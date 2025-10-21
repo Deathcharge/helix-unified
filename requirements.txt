@@ -42,5 +42,5 @@ python-multipart==0.0.6
 pydantic==2.5.0
 
 # Notion Integration
-notion-client==2.2.3
+notion-client==2.5.0
 
