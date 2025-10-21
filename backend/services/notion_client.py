@@ -305,6 +305,68 @@ class HelixNotionClient:
         """Clear the agent page ID cache."""
         self._agent_cache.clear()
         print("✅ Agent cache cleared")
+    
+    async def get_context_snapshot(self, session_id: str):
+        """Retrieve a context snapshot by session ID."""
+        try:
+            results = self.notion.databases.query(
+                database_id=self.context_db,
+                filter={"property": "Session ID", "title": {"equals": session_id}}
+            )
+            if not results["results"]:
+                return None
+            page = results["results"][0]
+            return {
+                "session_id": session_id,
+                "created": page["properties"]["Created"]["date"]["start"],
+                "ai_system": page["properties"]["AI System"]["select"]["name"],
+                "summary": page["properties"]["Summary"]["rich_text"][0]["text"]["content"],
+                "decisions": page["properties"]["Key Decisions"]["rich_text"][0]["text"]["content"]
+            }
+        except Exception as e:
+            print(f"⚠ Error getting context snapshot: {e}")
+            return None
+    
+    async def query_events_by_agent(self, agent_name: str, limit: int = 10):
+        """Query events for a specific agent."""
+        try:
+            agent_page_id = await self._get_agent_page_id(agent_name)
+            if not agent_page_id:
+                return []
+            results = self.notion.databases.query(
+                database_id=self.event_log_db,
+                filter={"property": "Agent", "relation": {"contains": agent_page_id}},
+                sorts=[{"property": "Timestamp", "direction": "descending"}]
+            )
+            events = []
+            for page in results["results"][:limit]:
+                event = {
+                    "title": page["properties"]["Event"]["title"][0]["text"]["content"],
+                    "timestamp": page["properties"]["Timestamp"]["date"]["start"],
+                    "type": page["properties"]["Event Type"]["select"]["name"]
+                }
+                events.append(event)
+            return events
+        except Exception as e:
+            print(f"⚠ Error querying events: {e}")
+            return []
+    
+    async def get_all_agents(self):
+        """Get all agents from Agent Registry."""
+        try:
+            results = self.notion.databases.query(database_id=self.agent_registry_db)
+            agents = []
+            for page in results["results"]:
+                agent = {
+                    "name": page["properties"]["Agent Name"]["title"][0]["text"]["content"],
+                    "status": page["properties"]["Status"]["select"]["name"],
+                    "health": page["properties"]["Health Score"]["number"]
+                }
+                agents.append(agent)
+            return agents
+        except Exception as e:
+            print(f"⚠ Error getting agents: {e}")
+            return []
 
 # ============================================================================
 # SINGLETON INSTANCE
