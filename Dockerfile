@@ -21,13 +21,10 @@ COPY scripts ./scripts
 # Create necessary directories
 RUN mkdir -p Helix/state Helix/commands Helix/ethics Shadow/manus_archive
 
-# Expose port
+# Expose port (Railway will use PORT env var)
 EXPOSE 8000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8000/health')"
-
-# Run FastAPI app
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run FastAPI app with dynamic port binding
+# Uses Railway's PORT env var, falls back to 8000 for local development
+CMD sh -c "uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000}"
 
