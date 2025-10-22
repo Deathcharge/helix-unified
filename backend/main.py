@@ -308,5 +308,16 @@ async def root():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+    # Get port from environment (Railway sets this)
+    port = int(os.getenv("PORT", 8000))
+
+    # MUST bind to 0.0.0.0, not localhost/127.0.0.1
+    uvicorn.run(
+        app,
+        host="0.0.0.0",  # ← CRITICAL for Railway
+        port=port,        # ← CRITICAL: Use Railway's PORT
+        log_level="info",
+        access_log=True
+    )
 
