@@ -27,4 +27,10 @@ EXPOSE 8080
 
 # Run FastAPI app (use $PORT env var or default to 8080)
 CMD uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8080}
+# Expose port (Railway will use PORT env var)
+EXPOSE 8000
+
+# Run FastAPI app with dynamic port binding
+# Uses Railway's PORT env var, falls back to 8000 for local development
+CMD sh -c "uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000}"
 
