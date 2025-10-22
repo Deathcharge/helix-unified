@@ -14,7 +14,6 @@ sqlalchemy==2.0.23
 
 # Audio & Ritual Engine
 numpy==1.26.4
-scipy==1.11.4
 pydub==0.25.1
 
 # API Clients (for service integrations)
