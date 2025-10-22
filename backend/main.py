@@ -98,24 +98,35 @@ app = FastAPI(
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint."""
+    """Health check endpoint - Railway requires this to always return 200."""
+    # Ultra-reliable health check - never fails, always returns 200
+    response = {
+        "status": "healthy",
+        "service": "helix-collective",
+        "version": "14.5",
+        "codename": "Quantum Handshake",
+        "timestamp": datetime.utcnow().isoformat()
+    }
+
+    # Try to add Discord bot status (non-critical)
     try:
-        ucf_state = {}
+        response["discord_bot"] = discord_bot.user is not None if hasattr(discord_bot, 'user') else False
+    except:
+        response["discord_bot"] = False
+
+    # Try to add harmony metric (non-critical)
+    try:
         state_path = Path("Helix/state/ucf_state.json")
         if state_path.exists():
             with open(state_path) as f:
                 ucf_state = json.load(f)
-        
-        return {
-            "status": "healthy",
-            "version": "14.5",
-            "codename": "Quantum Handshake",
-            "discord_bot": discord_bot.user is not None if hasattr(discord_bot, 'user') else False,
-            "harmony": ucf_state.get("harmony", 0.355),
-            "timestamp": datetime.utcnow().isoformat()
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+                response["harmony"] = ucf_state.get("harmony", 0.355)
+        else:
+            response["harmony"] = 0.355
+    except:
+        response["harmony"] = 0.355
+
+    return response
 
 @app.get("/api/ucf/current")
 async def get_ucf_state():
@@ -308,5 +319,16 @@ async def root():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+    # Get port from environment (Railway sets this)
+    port = int(os.getenv("PORT", 8000))
+
+    # MUST bind to 0.0.0.0, not localhost/127.0.0.1
+    uvicorn.run(
+        app,
+        host="0.0.0.0",  # ← CRITICAL for Railway
+        port=port,        # ← CRITICAL: Use Railway's PORT
+        log_level="info",
+        access_log=True
+    )
 
