@@ -1,4 +1,4 @@
-# 🌀 Helix Collective v14.5 - Railway Configuration
+# 🌀 Helix Collective v14.5 - Railway Configuration (FIXED)
 # This file configures how Railway builds and deploys the application
 
 [build]
@@ -6,7 +6,8 @@ builder = "dockerfile"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-startCommand = "uvicorn backend.main:app --host 0.0.0.0 --port $PORT"
+# DO NOT specify startCommand - let Dockerfile CMD handle it!
+# Railway will use: CMD ["python", "backend/main.py"] from Dockerfile
 healthcheckPath = "/health"
 healthcheckTimeout = 300
 restartPolicyType = "on_failure"
