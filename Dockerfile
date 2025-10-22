@@ -6,10 +6,11 @@ WORKDIR /app
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     gcc \
+    g++ \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements
+# Copy requirements first (better caching)
 COPY requirements.txt .
 
 # Install Python dependencies
@@ -17,14 +18,18 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY backend ./backend
+COPY Helix ./Helix
+COPY Shadow ./Shadow
 COPY scripts ./scripts
 
 # Create necessary directories
 RUN mkdir -p Helix/state Helix/commands Helix/ethics Shadow/manus_archive
 
+# Environment variables
+ENV PYTHONUNBUFFERED=1
+
 # Expose port (Railway will override with $PORT)
 EXPOSE 8000
 
-# Run FastAPI app with dynamic port binding
-# Uses Railway's PORT env var, falls back to 8000 for local development
-CMD sh -c "uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000}"
+# 🚨 FIX: Use Python to start, not uvicorn command
+CMD ["python", "backend/main.py"]
