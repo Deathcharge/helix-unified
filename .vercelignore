@@ -1,0 +1,3 @@
+# Ignore everything - this project deploys to Railway, not Vercel
+*
+!vercel.json
