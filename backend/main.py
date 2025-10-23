@@ -279,11 +279,75 @@ async def get_ritual_logs(limit: int = 20):
         log_path = Path("Shadow/manus_archive/z88_log.json")
         if not log_path.exists():
             return {"logs": [], "total": 0}
-        
+
         with open(log_path) as f:
             logs = json.load(f)
-        
+
         return {"logs": logs[-limit:], "total": len(logs)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================================================
+# STORAGE ENDPOINTS
+# ============================================================================
+
+@app.get("/storage/status")
+async def get_storage_status():
+    """Get Shadow storage status and metrics."""
+    try:
+        from backend.helix_storage_adapter_async import HelixStorageAdapterAsync
+        storage = HelixStorageAdapterAsync()
+        stats = await storage.get_storage_stats()
+        return stats
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/storage/list")
+async def list_archives():
+    """List all archived files."""
+    try:
+        from backend.helix_storage_adapter_async import HelixStorageAdapterAsync
+        storage = HelixStorageAdapterAsync()
+        archives = await storage.list_archives()
+        return {"archives": archives, "total": len(archives)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================================================
+# VISUALIZATION ENDPOINTS
+# ============================================================================
+
+@app.post("/visualize/ritual")
+async def visualize_ritual():
+    """Generate Samsara visualization based on current UCF state."""
+    try:
+        from backend.samsara_bridge import run_visualization_cycle
+
+        # Load current UCF state
+        state_path = Path("Helix/state/ucf_state.json")
+        if state_path.exists():
+            with open(state_path) as f:
+                ucf_state = json.load(f)
+        else:
+            # Default UCF state
+            ucf_state = {
+                "harmony": 0.355,
+                "resilience": 1.1191,
+                "prana": 0.5175,
+                "drishti": 0.5023,
+                "klesha": 0.010,
+                "zoom": 1.0228
+            }
+
+        # Run visualization
+        frame_path = await run_visualization_cycle(ucf_state)
+
+        return {
+            "status": "visualization_complete",
+            "frame_path": str(frame_path),
+            "ucf_state": ucf_state,
+            "timestamp": datetime.utcnow().isoformat()
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -295,8 +359,9 @@ async def get_ritual_logs(limit: int = 20):
 async def root():
     """Root endpoint with system info."""
     return {
-        "system": "Helix Collective v14.5 - Quantum Handshake Edition",
-        "description": "Unified multi-agent system with Discord integration and autonomous operations",
+        "system": "Helix Collective v15.0 - Ω-Bridge Edition",
+        "codename": "Helix-Samsara Continuum",
+        "description": "Unified multi-agent system with consciousness visualization and autonomous operations",
         "endpoints": {
             "health": "/health",
             "status": "/status",
@@ -308,9 +373,18 @@ async def root():
                 "operations": "/logs/operations",
                 "discord": "/logs/discord",
                 "ritual": "/logs/ritual"
+            },
+            "storage": {
+                "status": "/storage/status",
+                "list": "/storage/list"
+            },
+            "visualization": {
+                "ritual": "/visualize/ritual"
             }
         },
-        "documentation": "/docs"
+        "documentation": "/docs",
+        "version": "15.0",
+        "motto": "Tat Tvam Asi 🙏"
     }
 
 # ============================================================================

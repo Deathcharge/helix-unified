@@ -729,20 +729,82 @@ async def execute_ritual_command(ctx, steps: int = 108):
 @bot.command(name="halt")
 async def manus_halt(ctx):
     """Halt Manus operations (admin only)"""
-    
+
     # Check if user is architect
     if ctx.author.id != ARCHITECT_ID and ARCHITECT_ID != 0:
         await ctx.send("🛡️ **Insufficient permissions**\nOnly the Architect can halt Manus")
         return
-    
+
     await ctx.send("⏸️ **Manus operations halted**\nUse `!manus resume` to restart")
-    
+
     # Log halt command
     log_to_shadow("operations", {
         "action": "halt",
         "timestamp": datetime.datetime.now().isoformat(),
         "user": str(ctx.author)
     })
+
+
+@bot.command(name="storage")
+async def storage_command(ctx, action: str = "status"):
+    """
+    Storage Telemetry & Control
+
+    Usage:
+        !storage status  – Show archive metrics
+        !storage sync    – Force upload of all archives
+        !storage clean   – Prune old archives (keep latest 20)
+    """
+    try:
+        from backend.helix_storage_adapter_async import HelixStorageAdapterAsync
+        storage = HelixStorageAdapterAsync()
+
+        if action == "status":
+            # Get storage stats
+            stats = await storage.get_storage_stats()
+
+            embed = discord.Embed(
+                title="🦑 Shadow Storage Status",
+                color=discord.Color.teal(),
+                timestamp=datetime.datetime.utcnow()
+            )
+            embed.add_field(name="Mode", value=stats.get("mode", "unknown"), inline=True)
+            embed.add_field(name="Archives", value=str(stats.get("archive_count", "?")), inline=True)
+            embed.add_field(name="Total Size", value=f"{stats.get('total_size_mb', 0):.2f} MB", inline=True)
+            embed.add_field(name="Free Space", value=f"{stats.get('free_gb', 0):.2f} GB", inline=True)
+            embed.add_field(name="Latest File", value=stats.get("latest", "None"), inline=False)
+            embed.set_footer(text="Tat Tvam Asi 🙏")
+
+            await ctx.send(embed=embed)
+
+        elif action == "sync":
+            await ctx.send("🔄 **Initiating background upload for all archives...**")
+
+            async def force_sync():
+                count = 0
+                for f in storage.root.glob("*.json"):
+                    await storage.upload(str(f))
+                    count += 1
+                await ctx.send(f"✅ **Sync complete** - {count} files uploaded")
+
+            asyncio.create_task(force_sync())
+
+        elif action == "clean":
+            files = sorted(storage.root.glob("*.json"), key=lambda p: p.stat().st_mtime)
+            removed = len(files) - 20
+            if removed > 0:
+                for f in files[:-20]:
+                    f.unlink(missing_ok=True)
+                await ctx.send(f"🧹 **Cleanup complete** - Removed {removed} old archives (kept latest 20)")
+            else:
+                await ctx.send("✅ **No cleanup needed** - Archive count within limits")
+
+        else:
+            await ctx.send("⚠️ **Invalid action**\nUsage: `!storage status | sync | clean`")
+
+    except Exception as e:
+        await ctx.send(f"❌ **Storage error:** {str(e)}")
+        print(f"Storage command error: {e}")
 
 
 # ============================================================================
