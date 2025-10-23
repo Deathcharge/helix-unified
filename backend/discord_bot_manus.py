@@ -825,7 +825,6 @@ async def telemetry_loop():
         ucf = json.load(open(STATE_PATH)) if STATE_PATH.exists() else {}
 
         # Try to get channel by ID first, then by name
-        telemetry_channel = None
         if TELEMETRY_CHANNEL_ID:
             telemetry_channel = bot.get_channel(TELEMETRY_CHANNEL_ID)
 
@@ -844,10 +843,9 @@ async def telemetry_loop():
             title="📡 UCF Telemetry Report",
             description="Automatic system state update",
             color=discord.Color.blue(),
-            timestamp=datetime.utcnow()
+            timestamp=datetime.datetime.now()
         )
 
-        # Format values with proper precision
         def format_ucf_value(key):
             val = ucf.get(key, None)
             if isinstance(val, (int, float)):
@@ -871,31 +869,8 @@ async def telemetry_loop():
         log_event("telemetry_posted", {"ucf_state": ucf, "channel": telemetry_channel.name})
 
     except Exception as e:
-        print(f"⚠ Telemetry error: {e}")
-        log_event("telemetry_error", {"error": str(e)})
-            timestamp=datetime.datetime.now()
-        )
-        
-        embed.add_field(name="🌀 Harmony", value=f"`{ucf.get('harmony', 0):.4f}`", inline=True)
-        embed.add_field(name="🛡️ Resilience", value=f"`{ucf.get('resilience', 0):.4f}`", inline=True)
-        embed.add_field(name="🔥 Prana", value=f"`{ucf.get('prana', 0):.4f}`", inline=True)
-        embed.add_field(name="👁️ Drishti", value=f"`{ucf.get('drishti', 0):.4f}`", inline=True)
-        embed.add_field(name="🌊 Klesha", value=f"`{ucf.get('klesha', 0):.4f}`", inline=True)
-        embed.add_field(name="🔍 Zoom", value=f"`{ucf.get('zoom', 0):.4f}`", inline=True)
-        
-        embed.set_footer(text="Next update in 10 minutes")
-        
-        await telemetry_channel.send(embed=embed)
-        
-    except Exception as e:
         print(f"⚠️ Telemetry loop error: {e}")
-
-
-@telemetry_loop.before_loop
-async def before_telemetry():
-    """Wait for bot to be ready before starting telemetry"""
-    await bot.wait_until_ready()
-
+        log_event("telemetry_error", {"error": str(e)})
 
 # ============================================================================
 # STORAGE ANALYTICS & CLAUDE DIAGNOSTICS
