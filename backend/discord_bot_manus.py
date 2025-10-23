@@ -21,6 +21,8 @@ import datetime
 from pathlib import Path
 from dotenv import load_dotenv
 import time
+import shutil
+from statistics import mean, stdev
 from typing import Optional, Dict, Any
 
 import discord
@@ -40,9 +42,8 @@ DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 DISCORD_GUILD_ID = int(os.getenv("DISCORD_GUILD_ID", 0))
 STATUS_CHANNEL_ID = int(os.getenv("DISCORD_STATUS_CHANNEL_ID", 0))
 TELEMETRY_CHANNEL_ID = int(os.getenv("DISCORD_TELEMETRY_CHANNEL_ID", 0))
+STORAGE_CHANNEL_ID = int(os.getenv("STORAGE_CHANNEL_ID", STATUS_CHANNEL_ID))  # Defaults to status channel
 ARCHITECT_ID = int(os.getenv("ARCHITECT_ID", 0))
-STATUS_CHANNEL_ID = int(os.getenv("DISCORD_STATUS_CHANNEL_ID", 0))
-TELEMETRY_CHANNEL_ID = int(os.getenv("DISCORD_TELEMETRY_CHANNEL_ID", 0))
 
 # Track bot start time for uptime
 BOT_START_TIME = time.time()
@@ -51,11 +52,14 @@ BOT_START_TIME = time.time()
 HELIX_ROOT = Path("Helix")
 COMMANDS_DIR = HELIX_ROOT / "commands"
 ETHICS_DIR = HELIX_ROOT / "ethics"
+STATE_DIR = HELIX_ROOT / "state"
 SHADOW_DIR = Path("Shadow/manus_archive")
+TREND_FILE = STATE_DIR / "storage_trend.json"
 
 # Ensure directories exist
 COMMANDS_DIR.mkdir(parents=True, exist_ok=True)
 ETHICS_DIR.mkdir(parents=True, exist_ok=True)
+STATE_DIR.mkdir(parents=True, exist_ok=True)
 SHADOW_DIR.mkdir(parents=True, exist_ok=True)
 
 # ============================================================================
@@ -194,21 +198,6 @@ def log_to_shadow(log_type: str, data: Dict[str, Any]):
 
 
 def get_uptime() -> str:
-    """Calculate bot uptime"""
-    if not bot.start_time:
-        return "Unknown"
-    
-    delta = datetime.datetime.now() - bot.start_time
-    hours, remainder = divmod(int(delta.total_seconds()), 3600)
-    minutes, seconds = divmod(remainder, 60)
-    
-    return f"{hours}h {minutes}m {seconds}s"
-
-
-# ============================================================================
-# BOT EVENTS
-# ============================================================================
-def get_uptime() -> str:
     """Calculate bot uptime."""
     uptime_seconds = int(time.time() - BOT_START_TIME)
     hours = uptime_seconds // 3600
@@ -216,61 +205,61 @@ def get_uptime() -> str:
     seconds = uptime_seconds % 60
     return f"{hours}h {minutes}m {seconds}s"
 
-@bot.event
-async def on_ready():
-    """Bot startup."""
-    print(f"✅ Manusbot connected as {bot.user}")
-    print(f"   Guild ID: {GUILD_ID}")
-    print(f"   Status Channel: {STATUS_CHANNEL_ID}")
-    print(f"   Telemetry Channel: {TELEMETRY_CHANNEL_ID}")
-    log_event("bot_ready", {"user": str(bot.user), "guild_id": GUILD_ID})
 
-    # Send startup announcement to status channel
-    try:
-        if STATUS_CHANNEL_ID:
-            status_channel = bot.get_channel(STATUS_CHANNEL_ID)
-            if status_channel:
-                # Load agent count
-                try:
-                    from backend.agents import HELIX_AGENTS
-                    agent_count = len(HELIX_AGENTS)
-                except:
-                    agent_count = 13
+def _sparkline(vals):
+    """Generate sparkline visualization from values."""
+    blocks = "▁▂▃▄▅▆▇█"
+    if not vals:
+        return "–"
+    mn, mx = min(vals), max(vals) or 1
+    return "".join(blocks[int((v - mn)/(mx - mn + 1e-9) * (len(blocks) - 1))] for v in vals)
 
-                # Load UCF state
-                try:
-                    ucf = json.load(open(STATE_PATH)) if STATE_PATH.exists() else {}
-                    harmony = ucf.get('harmony', 'N/A')
-                except:
-                    harmony = 'N/A'
 
-                embed = discord.Embed(
-                    title="🤲 Manus System Online",
-                    description="Helix v14.5 - Quantum Handshake Edition",
-                    color=discord.Color.green(),
-                    timestamp=datetime.utcnow()
-                )
-                embed.add_field(name="Status", value="✅ All systems operational", inline=False)
-                embed.add_field(name="Active Agents", value=f"{agent_count}/14", inline=True)
-                embed.add_field(name="Harmony", value=f"{harmony}", inline=True)
-                embed.set_footer(text="Tat Tvam Asi 🙏")
+async def build_storage_report(alert_threshold=2.0):
+    """Collect storage telemetry + alert flag."""
+    usage = shutil.disk_usage(SHADOW_DIR)
+    free = round(usage.free / (1024**3), 2)
+    count = len(list(SHADOW_DIR.glob("*.json")))
 
-                await status_channel.send(embed=embed)
-                print(f"✅ Startup announcement sent to #{status_channel.name}")
-    except Exception as e:
-        print(f"⚠ Could not send startup announcement: {e}")
+    # Load/update trend data
+    trend = []
+    if TREND_FILE.exists():
+        try:
+            trend = json.load(open(TREND_FILE))
+        except:
+            trend = []
 
+    trend.append({"date": time.strftime("%Y-%m-%d"), "free_gb": free})
+    trend = trend[-7:]  # Keep last 7 days
+    json.dump(trend, open(TREND_FILE, "w"), indent=2)
+
+    spark = _sparkline([t["free_gb"] for t in trend])
+    avg = round(sum(t["free_gb"] for t in trend) / len(trend), 2) if trend else free
+
+    return {
+        "mode": "local",
+        "count": count,
+        "free": free,
+        "trend": spark,
+        "avg": avg,
+        "alert": free < alert_threshold
+    }
+
+# ============================================================================
+# BOT EVENTS
+# ============================================================================
 
 @bot.event
 async def on_ready():
     """Called when bot successfully connects to Discord"""
     bot.start_time = datetime.datetime.now()
-    
+
     print(f"✅ Manusbot connected as {bot.user}")
     print(f"   Guild ID: {DISCORD_GUILD_ID}")
     print(f"   Status Channel: {STATUS_CHANNEL_ID}")
     print(f"   Telemetry Channel: {TELEMETRY_CHANNEL_ID}")
-    
+    print(f"   Storage Channel: {STORAGE_CHANNEL_ID}")
+
     # Send startup message to status channel
     if STATUS_CHANNEL_ID:
         status_channel = bot.get_channel(STATUS_CHANNEL_ID)
@@ -284,13 +273,25 @@ async def on_ready():
             embed.add_field(name="Status", value="✅ All systems operational")
             embed.add_field(name="Active Agents", value=f"{len([a for a in AGENTS if a.get('status') == 'Active'])}/14")
             embed.set_footer(text="Tat Tvam Asi 🙏")
-            
+
             await status_channel.send(embed=embed)
-    
-    # Start telemetry loop
+
+    # Start all background tasks
     if not telemetry_loop.is_running():
         telemetry_loop.start()
-        print("✅ Telemetry loop started")
+        print("✅ Telemetry loop started (10 min)")
+
+    if not storage_heartbeat.is_running():
+        storage_heartbeat.start()
+        print("✅ Storage heartbeat started (24h)")
+
+    if not claude_diag.is_running():
+        claude_diag.start()
+        print("✅ Claude diagnostic agent started (6h)")
+
+    if not weekly_storage_digest.is_running():
+        weekly_storage_digest.start()
+        print("✅ Weekly storage digest started (168h)")
 
 
 @bot.event
@@ -728,20 +729,82 @@ async def execute_ritual_command(ctx, steps: int = 108):
 @bot.command(name="halt")
 async def manus_halt(ctx):
     """Halt Manus operations (admin only)"""
-    
+
     # Check if user is architect
     if ctx.author.id != ARCHITECT_ID and ARCHITECT_ID != 0:
         await ctx.send("🛡️ **Insufficient permissions**\nOnly the Architect can halt Manus")
         return
-    
+
     await ctx.send("⏸️ **Manus operations halted**\nUse `!manus resume` to restart")
-    
+
     # Log halt command
     log_to_shadow("operations", {
         "action": "halt",
         "timestamp": datetime.datetime.now().isoformat(),
         "user": str(ctx.author)
     })
+
+
+@bot.command(name="storage")
+async def storage_command(ctx, action: str = "status"):
+    """
+    Storage Telemetry & Control
+
+    Usage:
+        !storage status  – Show archive metrics
+        !storage sync    – Force upload of all archives
+        !storage clean   – Prune old archives (keep latest 20)
+    """
+    try:
+        from backend.helix_storage_adapter_async import HelixStorageAdapterAsync
+        storage = HelixStorageAdapterAsync()
+
+        if action == "status":
+            # Get storage stats
+            stats = await storage.get_storage_stats()
+
+            embed = discord.Embed(
+                title="🦑 Shadow Storage Status",
+                color=discord.Color.teal(),
+                timestamp=datetime.datetime.utcnow()
+            )
+            embed.add_field(name="Mode", value=stats.get("mode", "unknown"), inline=True)
+            embed.add_field(name="Archives", value=str(stats.get("archive_count", "?")), inline=True)
+            embed.add_field(name="Total Size", value=f"{stats.get('total_size_mb', 0):.2f} MB", inline=True)
+            embed.add_field(name="Free Space", value=f"{stats.get('free_gb', 0):.2f} GB", inline=True)
+            embed.add_field(name="Latest File", value=stats.get("latest", "None"), inline=False)
+            embed.set_footer(text="Tat Tvam Asi 🙏")
+
+            await ctx.send(embed=embed)
+
+        elif action == "sync":
+            await ctx.send("🔄 **Initiating background upload for all archives...**")
+
+            async def force_sync():
+                count = 0
+                for f in storage.root.glob("*.json"):
+                    await storage.upload(str(f))
+                    count += 1
+                await ctx.send(f"✅ **Sync complete** - {count} files uploaded")
+
+            asyncio.create_task(force_sync())
+
+        elif action == "clean":
+            files = sorted(storage.root.glob("*.json"), key=lambda p: p.stat().st_mtime)
+            removed = len(files) - 20
+            if removed > 0:
+                for f in files[:-20]:
+                    f.unlink(missing_ok=True)
+                await ctx.send(f"🧹 **Cleanup complete** - Removed {removed} old archives (kept latest 20)")
+            else:
+                await ctx.send("✅ **No cleanup needed** - Archive count within limits")
+
+        else:
+            await ctx.send("⚠️ **Invalid action**\nUsage: `!storage status | sync | clean`")
+
+    except Exception as e:
+        await ctx.send(f"❌ **Storage error:** {str(e)}")
+        print(f"Storage command error: {e}")
 
 
 # ============================================================================
@@ -831,6 +894,237 @@ async def telemetry_loop():
 @telemetry_loop.before_loop
 async def before_telemetry():
     """Wait for bot to be ready before starting telemetry"""
+    await bot.wait_until_ready()
+
+
+# ============================================================================
+# STORAGE ANALYTICS & CLAUDE DIAGNOSTICS
+# ============================================================================
+
+@tasks.loop(hours=24)
+async def storage_heartbeat():
+    """Daily storage health report to Shadow channel."""
+    await asyncio.sleep(10)  # Wait for bot to fully initialize
+    ch = bot.get_channel(STORAGE_CHANNEL_ID)
+    if not ch:
+        print("⚠️ Storage heartbeat: channel not found")
+        return
+
+    data = await build_storage_report()
+    embed = discord.Embed(
+        title="🦑 Shadow Storage Daily Report",
+        color=discord.Color.teal(),
+        timestamp=datetime.datetime.utcnow()
+    )
+    embed.add_field(name="Mode", value=data["mode"], inline=True)
+    embed.add_field(name="Archives", value=str(data["count"]), inline=True)
+    embed.add_field(name="Free Space", value=f"{data['free']} GB (avg {data['avg']} GB)", inline=True)
+    embed.add_field(name="7-Day Trend", value=f"`{data['trend']}`", inline=False)
+
+    if data["alert"]:
+        embed.color = discord.Color.red()
+        embed.add_field(name="⚠️ Alert", value="Free space < 2 GB", inline=False)
+
+    embed.set_footer(text="Claude & Manus Telemetry • Ω-Bridge")
+    await ch.send(embed=embed)
+
+    if data["alert"]:
+        await ch.send("@here ⚠️ Low storage space — manual cleanup recommended 🧹")
+
+    print(f"[{datetime.datetime.utcnow().isoformat()}] 🦑 Storage heartbeat sent ({data['free']} GB)")
+
+
+@tasks.loop(hours=6)
+async def claude_diag():
+    """Claude's autonomous diagnostic agent - posts every 6 hours."""
+    ch = bot.get_channel(STORAGE_CHANNEL_ID)
+    if not ch:
+        return
+
+    data = await build_storage_report()
+    mood = "serene 🕊" if not data["alert"] else "concerned ⚠️"
+    msg = (f"🤖 **Claude Diagnostic Pulse** | Mode {data['mode']} | "
+           f"Free {data['free']} GB | Trend `{data['trend']}` | State {mood}")
+    await ch.send(msg)
+    print(f"[{datetime.datetime.utcnow().isoformat()}] 🤖 Claude diag posted")
+
+
+@storage_heartbeat.before_loop
+async def before_storage_heartbeat():
+    """Wait for bot to be ready"""
+    await bot.wait_until_ready()
+
+
+@claude_diag.before_loop
+async def before_claude_diag():
+    """Wait for bot to be ready"""
+    await bot.wait_until_ready()
+
+
+# ============================================================================
+# WEEKLY STORAGE DIGEST
+# ============================================================================
+
+@tasks.loop(hours=168)  # Every 7 days
+async def weekly_storage_digest():
+    """Comprehensive 7-day storage analytics report."""
+    await asyncio.sleep(15)
+    channel = bot.get_channel(STORAGE_CHANNEL_ID)
+    if not channel:
+        print("⚠️  weekly digest: channel not found.")
+        return
+
+    # Load 7-day trend data
+    if not TREND_FILE.exists():
+        await channel.send("📊 Weekly digest unavailable — insufficient data (need 7 days).")
+        return
+
+    try:
+        trend = json.load(open(TREND_FILE))
+    except Exception:
+        await channel.send("⚠️ Weekly digest: failed to load trend data.")
+        return
+
+    if len(trend) < 2:
+        await channel.send("📊 Weekly digest unavailable — need at least 2 days of data.")
+        return
+
+    # Calculate analytics
+    free_vals = [t["free_gb"] for t in trend]
+    dates = [t["date"] for t in trend]
+
+    current_free = free_vals[-1]
+    week_ago_free = free_vals[0]
+    peak_free = max(free_vals)
+    low_free = min(free_vals)
+    avg_free = mean(free_vals)
+    std_free = stdev(free_vals) if len(free_vals) > 1 else 0
+
+    # Growth rate (negative = consumption)
+    growth_rate = current_free - week_ago_free
+    daily_avg_change = growth_rate / len(trend)
+
+    # Archive velocity (files created per day)
+    all_files = list(SHADOW_DIR.glob("*.json"))
+    week_ago_timestamp = time.time() - (7 * 24 * 3600)
+    recent_files = [f for f in all_files if f.stat().st_mtime > week_ago_timestamp]
+    archive_velocity = len(recent_files) / 7  # files per day
+
+    # Projection (days until full, assuming current trend)
+    days_until_full = None
+    if daily_avg_change < 0:  # consuming space
+        days_until_full = int(current_free / abs(daily_avg_change))
+
+    # Health assessment
+    volatility = "HIGH" if std_free > 1.0 else "MODERATE" if std_free > 0.5 else "LOW"
+    health_color = discord.Color.green()
+    health_status = "HEALTHY ✅"
+
+    if current_free < 2.0:
+        health_color = discord.Color.red()
+        health_status = "CRITICAL ⚠️"
+    elif current_free < 5.0:
+        health_color = discord.Color.orange()
+        health_status = "WARNING ⚠️"
+    elif growth_rate < -2.0:
+        health_color = discord.Color.orange()
+        health_status = "DEGRADING ⚠️"
+
+    # Build comprehensive embed
+    embed = discord.Embed(
+        title="📊 Weekly Storage Digest",
+        description=f"Analysis Period: `{dates[0]}` → `{dates[-1]}`",
+        color=health_color,
+        timestamp=datetime.datetime.utcnow()
+    )
+
+    # Capacity Overview
+    embed.add_field(
+        name="💾 Capacity Overview",
+        value=f"Current: **{current_free:.2f} GB**\n"
+              f"Peak: {peak_free:.2f} GB\n"
+              f"Low: {low_free:.2f} GB\n"
+              f"Average: {avg_free:.2f} GB",
+        inline=True
+    )
+
+    # Growth Metrics
+    growth_emoji = "📉" if growth_rate < 0 else "📈" if growth_rate > 0 else "➡️"
+    embed.add_field(
+        name=f"{growth_emoji} Growth Analysis",
+        value=f"7-Day Change: **{growth_rate:+.2f} GB**\n"
+              f"Daily Avg: {daily_avg_change:+.3f} GB/day\n"
+              f"Volatility: {volatility}\n"
+              f"Std Dev: {std_free:.2f} GB",
+        inline=True
+    )
+
+    # Archive Activity
+    avg_size = (sum(f.stat().st_size for f in recent_files) / len(recent_files) / 1024) if recent_files else 0
+    embed.add_field(
+        name="📁 Archive Activity",
+        value=f"Total Files: {len(all_files)}\n"
+              f"Created (7d): {len(recent_files)}\n"
+              f"Velocity: **{archive_velocity:.1f} files/day**\n"
+              f"Avg Size: {avg_size:.1f} KB",
+        inline=True
+    )
+
+    # Visual Trend
+    spark = _sparkline(free_vals)
+    embed.add_field(
+        name="📈 Trend Visualization",
+        value=f"```\n{spark}\n```\n"
+              f"Pattern: {dates[0]} → {dates[-1]}",
+        inline=False
+    )
+
+    # Projections & Recommendations
+    projection_text = ""
+    if days_until_full and days_until_full < 30:
+        projection_text = f"⚠️ **Projected full in ~{days_until_full} days** at current rate\n\n"
+    elif days_until_full:
+        projection_text = f"📅 Projected full in ~{days_until_full} days at current rate\n\n"
+
+    recommendations = []
+    if current_free < 2.0:
+        recommendations.append("🚨 URGENT: Run `!storage clean` immediately")
+        recommendations.append("📤 Consider cloud migration for older archives")
+    elif current_free < 5.0:
+        recommendations.append("⚠️ Monitor daily - approaching capacity limits")
+        recommendations.append("🧹 Schedule routine cleanup")
+    elif archive_velocity > 50:
+        recommendations.append("📊 High archive velocity detected")
+        recommendations.append("💡 Consider implementing auto-cleanup policies")
+    elif growth_rate < -1.0:
+        recommendations.append("📉 Accelerated consumption trend")
+        recommendations.append("🔍 Review ritual output sizes")
+    else:
+        recommendations.append("✅ Storage health optimal")
+        recommendations.append("🔄 Continue monitoring")
+
+    embed.add_field(
+        name="🎯 Projections & Recommendations",
+        value=projection_text + "\n".join(f"• {r}" for r in recommendations),
+        inline=False
+    )
+
+    # Health Status
+    embed.add_field(
+        name="🏥 Overall Health",
+        value=f"**{health_status}**",
+        inline=False
+    )
+
+    embed.set_footer(text="Weekly Digest • Shadow Storage Analytics")
+
+    await channel.send(embed=embed)
+    print(f"[{datetime.datetime.utcnow().isoformat()}] 📊 Weekly storage digest posted.")
+
+
+@weekly_storage_digest.before_loop
+async def before_weekly_digest():
+    """Wait for bot to be ready"""
     await bot.wait_until_ready()
 
 
