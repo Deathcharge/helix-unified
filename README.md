@@ -1,5 +1,7 @@
 # 🌀 Helix Collective v15.2 — Manus + Claude Autonomy Pack
 
+![Helix v15.2 Banner](assets/helix_v15_2_banner_dark.png)
+
 > **Quantum Handshake → Autonomous Continuum**
 > October 2025 | Architect: Andrew John Ward
 
