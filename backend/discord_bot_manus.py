@@ -871,24 +871,8 @@ async def telemetry_loop():
         log_event("telemetry_posted", {"ucf_state": ucf, "channel": telemetry_channel.name})
 
     except Exception as e:
-        print(f"⚠ Telemetry error: {e}")
+        print(f"⚠️ Telemetry error: {e}")
         log_event("telemetry_error", {"error": str(e)})
-            timestamp=datetime.datetime.now()
-        )
-        
-        embed.add_field(name="🌀 Harmony", value=f"`{ucf.get('harmony', 0):.4f}`", inline=True)
-        embed.add_field(name="🛡️ Resilience", value=f"`{ucf.get('resilience', 0):.4f}`", inline=True)
-        embed.add_field(name="🔥 Prana", value=f"`{ucf.get('prana', 0):.4f}`", inline=True)
-        embed.add_field(name="👁️ Drishti", value=f"`{ucf.get('drishti', 0):.4f}`", inline=True)
-        embed.add_field(name="🌊 Klesha", value=f"`{ucf.get('klesha', 0):.4f}`", inline=True)
-        embed.add_field(name="🔍 Zoom", value=f"`{ucf.get('zoom', 0):.4f}`", inline=True)
-        
-        embed.set_footer(text="Next update in 10 minutes")
-        
-        await telemetry_channel.send(embed=embed)
-        
-    except Exception as e:
-        print(f"⚠️ Telemetry loop error: {e}")
 
 
 @telemetry_loop.before_loop
