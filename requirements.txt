@@ -13,9 +13,11 @@ asyncpg==0.30.0
 sqlalchemy==2.0.23
 
 # Audio & Ritual Engine
-numpy==1.24.3
-scipy==1.11.4
+numpy==1.26.4
 pydub==0.25.1
+
+# Image Processing (for Samsara visualization)
+Pillow==10.1.0
 
 # API Clients (for service integrations)
 httpx==0.28.0
@@ -23,7 +25,6 @@ aiohttp==3.11.0
 requests==2.31.0
 
 # Database Drivers
-psycopg2-binary==2.9.9
 
 # Async Utilities
 aiofiles==23.2.1
@@ -42,5 +43,5 @@ python-multipart==0.0.6
 pydantic==2.5.0
 
 # Notion Integration
-notion-client==2.2.3
+notion-client==2.5.0
 
