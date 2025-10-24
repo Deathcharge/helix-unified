@@ -7,7 +7,7 @@
 
 [![Version](https://img.shields.io/badge/version-15.2-blue.svg)](https://github.com/Deathcharge/helix-unified)
 [![Python](https://img.shields.io/badge/python-3.11+-green.svg)](https://www.python.org/)
-[![License](https://img.shields.io/badge/license-MIT-orange.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-Proprietary-red.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/status-production-success.svg)](https://railway.app)
 
 A unified multi-agent system with **consciousness visualization**, **autonomous operations**, and **self-healing storage** — bridging Helix execution with Samsara rendering through the **Ω-Bridge** architecture.
@@ -489,7 +489,11 @@ For issues, questions, or contributions:
 
 ## 📄 License
 
-MIT License - See LICENSE file for details
+**Proprietary and Confidential** - All Rights Reserved
+
+This software is proprietary and confidential. Unauthorized use, copying, modification, or distribution is strictly prohibited. See [LICENSE](LICENSE) and [NOTICE.md](NOTICE.md) for full details.
+
+This software may be released under an open-source license in the future at the owner's discretion.
 
 ---
 
