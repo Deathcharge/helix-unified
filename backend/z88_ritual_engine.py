@@ -135,6 +135,31 @@ class RitualManager:
                 self.lock_file.unlink()  # Remove lock file
 
 # ============================================================================
+# HELPER FUNCTIONS (for backward compatibility)
+# ============================================================================
+def execute_ritual(steps=108):
+    """Execute a ritual synchronously (wrapper for RitualManager)."""
+    manager = RitualManager(steps)
+    manager.run()
+    return manager.state
+
+def load_ucf_state():
+    """Load the current UCF state from file."""
+    if not STATE_PATH.exists():
+        STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+        state = {
+            "zoom": 1.0228,
+            "harmony": 0.355,
+            "resilience": 1.1191,
+            "prana": 0.5175,
+            "drishti": 0.5023,
+            "klesha": 0.010
+        }
+        json.dump(state, open(STATE_PATH, "w"), indent=2)
+        return state
+    return json.load(open(STATE_PATH))
+
+# ============================================================================
 # ENTRY POINT
 # ============================================================================
 if __name__ == "__main__":
