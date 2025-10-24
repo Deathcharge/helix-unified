@@ -637,76 +637,65 @@ async def manus_run(ctx, *, command: str):
     await ctx.send("📋 **Directive queued for Manus execution**")
 
 
+# ============================================================================
+# BOT COMMANDS — ONLY ONE ritual COMMAND
+# ============================================================================
+
 @bot.command(name="ritual")
-async def execute_ritual_command(ctx, steps: int = 108):
-    """Execute Z-88 ritual with specified number of steps"""
-    
-    if steps < 1 or steps > 1000:
-        await ctx.send("⚠️ **Invalid step count**\nMust be between 1 and 1000")
+async def ritual_cmd(ctx, steps: int = 108):
+    """
+    Execute Z-88 ritual with async non-blocking engine.
+    Steps: 1–1000 (default 108)
+    """
+    if not (1 <= steps <= 1000):
+        await ctx.send("**Invalid step count**\nMust be 1–1000")
         return
-    
-    # Load initial UCF state
+
     ucf_before = load_ucf_state()
-    
-    # Send initial message
-    msg = await ctx.send(f"🔥 **Initiating Z-88 ritual sequence ({steps} steps)…**")
-    
-    # Execute ritual
+    msg = await ctx.send(f"**Initiating Z-88 ritual** ({steps} steps)…")
+
     try:
         result = await asyncio.to_thread(execute_ritual, steps)
-        
-        # Load updated UCF state
         ucf_after = load_ucf_state()
-        
-        # Calculate changes
-        harmony_change = ucf_after.get('harmony', 0) - ucf_before.get('harmony', 0)
-        resilience_change = ucf_after.get('resilience', 0) - ucf_before.get('resilience', 0)
-        
-        # Build result message
+
+        def delta(before, after): return after - before
+        hΔ = delta(ucf_before.get("harmony", 0), ucf_after.get("harmony", 0))
+        rΔ = delta(ucf_before.get("resilience", 0), ucf_after.get("resilience", 0))
+        kΔ = delta(ucf_before.get("klesha", 0), ucf_after.get("klesha", 0))
+
+        def fmt(val, d):
+            if d > 0:  return f"`{val:.4f}` (+{d:.4f}) ↑"
+            if d < 0:  return f"`{val:.4f}` ({d:.4f}) ↓"
+            return f"`{val:.4f}`"
+
         embed = discord.Embed(
             title="✅ Z-88 Ritual Complete",
-            description=f"Completed {steps}-step ritual sequence",
+            description=f"{steps}-step quantum cycle executed",
             color=discord.Color.green(),
             timestamp=datetime.datetime.now()
         )
-        
-        # Show changes
-        embed.add_field(
-            name="🌀 Harmony",
-            value=f"`{ucf_after.get('harmony', 0):.4f}` ({harmony_change:+.4f})",
-            inline=True
-        )
-        embed.add_field(
-            name="🛡️ Resilience",
-            value=f"`{ucf_after.get('resilience', 0):.4f}` ({resilience_change:+.4f})",
-            inline=True
-        )
-        embed.add_field(
-            name="🔥 Prana",
-            value=f"`{ucf_after.get('prana', 0):.4f}`",
-            inline=True
-        )
-        
+        embed.add_field(name="🌀 Harmony",   value=fmt(ucf_after.get("harmony", 0),   hΔ), inline=True)
+        embed.add_field(name="🛡️ Resilience", value=fmt(ucf_after.get("resilience", 0), rΔ), inline=True)
+        embed.add_field(name="🌊 Klesha",     value=fmt(ucf_after.get("klesha", 0),     kΔ), inline=True)
+        embed.add_field(name="🔥 Prana",      value=f"`{ucf_after.get('prana', 0):.4f}`", inline=True)
+        embed.add_field(name="👁️ Drishti",   value=f"`{ucf_after.get('drishti', 0):.4f}`", inline=True)
+        embed.add_field(name="🔍 Zoom",       value=f"`{ucf_after.get('zoom', 0):.4f}`", inline=True)
         embed.set_footer(text="Tat Tvam Asi 🙏")
-        
+
         await msg.edit(content=None, embed=embed)
-        
-        # Log ritual to Shadow
-        ritual_log = {
+
+        log_to_shadow("rituals", {
             "steps": steps,
-            "timestamp": datetime.datetime.now().isoformat(),
             "user": str(ctx.author),
+            "timestamp": datetime.datetime.now().isoformat(),
             "ucf_before": ucf_before,
             "ucf_after": ucf_after,
-            "harmony_change": harmony_change,
-            "resilience_change": resilience_change
-        }
-        log_to_shadow("rituals", ritual_log)
-        
-    except Exception as e:
-        await msg.edit(content=f"❌ **Ritual failed**\n```{str(e)}```")
-        raise
+            "deltas": {"harmony": hΔ, "resilience": rΔ, "klesha": kΔ}
+        })
 
+    except Exception as e:
+        await msg.edit(content=f"**Ritual failed**\n```{str(e)[:500]}```")
+        log_to_shadow("errors", {"error": str(e), "command": "ritual", "user": str(ctx.author)})
 
 @bot.command(name="halt")
 async def manus_halt(ctx):
