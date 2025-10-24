@@ -203,7 +203,7 @@ async def run_visualization_cycle(ucf_state: Dict[str, Any]) -> Path:
     Public interface: Render a Samsara visualization cycle.
 
     Usage:
-        from backend.samsara_bridge import run_visualization_cycle
+        from samsara_bridge import run_visualization_cycle
         frame_path = await run_visualization_cycle(ucf_state)
     """
     renderer = SamsaraRenderer()

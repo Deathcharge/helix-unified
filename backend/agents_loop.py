@@ -7,7 +7,7 @@ import json
 import os
 import datetime
 from pathlib import Path
-from backend.agents import Manus, Kavach
+from agents import Manus, Kavach
 
 # ============================================================================
 # PATH DEFINITIONS

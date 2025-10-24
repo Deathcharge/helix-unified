@@ -28,11 +28,11 @@ from typing import Optional, Dict, Any
 import discord
 from discord.ext import commands, tasks
 
-# Import Helix components
-from backend.agents import AGENTS
-from backend.z88_ritual_engine import execute_ritual, load_ucf_state
-from backend.services.ucf_calculator import UCFCalculator
-from backend.services.state_manager import StateManager
+# Import Helix components (FIXED: relative imports)
+from agents import AGENTS
+from z88_ritual_engine import execute_ritual, load_ucf_state
+from services.ucf_calculator import UCFCalculator
+from services.state_manager import StateManager
 
 # ============================================================================
 # CONFIGURATION
@@ -380,7 +380,7 @@ async def show_status(ctx):
 
         # Load agent count
         try:
-            from backend.agents import HELIX_AGENTS
+            from agents import HELIX_AGENTS
             agent_count = len(HELIX_AGENTS)
         except:
             agent_count = 13
@@ -423,7 +423,7 @@ async def run_command(ctx, command: str):
         return
 
     try:
-        from backend.agents import Kavach
+        from agents import Kavach
         kavach = Kavach()
 
         # Use the synchronous scan_command method
@@ -551,7 +551,7 @@ async def ritual_cmd(ctx, steps: int = 108):
     await ctx.send(embed=start_embed)
 
     try:
-        from backend.z88_ritual_engine import RitualManager
+        from z88_ritual_engine import RitualManager
         manager = RitualManager(steps=steps)
         final_state = await manager.run_async()  # ✅ Non-blocking async version
 
@@ -756,7 +756,7 @@ async def storage_command(ctx, action: str = "status"):
         !storage clean   – Prune old archives (keep latest 20)
     """
     try:
-        from backend.helix_storage_adapter_async import HelixStorageAdapterAsync
+        from helix_storage_adapter_async import HelixStorageAdapterAsync
         storage = HelixStorageAdapterAsync()
 
         if action == "status":
