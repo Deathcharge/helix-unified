@@ -507,26 +507,8 @@ async def run_command(ctx, command: str):
         await ctx.send(embed=embed)
         log_event("command_error", {"command": command, "error": str(e)})
 
-# Command aliases for status
-@bot.command(name="status")
-async def status_cmd(ctx):
-    """Alias for !manus status"""
-    await show_status(ctx)
-
-@bot.command(name="s")
-async def status_short(ctx):
-    """Short alias for status"""
-    await show_status(ctx)
-
-@bot.command(name="stat")
-async def status_alt(ctx):
-    """Alternative alias for status"""
-    await show_status(ctx)
-
-@bot.command(name="health")
-async def health_cmd(ctx):
-    """Health check alias"""
-    await show_status(ctx)
+# Note: status command with aliases is already defined at line 333
+# Removed duplicate command registrations to avoid CommandRegistrationError
 
 @bot.command(name="ritual")
 async def ritual_cmd(ctx, steps: int = 108):
