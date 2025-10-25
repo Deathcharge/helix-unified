@@ -48,6 +48,10 @@ ARCHITECT_ID = int(os.getenv("ARCHITECT_ID", 0))
 # Track bot start time for uptime
 BOT_START_TIME = time.time()
 
+# File path constants (added)
+STATE_PATH = STATE_DIR / "ucf_state.json"
+HEARTBEAT_PATH = STATE_DIR / "heartbeat.json"
+
 # Paths
 HELIX_ROOT = Path("Helix")
 COMMANDS_DIR = HELIX_ROOT / "commands"
@@ -696,7 +700,10 @@ async def storage_command(ctx, action: str = "status"):
 # ============================================================================
 # TELEMETRY LOOP
 # ============================================================================
-
+def log_event(event_type: str, data: dict):
+    """Basic internal event logger"""
+    log_to_shadow(event_type, data)
+    
 @tasks.loop(minutes=10)
 async def telemetry_loop():
     """Post UCF state updates to telemetry channel every 10 minutes"""
