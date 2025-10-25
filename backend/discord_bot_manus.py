@@ -1001,11 +1001,11 @@ def main():
     
     print("🤲 Starting Manusbot...")
     print(f"   Helix v14.5 - Quantum Handshake Edition")
-     active = 0
-for a in AGENTS:
-    if isinstance(a, dict) and a.get("status") == "Active":
-        active += 1
-print(f"   Active Agents: {active}/14")
+    active = 0
+    for a in AGENTS:
+        if isinstance(a, dict) and a.get("status") == "Active":
+            active += 1
+    print(f"   Active Agents: {active}/14")
     
     bot.run(DISCORD_TOKEN)
 
