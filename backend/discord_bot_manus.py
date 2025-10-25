@@ -271,7 +271,8 @@ async def on_ready():
                 timestamp=datetime.datetime.now()
             )
             embed.add_field(name="Status", value="✅ All systems operational")
-            embed.add_field(name="Active Agents", value=f"{len([a for a in AGENTS if a.get('status') == 'Active'])}/14")
+            active_count = sum(1 for a in AGENTS if isinstance(a, dict) and a.get("status") == "Active")
+            embed.add_field(name="Active Agents", value=f"{active_count}/14")
             embed.set_footer(text="Tat Tvam Asi 🙏")
 
             await status_channel.send(embed=embed)
