@@ -28,6 +28,16 @@ from typing import Optional, Dict, Any
 import discord
 from discord.ext import commands, tasks
 
+from pathlib import Path
+
+# --- PATH DEFINITIONS ---
+BASE_DIR = Path(__file__).resolve().parent.parent
+STATE_DIR = BASE_DIR / "Helix" / "state"
+STATE_DIR.mkdir(parents=True, exist_ok=True)
+
+STATE_PATH = STATE_DIR / "ucf_state.json"
+HEARTBEAT_PATH = STATE_DIR / "heartbeat.json"
+
 # Import Helix components (FIXED: relative imports)
 from agents import AGENTS
 from z88_ritual_engine import execute_ritual, load_ucf_state
@@ -47,10 +57,6 @@ ARCHITECT_ID = int(os.getenv("ARCHITECT_ID", 0))
 
 # Track bot start time for uptime
 BOT_START_TIME = time.time()
-
-# File path constants (added)
-STATE_PATH = STATE_DIR / "ucf_state.json"
-HEARTBEAT_PATH = STATE_DIR / "heartbeat.json"
 
 # Paths
 HELIX_ROOT = Path("Helix")
