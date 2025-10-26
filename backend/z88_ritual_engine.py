@@ -135,6 +135,55 @@ class RitualManager:
                 self.lock_file.unlink()  # Remove lock file
 
 # ============================================================================
+# STANDALONE HELPER FUNCTIONS (for Discord bot compatibility)
+# ============================================================================
+def load_ucf_state():
+    """
+    Load UCF state from JSON file.
+    Returns dict, NOT string (critical for .get() calls in bot).
+    """
+    if not STATE_PATH.exists():
+        STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+        default_state = {
+            "zoom": 1.0228,
+            "harmony": 0.355,
+            "resilience": 1.1191,
+            "prana": 0.5175,
+            "drishti": 0.5023,
+            "klesha": 0.010
+        }
+        json.dump(default_state, open(STATE_PATH, "w"), indent=2)
+        return default_state
+
+    try:
+        with open(STATE_PATH, "r") as f:
+            data = json.load(f)
+            # Ensure it's a dict, not a string
+            if not isinstance(data, dict):
+                raise ValueError("UCF state is not a valid dictionary")
+            return data
+    except (json.JSONDecodeError, ValueError) as e:
+        print(f"⚠️  UCF state load error: {e}")
+        # Return default state to prevent crashes
+        return {
+            "zoom": 1.0228,
+            "harmony": 0.355,
+            "resilience": 1.1191,
+            "prana": 0.5175,
+            "drishti": 0.5023,
+            "klesha": 0.010
+        }
+
+def execute_ritual(steps=108):
+    """
+    Execute Z-88 ritual synchronously (for bot threading).
+    Returns final UCF state dict.
+    """
+    manager = RitualManager(steps)
+    manager.run()
+    return manager.state
+
+# ============================================================================
 # ENTRY POINT
 # ============================================================================
 if __name__ == "__main__":

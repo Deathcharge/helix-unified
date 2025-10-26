@@ -146,6 +146,77 @@ class HelixStorageAdapterAsync:
             "latest": max((p.name for p in files), default=None)
         }
 
+    async def auto_cleanup_if_needed(self) -> int:
+        """
+        Auto-prune archives if free space < threshold (default 100 GB).
+        Keeps latest 20 files + all visual outputs.
+        Logs cleanup events to Shadow archive.
+
+        Returns:
+            Number of files deleted
+        """
+        import shutil
+        import glob
+        import time
+
+        # Load threshold from config (default 100 GB)
+        config_path = Path("Helix/state/storage_config.json")
+        threshold_gb = 100
+        if config_path.exists():
+            try:
+                async with aiofiles.open(config_path, 'r') as f:
+                    content = await f.read()
+                    config = json.loads(content)
+                    threshold_gb = config.get("auto_cleanup_threshold_gb", 100)
+            except:
+                pass
+
+        # Check free space
+        stat = shutil.disk_usage('/')
+        free_gb = stat.free / (1024**3)
+
+        if free_gb < threshold_gb:
+            # Get all log files (excluding visual outputs)
+            log_files = []
+            for ext in ["*.log", "*.json"]:
+                for f in glob.glob(str(self.root / ext)):
+                    if "visual_outputs" not in f and "cleanup_log" not in f:
+                        log_files.append(f)
+
+            # Sort by modification time (oldest first)
+            log_files.sort(key=os.path.getmtime)
+
+            # Keep latest 20, delete rest
+            deleted_count = 0
+            if len(log_files) > 20:
+                to_delete = log_files[:-20]
+                for file in to_delete:
+                    try:
+                        os.remove(file)
+                        print(f"🧹 Auto-cleanup: Deleted {file}")
+                        deleted_count += 1
+                    except Exception as e:
+                        print(f"⚠️  Cleanup error for {file}: {e}")
+
+            # Log to Shadow archive
+            cleanup_log_path = self.root / "cleanup_log.json"
+            log_entry = {
+                "timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "deleted_files": deleted_count,
+                "free_space_gb": round(free_gb, 2),
+                "threshold_gb": threshold_gb
+            }
+
+            try:
+                async with aiofiles.open(cleanup_log_path, 'a') as f:
+                    await f.write(json.dumps(log_entry) + "\n")
+            except Exception as e:
+                print(f"⚠️  Cleanup log error: {e}")
+
+            return deleted_count
+
+        return 0
+
 
 # ============================================================================
 # PUBLIC API
