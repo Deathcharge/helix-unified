@@ -703,6 +703,50 @@ async def storage_command(ctx, action: str = "status"):
         print(f"Storage command error: {e}")
 
 
+@bot.command(name="visualize", aliases=["visual", "render", "fractal"])
+async def visualize_command(ctx):
+    """
+    Generate and post Samsara consciousness fractal visualization.
+
+    Renders current UCF state as a Mandelbrot fractal and posts to Discord.
+    Uses colors, zoom, and patterns influenced by harmony, prana, and other metrics.
+
+    Usage:
+        !visualize
+    """
+    try:
+        # Load current UCF state
+        ucf_state = load_ucf_state()
+
+        # Send initial message
+        msg = await ctx.send("🎨 **Generating Samsara consciousness fractal...**")
+
+        # Generate and post visualization
+        from backend.samsara_bridge import generate_and_post_to_discord
+        result = await generate_and_post_to_discord(ucf_state, ctx.channel)
+
+        if result:
+            # Update initial message with success
+            await msg.edit(content="✅ **Samsara visualization complete!**")
+        else:
+            await msg.edit(content="❌ **Visualization failed** - check logs for details")
+
+        # Log visualization event
+        log_to_shadow("samsara_events", {
+            "action": "visualization",
+            "timestamp": datetime.datetime.now().isoformat(),
+            "ucf_state": ucf_state,
+            "success": result is not None,
+            "user": str(ctx.author)
+        })
+
+    except Exception as e:
+        await ctx.send(f"❌ **Visualization error:** {str(e)}")
+        print(f"Visualization command error: {e}")
+        import traceback
+        traceback.print_exc()
+
+
 # ============================================================================
 # TELEMETRY LOOP
 # ============================================================================
@@ -768,8 +812,15 @@ async def telemetry_loop():
         log_event("telemetry_posted", {"ucf_state": ucf, "channel": telemetry_channel.name})
 
     except Exception as e:
-        print(f"⚠️ Telemetry loop error: {e}")
+        print(f"⚠️ Telemetry error: {e}")
         log_event("telemetry_error", {"error": str(e)})
+
+
+@telemetry_loop.before_loop
+async def before_telemetry():
+    """Wait for bot to be ready before starting telemetry"""
+    await bot.wait_until_ready()
+
 
 # ============================================================================
 # STORAGE ANALYTICS & CLAUDE DIAGNOSTICS

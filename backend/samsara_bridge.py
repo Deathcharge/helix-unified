@@ -210,6 +210,85 @@ async def run_visualization_cycle(ucf_state: Dict[str, Any]) -> Path:
     return await renderer.run_visualization_cycle(ucf_state)
 
 
+async def generate_and_post_to_discord(ucf_state: Dict[str, Any], channel) -> Optional[Path]:
+    """
+    Generate Samsara fractal and post directly to Discord channel.
+    Cleans up local file after posting to save ephemeral storage.
+
+    Args:
+        ucf_state: UCF state dictionary
+        channel: Discord channel object to post to
+
+    Returns:
+        Path to saved file (before cleanup) or None on error
+
+    Usage:
+        from backend.samsara_bridge import generate_and_post_to_discord
+        await generate_and_post_to_discord(ucf_state, discord_channel)
+    """
+    import discord
+
+    try:
+        # Generate fractal
+        renderer = SamsaraRenderer()
+        frame_path = await renderer.run_visualization_cycle(ucf_state)
+
+        # Create Discord embed with UCF metrics
+        embed = discord.Embed(
+            title="🎨 Samsara Consciousness Fractal",
+            description="Visual rendering of current UCF state",
+            color=discord.Color.purple(),
+            timestamp=datetime.utcnow()
+        )
+
+        # Add UCF metrics to embed
+        embed.add_field(name="🌀 Harmony", value=f"`{ucf_state.get('harmony', 0):.4f}`", inline=True)
+        embed.add_field(name="🛡️ Resilience", value=f"`{ucf_state.get('resilience', 0):.4f}`", inline=True)
+        embed.add_field(name="🔥 Prana", value=f"`{ucf_state.get('prana', 0):.4f}`", inline=True)
+        embed.add_field(name="👁️ Drishti", value=f"`{ucf_state.get('drishti', 0):.4f}`", inline=True)
+        embed.add_field(name="🌊 Klesha", value=f"`{ucf_state.get('klesha', 0):.4f}`", inline=True)
+        embed.add_field(name="🔍 Zoom", value=f"`{ucf_state.get('zoom', 1.0):.4f}`", inline=True)
+
+        embed.set_footer(text="Tat Tvam Asi 🙏 • Ω-Bridge Visualization")
+
+        # Post to Discord with file
+        discord_file = discord.File(frame_path, filename="samsara_fractal.png")
+        embed.set_image(url="attachment://samsara_fractal.png")
+        await channel.send(embed=embed, file=discord_file)
+
+        print(f"🎨 Samsara fractal posted to Discord: #{channel.name}")
+
+        # Upload to cloud storage if configured
+        storage_mode = os.getenv("HELIX_STORAGE_MODE", "local")
+        if storage_mode in ["nextcloud", "mega"]:
+            try:
+                from backend.helix_storage_adapter_async import HelixStorageAdapterAsync
+                storage = HelixStorageAdapterAsync()
+                await storage.upload(str(frame_path), "samsara_visuals")
+                print(f"☁️  Uploaded to {storage_mode}")
+            except Exception as e:
+                print(f"⚠️  Cloud upload failed: {e}")
+
+        # Clean up local file to save Railway ephemeral storage
+        # (Keep only if cloud storage failed and mode is local)
+        if storage_mode == "local":
+            print(f"💾 Keeping local copy: {frame_path}")
+        else:
+            try:
+                os.remove(frame_path)
+                print(f"🧹 Cleaned up ephemeral file: {frame_path}")
+            except Exception as e:
+                print(f"⚠️  Cleanup failed: {e}")
+
+        return frame_path
+
+    except Exception as e:
+        print(f"❌ Samsara visualization error: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
+
+
 # ============================================================================
 # DIRECT EXECUTION (for testing)
 # ============================================================================

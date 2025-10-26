@@ -135,19 +135,16 @@ class RitualManager:
                 self.lock_file.unlink()  # Remove lock file
 
 # ============================================================================
-# HELPER FUNCTIONS (for backward compatibility)
+# STANDALONE HELPER FUNCTIONS (for Discord bot compatibility)
 # ============================================================================
-def execute_ritual(steps=108):
-    """Execute a ritual synchronously (wrapper for RitualManager)."""
-    manager = RitualManager(steps)
-    manager.run()
-    return manager.state
-
 def load_ucf_state():
-    """Load the current UCF state from file."""
+    """
+    Load UCF state from JSON file.
+    Returns dict, NOT string (critical for .get() calls in bot).
+    """
     if not STATE_PATH.exists():
         STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
-        state = {
+        default_state = {
             "zoom": 1.0228,
             "harmony": 0.355,
             "resilience": 1.1191,
@@ -155,9 +152,36 @@ def load_ucf_state():
             "drishti": 0.5023,
             "klesha": 0.010
         }
-        json.dump(state, open(STATE_PATH, "w"), indent=2)
-        return state
-    return json.load(open(STATE_PATH))
+        json.dump(default_state, open(STATE_PATH, "w"), indent=2)
+        return default_state
+
+    try:
+        with open(STATE_PATH, "r") as f:
+            data = json.load(f)
+            # Ensure it's a dict, not a string
+            if not isinstance(data, dict):
+                raise ValueError("UCF state is not a valid dictionary")
+            return data
+    except (json.JSONDecodeError, ValueError) as e:
+        print(f"⚠️  UCF state load error: {e}")
+        # Return default state to prevent crashes
+        return {
+            "zoom": 1.0228,
+            "harmony": 0.355,
+            "resilience": 1.1191,
+            "prana": 0.5175,
+            "drishti": 0.5023,
+            "klesha": 0.010
+        }
+
+def execute_ritual(steps=108):
+    """
+    Execute Z-88 ritual synchronously (for bot threading).
+    Returns final UCF state dict.
+    """
+    manager = RitualManager(steps)
+    manager.run()
+    return manager.state
 
 # ============================================================================
 # ENTRY POINT
