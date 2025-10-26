@@ -16,8 +16,8 @@ sqlalchemy==2.0.23
 numpy==1.26.4
 pydub==0.25.1
 
-# Image Processing (for Samsara visualization)
-Pillow==10.3.0
+# Image Processing (Pillow==10.3.0 did not work for Samsara visualization)
+
 
 # API Clients (for service integrations)
 httpx==0.28.0
