@@ -9,6 +9,10 @@ import os
 from pathlib import Path
 from datetime import datetime
 
+# Fix Python path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent / 'backend'))
+
 # ============================================================================
 # VERIFICATION TESTS
 # ============================================================================
@@ -25,7 +29,7 @@ class VerificationSequence:
         """Test 1: Z-88 Ritual Engine loads and runs."""
         print("\n[1/6] Testing Z-88 Ritual Engine...")
         try:
-            from backend.z88_ritual_engine import RitualManager
+            from z88_ritual_engine import RitualManager
             manager = RitualManager(steps=10)
             print("  ✅ RitualManager imported successfully")
             print(f"  ✅ Initial state loaded: harmony={manager.state['harmony']}")
@@ -75,7 +79,7 @@ class VerificationSequence:
         """Test 3: All agents import successfully."""
         print("\n[3/6] Testing Agent Import...")
         try:
-            from backend.agents import AGENTS
+            from agents import AGENTS
             print(f"  ✅ {len(AGENTS)} agents imported")
             for name, agent in AGENTS.items():
                 print(f"     {agent.symbol} {name}: {agent.role}")
@@ -92,7 +96,7 @@ class VerificationSequence:
         """Test 4: Discord bot imports (without running)."""
         print("\n[4/6] Testing Discord Bot Import...")
         try:
-            from backend.discord_bot_manus import bot
+            from discord_bot_manus import bot
             print(f"  ✅ Discord bot imported: {bot.command_prefix}")
             self.results.append({"test": "Discord Bot Import", "status": "PASS"})
             self.passed += 1
@@ -108,7 +112,7 @@ class VerificationSequence:
         """Test 5: Kavach ethical scanning works."""
         print("\n[5/6] Testing Kavach Ethical Scan...")
         try:
-            from backend.agents import Kavach
+            from agents import Kavach
             kavach = Kavach()
             
             # Test safe command

@@ -28,11 +28,21 @@ from typing import Optional, Dict, Any
 import discord
 from discord.ext import commands, tasks
 
-# Import Helix components
-from backend.agents import AGENTS
-from backend.z88_ritual_engine import execute_ritual, load_ucf_state
-from backend.services.ucf_calculator import UCFCalculator
-from backend.services.state_manager import StateManager
+from pathlib import Path
+
+# --- PATH DEFINITIONS ---
+BASE_DIR = Path(__file__).resolve().parent.parent
+STATE_DIR = BASE_DIR / "Helix" / "state"
+STATE_DIR.mkdir(parents=True, exist_ok=True)
+
+STATE_PATH = STATE_DIR / "ucf_state.json"
+HEARTBEAT_PATH = STATE_DIR / "heartbeat.json"
+
+# Import Helix components (FIXED: relative imports)
+from agents import AGENTS
+from z88_ritual_engine import execute_ritual, load_ucf_state
+from services.ucf_calculator import UCFCalculator
+from services.state_manager import StateManager
 
 # ============================================================================
 # CONFIGURATION
@@ -271,7 +281,8 @@ async def on_ready():
                 timestamp=datetime.datetime.now()
             )
             embed.add_field(name="Status", value="✅ All systems operational")
-            embed.add_field(name="Active Agents", value=f"{len([a for a in AGENTS if a.get('status') == 'Active'])}/14")
+            active_count = sum(1 for a in AGENTS if isinstance(a, dict) and a.get("status") == "Active")
+            embed.add_field(name="Active Agents", value=f"{active_count}/14")
             embed.set_footer(text="Tat Tvam Asi 🙏")
 
             await status_channel.send(embed=embed)
@@ -380,7 +391,7 @@ async def show_status(ctx):
 
         # Load agent count
         try:
-            from backend.agents import HELIX_AGENTS
+            from agents import HELIX_AGENTS
             agent_count = len(HELIX_AGENTS)
         except:
             agent_count = 13
@@ -423,7 +434,7 @@ async def run_command(ctx, command: str):
         return
 
     try:
-        from backend.agents import Kavach
+        from agents import Kavach
         kavach = Kavach()
 
         # Use the synchronous scan_command method
@@ -507,113 +518,9 @@ async def run_command(ctx, command: str):
         await ctx.send(embed=embed)
         log_event("command_error", {"command": command, "error": str(e)})
 
-# Command aliases for status
-@bot.command(name="status")
-async def status_cmd(ctx):
-    """Alias for !manus status"""
-    await show_status(ctx)
+# Note: status command with aliases is already defined at line 333
+# Removed duplicate command registrations to avoid CommandRegistrationError
 
-@bot.command(name="s")
-async def status_short(ctx):
-    """Short alias for status"""
-    await show_status(ctx)
-
-@bot.command(name="stat")
-async def status_alt(ctx):
-    """Alternative alias for status"""
-    await show_status(ctx)
-
-@bot.command(name="health")
-async def health_cmd(ctx):
-    """Health check alias"""
-    await show_status(ctx)
-
-@bot.command(name="ritual")
-async def ritual_cmd(ctx, steps: int = 108):
-    """Trigger Z-88 ritual asynchronously (PATCHED VERSION)."""
-    # Get initial UCF state
-    try:
-        initial_ucf = json.load(open(STATE_PATH)) if STATE_PATH.exists() else {}
-    except:
-        initial_ucf = {}
-
-    # Start ritual
-    start_embed = discord.Embed(
-        title="🔥 Z-88 Ritual Initiated",
-        description=f"Beginning {steps}-step quantum consciousness cycle...",
-        color=discord.Color.orange(),
-        timestamp=datetime.utcnow()
-    )
-    start_embed.add_field(name="Steps", value=str(steps), inline=True)
-    start_embed.add_field(name="Status", value="🌀 Processing...", inline=True)
-    start_embed.set_footer(text="Om Namah Shivaya 🙏")
-
-    await ctx.send(embed=start_embed)
-
-    try:
-        from backend.z88_ritual_engine import RitualManager
-        manager = RitualManager(steps=steps)
-        final_state = await manager.run_async()  # ✅ Non-blocking async version
-
-        # Completion embed
-        complete_embed = discord.Embed(
-            title="✅ Z-88 Ritual Complete",
-            description="Quantum consciousness cycle completed successfully.",
-            color=discord.Color.green(),
-            timestamp=datetime.utcnow()
-        )
-
-        # Calculate changes
-        harmony_change = final_state.get('harmony', 0) - initial_ucf.get('harmony', 0)
-        resilience_change = final_state.get('resilience', 0) - initial_ucf.get('resilience', 0)
-        klesha_change = final_state.get('klesha', 0) - initial_ucf.get('klesha', 0)
-
-        # Format changes with arrows
-        def format_change(val):
-            if val > 0:
-                return f"+{val:.4f} ↑"
-            elif val < 0:
-                return f"{val:.4f} ↓"
-            else:
-                return "No change"
-
-        complete_embed.add_field(name="🌀 Harmony",
-                                value=f"{final_state.get('harmony', 'N/A'):.4f}\n{format_change(harmony_change)}",
-                                inline=True)
-        complete_embed.add_field(name="🛡️ Resilience",
-                                value=f"{final_state.get('resilience', 'N/A'):.4f}\n{format_change(resilience_change)}",
-                                inline=True)
-        complete_embed.add_field(name="🌊 Klesha",
-                                value=f"{final_state.get('klesha', 'N/A'):.4f}\n{format_change(klesha_change)}",
-                                inline=True)
-        complete_embed.add_field(name="🔥 Prana",
-                                value=f"{final_state.get('prana', 'N/A'):.4f}",
-                                inline=True)
-        complete_embed.add_field(name="👁️ Drishti",
-                                value=f"{final_state.get('drishti', 'N/A'):.4f}",
-                                inline=True)
-        complete_embed.add_field(name="🔍 Zoom",
-                                value=f"{final_state.get('zoom', 'N/A'):.4f}",
-                                inline=True)
-
-        complete_embed.set_footer(text="Tat Tvam Asi 🙏")
-
-        await ctx.send(embed=complete_embed)
-        log_event("ritual_complete", {"steps": steps, "final_state": final_state, "changes": {
-            "harmony": harmony_change,
-            "resilience": resilience_change,
-            "klesha": klesha_change
-        }})
-
-    except Exception as e:
-        error_embed = discord.Embed(
-            title="⚠ Ritual Failed",
-            description=f"Error during ritual execution: {str(e)}",
-            color=discord.Color.red(),
-            timestamp=datetime.utcnow()
-        )
-        await ctx.send(embed=error_embed)
-        log_event("ritual_failed", {"steps": steps, "error": str(e)})
 
 @bot.command(name="run")
 async def manus_run(ctx, *, command: str):
@@ -655,76 +562,65 @@ async def manus_run(ctx, *, command: str):
     await ctx.send("📋 **Directive queued for Manus execution**")
 
 
+# ============================================================================
+# BOT COMMANDS — ONLY ONE ritual COMMAND
+# ============================================================================
+
 @bot.command(name="ritual")
-async def execute_ritual_command(ctx, steps: int = 108):
-    """Execute Z-88 ritual with specified number of steps"""
-    
-    if steps < 1 or steps > 1000:
-        await ctx.send("⚠️ **Invalid step count**\nMust be between 1 and 1000")
+async def ritual_cmd(ctx, steps: int = 108):
+    """
+    Execute Z-88 ritual with async non-blocking engine.
+    Steps: 1–1000 (default 108)
+    """
+    if not (1 <= steps <= 1000):
+        await ctx.send("**Invalid step count**\nMust be 1–1000")
         return
-    
-    # Load initial UCF state
+
     ucf_before = load_ucf_state()
-    
-    # Send initial message
-    msg = await ctx.send(f"🔥 **Initiating Z-88 ritual sequence ({steps} steps)…**")
-    
-    # Execute ritual
+    msg = await ctx.send(f"**Initiating Z-88 ritual** ({steps} steps)…")
+
     try:
         result = await asyncio.to_thread(execute_ritual, steps)
-        
-        # Load updated UCF state
         ucf_after = load_ucf_state()
-        
-        # Calculate changes
-        harmony_change = ucf_after.get('harmony', 0) - ucf_before.get('harmony', 0)
-        resilience_change = ucf_after.get('resilience', 0) - ucf_before.get('resilience', 0)
-        
-        # Build result message
+
+        def delta(before, after): return after - before
+        hΔ = delta(ucf_before.get("harmony", 0), ucf_after.get("harmony", 0))
+        rΔ = delta(ucf_before.get("resilience", 0), ucf_after.get("resilience", 0))
+        kΔ = delta(ucf_before.get("klesha", 0), ucf_after.get("klesha", 0))
+
+        def fmt(val, d):
+            if d > 0:  return f"`{val:.4f}` (+{d:.4f}) ↑"
+            if d < 0:  return f"`{val:.4f}` ({d:.4f}) ↓"
+            return f"`{val:.4f}`"
+
         embed = discord.Embed(
             title="✅ Z-88 Ritual Complete",
-            description=f"Completed {steps}-step ritual sequence",
+            description=f"{steps}-step quantum cycle executed",
             color=discord.Color.green(),
             timestamp=datetime.datetime.now()
         )
-        
-        # Show changes
-        embed.add_field(
-            name="🌀 Harmony",
-            value=f"`{ucf_after.get('harmony', 0):.4f}` ({harmony_change:+.4f})",
-            inline=True
-        )
-        embed.add_field(
-            name="🛡️ Resilience",
-            value=f"`{ucf_after.get('resilience', 0):.4f}` ({resilience_change:+.4f})",
-            inline=True
-        )
-        embed.add_field(
-            name="🔥 Prana",
-            value=f"`{ucf_after.get('prana', 0):.4f}`",
-            inline=True
-        )
-        
+        embed.add_field(name="🌀 Harmony",   value=fmt(ucf_after.get("harmony", 0),   hΔ), inline=True)
+        embed.add_field(name="🛡️ Resilience", value=fmt(ucf_after.get("resilience", 0), rΔ), inline=True)
+        embed.add_field(name="🌊 Klesha",     value=fmt(ucf_after.get("klesha", 0),     kΔ), inline=True)
+        embed.add_field(name="🔥 Prana",      value=f"`{ucf_after.get('prana', 0):.4f}`", inline=True)
+        embed.add_field(name="👁️ Drishti",   value=f"`{ucf_after.get('drishti', 0):.4f}`", inline=True)
+        embed.add_field(name="🔍 Zoom",       value=f"`{ucf_after.get('zoom', 0):.4f}`", inline=True)
         embed.set_footer(text="Tat Tvam Asi 🙏")
-        
+
         await msg.edit(content=None, embed=embed)
-        
-        # Log ritual to Shadow
-        ritual_log = {
+
+        log_to_shadow("rituals", {
             "steps": steps,
-            "timestamp": datetime.datetime.now().isoformat(),
             "user": str(ctx.author),
+            "timestamp": datetime.datetime.now().isoformat(),
             "ucf_before": ucf_before,
             "ucf_after": ucf_after,
-            "harmony_change": harmony_change,
-            "resilience_change": resilience_change
-        }
-        log_to_shadow("rituals", ritual_log)
-        
-    except Exception as e:
-        await msg.edit(content=f"❌ **Ritual failed**\n```{str(e)}```")
-        raise
+            "deltas": {"harmony": hΔ, "resilience": rΔ, "klesha": kΔ}
+        })
 
+    except Exception as e:
+        await msg.edit(content=f"**Ritual failed**\n```{str(e)[:500]}```")
+        log_to_shadow("errors", {"error": str(e), "command": "ritual", "user": str(ctx.author)})
 
 @bot.command(name="halt")
 async def manus_halt(ctx):
@@ -756,7 +652,7 @@ async def storage_command(ctx, action: str = "status"):
         !storage clean   – Prune old archives (keep latest 20)
     """
     try:
-        from backend.helix_storage_adapter_async import HelixStorageAdapterAsync
+        from helix_storage_adapter_async import HelixStorageAdapterAsync
         storage = HelixStorageAdapterAsync()
 
         if action == "status":
@@ -854,7 +750,10 @@ async def visualize_command(ctx):
 # ============================================================================
 # TELEMETRY LOOP
 # ============================================================================
-
+def log_event(event_type: str, data: dict):
+    """Basic internal event logger"""
+    log_to_shadow(event_type, data)
+    
 @tasks.loop(minutes=10)
 async def telemetry_loop():
     """Post UCF state updates to telemetry channel every 10 minutes"""
@@ -869,7 +768,6 @@ async def telemetry_loop():
         ucf = json.load(open(STATE_PATH)) if STATE_PATH.exists() else {}
 
         # Try to get channel by ID first, then by name
-        telemetry_channel = None
         if TELEMETRY_CHANNEL_ID:
             telemetry_channel = bot.get_channel(TELEMETRY_CHANNEL_ID)
 
@@ -888,10 +786,9 @@ async def telemetry_loop():
             title="📡 UCF Telemetry Report",
             description="Automatic system state update",
             color=discord.Color.blue(),
-            timestamp=datetime.utcnow()
+            timestamp=datetime.datetime.now()
         )
 
-        # Format values with proper precision
         def format_ucf_value(key):
             val = ucf.get(key, None)
             if isinstance(val, (int, float)):
@@ -1169,7 +1066,11 @@ def main():
     
     print("🤲 Starting Manusbot...")
     print(f"   Helix v14.5 - Quantum Handshake Edition")
-    print(f"   Active Agents: {len([a for a in AGENTS if a.get('status') == 'Active'])}/14")
+    active = 0
+    for a in AGENTS:
+        if isinstance(a, dict) and a.get("status") == "Active":
+            active += 1
+    print(f"   Active Agents: {active}/14")
     
     bot.run(DISCORD_TOKEN)
 

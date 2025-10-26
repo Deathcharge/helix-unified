@@ -4,7 +4,7 @@
 
 import discord
 from discord.ext import commands
-from backend.agents.memory_root import get_memory_root
+from agents.memory_root import get_memory_root
 
 # ============================================================================
 # MEMORY ROOT COMMAND GROUP

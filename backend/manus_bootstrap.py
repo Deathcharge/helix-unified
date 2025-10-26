@@ -13,7 +13,7 @@ from typing import Optional
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.responses import JSONResponse
 
-from backend.services.zapier_client import (
+from services.zapier_client import (
     ZapierClient,
     validate_zapier_config,
     EVENT_HOOK,
