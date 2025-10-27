@@ -20,6 +20,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY backend ./backend
 COPY Shadow ./Shadow
 COPY scripts ./scripts
+COPY dashboard ./dashboard
 
 # Create runtime directories (app will use these)
 # The app creates these at startup, but we pre-create for safety
