@@ -280,10 +280,112 @@ async def generate_and_post_to_discord(ucf_state: Dict[str, Any], channel) -> Op
             except Exception as e:
                 print(f"⚠️  Cleanup failed: {e}")
 
+        # Generate and post KairoByte audio (Manus Pass v15.2)
+        audio_path = await generate_kairobyte_audio(ucf_state)
+
+        if audio_path:
+            try:
+                discord_audio = discord.File(str(audio_path), filename="kairobyte_om.wav")
+                await channel.send("🎵 **KairoByte Om Audio** - 108 seconds of sacred frequencies (136.1 Hz + 432 Hz)", file=discord_audio)
+                print(f"🎵 KairoByte audio posted to Discord")
+
+                # Upload to Nextcloud if configured
+                if storage_mode in ["nextcloud", "mega"]:
+                    from backend.helix_storage_adapter_async import upload_samsara_asset
+                    await upload_samsara_asset(audio_path, {
+                        "type": "kairobyte_audio",
+                        "prana": ucf_state.get("prana", 0),
+                        "duration_seconds": 108,
+                        "timestamp": datetime.utcnow().isoformat()
+                    })
+                    print(f"☁️  Audio uploaded to {storage_mode}")
+
+                # Cleanup audio file (unless local mode)
+                if storage_mode != "local":
+                    try:
+                        os.remove(audio_path)
+                        print(f"🧹 Cleaned up audio file: {audio_path}")
+                    except Exception as e:
+                        print(f"⚠️  Audio cleanup failed: {e}")
+
+            except Exception as e:
+                print(f"⚠️  KairoByte audio posting failed: {e}")
+
         return frame_path
 
     except Exception as e:
         print(f"❌ Samsara visualization error: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
+
+
+# ============================================================================
+# KAIROBYTE AUDIO GENERATION (Manus Pass v15.2)
+# ============================================================================
+
+async def generate_kairobyte_audio(ucf_state: Dict[str, float]) -> Optional[Path]:
+    """
+    Generate 108-second Om audio at 136.1 Hz + 432 Hz harmonics.
+    Based on Prana levels from UCF state.
+
+    Args:
+        ucf_state: Current UCF metrics
+
+    Returns:
+        Path to generated audio file, or None if Prana too low
+    """
+    import time
+    import numpy as np
+    from scipy.io import wavfile
+
+    prana = ucf_state.get("prana", 0)
+
+    if prana < 0.5:
+        print(f"⚠️  Prana too low for audio generation ({prana:.2f} < 0.50)")
+        return None
+
+    try:
+        print(f"🎵 Generating KairoByte Om audio (Prana: {prana:.2f})...")
+
+        # Audio parameters
+        duration = 108  # seconds (sacred number)
+        sample_rate = 44100  # Hz
+
+        # Generate time array
+        t = np.linspace(0, duration, int(sample_rate * duration))
+
+        # Sacred frequencies
+        om_freq = 136.1  # Hz (Om frequency, derived from Earth's year)
+        harmony_freq = 432  # Hz (Universal harmony, A=432Hz tuning)
+
+        # Mix frequencies with Prana-influenced amplitude
+        # Higher Prana = more Om frequency, Lower Prana = more harmony frequency
+        audio = (np.sin(2 * np.pi * om_freq * t) * 0.3 * prana +
+                 np.sin(2 * np.pi * harmony_freq * t) * 0.3 * (1 - prana))
+
+        # Add subtle harmonics for richness
+        audio += np.sin(2 * np.pi * (om_freq * 2) * t) * 0.1 * prana  # Octave
+        audio += np.sin(2 * np.pi * (harmony_freq / 2) * t) * 0.1 * (1 - prana)  # Sub-harmonic
+
+        # Normalize to prevent clipping
+        audio = audio / np.max(np.abs(audio)) * 0.8
+
+        # Convert to 16-bit integer format
+        audio = (audio * 32767).astype(np.int16)
+
+        # Save to file
+        output_dir = Path("Shadow/manus_archive/visual_outputs")
+        output_dir.mkdir(parents=True, exist_ok=True)
+        audio_path = output_dir / f"kairobyte_om_{int(time.time())}.wav"
+
+        wavfile.write(str(audio_path), sample_rate, audio)
+        print(f"✅ KairoByte audio generated: {audio_path} ({duration}s, {sample_rate}Hz)")
+
+        return audio_path
+
+    except Exception as e:
+        print(f"❌ KairoByte audio generation failed: {e}")
         import traceback
         traceback.print_exc()
         return None
