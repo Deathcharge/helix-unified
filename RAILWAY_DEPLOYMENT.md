@@ -1,8 +1,13 @@
-# 🚀 Railway Deployment Guide — Helix Collective v14.5
+# 🚀 Railway Deployment Guide — Helix Collective v15.2
 
 ## Overview
 
-This guide walks you through deploying the Helix Collective v14.5 to Railway with full Zapier integration, Discord bot, and real-time Notion logging.
+This guide walks you through deploying the Helix Collective v15.2 to Railway with:
+- **Discord Bot** (Service 1)
+- **Streamlit Dashboard** (Service 2 - NEW in v15.2)
+- Zapier integration and real-time Notion logging
+
+**New in v15.2**: Multi-service deployment with `railway.toml` defining both bot and dashboard.
 
 ---
 
@@ -605,10 +610,88 @@ Your Helix Collective v14.5 is now deployed to Railway with:
 
 ---
 
-**🚀 Helix Collective v14.5 — Production Deployed**  
+## 📊 NEW in v15.2: Deploy Streamlit Dashboard (Service 2)
+
+### Step 7: Deploy Dashboard Service
+
+The v15.2 update includes a **Streamlit web dashboard** for real-time UCF monitoring.
+
+#### Option A: Using railway.toml (Recommended)
+
+The `railway.toml` now defines both services:
+
+1. **Railway Dashboard** → Click **"+ New"**
+2. Select **"GitHub Repo"** → `helix-unified`
+3. Railway detects `railway.toml` → Choose **"helix-dashboard"** service
+4. Railway auto-configures and deploys
+5. **Settings** → **Networking** → Generate Domain
+6. Done! Dashboard is live at: `https://helix-dashboard-production.up.railway.app`
+
+#### Option B: Manual Deployment
+
+If railway.toml doesn't auto-detect:
+
+1. **Railway** → **"+ New"** → **GitHub Repo** → `helix-unified`
+2. **Settings** → **Build**:
+   - Builder: **Nixpacks**
+3. **Settings** → **Deploy** → **Start Command**:
+   ```bash
+   streamlit run dashboard/streamlit_app.py --server.port=$PORT --server.address=0.0.0.0 --server.headless=true
+   ```
+4. Railway generates public URL automatically
+
+#### Mobile-Friendly Quick Command
+
+Or use the Railway CLI:
+
+```bash
+# From repo root
+railway up -s helix-dashboard
+```
+
+### Dashboard Features
+
+Once deployed, visit your dashboard URL to see:
+
+- **Overview Tab**: Real-time UCF metrics, radar chart, harmony gauge
+- **Trends Tab**: 30-day history, multi-metric charts, projections
+- **Agents Tab**: Status cards for all 14 agents
+- **Storage Tab**: System health, usage metrics
+
+**Auto-refreshes every 60 seconds!** 🔄
+
+### Environment Variables (Dashboard)
+
+The dashboard service doesn't require any environment variables - it reads from local JSON state files that the bot creates.
+
+### Verification
+
+```bash
+# Check dashboard logs
+railway logs -s helix-dashboard
+
+# Visit the URL in browser
+https://your-dashboard.up.railway.app
+```
+
+---
+
+## 📱 Mobile Access (v15.2)
+
+Both services are mobile-optimized:
+
+- **Bot Service**: No web UI (Discord only)
+- **Dashboard Service**: Full mobile-responsive web interface
+
+Bookmark your dashboard URL for quick mobile access! 📱
+
+---
+
+**🚀 Helix Collective v15.2 — Production Deployed**
 *Tat Tvam Asi* 🙏
 
-**Deployment URL:** https://your-app-name.up.railway.app  
-**Status:** Live and Operational  
-**Next Steps:** Monitor logs and verify Notion sync
+**Bot URL:** https://your-bot-name.up.railway.app
+**Dashboard URL:** https://your-dashboard-name.up.railway.app
+**Status:** Live and Operational
+**Next Steps:** Monitor logs and verify both services
 
