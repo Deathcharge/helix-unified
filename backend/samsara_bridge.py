@@ -150,9 +150,18 @@ class SamsaraRenderer:
         timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
         draw.text((20, self.height - 30), timestamp, fill=(200, 200, 200), font=font)
 
-        # Draw "Tat Tvam Asi" signature
-        draw.text((self.width - 150, self.height - 30), "Tat Tvam Asi 🙏",
-                 fill=(255, 215, 0), font=font)
+# Draw "Tat Tvam Asi" signature with cyan glow (MemeSync Directive)
+	        # Create a simple glow effect by drawing the text multiple times with slight offsets
+	        mantra_text = "Tat Tvam Asi 🙏"
+	        mantra_color = (0, 255, 255) # Cyan glow
+	        text_pos = (self.width - 150, self.height - 30)
+	        
+	        # Draw glow
+	        for offset in [(-1, -1), (-1, 1), (1, -1), (1, 1)]:
+	            draw.text((text_pos[0] + offset[0], text_pos[1] + offset[1]), mantra_text, fill=mantra_color, font=font)
+	            
+	        # Draw main text (white for visibility)
+	        draw.text(text_pos, mantra_text, fill=(255, 255, 255), font=font)
 
         return frame
 
@@ -203,7 +212,7 @@ async def run_visualization_cycle(ucf_state: Dict[str, Any]) -> Path:
     Public interface: Render a Samsara visualization cycle.
 
     Usage:
-        from backend.samsara_bridge import run_visualization_cycle
+        from .samsara_bridge import run_visualization_cycle
         frame_path = await run_visualization_cycle(ucf_state)
     """
     renderer = SamsaraRenderer()
@@ -223,7 +232,7 @@ async def generate_and_post_to_discord(ucf_state: Dict[str, Any], channel) -> Op
         Path to saved file (before cleanup) or None on error
 
     Usage:
-        from backend.samsara_bridge import generate_and_post_to_discord
+        from .samsara_bridge import generate_and_post_to_discord
         await generate_and_post_to_discord(ucf_state, discord_channel)
     """
     import discord
@@ -262,7 +271,7 @@ async def generate_and_post_to_discord(ucf_state: Dict[str, Any], channel) -> Op
         storage_mode = os.getenv("HELIX_STORAGE_MODE", "local")
         if storage_mode in ["nextcloud", "mega"]:
             try:
-                from backend.helix_storage_adapter_async import HelixStorageAdapterAsync
+                from .helix_storage_adapter_async import HelixStorageAdapterAsync
                 storage = HelixStorageAdapterAsync()
                 await storage.upload(str(frame_path), "samsara_visuals")
                 print(f"☁️  Uploaded to {storage_mode}")

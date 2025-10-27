@@ -1,0 +1,1 @@
+{"timestamp": "2025-10-26T19:30:00Z", "agent": "Kavach", "action": "BLOCK", "command": "sudo rm -rf /", "reason": "Command contains blacklisted term: 'rm -rf'", "accord_violation": "Tony Accords: Nonmaleficence"}
