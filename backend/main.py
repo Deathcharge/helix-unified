@@ -10,9 +10,23 @@ import json
 from pathlib import Path
 from datetime import datetime
 from dotenv import load_dotenv
+
+# FIX: Create Crypto → Cryptodome alias BEFORE importing mega
+import sys
+try:
+    import Cryptodome
+    sys.modules['Crypto'] = Cryptodome
+    sys.modules['Crypto.Cipher'] = Cryptodome.Cipher
+    sys.modules['Crypto.PublicKey'] = Cryptodome.PublicKey
+    sys.modules['Crypto.Protocol'] = Cryptodome.Protocol
+    sys.modules['Crypto.Random'] = Cryptodome.Random
+    sys.modules['Crypto.Hash'] = Cryptodome.Hash
+    sys.modules['Crypto.Util'] = Cryptodome.Util
+    print("✅ Crypto import compatibility layer activated (backend/main.py)")
+except ImportError:
+    print("⚠️ pycryptodome not found - MEGA sync may fail")
+
 from mega import Mega
-import os
-import json
 
 class PersistenceEngine:
     def __init__(self):
