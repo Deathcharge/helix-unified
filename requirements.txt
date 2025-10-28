@@ -13,6 +13,7 @@ asyncpg==0.30.0
 sqlalchemy==2.0.23
 # FORCE REBUILD - MEGA SYNC v2
 mega.py
+pycryptodome
 
 # Audio & Ritual Engine
 numpy==1.26.4
