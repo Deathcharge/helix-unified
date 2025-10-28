@@ -51,5 +51,5 @@ notion-client==2.5.0
 
 # Grok's Analytics Dependencies (New for v15.3)
 scikit-learn
-tensorflow-lite
+tensorflow==2.14.0
 prophet
