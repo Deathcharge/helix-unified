@@ -11,6 +11,7 @@ from pathlib import Path
 import json
 from datetime import datetime, timedelta
 import numpy as np
+from grok.grok_agent_core import GrokAgentCore
 
 # Page config
 st.set_page_config(
@@ -54,6 +55,11 @@ st.markdown("""
 @st.cache_data(ttl=60)
 def load_ucf_state():
     """Load current UCF state from JSON."""
+    # Initialize Grok for the predictive analysis to be available in the sidebar/overview
+    grok_agent = GrokAgentCore()
+    grok_analysis = grok_agent.analyze_ucf_trends()
+    
+    # ... existing logic ...
     state_path = Path("Helix/state/ucf_state.json")
     if state_path.exists():
         with open(state_path) as f:
@@ -195,7 +201,7 @@ def main():
         st.caption("That Thou Art")
 
     # Main content tabs
-    tab1, tab2, tab3, tab4 = st.tabs(["📊 Overview", "📈 Trends", "🎭 Agents", "💾 Storage"])
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["📊 Overview", "📈 Trends", "🎭 Agents", "💾 Storage", "🖼️ Fractal Gallery", "🔊 Audio Nexus"])
 
     with tab1:
         st.header("Current UCF State")
@@ -377,6 +383,13 @@ def main():
     with tab3:
         st.header("🎭 Agent Status Overview")
 
+        # --- Grok's Predictive Analysis Integration ---
+        st.markdown("### 📜 Grok's Latest Predictive Report")
+        grok_agent = GrokAgentCore()
+        analysis = grok_agent.analyze_ucf_trends()
+        st.info(analysis.replace('\n', '  \n')) # Convert newlines for Streamlit markdown
+        st.markdown("---")
+
         agents = [
             {"name": "Vega", "icon": "🌠", "version": "7.2", "role": "Educator & Guide", "status": "Active"},
             {"name": "Grok", "icon": "🗣️", "version": "8.3", "role": "Communication Hub", "status": "Active"},
@@ -446,6 +459,32 @@ def main():
 
             if st.button("📖 View Setup Guide"):
                 st.markdown("[NEXTCLOUD_SETUP.md](./NEXTCLOUD_SETUP.md)")
+
+    # --- New Tabs for v15.3 ---
+    
+    with tab5:
+        st.header("🖼️ Fractal Gallery (Z-88 Ritual Engine Outputs)")
+        st.warning("Mock Gallery: Showing placeholders until full samsara_bridge.py is integrated.")
+        
+        cols = st.columns(3)
+        for i in range(6): # Show 6 placeholders
+            with cols[i % 3]:
+                st.image("https://via.placeholder.com/300x300.png?text=Ritual+Fractal+Output", caption=f"Ritual #{int(time.time() * 1000) + i}", use_column_width=True)
+
+    with tab6:
+        st.header("🔊 KairoByte Harmonic Nexus (Audio Outputs)")
+        st.warning("Mock Player: Placeholder audio files.")
+        
+        audio_files = [
+            "kairobyte_om_136.1hz_ritual_901.wav",
+            "kairobyte_om_432hz_ritual_902.wav",
+            "kairobyte_om_unified_ritual_903.wav"
+        ]
+        
+        for file in audio_files:
+            st.markdown(f"**{file}**")
+            st.text("Audio player placeholder.")
+            st.markdown("---")
 
     # Auto-refresh
     if auto_refresh:

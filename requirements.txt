@@ -47,3 +47,9 @@ pydantic==2.5.0
 # Notion Integration
 notion-client==2.5.0
 
+
+
+# Grok's Analytics Dependencies (New for v15.3)
+scikit-learn
+tensorflow-lite
+prophet
