@@ -8,6 +8,21 @@ import os
 import random
 import time
 import asyncio
+from sync_mega import mega_sync
+import logging
+
+# On startup
+if mega_sync.connect():
+    # Restore state if exists
+    if os.path.exists('Helix/state/heartbeat.json'):
+        mega_sync.upload('Helix/state/heartbeat.json', 'state/heartbeat.json')
+    # Download latest from MEGA on boot
+    mega_sync.download('state/heartbeat.json', 'Helix/state/heartbeat.json')
+
+# On shutdown or periodic
+def save_persistence():
+    mega_sync.upload('Helix/state/heartbeat.json', 'state/heartbeat.json')
+    mega_sync.upload('Helix/state/ucf_state.json', 'state/ucf_state.json')
 
 # Import Grok's core for the !analyze command
 # The actual import path will be 'grok.grok_agent_core' after deployment
