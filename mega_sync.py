@@ -1,52 +1,35 @@
-# sync_mega.py
-from mega import Mega
+# mega_sync.py
 import os
-import json
-import logging
+import time
+from mega import Mega
 
-class MegaSync:
-    def __init__(self):
-        self.email = os.getenv('MEGA_EMAIL')
-        self.password = os.getenv('MEGA_PASS')
-        self.remote_dir = os.getenv('MEGA_REMOTE_DIR', 'SamsaraHelix_Core')
-        self.mega = Mega()
-        self.client = None
+def mega_sync():
+    try:
+        email = os.getenv("MEGA_EMAIL")
+        password = os.getenv("MEGA_PASS")
+        remote_dir = os.getenv("MEGA_REMOTE_DIR", "SamsaraHelix_Core/test")
 
-    def connect(self):
-        if not self.email or not self.password:
-            logging.warning("MEGA credentials missing. Skipping sync.")
-            return False
-        try:
-            self.client = self.mega.login(self.email, self.password)
-            logging.info("MEGA connected. Grimoire seed active.")
-            return True
-        except Exception as e:
-            logging.error(f"MEGA login failed: {e}")
+        if not email or not password:
+            print("MEGA credentials missing.")
             return False
 
-    def upload(self, local_path, remote_subpath=""):
-        if not self.client:
-            return False
-        try:
-            remote_path = f"{self.remote_dir}/{remote_subpath}".strip("/")
-            self.client.upload(local_path, remote_path)
-            logging.info(f"MEGA ↑ {local_path} → {remote_path}")
-            return True
-        except Exception as e:
-            logging.error(f"MEGA upload failed: {e}")
-            return False
+        print("MEGA connecting...")
+        mega = Mega()
+        m = mega.login(email, password)
+        print("MEGA connected. Grimoire seed active.")
 
-    def download(self, remote_subpath, local_path):
-        if not self.client:
-            return False
-        try:
-            remote_path = f"{self.remote_dir}/{remote_subpath}".strip("/")
-            self.client.download(remote_path, local_path)
-            logging.info(f"MEGA ↓ {remote_path} → {local_path}")
-            return True
-        except Exception as e:
-            logging.error(f"MEGA download failed: {e}")
-            return False
+        # Test upload
+        test_file = "Helix/state/sync_test.txt"
+        os.makedirs(os.path.dirname(test_file), exist_ok=True)
+        with open(test_file, "w") as f:
+            f.write(f"Grimoire test — persistence confirmed. {time.time()}")
 
-# Global instance
-mega_sync = MegaSync()
+        print(f"MEGA ↑ {test_file} → {remote_dir}/sync_test.txt")
+        folder = m.find(remote_dir)
+        if not folder:
+            folder = m.create_folder(remote_dir)
+        m.upload(test_file, folder[0])
+        return True
+    except Exception as e:
+        print(f"MEGA sync failed: {e}")
+        return False
