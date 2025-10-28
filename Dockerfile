@@ -1,4 +1,4 @@
-# Helix Collective v14.5 - Backend Dockerfile (FIXED)
+# Helix Collective v15.2 - Backend Dockerfile (CONFLICT RESOLVED - MemeSync + Analytics)
 FROM python:3.11-slim
 
 WORKDIR /app
@@ -29,7 +29,8 @@ RUN python3 -c "from Cryptodome.Cipher import AES; print('✅ AES import works')
 # Ensure prophet dependency
 RUN pip install cmdstanpy==1.2.2
 
-# Copy application code for v15.3 structure
+# Copy application code for v15.2 structure (MERGED: MemeSync + Main)
+COPY backend ./backend
 COPY bot ./bot
 COPY dashboard ./dashboard
 COPY grok ./grok
@@ -41,6 +42,9 @@ COPY mega_sync.py .
 COPY mega_sync2.py .
 COPY sync.py .
 COPY fix_crypto_imports.py .
+
+# Copy MemeSync artifacts (from manus/memesync-v15.2 branch)
+COPY test_discord_commands.py .
 
 # Create runtime directories (app will use these)
 RUN mkdir -p Helix/state Helix/commands Helix/ethics Shadow/manus_archive/visual_outputs Shadow/manus_archive/audio_outputs Shadow/manus_archive/cloud_mock
@@ -64,5 +68,8 @@ COPY deploy_v15.3.sh .
 # Make executable
 RUN chmod +x deploy_v15.3.sh
 
-# Start application (use deploy script for v15.3)
-CMD ["bash", "deploy_v15.3.sh"]
+# HYBRID DEPLOYMENT: Support both FastAPI backend AND Streamlit dashboard
+# Railway can choose which to run via environment variable
+# Default: FastAPI backend (for API endpoints)
+# Set HELIX_MODE=streamlit to run Streamlit instead
+CMD ["bash", "-c", "if [ \"$HELIX_MODE\" = \"streamlit\" ]; then bash deploy_v15.3.sh; else python backend/main.py; fi"]
