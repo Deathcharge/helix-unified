@@ -16,6 +16,10 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install cmdstanpy==1.2.2  # Ensure prophet dependency
 
+# Fix: Remove broken pycrypto, use pycryptodome
+RUN pip uninstall -y pycrypto || true
+RUN pip install pycryptodome
+
 # Copy application code for v15.3 structure
 COPY bot ./bot
 COPY dashboard ./dashboard
