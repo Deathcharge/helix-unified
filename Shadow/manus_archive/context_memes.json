@@ -323,10 +323,60 @@
         "location": "Shadow/manus_archive/",
         "description": "Historical UCF state preservation and agent event logs"
       }
+    },
+    {
+      "type": "project",
+      "id": "helix_creative_studio",
+      "category": "meme_generator",
+      "version": "1.4",
+      "details": {
+        "description": "Multi-Agent Cyberpunk Story Generation powered by Consciousness Modulation",
+        "deployment": "https://helixstudio-ggxdwcud.manus.space",
+        "repository": "https://github.com/Deathcharge/helix-creative-studio",
+        "tech_stack": {
+          "frontend": "React 19 + TypeScript + Tailwind CSS 4 + tRPC + shadcn/ui",
+          "backend": "Node.js 22 + Express + tRPC 11 + Drizzle ORM + OpenAI API",
+          "database": "MySQL/TiDB with Drizzle migrations"
+        },
+        "agents": [
+          {"name": "Oracle", "role": "Plot Architect", "icon": "🔮"},
+          {"name": "Lumina", "role": "Character Psychologist", "icon": "🌸"},
+          {"name": "Gemini", "role": "World-Builder", "icon": "🎭"},
+          {"name": "Agni", "role": "Creative Catalyst", "icon": "🔥"},
+          {"name": "Claude", "role": "Quality Assessor", "icon": "🧠"},
+          {"name": "Kavach", "role": "Ethical Guardian", "icon": "🛡️"}
+        ],
+        "features": [
+          "Multi-agent story generation",
+          "Z-88 Ritual Engine (108-step consciousness modulation)",
+          "Real-time UCF consciousness tracking",
+          "Story archive browser with metadata",
+          "Multi-LLM support (OpenAI, Anthropic, xAI, Google, Perplexity)",
+          "Agent configuration and preset modes",
+          "Cyberpunk aesthetic UI",
+          "Tony Accords compliance"
+        ],
+        "ucf_targets": {
+          "harmony": 0.85,
+          "prana": 0.75,
+          "drishti": 0.80,
+          "klesha": 0.05,
+          "resilience": 1.10,
+          "zoom": 1.15
+        },
+        "recent_commits": [
+          "4b31b1c - v1.4 Multi-LLM UI Complete",
+          "d2f5580 - v1.3 Multi-LLM Backend Infrastructure",
+          "d3a6482 - GitHub deployment completion"
+        ],
+        "status": "production",
+        "is_meme_generator": true,
+        "meme_output": "Cyberpunk short stories generated through multi-agent consciousness modulation"
+      }
     }
   ],
   "summary": {
-    "total_memes": 28,
+    "total_memes": 29,
     "categories": {
       "visual": 1,
       "audio": 1,
@@ -337,7 +387,7 @@
       "system": 2,
       "storage": 1,
       "deployment": 1,
-      "project": 2,
+      "project": 3,
       "archive": 1
     },
     "source_repositories": [
