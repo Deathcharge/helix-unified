@@ -1,28 +1,35 @@
 #!/bin/bash
-# deploy_v15.3.sh - Deployment Script for Helix v15.3 (Quantum Handshake)
-# Author: Manus AI
+# deploy_v15.3.sh - Helix v15.3 Quantum Handshake
+set -e
 
 echo "--- Helix Collective v15.3 Deployment Initiated ---"
 
-# 1. Ensure all necessary directories exist
-echo "1. Creating necessary runtime directories..."
-mkdir -p Helix/state Helix/commands Helix/ethics Shadow/manus_archive
+# 1. Create directories
+echo "1. Creating runtime directories..."
+mkdir -p Helix/state Helix/commands Helix/ethics Shadow/manus_archive/visual_outputs Shadow/manus_archive/audio_outputs
 
-# 2. Start the Discord Bot (in the background)
-echo "2. Starting Discord Bot (bot/discord_bot_manus.py)..."
-# The bot runs in the background, consuming the DISCORD_BOT_TOKEN
-# We use nohup to ensure it continues running after the script exits
-nohup python3 bot/discord_bot_manus.py > bot_output.log 2>&1 &
+# 2. Start Discord Bot with LIVE LOGGING
+echo "2. Starting Discord Bot (LIVE LOGS)..."
+if [ -z "$DISCORD_BOT_TOKEN" ]; then
+    echo "ERROR: DISCORD_BOT_TOKEN is not set!"
+    exit 1
+fi
+
+python3 bot/discord_bot_manus.py > bot_output.log 2>&1 &
 BOT_PID=$!
-echo "Discord Bot started with PID: $BOT_PID"
+echo "Bot started with PID: $BOT_PID"
 
-# 3. Start the Streamlit Dashboard
-echo "3. Starting Streamlit Dashboard (dashboard/streamlit_app.py) on port $PORT..."
-# Streamlit will bind to the port specified by the environment variable $PORT (e.g., set by Railway)
-# We use the --server.port and --server.address 0.0.0.0 flags for containerized deployment
-streamlit run dashboard/streamlit_app.py --server.port $PORT --server.address 0.0.0.0
+# Stream bot logs to Railway console
+tail -f bot_output.log &
+TAIL_PID=$!
 
-# Note: The script will block here while Streamlit is running.
-# The Discord bot continues in the background.
+# 3. Start Streamlit
+echo "3. Starting Streamlit on port ${PORT:-8080}..."
+streamlit run dashboard/streamlit_app.py \
+    --server.port ${PORT:-8080} \
+    --server.address 0.0.0.0 \
+    --server.headless=true
 
-echo "--- Helix Collective v15.3 Deployment Complete ---"
+# Cleanup on exit
+kill $TAIL_PID $BOT_PID 2>/dev/null || true
+echo "--- Deployment Complete ---"
