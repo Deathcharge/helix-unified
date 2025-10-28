@@ -39,5 +39,11 @@ ENV PYTHONPATH=/app/backend:/app/grok:/app/bot:/app/dashboard:$PYTHONPATH
 # Expose port (Railway will override with $PORT)
 EXPOSE 8000
 
+# Copy deployment script (in repo root)
+COPY deploy_v15.3.sh .
+
+# Make executable
+RUN chmod +x deploy_v15.3.sh
+
 # Start application (use deploy script for v15.3)
 CMD ["bash", "deploy_v15.3.sh"]
