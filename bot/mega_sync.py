@@ -1,5 +1,10 @@
 # sync_mega.py
 from mega import Mega
+# Fix: Force pycryptodome AES import
+import sys
+import os
+sys.path.insert(0, '/usr/local/lib/python3.11/site-packages')
+from Crypto.Cipher import AES
 import os
 import json
 import logging
