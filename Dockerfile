@@ -27,6 +27,12 @@ COPY grok ./grok
 COPY Shadow ./Shadow
 COPY scripts ./scripts
 
+# Copy root-level sync modules (CRITICAL: bot imports these!)
+COPY mega_sync.py .
+COPY mega_sync2.py .
+COPY sync.py .
+COPY fix_crypto_imports.py .
+
 # Create runtime directories (app will use these)
 RUN mkdir -p Helix/state Helix/commands Helix/ethics Shadow/manus_archive/visual_outputs Shadow/manus_archive/audio_outputs Shadow/manus_archive/cloud_mock
 
