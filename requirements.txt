@@ -11,13 +11,16 @@ discord.py==2.4.0
 redis[hiredis]==5.2.0
 asyncpg==0.30.0
 sqlalchemy==2.0.23
+# FORCE REBUILD - MEGA SYNC v2
+mega.py
+pycryptodome
 
 # Audio & Ritual Engine
 numpy==1.26.4
 pydub==0.25.1
 
-# Image Processing (for Samsara visualization)
-Pillow==10.3.0
+# Image Processing (Pillow==10.3.0 did not work for Samsara visualization)
+
 
 # API Clients (for service integrations)
 httpx==0.28.0
@@ -47,3 +50,9 @@ pydantic==2.5.0
 # Notion Integration
 notion-client==2.5.0
 
+
+
+# Grok's Analytics Dependencies (New for v15.3)
+scikit-learn
+tensorflow==2.14.0
+prophet
