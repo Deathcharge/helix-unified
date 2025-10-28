@@ -19,9 +19,6 @@ pycryptodome
 numpy==1.26.4
 pydub==0.25.1
 
-# Image Processing (Pillow==10.3.0 did not work for Samsara visualization)
-
-
 # API Clients (for service integrations)
 httpx==0.28.0
 aiohttp==3.11.0
@@ -50,9 +47,6 @@ pydantic==2.5.3
 # Notion Integration
 notion-client==2.5.0
 
-
-
 # Grok's Analytics Dependencies (New for v15.3)
 scikit-learn
-tensorflow==2.14.0
 prophet
