@@ -12,13 +12,22 @@ RUN apt-get update && apt-get install -y \
 # Copy requirements first (better caching)
 COPY requirements.txt .
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install cmdstanpy==1.2.2  # Ensure prophet dependency
+# CRITICAL FIX: Install pycryptodome FIRST to avoid conflicts
+RUN pip install --no-cache-dir pycryptodome
 
-# Fix: Remove broken pycrypto, use pycryptodome
+# Install Python dependencies (mega.py might try to install pycrypto)
+RUN pip install --no-cache-dir -r requirements.txt
+
+# FORCE: Remove any pycrypto that snuck in, reinstall pycryptodome
 RUN pip uninstall -y pycrypto || true
-RUN pip install pycryptodome
+RUN pip install --no-cache-dir --force-reinstall pycryptodome
+
+# Verify installation (this will appear in build logs)
+RUN python3 -c "import Cryptodome; print('✅ Cryptodome installed:', Cryptodome.__version__)"
+RUN python3 -c "from Cryptodome.Cipher import AES; print('✅ AES import works')"
+
+# Ensure prophet dependency
+RUN pip install cmdstanpy==1.2.2
 
 # Copy application code for v15.3 structure
 COPY bot ./bot

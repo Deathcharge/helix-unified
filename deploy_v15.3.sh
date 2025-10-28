@@ -4,6 +4,17 @@ set -e
 
 echo "--- Helix Collective v15.3 Deployment Initiated ---"
 
+# 0. CRITICAL: Verify pycryptodome is installed
+echo "0. Verifying Crypto dependencies..."
+python3 -c "import Cryptodome; print('✅ Cryptodome version:', Cryptodome.__version__)" || {
+    echo "❌ CRITICAL: pycryptodome not found! Installing now..."
+    pip install --force-reinstall pycryptodome
+}
+python3 -c "from Cryptodome.Cipher import AES; print('✅ AES import successful')" || {
+    echo "❌ CRITICAL: Cryptodome.Cipher.AES import failed!"
+    exit 1
+}
+
 # 1. Create directories
 echo "1. Creating runtime directories..."
 mkdir -p Helix/state Helix/commands Helix/ethics Shadow/manus_archive/visual_outputs Shadow/manus_archive/audio_outputs
