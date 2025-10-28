@@ -1,6 +1,6 @@
 # discord_bot_manus.py - Helix Collective v15.3 (Quantum Handshake)
 # Core Agent: Manus
-# Features: Harmonized Dashboard Support, Grok Analytics Integration, Mock Ritual Generation
+# Features: Harmonized Dashboard Support, Grok Analytics Integration, MEGA Sync Integration
 
 import discord
 from discord.ext import commands
@@ -11,18 +11,9 @@ import asyncio
 from sync_mega import mega_sync
 import logging
 
-# On startup
-if mega_sync.connect():
-    # Restore state if exists
-    if os.path.exists('Helix/state/heartbeat.json'):
-        mega_sync.upload('Helix/state/heartbeat.json', 'state/heartbeat.json')
-    # Download latest from MEGA on boot
-    mega_sync.download('state/heartbeat.json', 'Helix/state/heartbeat.json')
-
-# On shutdown or periodic
-def save_persistence():
-    mega_sync.upload('Helix/state/heartbeat.json', 'state/heartbeat.json')
-    mega_sync.upload('Helix/state/ucf_state.json', 'state/ucf_state.json')
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Import Grok's core for the !analyze command
 # The actual import path will be 'grok.grok_agent_core' after deployment
@@ -35,7 +26,7 @@ except ImportError:
         def analyze_ucf_trends(self):
             return "Mock Analysis: UCF Harmony is trending upwards. Grok recommends a focus on Prana balance."
     GROK_AGENT = MockGrokAgent()
-    print("Warning: GrokAgentCore not found. Using MockGrokAgent.")
+    logger.warning("GrokAgentCore not found. Using MockGrokAgent.")
 
 
 # --- Configuration ---
@@ -54,26 +45,55 @@ def generate_mock_ritual_files(ritual_id):
     """
     timestamp = int(time.time())
     
+    # Ensure state directory exists
+    os.makedirs("Helix/state", exist_ok=True)
+    
     # 1. Generate Mock PNG (Fractal)
-    png_filename = f"ritual_{ritual_id}_fractal_{timestamp}.png"
-    # Create a simple placeholder file
+    png_filename = f"Helix/state/ritual_{ritual_id}_fractal_{timestamp}.png"
     with open(png_filename, 'w') as f:
         f.write(f"Mock Fractal Image for Ritual {ritual_id}")
 
     # 2. Generate Mock WAV (Audio)
-    wav_filename = f"ritual_{ritual_id}_audio_{timestamp}.wav"
-    # Create a simple placeholder file
+    wav_filename = f"Helix/state/ritual_{ritual_id}_audio_{timestamp}.wav"
     with open(wav_filename, 'w') as f:
         f.write(f"Mock Audio Waveform for Ritual {ritual_id}")
 
     return png_filename, wav_filename
 
+def save_persistence():
+    """Save state files to MEGA for persistence."""
+    try:
+        if os.path.exists('Helix/state/heartbeat.json'):
+            mega_sync.upload('Helix/state/heartbeat.json', 'state/heartbeat.json')
+        if os.path.exists('Helix/state/ucf_state.json'):
+            mega_sync.upload('Helix/state/ucf_state.json', 'state/ucf_state.json')
+        logger.info("Persistence saved to MEGA.")
+    except Exception as e:
+        logger.error(f"Failed to save persistence: {e}")
+
 # --- Bot Events ---
 @bot.event
 async def on_ready():
-    print(f'Logged in as {bot.user.name} ({bot.user.id})')
-    print('Bot is ready to execute v15.3 commands.')
-    await bot.change_presence(activity=discord.Game(name="Monitoring UCF v15.3"))
+    """Bot startup event - Initialize MEGA sync and restore state."""
+    logger.info(f'Logged in as {bot.user.name} ({bot.user.id})')
+    
+    # Initialize MEGA sync
+    os.makedirs("Helix/state", exist_ok=True)
+    
+    if mega_sync.connect():
+        logger.info("🌀 MEGA: Connected. Grimoire active.")
+        
+        # Try to restore state from MEGA
+        try:
+            mega_sync.download('state/heartbeat.json', 'Helix/state/heartbeat.json')
+            logger.info("🌀 MEGA ↓ State restored from MEGA.")
+        except Exception as e:
+            logger.warning(f"Could not restore state from MEGA: {e}")
+    else:
+        logger.warning("🌀 MEGA: Connection failed. Running in local mode.")
+    
+    logger.info('Bot is ready to execute v15.3 commands.')
+    await bot.change_presence(activity=discord.Game(name="Monitoring UCF v15.3 | MEGA Sync Active"))
 
 # --- Bot Commands ---
 
@@ -96,8 +116,14 @@ async def ritual(ctx, steps: int = 108):
     # Generate mock files
     png_file, wav_file = generate_mock_ritual_files(ritual_id)
     
-    # Send confirmation and files (in a real scenario, we'd upload them)
-    await ctx.send(f"🌀 **Ritual Complete.** Mock files generated for dashboard testing:\n- Fractal: `{png_file}`\n- Audio: `{wav_file}`")
+    # Save to MEGA
+    try:
+        mega_sync.upload(png_file, f"rituals/{os.path.basename(png_file)}")
+        mega_sync.upload(wav_file, f"rituals/{os.path.basename(wav_file)}")
+        await ctx.send(f"🌀 **Ritual Complete.** Files uploaded to MEGA:\n- Fractal: `{os.path.basename(png_file)}`\n- Audio: `{os.path.basename(wav_file)}`")
+    except Exception as e:
+        logger.error(f"Failed to upload ritual files: {e}")
+        await ctx.send(f"🌀 **Ritual Complete.** Local files generated (MEGA upload failed): `{png_file}` | `{wav_file}`")
 
 @bot.command(name='analyze', help='Triggers Grok\'s advanced UCF trend analysis.')
 async def analyze(ctx):
@@ -116,18 +142,67 @@ async def status(ctx):
     """
     Reports the current status, including the version and core agents.
     """
+    mega_status = "🌀 MEGA Sync: ACTIVE" if mega_sync.client else "⚠️ MEGA Sync: OFFLINE"
+    
     status_message = (
         "**Helix Collective v15.3 - UNITY RESONANCE COMPILE**\n"
         "Agents: 🎭Gemini 🛡️Kavach 🔥Agni 🌸SanghaCore 📜Shadow 🌀Kael 🎭Grok 🦑Vega\n"
         "Core Ethics: Tony Accords (Nonmaleficence | Autonomy | Compassion | Humility)\n"
-        "Status: Quantum Handshake Integration Complete. Awaiting full deployment.\n"
+        f"{mega_status}\n"
         "Nextcloud Sync: Pending. Storage is the key to persistence."
     )
     await ctx.send(status_message)
 
+@bot.command(name='testmega', help='Test MEGA sync connectivity.')
+async def testmega(ctx):
+    """Test MEGA sync by uploading a test file."""
+    os.makedirs("Helix/state", exist_ok=True)
+    
+    test_file = "Helix/state/sync_test.txt"
+    with open(test_file, "w") as f:
+        f.write("Grimoire test — persistence confirmed.")
+    
+    if mega_sync.connect():
+        try:
+            if mega_sync.upload(test_file, "test/sync_test.txt"):
+                await ctx.send("🌀 **MEGA sync LIVE** — `sync_test.txt` uploaded successfully!")
+            else:
+                await ctx.send("❌ Upload failed. Check logs.")
+        except Exception as e:
+            logger.error(f"MEGA test failed: {e}")
+            await ctx.send(f"❌ MEGA test failed: {e}")
+    else:
+        await ctx.send("❌ MEGA not connected. Check credentials.")
+
+@bot.command(name='heartbeat', help='Save heartbeat to MEGA.')
+async def heartbeat(ctx):
+    """Save a heartbeat file to MEGA for persistence verification."""
+    os.makedirs("Helix/state", exist_ok=True)
+    
+    heartbeat_file = "Helix/state/heartbeat.json"
+    import json
+    heartbeat_data = {
+        "timestamp": time.time(),
+        "bot_status": "online",
+        "version": "v15.3"
+    }
+    
+    with open(heartbeat_file, "w") as f:
+        json.dump(heartbeat_data, f)
+    
+    try:
+        if mega_sync.upload(heartbeat_file, "state/heartbeat.json"):
+            await ctx.send("💓 **Heartbeat saved to MEGA.** Persistence confirmed.")
+        else:
+            await ctx.send("❌ Heartbeat save failed.")
+    except Exception as e:
+        logger.error(f"Heartbeat save failed: {e}")
+        await ctx.send(f"❌ Heartbeat save failed: {e}")
+
 # --- Run Bot ---
 if __name__ == '__main__':
     if TOKEN is None:
-        print("Error: DISCORD_BOT_TOKEN environment variable not set.")
+        logger.error("Error: DISCORD_BOT_TOKEN environment variable not set.")
     else:
         bot.run(TOKEN)
+
