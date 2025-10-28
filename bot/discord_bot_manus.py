@@ -8,7 +8,7 @@ import os
 import random
 import time
 import asyncio
-from sync_mega import mega_sync
+from mega_sync import mega_sync
 import logging
 
 # Configure logging
