@@ -10,7 +10,34 @@ import json
 from pathlib import Path
 from datetime import datetime
 from dotenv import load_dotenv
+from mega import Mega
+import os
+import json
 
+class PersistenceEngine:
+    def __init__(self):
+        self.mega = Mega()
+        self.m = self.mega.login(
+            os.getenv('MEGA_EMAIL'), 
+            os.getenv('MEGA_PASS')
+        )
+        self.remote_dir = os.getenv('MEGA_REMOTE_DIR')
+
+    def upload_state(self):
+        local = 'Helix/state/heartbeat.json'
+        remote = f"{self.remote_dir}/state/heartbeat.json"
+        self.m.upload(local, remote)
+        print("MEGA: Heartbeat synced.")
+
+    def upload_archive(self, filepath):
+        remote = f"{self.remote_dir}/manus_archive/{os.path.basename(filepath)}"
+        self.m.upload(filepath, remote)
+        print(f"MEGA: Archive preserved — {filepath}")
+
+    def download_state(self):
+        remote = f"{self.remote_dir}/state/heartbeat.json"
+        self.m.download(remote, 'Helix/state/heartbeat.json')
+        print("MEGA: State restored from cloud.")
 load_dotenv()
 
 # ✅ FIXED IMPORTS - Use relative imports instead of absolute
