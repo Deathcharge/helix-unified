@@ -1,8 +1,23 @@
 # sync_mega.py
-from mega import Mega
 import os
 import json
 import logging
+import sys
+
+# FIX: Create Crypto → Cryptodome alias BEFORE importing mega
+try:
+    import Cryptodome
+    sys.modules['Crypto'] = Cryptodome
+    sys.modules['Crypto.Cipher'] = Cryptodome.Cipher
+    sys.modules['Crypto.PublicKey'] = Cryptodome.PublicKey
+    sys.modules['Crypto.Protocol'] = Cryptodome.Protocol
+    sys.modules['Crypto.Random'] = Cryptodome.Random
+    sys.modules['Crypto.Hash'] = Cryptodome.Hash
+    sys.modules['Crypto.Util'] = Cryptodome.Util
+except ImportError:
+    logging.warning("⚠️ pycryptodome not found - MEGA sync may fail")
+
+from mega import Mega
 
 class MegaSync:
     def __init__(self):
