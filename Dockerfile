@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first (better caching)
-COPY requirements.txt .
+COPY requirements-backend.txt requirements.txt
 
 # CRITICAL FIX: Install pycryptodome FIRST to avoid conflicts
 RUN pip install --no-cache-dir pycryptodome

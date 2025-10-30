@@ -1,7 +1,4 @@
 # Helix Collective v14.5 - Frontend Requirements (Streamlit)
-# This file is used by Streamlit Community Cloud
-# Backend uses requirements-backend.txt (configured in railway.json)
-
 # Core Framework
 fastapi==0.115.0
 python-dotenv==1.0.1
