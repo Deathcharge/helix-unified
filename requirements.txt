@@ -22,3 +22,7 @@ pydantic==2.5.3
 # Notion Integration (if needed for frontend)
 notion-client==2.5.0
 
+
+
+# MEGA Sync Dependency (Critical for Persistence)
+mega.py
