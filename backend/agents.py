@@ -7,7 +7,7 @@ import subprocess
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 # ============================================================================
 # BASE AGENT CLASS
@@ -279,6 +279,75 @@ class Shadow(HelixAgent):
         with open(filename, "w") as f:
             json.dump(collective_state, f, indent=2)
         await self.log(f"Collective memory archived to {filename}")
+
+    async def load_collective_archive(self, filename: str = None) -> Optional[Dict[str, Any]]:
+        """
+        Load a collective memory archive.
+
+        Args:
+            filename: Specific archive filename, or None for latest
+
+        Returns:
+            Collective state data or None if not found
+        """
+        archive_dir = Path("Shadow/collective_archives")
+
+        if not archive_dir.exists():
+            await self.log("No collective archives directory found")
+            return None
+
+        try:
+            if filename:
+                # Load specific archive
+                archive_path = archive_dir / filename
+            else:
+                # Get latest archive
+                archives = sorted(archive_dir.glob("collective_*.json"), reverse=True)
+                if not archives:
+                    await self.log("No collective archives found")
+                    return None
+                archive_path = archives[0]
+
+            if not archive_path.exists():
+                await self.log(f"Archive not found: {archive_path}")
+                return None
+
+            with open(archive_path, "r") as f:
+                collective_state = json.load(f)
+
+            await self.log(f"Loaded collective archive from {archive_path}")
+            return collective_state
+
+        except json.JSONDecodeError as e:
+            await self.log(f"Invalid JSON in archive: {e}")
+            return None
+        except Exception as e:
+            await self.log(f"Error loading collective archive: {e}")
+            return None
+
+    async def list_collective_archives(self) -> List[str]:
+        """
+        List all available collective archives.
+
+        Returns:
+            List of archive filenames sorted by date (newest first)
+        """
+        archive_dir = Path("Shadow/collective_archives")
+
+        if not archive_dir.exists():
+            return []
+
+        try:
+            archives = sorted(
+                archive_dir.glob("collective_*.json"),
+                key=lambda p: p.stat().st_mtime,
+                reverse=True
+            )
+            return [a.name for a in archives]
+
+        except Exception as e:
+            await self.log(f"Error listing archives: {e}")
+            return []
 
 
 class Echo(HelixAgent):

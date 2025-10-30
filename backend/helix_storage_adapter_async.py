@@ -130,6 +130,89 @@ class HelixStorageAdapterAsync:
         """List all JSON archives in Shadow directory."""
         return [p.name for p in self.root.glob("*.json")]
 
+    async def retrieve_archive(self, filename: str) -> Optional[Dict[str, Any]]:
+        """
+        Load JSON archive from Shadow directory.
+
+        Args:
+            filename: Archive filename (e.g., "manus_log_20250130_123456.json")
+
+        Returns:
+            Parsed JSON data or None if file not found/invalid
+        """
+        file_path = self.root / filename
+
+        if not file_path.exists():
+            print(f"⚠️ Archive not found: {filename}")
+            return None
+
+        try:
+            async with aiofiles.open(file_path, "r") as f:
+                content = await f.read()
+                data = json.loads(content)
+                print(f"📂 Retrieved archive: {filename}")
+                return data
+        except json.JSONDecodeError as e:
+            print(f"❌ Invalid JSON in {filename}: {e}")
+            return None
+        except Exception as e:
+            print(f"❌ Error reading {filename}: {e}")
+            return None
+
+    async def search_archives(self, pattern: str = "*", limit: int = 10) -> list[Dict[str, Any]]:
+        """
+        Search for archives matching a pattern and return their metadata.
+
+        Args:
+            pattern: Glob pattern (e.g., "manus_log_*", "context_*")
+            limit: Maximum number of results to return
+
+        Returns:
+            List of archive metadata sorted by modification time (newest first)
+        """
+        files = list(self.root.glob(f"{pattern}.json"))
+        files.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+
+        results = []
+        for file_path in files[:limit]:
+            try:
+                stat = file_path.stat()
+                results.append({
+                    "filename": file_path.name,
+                    "size_kb": round(stat.st_size / 1024, 2),
+                    "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                    "path": str(file_path)
+                })
+            except Exception as e:
+                print(f"⚠️ Error reading metadata for {file_path.name}: {e}")
+
+        return results
+
+    async def get_latest_archive(self, name_prefix: str) -> Optional[Dict[str, Any]]:
+        """
+        Get the most recent archive matching a name prefix.
+
+        Args:
+            name_prefix: Archive name prefix (e.g., "manus_log", "context_memes")
+
+        Returns:
+            Parsed JSON data from latest archive or None if not found
+        """
+        files = list(self.root.glob(f"{name_prefix}_*.json"))
+
+        if not files:
+            # Try exact match (e.g., "context_memes.json" without timestamp)
+            exact_match = self.root / f"{name_prefix}.json"
+            if exact_match.exists():
+                return await self.retrieve_archive(exact_match.name)
+
+            print(f"⚠️ No archives found matching: {name_prefix}")
+            return None
+
+        # Get latest by modification time
+        latest = max(files, key=lambda p: p.stat().st_mtime)
+        return await self.retrieve_archive(latest.name)
+
     async def get_storage_stats(self) -> Dict[str, Any]:
         """Get storage statistics."""
         import shutil
