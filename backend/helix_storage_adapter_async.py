@@ -219,6 +219,77 @@ class HelixStorageAdapterAsync:
 
 
 # ============================================================================
+# SAMSARA ASSET UPLOADER (Manus Pass v15.2)
+# ============================================================================
+
+async def upload_samsara_asset(file_path: Path, metadata: dict) -> bool:
+    """
+    Upload Samsara assets to Nextcloud with UCF metadata.
+    Supports ritual_frame_*.png, kairobyte_om_*.mp3/wav, ucf_state.json.
+
+    Args:
+        file_path: Path to asset file
+        metadata: UCF state and other context
+
+    Returns:
+        True if upload successful, False otherwise
+    """
+    import time
+    import logging
+
+    storage_mode = os.getenv("HELIX_STORAGE_MODE", "local")
+
+    if storage_mode != "nextcloud":
+        logging.info(f"🦑 Shadow: Nextcloud disabled (mode={storage_mode}); falling back to local")
+        return False
+
+    nextcloud_url = os.getenv("NEXTCLOUD_URL", "")
+    nextcloud_user = os.getenv("NEXTCLOUD_USER", "")
+    nextcloud_pass = os.getenv("NEXTCLOUD_PASS", "")
+
+    if not all([nextcloud_url, nextcloud_user, nextcloud_pass]):
+        logging.warning("⚠️  Nextcloud credentials incomplete")
+        return False
+
+    if not file_path.exists():
+        logging.error(f"❌ File not found: {file_path}")
+        return False
+
+    # Build WebDAV URL
+    url = f"{nextcloud_url.rstrip('/')}/{file_path.name}"
+
+    try:
+        async with aiohttp.ClientSession() as session:
+            with open(file_path, "rb") as f:
+                auth = aiohttp.BasicAuth(nextcloud_user, nextcloud_pass)
+                async with session.put(url, data=f, auth=auth) as resp:
+                    success = resp.status in (201, 204)
+                    status = "success" if success else f"failed ({resp.status})"
+
+                    log_entry = {
+                        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                        "file": str(file_path),
+                        "status": status,
+                        "metadata": metadata
+                    }
+
+                    logging.info(f"🦑 Shadow: Uploaded {file_path.name} - {status}")
+
+                    # Log upload
+                    archive_path = Path("Shadow/manus_archive/upload_log.json")
+                    archive_path.parent.mkdir(parents=True, exist_ok=True)
+
+                    async with aiofiles.open(archive_path, "a") as log:
+                        await log.write(json.dumps(log_entry) + "\n")
+
+                    return success
+
+    except Exception as e:
+        logging.error(f"❌ Samsara upload failed: {e}")
+        return False
+
+
+# ============================================================================
 # PUBLIC API
 # ============================================================================
 
