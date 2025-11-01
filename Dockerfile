@@ -12,17 +12,16 @@ RUN apt-get update && apt-get install -y \
 # Copy requirements first (better caching)
 COPY requirements-backend.txt requirements.txt
 
-# CRITICAL FIX: Install pycryptodome FIRST to avoid conflicts
+# CRITICAL FIX: Install pycryptodome FIRST
 RUN pip install --no-cache-dir pycryptodome
 
-# Install Python dependencies (mega.py might try to install pycrypto)
+# Install Python dependencies (requirements-backend.txt excludes mega.py)
 RUN pip install --no-cache-dir -r requirements.txt
 
-# FORCE: Remove any pycrypto that snuck in, reinstall pycryptodome
-RUN pip uninstall -y pycrypto || true
-RUN pip install --no-cache-dir --force-reinstall pycryptodome
+# Install mega.py WITHOUT dependencies (prevents pycrypto installation)
+RUN pip install --no-cache-dir --no-deps mega.py
 
-# Verify installation (this will appear in build logs)
+# Verify Cryptodome installation
 RUN python3 -c "import Cryptodome; print('✅ Cryptodome installed:', Cryptodome.__version__)"
 RUN python3 -c "from Cryptodome.Cipher import AES; print('✅ AES import works')"
 
