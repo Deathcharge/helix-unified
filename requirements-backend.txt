@@ -1,4 +1,5 @@
-# Helix Collective v14.5 - Backend Requirements (Railway)
+# Helix Collective v15.3 Dual Resonance - Backend Requirements (Railway)
+
 # Core Framework & Web Server
 fastapi==0.115.0
 uvicorn[standard]==0.32.0
@@ -6,6 +7,11 @@ python-dotenv==1.0.1
 
 # Discord Integration
 discord.py==2.4.0
+
+# AI Model APIs
+anthropic==0.39.0
+google-generativeai==0.8.3
+openai==1.54.3
 
 # Data & State Management
 redis[hiredis]==5.2.0
@@ -40,6 +46,8 @@ sentry-sdk[fastapi]==2.19.0
 pyyaml==6.0.1
 python-multipart==0.0.6
 pydantic==2.5.3
+python-dateutil==2.8.2
+pytz==2023.3
 
 # Notion Integration
 notion-client==2.5.0
