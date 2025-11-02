@@ -9,6 +9,10 @@ RUN apt-get update && apt-get install -y \
     libblas-dev liblapack-dev gfortran \
     && rm -rf /var/lib/apt/lists/*
 
+COPY helix_omega_deploy.sh .
+RUN chmod +x helix_omega_deploy.sh
+CMD ["./helix_omega_deploy.sh"]
+
 # Copy requirements first (better caching)
 COPY requirements-backend.txt requirements.txt
 
