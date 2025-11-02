@@ -25,9 +25,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Install mega.py WITHOUT dependencies (prevents pycrypto installation)
 RUN pip install --no-cache-dir --no-deps mega.py
 
-# Verify Cryptodome installation
-RUN python3 -c "import Cryptodome; print('✅ Cryptodome installed:', Cryptodome.__version__)"
-RUN python3 -c "from Cryptodome.Cipher import AES; print('✅ AES import works')"
+# Verify Cryptodome installation (pycryptodome imports as 'Crypto', not 'Cryptodome')
+RUN python3 -c "import Crypto; print('✅ Cryptodome installed:', Crypto.__version__)"
+RUN python3 -c "from Crypto.Cipher import AES; print('✅ AES import works')"
 
 # Ensure prophet dependency
 RUN pip install cmdstanpy==1.2.2
