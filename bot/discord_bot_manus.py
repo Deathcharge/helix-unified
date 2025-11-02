@@ -10,10 +10,26 @@ import time
 import asyncio
 from mega_sync import mega_sync
 import logging
+import toml
+import sys
+from discord.ext import commands
+import os
+import random
+import time
+import asyncio
+from mega_sync import mega_sync
+import logging
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# --- Configuration and Logging Setup ---
+try:
+    config = toml.load('config.toml')
+except FileNotFoundError:
+    print("FATAL: config.toml not found. Exiting.")
+    sys.exit(1)
+
+# Setup Logging
+logging.basicConfig(level=config['logging']['level'], format=config['logging']['format'])
+logger = logging.getLogger('discord_bot')
 
 # Import Grok's core for the !analyze command
 # The actual import path will be 'grok.grok_agent_core' after deployment
@@ -31,11 +47,10 @@ except ImportError:
 
 # --- Configuration ---
 TOKEN = os.getenv('DISCORD_BOT_TOKEN')
-BOT_PREFIX = '!'
 INTENTS = discord.Intents.default()
 INTENTS.message_content = True
 
-bot = commands.Bot(command_prefix=BOT_PREFIX, intents=INTENTS)
+bot = commands.Bot(command_prefix=config['bot']['prefix'], intents=INTENTS)
 
 # --- Utility Functions (Mocked for Ritual Generation) ---
 def generate_mock_ritual_files(ritual_id):
@@ -75,7 +90,8 @@ def save_persistence():
 @bot.event
 async def on_ready():
     """Bot startup event - Initialize MEGA sync and restore state."""
-    logger.info(f'Logged in as {bot.user.name} ({bot.user.id})')
+    logger.info(f"Logged in as {bot.user.name} ({bot.user.id})")
+    logger.info(f"Bot Version: {config['bot']['version']}")
     
     # Initialize MEGA sync
     os.makedirs("Helix/state", exist_ok=True)
@@ -98,7 +114,7 @@ async def on_ready():
 # --- Bot Commands ---
 
 @bot.command(name='ritual', help='Initiates a Z-88 Ritual Engine cycle (currently mocked).')
-async def ritual(ctx, steps: int = 108):
+async def ritual(ctx, steps: int = config['z88_ritual_engine']['steps']):
     """
     Initiates a ritual cycle. In v15.3, this uses mock logic to generate files 
     for the dashboard, simulating the full samsara_bridge.py output.
@@ -204,5 +220,12 @@ if __name__ == '__main__':
     if TOKEN is None:
         logger.error("Error: DISCORD_BOT_TOKEN environment variable not set.")
     else:
-        bot.run(TOKEN)
+        try:
+            bot.run(TOKEN)
+        finally:
+            # Graceful Shutdown: Ensure MEGA client is logged out
+            if mega_sync.client:
+                logger.info("Logging out of MEGA client for graceful shutdown.")
+                mega_sync.client.logout()
+            logger.info("Bot process terminated.")
 
