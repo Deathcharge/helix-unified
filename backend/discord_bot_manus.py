@@ -1368,3 +1368,76 @@ async def help_consciousness_command(ctx):
     await ctx.send(embed=embed)
 
 
+
+
+
+# ============================================================================
+# AGENT EMBED COMMANDS (v15.3) - Agent Rotation & Profiles
+# ============================================================================
+
+from agent_embeds import get_agent_embed, get_next_agent_embed, get_collective_status, list_all_agents
+
+@bot.command(name="agent")
+async def agent_command(ctx, agent_name: str = None):
+    """Show detailed agent profile.
+    
+    Usage:
+        !agent Kael
+        !agent Lumina
+        !agent list
+    """
+    if not agent_name:
+        await ctx.send("❌ Usage: `!agent <name>` or `!agent list`")
+        return
+    
+    if agent_name.lower() == "list":
+        embed = list_all_agents()
+        await ctx.send(embed=embed)
+        return
+    
+    embed = get_agent_embed(agent_name)
+    
+    if not embed:
+        await ctx.send(f"❌ Agent not found: {agent_name}\nUse `!agent list` to see all agents")
+        return
+    
+    await ctx.send(embed=embed)
+
+
+@bot.command(name="statusv2", aliases=["st", "rotate"])
+async def status_rotate_command(ctx):
+    """Show rotating agent status (cycles through all 11 agents).
+    
+    Each call shows the next agent in rotation.
+    """
+    embed = get_next_agent_embed()
+    await ctx.send(embed=embed)
+
+
+@bot.command(name="manusv2", aliases=["collective", "system"])
+async def manus_v2_command(ctx):
+    """Show collective system status with all agents."""
+    # TODO: Pull real UCF state from z88_ritual_engine
+    embed = get_collective_status()
+    await ctx.send(embed=embed)
+
+
+@bot.command(name="agents", aliases=["roster", "list"])
+async def agents_command(ctx):
+    """List all agents with brief descriptions."""
+    embed = list_all_agents()
+    await ctx.send(embed=embed)
+
+
+# ============================================================================
+# BOT STARTUP
+# ============================================================================
+
+if __name__ == "__main__":
+    if not DISCORD_TOKEN:
+        print("❌ DISCORD_TOKEN not set in environment")
+        exit(1)
+    
+    print("🌀 Starting Manusbot v15.3...")
+    bot.run(DISCORD_TOKEN)
+
