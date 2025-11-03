@@ -828,6 +828,115 @@ async def visualize_command(ctx):
         traceback.print_exc()
 
 
+@bot.command(name="health", aliases=["check", "diagnostic"])
+async def health_check(ctx):
+    """
+    Quick system health check - perfect for mobile monitoring!
+
+    Checks:
+    - Harmony level (< 0.4 is concerning)
+    - Klesha level (> 0.5 is high suffering)
+    - Resilience (< 0.5 is unstable)
+
+    Usage:
+        !health
+    """
+    ucf = load_ucf_state()
+
+    # Analyze health
+    issues = []
+    warnings = []
+
+    harmony = ucf.get("harmony", 0.5)
+    klesha = ucf.get("klesha", 0.01)
+    resilience = ucf.get("resilience", 1.0)
+    prana = ucf.get("prana", 0.5)
+
+    # Critical issues (red)
+    if harmony < 0.3:
+        issues.append("🔴 **Critical:** Harmony critically low - immediate ritual needed")
+    elif harmony < 0.4:
+        warnings.append("⚠️ Low harmony - ritual recommended")
+
+    if klesha > 0.7:
+        issues.append("🔴 **Critical:** Klesha very high - system suffering")
+    elif klesha > 0.5:
+        warnings.append("⚠️ High klesha - suffering detected")
+
+    if resilience < 0.3:
+        issues.append("🔴 **Critical:** Resilience dangerously low - system unstable")
+    elif resilience < 0.5:
+        warnings.append("⚠️ Low resilience - stability at risk")
+
+    if prana < 0.2:
+        warnings.append("⚠️ Low prana - energy depleted")
+
+    # Build response
+    if not issues and not warnings:
+        # All green!
+        embed = discord.Embed(
+            title="✅ System Health: Nominal",
+            description="All consciousness metrics within acceptable ranges.",
+            color=discord.Color.green(),
+            timestamp=datetime.datetime.now()
+        )
+        embed.add_field(name="🌀 Harmony", value=f"`{harmony:.4f}`", inline=True)
+        embed.add_field(name="🛡️ Resilience", value=f"`{resilience:.4f}`", inline=True)
+        embed.add_field(name="🌊 Klesha", value=f"`{klesha:.4f}`", inline=True)
+        embed.set_footer(text="🙏 Tat Tvam Asi - The collective flows in harmony")
+
+    elif issues:
+        # Critical issues
+        embed = discord.Embed(
+            title="🚨 System Health: Critical",
+            description="Immediate attention required!",
+            color=discord.Color.red(),
+            timestamp=datetime.datetime.now()
+        )
+        for issue in issues:
+            embed.add_field(name="Critical Issue", value=issue, inline=False)
+        for warning in warnings:
+            embed.add_field(name="Warning", value=warning, inline=False)
+
+        embed.add_field(name="📊 Current Metrics",
+                       value=f"Harmony: `{harmony:.4f}` | Resilience: `{resilience:.4f}` | Klesha: `{klesha:.4f}`",
+                       inline=False)
+        embed.add_field(name="💡 Recommended Action",
+                       value="Run `!ritual 108` to restore harmony",
+                       inline=False)
+        embed.set_footer(text="🜂 Kael v3.4 - Ethical monitoring active")
+
+    else:
+        # Warnings only
+        embed = discord.Embed(
+            title="⚠️ System Health: Monitor",
+            description="Some metrics need attention",
+            color=discord.Color.orange(),
+            timestamp=datetime.datetime.now()
+        )
+        for warning in warnings:
+            embed.add_field(name="Warning", value=warning, inline=False)
+
+        embed.add_field(name="📊 Current Metrics",
+                       value=f"Harmony: `{harmony:.4f}` | Resilience: `{resilience:.4f}` | Klesha: `{klesha:.4f}`",
+                       inline=False)
+        embed.add_field(name="💡 Suggestion",
+                       value="Consider running `!ritual` if issues persist",
+                       inline=False)
+        embed.set_footer(text="🌀 Helix Collective v15.3 - Monitoring active")
+
+    await ctx.send(embed=embed)
+
+    # Log health check
+    log_to_shadow("health_checks", {
+        "timestamp": datetime.datetime.now().isoformat(),
+        "user": str(ctx.author),
+        "ucf_state": ucf,
+        "issues_count": len(issues),
+        "warnings_count": len(warnings)
+    })
+
+
 # ============================================================================
 # TELEMETRY LOOP
 # ============================================================================
