@@ -21,8 +21,10 @@ mkdir -p Helix/state Helix/commands Helix/ethics Shadow/manus_archive/visual_out
 
 # 2. Start Discord Bot with LIVE LOGGING
 echo "2. Starting Discord Bot (LIVE LOGS)..."
-if [ -z "$DISCORD_BOT_TOKEN" ]; then
-    echo "ERROR: DISCORD_BOT_TOKEN is not set!"
+# Use DISCORD_TOKEN (Railway variable name) or DISCORD_BOT_TOKEN as fallback
+TOKEN="${DISCORD_TOKEN:-$DISCORD_BOT_TOKEN}"
+if [ -z "$TOKEN" ]; then
+    echo "ERROR: DISCORD_TOKEN is not set!"
     exit 1
 fi
 
