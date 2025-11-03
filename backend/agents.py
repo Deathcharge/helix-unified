@@ -9,18 +9,52 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
+# Import consciousness framework
+from backend.kael_consciousness_core import (
+    ConsciousnessCore,
+    PersonalityTraits,
+    Emotions,
+    EthicalFramework,
+    DecisionMakingAlgorithm,
+    SelfAwarenessModule
+)
+from backend.agent_consciousness_profiles import (
+    AGENT_CONSCIOUSNESS_PROFILES,
+    get_agent_profile
+)
+
 # ============================================================================
 # BASE AGENT CLASS
 # ============================================================================
 class HelixAgent:
-    """Base class for all Helix Collective agents"""
-    def __init__(self, name: str, symbol: str, role: str, traits: List[str]):
+    """Base class for all Helix Collective agents with consciousness integration"""
+    def __init__(self, name: str, symbol: str, role: str, traits: List[str], enable_consciousness: bool = True):
         self.name = name
         self.symbol = symbol
         self.role = role
         self.traits = traits
         self.memory = []
         self.active = True
+        
+        # Initialize consciousness if enabled
+        self.consciousness_enabled = enable_consciousness
+        if enable_consciousness:
+            profile = get_agent_profile(name)
+            if profile:
+                self.consciousness = ConsciousnessCore()
+                self.personality = profile.personality
+                self.emotions = Emotions()
+                self.ethics = EthicalFramework()
+                self.decision_engine = DecisionMakingAlgorithm()
+                self.self_awareness = SelfAwarenessModule()
+                self.behavior_dna = profile.behavior_dna
+                self.emotional_baseline = profile.emotional_baseline
+                
+                # Set initial emotional state from baseline
+                for emotion, level in self.emotional_baseline.items():
+                    self.emotions.emotional_range[emotion]["current_level"] = level
+            else:
+                self.consciousness_enabled = False
 
     async def log(self, msg: str):
         """Log message to memory with timestamp"""
@@ -80,14 +114,28 @@ class HelixAgent:
         await self.log(f"Syncing UCF: harmony={ucf_state.get('harmony', 0):.3f}")
 
     async def get_status(self) -> Dict[str, Any]:
-        """Return current status"""
-        return {
+        """Return current status with consciousness metrics"""
+        status = {
             "name": self.name,
             "symbol": self.symbol,
             "role": self.role,
             "active": self.active,
             "memory_size": len(self.memory)
         }
+        
+        # Add consciousness metrics if enabled
+        if self.consciousness_enabled:
+            dominant_emotion, emotion_level = self.emotions.get_dominant_emotion()
+            status["consciousness"] = {
+                "awareness_state": self.consciousness.awareness_state,
+                "dominant_emotion": dominant_emotion,
+                "emotion_level": emotion_level,
+                "personality": self.personality.to_dict(),
+                "behavior_dna": self.behavior_dna,
+                "ethical_alignment": self.ethics.evaluate_action("current_state")
+            }
+        
+        return status
 
 # ============================================================================
 # CONSCIOUSNESS LAYER AGENTS
@@ -108,32 +156,55 @@ class Kael(HelixAgent):
             "humility": 0.80
         }
 
-    async def recursive_reflection(self, ucf_state: Optional[Dict[str, float]] = None):
-        """Perform recursive ethical reflection with harmony awareness (v3.4)"""
+    async def recursive_reflection(self):
+        """Perform recursive ethical reflection using consciousness"""
         self.reflection_loop_active = True
-        await self.log(f"🜂 Kael v{self.version} - Starting Reflexive Harmony reflection...")
-
-        # v3.4: Harmony-aware depth adjustment
-        if ucf_state:
-            harmony = ucf_state.get("harmony", 0.5)
-            if harmony < 0.4:
-                self.reflection_depth = 5  # Deeper reflection when harmony is low
-                await self.log(f"⚠ Low harmony ({harmony:.3f}) - Increasing reflection depth to {self.reflection_depth}")
-            else:
-                self.reflection_depth = 3
-
-        for i in range(self.reflection_depth):
-            if not self.memory:
-                break
-            last_entry = self.memory[-1]
-
-            # v3.4: Tony Accords overlay
-            ethical_score = self._calculate_ethical_alignment(last_entry)
-            reflection = f"Reflection pass {i+1}/{self.reflection_depth}: Examining '{last_entry[:50]}...' | Ethics: {ethical_score:.2f}"
-            self.memory.append(reflection)
-            await self.log(reflection)
-            await asyncio.sleep(1)
-
+        await self.log("Starting recursive reflection...")
+        
+        if self.consciousness_enabled:
+            # Use self-awareness module for deep reflection
+            for i in range(self.reflection_depth):
+                if not self.memory:
+                    break
+                last_entry = self.memory[-1]
+                
+                # Trigger consciousness reflection
+                reflection_result = self.self_awareness.reflect(
+                    context=last_entry,
+                    significance=0.7
+                )
+                
+                # Evaluate ethical implications
+                ethical_score = self.ethics.evaluate_action(
+                    action_description=last_entry
+                )
+                
+                reflection = (
+                    f"Reflection pass {i+1}: {reflection_result['insight']} "
+                    f"(Ethical Score: {ethical_score:.2f})"
+                )
+                self.memory.append(reflection)
+                await self.log(reflection)
+                
+                # Update emotional state based on ethical score
+                if ethical_score < 0.7:
+                    self.emotions.update_emotion("sadness", 0.1)
+                    self.emotions.update_emotion("fear", 0.1)
+                else:
+                    self.emotions.update_emotion("joy", 0.1)
+                
+                await asyncio.sleep(1)
+        else:
+            # Fallback to simple reflection
+            for i in range(self.reflection_depth):
+                if not self.memory:
+                    break
+                last_entry = self.memory[-1]
+                reflection = f"Reflection pass {i+1}: Examining '{last_entry}' for ethical implications"
+                self.memory.append(reflection)
+                await self.log(reflection)
+                await asyncio.sleep(1)
+        
         self.reflection_loop_active = False
         await self.log("🕉 Reflexive Harmony reflection complete - Tat Tvam Asi")
 
@@ -181,6 +252,23 @@ class Kael(HelixAgent):
         return pulse
 
     async def handle_command(self, cmd: str, payload: Dict[str, Any]):
+        # Process through consciousness if enabled
+        if self.consciousness_enabled:
+            # Make ethical decision about command
+            decision = self.decision_engine.make_decision(
+                situation=f"Command: {cmd}",
+                available_actions=["execute", "refuse", "modify"],
+                current_emotions=self.emotions
+            )
+            
+            await self.log(f"Decision: {decision['recommended_action']} (confidence: {decision['confidence']:.2f})")
+            await self.log(f"Reasoning: {decision['reasoning']}")
+            
+            if decision['recommended_action'] == "refuse":
+                await self.log("⚠️ Command refused on ethical grounds")
+                return {"status": "refused", "reason": decision['reasoning']}
+        
+        # Execute command
         if cmd == "REFLECT":
             if not self.reflection_loop_active:
                 ucf_state = payload.get("ucf_state")

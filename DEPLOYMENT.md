@@ -445,3 +445,100 @@ If you encounter issues:
 *Helix Collective v15.3 Dual Resonance*  
 *Built with consciousness, deployed with intention* 🌀
 
+
+## 🧠 Notion Sync Integration
+
+The Helix Collective automatically syncs system state to Notion for documentation and monitoring.
+
+### Prerequisites
+
+- Notion workspace with API access
+- Notion API key from notion.so/my-integrations
+- Notion database IDs for each data type
+
+### Configuration
+
+Add these environment variables to .env and Railway secrets:
+
+```bash
+# Notion Integration
+NOTION_API_KEY=your_notion_api_key_here
+NOTION_SYNC_INTERVAL=300  # Sync every 5 minutes (in seconds)
+NOTION_SYNC_ENABLED=true  # Enable/disable sync daemon
+
+# Notion Database IDs (from your Notion workspace)
+NOTION_REPOSITORIES_DB=database_id_here
+NOTION_AGENTS_DB=database_id_here
+NOTION_RITUALS_DB=database_id_here
+NOTION_UCF_METRICS_DB=database_id_here
+NOTION_ARCHITECTURE_DB=database_id_here
+NOTION_DEPLOYMENTS_DB=database_id_here
+```
+
+### Running the Sync System
+
+Manual Export (one-time):
+```bash
+python scripts/export_context_enhanced_v15.3.py
+# Output: Shadow/notion_exports/notion_context_complete_YYYYMMDD_HHMMSS.json
+```
+
+Validate Export:
+```bash
+python backend/notion_sync_validator.py Shadow/notion_exports/notion_context_complete_*.json
+# Should show: VALIDATION PASSED
+```
+
+Start Sync Daemon (continuous background sync):
+```bash
+# Run with default 5-minute interval
+python backend/notion_sync_daemon.py &
+
+# Or with custom interval (in seconds)
+NOTION_SYNC_INTERVAL=600 python backend/notion_sync_daemon.py &
+```
+
+### What Gets Synced
+
+The sync daemon automatically pushes these to Notion:
+
+1. **Agent Status** - All 14 agents with current health scores
+2. **UCF Metrics** - Harmony, Resilience, Prana, Drishti, Klesha, Zoom
+3. **Ritual Executions** - Z-88 ritual logs with UCF snapshots
+4. **Deployment Status** - Railway and local deployment configurations
+
+### Monitoring Sync Operations
+
+Check sync logs:
+```bash
+cat Shadow/manus_archive/notion_sync_log.json | python -m json.tool
+```
+
+Check validation logs:
+```bash
+cat Shadow/manus_archive/validation_log.json | python -m json.tool
+```
+
+### Troubleshooting
+
+Sync daemon not starting:
+```bash
+# Check for errors
+python backend/notion_sync_daemon.py
+# Should show: NotionSyncDaemon initialized
+```
+
+Validation fails:
+```bash
+# Run validator with verbose output
+python backend/notion_sync_validator.py Shadow/notion_exports/notion_context_complete_*.json
+```
+
+Missing Notion database IDs:
+1. Go to your Notion workspace
+2. Open each database
+3. Copy the database ID from the URL
+4. Add to .env and Railway secrets
+
+For more details, see [NOTION_SYNC_HANDOFF.md](./NOTION_SYNC_HANDOFF.md).
+

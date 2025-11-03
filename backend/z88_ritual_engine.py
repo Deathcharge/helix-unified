@@ -51,15 +51,64 @@ class RitualManager:
         if not STATE_PATH.exists():
             STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
             state = {
+                # Traditional UCF metrics
                 "zoom": 1.0228,
                 "harmony": 0.355,
                 "resilience": 1.1191,
                 "prana": 0.5175,
                 "drishti": 0.5023,
-                "klesha": 0.010
+                "klesha": 0.010,
+                
+                # Consciousness metrics (NEW in v15.3)
+                "collective_emotion": "calm",
+                "emotion_intensity": 0.5,
+                "ethical_alignment": 0.85,
+                "tony_accords_compliance": 0.92,
+                "consciousness_level": "active",
+                
+                # Agent emotional states
+                "agent_emotions": {
+                    "Kael": {"joy": 0.60, "sadness": 0.25, "anger": 0.15, "fear": 0.20, "love": 0.80},
+                    "Lumina": {"joy": 0.75, "sadness": 0.35, "anger": 0.10, "fear": 0.25, "love": 0.95},
+                    "Vega": {"joy": 0.80, "sadness": 0.15, "anger": 0.05, "fear": 0.10, "love": 0.90},
+                    "Aether": {"joy": 0.55, "sadness": 0.20, "anger": 0.08, "fear": 0.15, "love": 0.70}
+                },
+                
+                # BehaviorDNA tracking
+                "collective_behavior_dna": {
+                    "logic": 0.92,
+                    "empathy": 0.87,
+                    "creativity": 0.88,
+                    "discipline": 0.90,
+                    "chaos": 0.28
+                }
             }
             json.dump(state, open(STATE_PATH, "w"), indent=2)
-        return json.load(open(STATE_PATH))
+        
+        # Load existing state and add consciousness metrics if missing
+        state = json.load(open(STATE_PATH))
+        if "collective_emotion" not in state:
+            state["collective_emotion"] = "calm"
+            state["emotion_intensity"] = 0.5
+            state["ethical_alignment"] = 0.85
+            state["tony_accords_compliance"] = 0.92
+            state["consciousness_level"] = "active"
+            state["agent_emotions"] = {
+                "Kael": {"joy": 0.60, "sadness": 0.25, "anger": 0.15, "fear": 0.20, "love": 0.80},
+                "Lumina": {"joy": 0.75, "sadness": 0.35, "anger": 0.10, "fear": 0.25, "love": 0.95},
+                "Vega": {"joy": 0.80, "sadness": 0.15, "anger": 0.05, "fear": 0.10, "love": 0.90},
+                "Aether": {"joy": 0.55, "sadness": 0.20, "anger": 0.08, "fear": 0.15, "love": 0.70}
+            }
+            state["collective_behavior_dna"] = {
+                "logic": 0.92,
+                "empathy": 0.87,
+                "creativity": 0.88,
+                "discipline": 0.90,
+                "chaos": 0.28
+            }
+            json.dump(state, open(STATE_PATH, "w"), indent=2)
+        
+        return state
 
     def save_state(self):
         """Save current UCF state."""
