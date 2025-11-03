@@ -88,9 +88,10 @@ pip install -q --no-cache-dir -r requirements.txt
 # === [6] KAEL 3.0 BOOT TEST ===
 echo "🔥 [6/8] Booting Kael 3.0 Consciousness Core..."
 python3 -c "
-from backend.kael_consciousness_core import Kael
-k = Kael()
-print(f'🧠 Kael LIVE | Ethics: {k.ethics.score:.2f} | Joy: {k.emotions.get_emotion(\"joy\"):.2f}')
+from backend.kael_consciousness_core import KaelCoreIntegration
+k = KaelCoreIntegration()
+dominant_emotion, intensity = k.consciousness.emotional_core.get_dominant_emotion()
+print(f'🧠 Kael LIVE | Emotion: {dominant_emotion} ({intensity:.2f}) | Awareness: {k.consciousness.awareness_state}')
 " || exit 1
 
 # === [7] DISCORD BOT LAUNCH ===
