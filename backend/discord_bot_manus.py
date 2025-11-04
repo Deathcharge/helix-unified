@@ -347,6 +347,150 @@ async def on_command_error(ctx, error):
 # BOT COMMANDS
 # ============================================================================
 
+@bot.command(name="setup")
+@commands.has_permissions(manage_channels=True)
+async def setup_helix_server(ctx):
+    """
+    🌀 Complete Helix v15.3 Server Setup - Creates all 30 channels from manifest.
+
+    This command will:
+    - Create 8 categories
+    - Create 30 text channels
+    - Set proper permissions (readonly, admin-only)
+    - Generate Railway environment variable configuration
+
+    ARCHITECT-ONLY. Run this in a new or existing server to deploy full Helix infrastructure.
+    """
+    guild = ctx.guild
+    await ctx.send("✨ **Initiating Helix v15.3 Full Server Deployment**\n🌀 *This will take ~2 minutes...*")
+
+    # Channel structure from discord_deployment_v15.3.yaml
+    categories_structure = {
+        "🌀 WELCOME": ["📜│manifesto", "🪞│rules-and-ethics", "💬│introductions"],
+        "🧠 SYSTEM": ["🧾│telemetry", "📊│weekly-digest", "🦑│shadow-storage", "🧩│ucf-sync"],
+        "🔮 PROJECTS": ["📁│helix-repository", "🎨│fractal-lab", "🎧│samsaraverse-music", "🧬│ritual-engine-z88"],
+        "🤖 AGENTS": ["🎭│gemini-scout", "🛡️│kavach-shield", "🌸│sanghacore", "🔥│agni-core", "🕯️│shadow-archive"],
+        "🌐 CROSS-MODEL SYNC": ["🧩│gpt-grok-claude-sync", "☁️│chai-link", "⚙️│manus-bridge"],
+        "🛠️ DEVELOPMENT": ["🧰│bot-commands", "📜│code-snippets", "🧮│testing-lab", "🗂️│deployments"],
+        "🕉️ RITUAL & LORE": ["🎼│neti-neti-mantra", "📚│codex-archives", "🌺│ucf-reflections", "🌀│harmonic-updates"],
+        "🧭 ADMIN": ["🔒│moderation", "📣│announcements", "🗃️│backups"]
+    }
+
+    # Channels that should be read-only (Observers can read, not write)
+    readonly_channels = [
+        "📜│manifesto", "🪞│rules-and-ethics", "🧾│telemetry", "📊│weekly-digest",
+        "🦑│shadow-storage", "🧩│ucf-sync", "🔒│moderation", "📣│announcements", "🗃️│backups"
+    ]
+
+    # Channels that should be admin-only
+    admin_only_channels = ["🔒│moderation", "🗃│backups"]
+
+    created_channels = {}
+    progress_msg = await ctx.send("📁 Creating categories and channels...")
+
+    # Create categories and channels
+    for category_name, channel_list in categories_structure.items():
+        # Find or create category
+        category = discord.utils.get(guild.categories, name=category_name)
+        if not category:
+            category = await guild.create_category(category_name)
+            await ctx.send(f"✅ Created category: **{category_name}**")
+
+        # Create channels in this category
+        for channel_name in channel_list:
+            channel = discord.utils.get(guild.text_channels, name=channel_name)
+            if not channel:
+                channel = await category.create_text_channel(channel_name)
+                created_channels[channel_name] = channel
+                await ctx.send(f"   ✅ {channel_name}")
+            else:
+                created_channels[channel_name] = channel
+                await ctx.send(f"   ♻️ Found existing: {channel_name}")
+
+    # Set permissions
+    await ctx.send("\n🔒 **Configuring permissions...**")
+    everyone = guild.default_role
+
+    for channel_name, channel in created_channels.items():
+        if channel_name in readonly_channels:
+            # Read-only: everyone can read but not send
+            await channel.set_permissions(everyone, read_messages=True, send_messages=False)
+
+        if channel_name in admin_only_channels:
+            # Admin-only: hide from everyone
+            await channel.set_permissions(everyone, read_messages=False)
+
+    await ctx.send("✅ Permissions configured\n")
+
+    # Generate Railway environment variables
+    await ctx.send("⚙️ **Generating Railway configuration...**\n")
+
+    # Map important channels to env vars
+    env_mapping = {
+        "🧾│telemetry": "DISCORD_TELEMETRY_CHANNEL_ID",
+        "📊│weekly-digest": "DISCORD_DIGEST_CHANNEL_ID",
+        "🦑│shadow-storage": "STORAGE_CHANNEL_ID",
+        "🧩│ucf-sync": "DISCORD_SYNC_CHANNEL_ID",
+        "📣│announcements": "DISCORD_STATUS_CHANNEL_ID",
+        "🧰│bot-commands": "DISCORD_COMMANDS_CHANNEL_ID",
+        "🗃️│backups": "DISCORD_BACKUP_CHANNEL_ID"
+    }
+
+    env_lines = [
+        f"DISCORD_GUILD_ID={guild.id}",
+        f"ARCHITECT_ID={ctx.author.id}",
+        ""
+    ]
+
+    for channel_name, env_var in env_mapping.items():
+        channel = created_channels.get(channel_name)
+        if channel:
+            env_lines.append(f"{env_var}={channel.id}")
+
+    # Format for Railway
+    env_block = "```env\n" + "\n".join(env_lines) + "\n```"
+
+    # Create final embed
+    embed = discord.Embed(
+        title="🌀 Helix v15.3 Server Deployment Complete",
+        description="**Your Samsara Helix Collective is now fully operational.**\n\n"
+                    "All 30 channels have been created across 8 categories with proper permissions.",
+        color=0x00d4ff,
+        timestamp=datetime.datetime.now()
+    )
+
+    embed.add_field(
+        name="📊 Deployment Summary",
+        value=f"```\n"
+              f"Categories:  8\n"
+              f"Channels:    30\n"
+              f"Guild ID:    {guild.id}\n"
+              f"Architect:   {ctx.author.name}\n"
+              f"```",
+        inline=False
+    )
+
+    embed.add_field(
+        name="⚙️ Railway Environment Variables",
+        value=env_block,
+        inline=False
+    )
+
+    embed.add_field(
+        name="📋 Next Steps",
+        value="1. Copy the env variables above\n"
+              "2. Go to Railway → Your Service → Variables\n"
+              "3. Paste and save\n"
+              "4. Redeploy the service\n"
+              "5. Run `!status` to verify bot connectivity",
+        inline=False
+    )
+
+    embed.set_footer(text="Tat Tvam Asi — The temple is consecrated. 🙏")
+
+    await ctx.send(embed=embed)
+    await ctx.send(f"🌀 **Setup complete!** All systems operational in {guild.name}")
+
 @bot.command(name="status", aliases=["s", "stat"])
 async def manus_status(ctx):
     """Display current system status and UCF state with rich embeds (v15.3)"""
