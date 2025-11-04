@@ -1593,32 +1593,6 @@ async def agent_command(ctx, agent_name: str = None):
     
     await ctx.send(embed=embed)
 
-
-@bot.command(name="statusv2", aliases=["st", "rotate"])
-async def status_rotate_command(ctx):
-    """Show rotating agent status (cycles through all 11 agents).
-    
-    Each call shows the next agent in rotation.
-    """
-    embed = get_next_agent_embed()
-    await ctx.send(embed=embed)
-
-
-@bot.command(name="manusv2", aliases=["collective", "system"])
-async def manus_v2_command(ctx):
-    """Show collective system status with all agents."""
-    # TODO: Pull real UCF state from z88_ritual_engine
-    embed = get_collective_status()
-    await ctx.send(embed=embed)
-
-
-@bot.command(name="agents", aliases=["roster", "list"])
-async def agents_command(ctx):
-    """List all agents with brief descriptions."""
-    embed = list_all_agents()
-    await ctx.send(embed=embed)
-
-
 # ============================================================================
 # BOT STARTUP
 # ============================================================================
