@@ -112,8 +112,8 @@ class VerificationSequence:
         """Test 5: Kavach ethical scanning works."""
         print("\n[5/6] Testing Kavach Ethical Scan...")
         try:
-            from agents import Kavach
-            kavach = Kavach()
+            from backend.enhanced_kavach import EnhancedKavach
+            kavach = EnhancedKavach()
             
             # Test safe command
             safe_result = kavach.scan_command("echo 'hello'")

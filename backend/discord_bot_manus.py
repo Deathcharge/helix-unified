@@ -520,8 +520,8 @@ async def run_command(ctx, command: str):
         return
 
     try:
-        from agents import Kavach
-        kavach = Kavach()
+        from backend.enhanced_kavach import EnhancedKavach
+        kavach = EnhancedKavach()
 
         # Use the synchronous scan_command method
         is_safe = kavach.scan_command(command)
