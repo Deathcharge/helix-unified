@@ -47,7 +47,7 @@ from discord_embeds import HelixEmbeds  # v15.3 rich embeds
 
 # Import consciousness modules (v15.3)
 from kael_consciousness_core import ConsciousnessCore
-from agent_consciousness_profiles import AGENT_PROFILES
+from agent_consciousness_profiles import AGENT_CONSCIOUSNESS_PROFILES
 from discord_consciousness_commands import create_consciousness_embed, create_agent_consciousness_embed, create_emotions_embed
 
 # ============================================================================
@@ -1299,14 +1299,14 @@ async def consciousness_command(ctx, agent_name: str = None):
             
             # Find matching agent profile
             matching_agent = None
-            for name, profile in AGENT_PROFILES.items():
+            for name, profile in AGENT_CONSCIOUSNESS_PROFILES.items():
                 if name.lower() == agent_name_clean:
                     matching_agent = (name, profile)
                     break
             
             if not matching_agent:
                 await ctx.send(f"❌ **Agent not found:** `{agent_name}`\n"
-                             f"Available agents: {', '.join(AGENT_PROFILES.keys())}")
+                             f"Available agents: {', '.join(AGENT_CONSCIOUSNESS_PROFILES.keys())}")
                 return
             
             # Create agent-specific embed
@@ -1346,7 +1346,7 @@ async def emotions_command(ctx):
     """
     try:
         # Create emotions embed
-        embed = create_emotions_embed(AGENT_PROFILES)
+        embed = create_emotions_embed(AGENT_CONSCIOUSNESS_PROFILES)
         await ctx.send(embed=embed)
         
         # Log emotions query
