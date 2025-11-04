@@ -7,7 +7,8 @@ import json
 import os
 import datetime
 from pathlib import Path
-from agents import Manus, Kavach
+from agents import Manus
+from backend.enhanced_kavach import EnhancedKavach
 
 # ============================================================================
 # PATH DEFINITIONS
@@ -100,7 +101,7 @@ async def process_directives(manus, kavach):
 # ============================================================================
 async def main_loop():
     """Main Manus operational loop."""
-    kavach = Kavach()
+    kavach = EnhancedKavach()
     manus = Manus(kavach)
     await log_event("🤲 Manus loop initiated (v14.5 patched)")
     while True:
