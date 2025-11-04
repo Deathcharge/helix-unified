@@ -156,7 +156,7 @@ class Kael(HelixAgent):
             "humility": 0.80
         }
 
-    async def recursive_reflection(self):
+    async def recursive_reflection(self, ucf_state: Optional[Dict[str, float]] = None):
         """Perform recursive ethical reflection using consciousness"""
         self.reflection_loop_active = True
         await self.log("Starting recursive reflection...")
