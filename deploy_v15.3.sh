@@ -19,20 +19,25 @@ python3 -c "from Cryptodome.Cipher import AES; print('✅ AES import successful'
 echo "1. Creating runtime directories..."
 mkdir -p Helix/state Helix/commands Helix/ethics Shadow/manus_archive/visual_outputs Shadow/manus_archive/audio_outputs
 
-# 2. Start Discord Bot with LIVE LOGGING
-echo "2. Starting Discord Bot (LIVE LOGS)..."
-if [ -z "$DISCORD_BOT_TOKEN" ]; then
-    echo "ERROR: DISCORD_BOT_TOKEN is not set!"
-    exit 1
+# 2. Start Discord Bot (only if RUN_BOT is not set to "false")
+if [ "${RUN_BOT:-true}" != "false" ]; then
+    echo "2. Starting Discord Bot (LIVE LOGS)..."
+    # Use DISCORD_TOKEN (Railway variable name) or DISCORD_BOT_TOKEN as fallback
+    TOKEN="${DISCORD_TOKEN:-$DISCORD_BOT_TOKEN}"
+    if [ -z "$TOKEN" ]; then
+        echo "WARNING: DISCORD_TOKEN is not set - skipping bot startup"
+    else
+        python3 bot/discord_bot_manus.py > bot_output.log 2>&1 &
+        BOT_PID=$!
+        echo "Bot started with PID: $BOT_PID"
+
+        # Stream bot logs to Railway console
+        tail -f bot_output.log &
+        TAIL_PID=$!
+    fi
+else
+    echo "2. Skipping Discord Bot (RUN_BOT=false)"
 fi
-
-python3 bot/discord_bot_manus.py > bot_output.log 2>&1 &
-BOT_PID=$!
-echo "Bot started with PID: $BOT_PID"
-
-# Stream bot logs to Railway console
-tail -f bot_output.log &
-TAIL_PID=$!
 
 # 3. Start Streamlit
 echo "3. Starting Streamlit on port ${PORT:-8080}..."
@@ -42,5 +47,6 @@ streamlit run dashboard/streamlit_app.py \
     --server.headless=true
 
 # Cleanup on exit
-kill $TAIL_PID $BOT_PID 2>/dev/null || true
+if [ -n "$TAIL_PID" ]; then kill $TAIL_PID 2>/dev/null || true; fi
+if [ -n "$BOT_PID" ]; then kill $BOT_PID 2>/dev/null || true; fi
 echo "--- Deployment Complete ---"

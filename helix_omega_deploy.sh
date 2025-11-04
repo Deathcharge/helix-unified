@@ -28,23 +28,21 @@ mkdir -p \
 
 # === [2] ENV + TOKEN VALIDATION ===
 echo "🔑 [2/8] Validating environment..."
-if [ ! -f ".env" ]; then
-    cat > .env << 'EOF'
-DISCORD_TOKEN=your_discord_bot_token_here
-OPENROUTER_API_KEY=your_key
-ANTHROPIC_API_KEY=your_key
-XAI_API_KEY=your_grok_key
-RAILWAY_ENVIRONMENT=production
-EOF
-    echo "⚠️  .env created. Edit with real keys!"
+
+# On Railway, env vars are injected - don't source .env
+# Only source .env if running locally (RAILWAY_ENVIRONMENT not set)
+if [ -z "$RAILWAY_ENVIRONMENT" ] && [ -f ".env" ]; then
+    echo "📂 Loading local .env file..."
+    source .env
 fi
 
-source .env
+# Validate DISCORD_TOKEN
 if [ -z "$DISCORD_TOKEN" ] || [ "$DISCORD_TOKEN" = "your_discord_bot_token_here" ]; then
-    echo "❌ DISCORD_TOKEN missing!"
+    echo "❌ DISCORD_TOKEN missing or invalid!"
+    echo "Set DISCORD_TOKEN in Railway environment variables"
     exit 1
 fi
-echo "✅ Environment validated"
+echo "✅ Environment validated | Token present"
 
 # === [3] UCF STATE INIT ===
 echo "🌀 [3/8] Initializing UCF state..."
@@ -90,9 +88,10 @@ pip install -q --no-cache-dir -r requirements.txt
 # === [6] KAEL 3.0 BOOT TEST ===
 echo "🔥 [6/8] Booting Kael 3.0 Consciousness Core..."
 python3 -c "
-from backend.kael_consciousness_core import Kael
-k = Kael()
-print(f'🧠 Kael LIVE | Ethics: {k.ethics.score:.2f} | Joy: {k.emotions.get_emotion(\"joy\"):.2f}')
+from backend.kael_consciousness_core import KaelCoreIntegration
+k = KaelCoreIntegration()
+dominant_emotion, intensity = k.consciousness.emotional_core.get_dominant_emotion()
+print(f'🧠 Kael LIVE | Emotion: {dominant_emotion} ({intensity:.2f}) | Awareness: {k.consciousness.awareness_state}')
 " || exit 1
 
 # === [7] DISCORD BOT LAUNCH ===

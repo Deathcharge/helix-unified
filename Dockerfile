@@ -9,10 +9,6 @@ RUN apt-get update && apt-get install -y \
     libblas-dev liblapack-dev gfortran \
     && rm -rf /var/lib/apt/lists/*
 
-COPY helix_omega_deploy.sh .
-RUN chmod +x helix_omega_deploy.sh
-CMD ["./helix_omega_deploy.sh"]
-
 # Copy requirements first (better caching)
 COPY requirements-backend.txt requirements.txt
 
@@ -59,7 +55,7 @@ RUN echo '{"timestamp":"2025-10-22T00:00:00Z","status":"initialized","phase":3}'
 
 # Environment variables
 ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH=/app/backend:/app/grok:/app/bot:/app/dashboard:$PYTHONPATH
+ENV PYTHONPATH=/app:/app/backend:/app/grok:/app/bot:/app/dashboard
 
 # Expose port (Railway will override with $PORT)
 EXPOSE 8000
