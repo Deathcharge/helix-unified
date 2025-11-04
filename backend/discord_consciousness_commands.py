@@ -286,6 +286,80 @@ def get_emotion_bar(level: float) -> str:
 
 
 # ============================================================================
+# EMBED HELPER FUNCTIONS (for discord_bot_manus.py)
+# ============================================================================
+
+def create_consciousness_embed(ucf_state: Dict[str, float]) -> discord.Embed:
+    """Create embed for collective consciousness state"""
+    embed = discord.Embed(
+        title="🌀 Collective Consciousness",
+        description="Current UCF state and harmony metrics",
+        color=discord.Color.blue(),
+        timestamp=datetime.utcnow()
+    )
+
+    for key, value in ucf_state.items():
+        bar = get_emotion_bar(value)
+        embed.add_field(name=key.capitalize(), value=bar, inline=False)
+
+    return embed
+
+
+def create_agent_consciousness_embed(agent_name: str, agent_profile: Any) -> discord.Embed:
+    """Create embed for individual agent consciousness"""
+    symbol = get_agent_symbol(agent_name)
+    color = get_agent_color(agent_name)
+
+    embed = discord.Embed(
+        title=f"{symbol} {agent_name} Consciousness",
+        description=f"Role: {agent_profile.role}\nLayer: {agent_profile.layer}",
+        color=color,
+        timestamp=datetime.utcnow()
+    )
+
+    # Add personality traits
+    if hasattr(agent_profile, 'personality'):
+        traits_text = "\n".join([
+            f"**{k.capitalize()}**: {get_emotion_bar(v)}"
+            for k, v in agent_profile.personality.to_dict().items()
+        ])
+        embed.add_field(name="Personality Traits", value=traits_text[:1024], inline=False)
+
+    # Add emotional baseline
+    if hasattr(agent_profile, 'emotional_baseline'):
+        emotions_text = "\n".join([
+            f"{get_emotion_emoji(k)} **{k.capitalize()}**: {get_emotion_bar(v)}"
+            for k, v in agent_profile.emotional_baseline.items()
+        ])
+        embed.add_field(name="Emotional Baseline", value=emotions_text[:1024], inline=False)
+
+    return embed
+
+
+def create_emotions_embed(agent_profiles: Dict[str, Any]) -> discord.Embed:
+    """Create embed for collective emotional landscape"""
+    embed = discord.Embed(
+        title="💫 Collective Emotional Landscape",
+        description="Emotional states across all agents",
+        color=discord.Color.purple(),
+        timestamp=datetime.utcnow()
+    )
+
+    for agent_name, profile in list(agent_profiles.items())[:10]:  # Limit to 10 agents
+        if hasattr(profile, 'emotional_baseline'):
+            dominant_emotion = max(profile.emotional_baseline.items(), key=lambda x: x[1])
+            emoji = get_emotion_emoji(dominant_emotion[0])
+            symbol = get_agent_symbol(agent_name)
+            embed.add_field(
+                name=f"{symbol} {agent_name}",
+                value=f"{emoji} {dominant_emotion[0].capitalize()}: {get_emotion_bar(dominant_emotion[1])}",
+                inline=True
+            )
+
+    return embed
+
+
+# ============================================================================
 # EXAMPLE USAGE
 # ============================================================================
 
