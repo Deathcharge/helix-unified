@@ -25,7 +25,5 @@ notion-client==2.5.0
 
 
 # MEGA Sync Dependency (Critical for Persistence)
-mega.py
-
-
 pycryptodome
+mega.py
