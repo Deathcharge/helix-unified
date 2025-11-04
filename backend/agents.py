@@ -637,6 +637,15 @@ class Manus(HelixAgent):
 # ============================================================================
 # Initialize Kavach first (needed by Manus)
 _kavach = EnhancedKavach()
+
+# Initialize MemoryRoot (GPT4o-powered long-term memory)
+try:
+    from backend.agents.memory_root import MemoryRootAgent
+    _memory_root = MemoryRootAgent()
+except ImportError as e:
+    print(f"⚠️ MemoryRoot not available: {e}")
+    _memory_root = None
+
 AGENTS = {
     "Kael": Kael(),
     "Lumina": Lumina(),
@@ -652,6 +661,10 @@ AGENTS = {
     "Claude": Claude(),
     "Manus": Manus(_kavach),
 }
+
+# Add MemoryRoot if available
+if _memory_root:
+    AGENTS["MemoryRoot"] = _memory_root
 
 # ============================================================================
 # UTILITY FUNCTIONS

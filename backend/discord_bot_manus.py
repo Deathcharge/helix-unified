@@ -276,6 +276,14 @@ async def on_ready():
     print(f"   Telemetry Channel: {TELEMETRY_CHANNEL_ID}")
     print(f"   Storage Channel: {STORAGE_CHANNEL_ID}")
 
+    # Load Memory Root commands (GPT4o long-term memory)
+    try:
+        from discord_commands_memory import MemoryRootCommands
+        await bot.add_cog(MemoryRootCommands(bot))
+        print("✅ Memory Root commands loaded")
+    except Exception as e:
+        print(f"⚠️ Memory Root commands not available: {e}")
+
     # Send startup message to status channel
     if STATUS_CHANNEL_ID:
         status_channel = bot.get_channel(STATUS_CHANNEL_ID)
@@ -346,6 +354,54 @@ async def on_command_error(ctx, error):
 # ============================================================================
 # BOT COMMANDS
 # ============================================================================
+
+@bot.command(name="setup")
+@commands.has_permissions(manage_channels=True)
+async def setup_command(ctx):
+    """Auto-create & register Helix channels. ARCHITECT-only."""
+    guild = ctx.guild
+    category_name = "🌀 HELIX COLLECTIVE"
+    channels_to_create = {
+        "DISCORD_STATUS_CHANNEL_ID": "status-updates",
+        "DISCORD_TELEMETRY_CHANNEL_ID": "ucf-telemetry",
+        "STORAGE_CHANNEL_ID": "storage-heartbeat",
+    }
+
+    await ctx.send(f"✨ Starting Helix setup ritual for **{guild.name}**...")
+
+    # Create or find category
+    category = discord.utils.get(guild.categories, name=category_name)
+    if not category:
+        category = await guild.create_category(category_name)
+        await ctx.send(f"🌸 Created category: `{category_name}`")
+
+    # Create channels and collect IDs
+    env_lines = []
+    for env_var, channel_name in channels_to_create.items():
+        channel = discord.utils.get(guild.text_channels, name=channel_name)
+        if not channel:
+            channel = await category.create_text_channel(channel_name)
+            await ctx.send(f"✅ Created channel: #{channel_name}")
+        else:
+            await ctx.send(f"♻️ Found existing channel: #{channel_name}")
+        env_lines.append(f"{env_var}={channel.id}")
+
+    # Format environment variables for Railway
+    env_block = "```env\n" + "\n".join(env_lines) + "\n```"
+    embed = discord.Embed(
+        title="🌀 Helix Setup Complete",
+        description="**Copy the block below and paste it into your Railway Environment Variables.**",
+        color=0x00d4ff,
+        timestamp=datetime.datetime.now()
+    )
+    embed.add_field(name="Railway Environment Variables", value=env_block, inline=False)
+    embed.add_field(
+        name="Next Steps",
+        value="1. Copy the env block above\n2. Go to Railway → Your Service → Variables\n3. Paste and save\n4. Redeploy the service",
+        inline=False
+    )
+    embed.set_footer(text="Tat Tvam Asi — The temple is consecrated. 🙏")
+    await ctx.send(embed=embed)
 
 @bot.command(name="status", aliases=["s", "stat"])
 async def manus_status(ctx):
