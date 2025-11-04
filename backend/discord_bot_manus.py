@@ -347,7 +347,7 @@ async def on_command_error(ctx, error):
 # BOT COMMANDS
 # ============================================================================
 
-@bot.command(name="status", aliases=["s", "stat", "health"])
+@bot.command(name="status", aliases=["s", "stat"])
 async def manus_status(ctx):
     """Display current system status and UCF state with rich embeds (v15.3)"""
     ucf = load_ucf_state()
