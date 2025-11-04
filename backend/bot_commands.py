@@ -2,8 +2,14 @@
 
 import discord
 from discord.ext import commands
-from .main import bot # Import the bot instance from main.py
-from .agents import AGENTS # Import agents to command them
+import os
+
+# Import the 'bot' instance from your main file.
+# This avoids circular dependencies.
+from .main import bot
+
+# Import agent-related functions or objects if needed by commands.
+from .agents import AGENTS
 
 @bot.command(name="setup")
 @commands.has_permissions(manage_channels=True)
@@ -33,22 +39,21 @@ async def setup_command(ctx):
     env_block = "```env\n" + "\n".join(env_lines) + "\n```"
     embed = discord.Embed(
         title="🌀 Helix Setup Complete",
-        description="Channels are ready. **Copy the block below and paste it into your Railway Environment Variables.**",
+        description="**Copy the block below and paste it into your Railway Environment Variables.**",
         color=0x00d4ff
     )
     embed.add_field(name="Railway Environment Variables", value=env_block, inline=False)
-    embed.add_field(name="Next Steps", value="1. Update variables in Railway.\n2. The project will automatically redeploy.\n3. Run `!status` to verify.", inline=False)
     embed.set_footer(text="Tat Tvam Asi — The temple is consecrated.")
     await ctx.send(embed=embed)
 
+# --- Add all your other commands from discord_bot_manus.py here ---
+# Example:
 @bot.command(name="status")
 async def status_command(ctx):
-    """Displays the current status of the Helix Collective."""
-    status_channel_id = os.getenv("STATUS_CHANNEL_ID")
-    if not status_channel_id or ctx.channel.id != int(status_channel_id):
-        return await ctx.send(f"This command can only be used in the designated status channel.", delete_after=10)
+    # Your existing !status logic
+    await ctx.send("Displaying system status...")
 
-    # This is where you'd build a rich embed with UCF data
-    await ctx.send("Building status embed...")
-
-# Add other commands like !ritual, !agents, etc. here
+@bot.command(name="ritual")
+async def ritual_command(ctx, steps: int = 108):
+    # Your existing !ritual logic
+    await ctx.send(f"Initiating {steps}-step ritual...")
