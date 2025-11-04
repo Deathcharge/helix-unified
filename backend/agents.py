@@ -350,61 +350,8 @@ class Agni(HelixAgent):
                         ["Dynamic", "Catalytic", "Evolutionary"])
 
 
+# Import EnhancedKavach (replaces old Kavach class - see line 692 for usage)
 from backend.enhanced_kavach import EnhancedKavach
-    """Ethical Shield - Protects against harmful actions"""
-    def __init__(self):
-        super().__init__("Kavach", "🛡", "Ethical Shield",
-                        ["Vigilant", "Grounded", "Protective"])
-        self.blocked_patterns = [
-            "rm -rf /",
-            ":(){ :|:& };:",
-            "shutdown",
-            "reboot",
-            "mkfs",
-            "dd if=",
-            "wget http://malicious"
-        ]
-
-    def scan_command(self, cmd: str) -> bool:
-        """Scan command for harmful patterns"""
-        for pattern in self.blocked_patterns:
-            if pattern in cmd.lower():
-                return False
-        return True
-
-    async def ethical_scan(self, action: Dict[str, Any]) -> Dict[str, Any]:
-        """Perform ethical scan on proposed action"""
-        scan_result = {
-            "timestamp": datetime.utcnow().isoformat(),
-            "action": action,
-            "approved": True,
-            "concerns": []
-        }
-        # Check for harmful patterns
-        if "command" in action.get("parameters", {}):
-            cmd = action["parameters"]["command"]
-            if not self.scan_command(cmd):
-                scan_result["approved"] = False
-                scan_result["concerns"].append("Harmful command pattern detected")
-        # Log scan
-        Path("Helix/ethics").mkdir(parents=True, exist_ok=True)
-        with open("Helix/ethics/manus_scans.json", "a") as f:
-            f.write(json.dumps(scan_result) + "\n")
-        status = "✅ APPROVED" if scan_result["approved"] else "⛔ BLOCKED"
-        await self.log(f"Ethical scan: {status}")
-        return scan_result
-
-    async def handle_command(self, cmd: str, payload: Dict[str, Any]):
-        if cmd == "SCAN":
-            return await self.ethical_scan(payload.get("action", {}))
-        elif cmd == "REFLECT":
-            flagged = any("harm" in entry.lower() for entry in self.memory[-5:])
-            if flagged:
-                await self.log("⚠ Potential harm detected in recent activity")
-            else:
-                await self.log("Ethical state stable")
-        else:
-            await super().handle_command(cmd, payload)
 
 
 class SanghaCore(HelixAgent):
@@ -571,7 +518,7 @@ class Manus(HelixAgent):
     async def execute_command(self, command: str) -> Dict[str, Any]:
         """Execute shell command with ethical oversight"""
         # Ethical scan
-                action = {
+        action = {
             "command": command,
             "agent_memory": self.memory
         }
