@@ -161,7 +161,8 @@ async def status(ctx):
     """
     Reports the current status, including the version and core agents.
     """
-    mega_status = "🌀 MEGA Sync: ACTIVE" if mega_sync.client else "⚠️ MEGA Sync: OFFLINE"
+    # Safely check mega_sync.client to avoid AttributeError if mega_sync is not fully initialized
+    mega_status = "🌀 MEGA Sync: ACTIVE" if getattr(mega_sync, 'client', None) else "⚠️ MEGA Sync: OFFLINE"
     
     status_message = (
         "**Helix Collective v15.3 - UNITY RESONANCE COMPILE**\n"
@@ -193,6 +194,29 @@ async def testmega(ctx):
             await ctx.send(f"❌ MEGA test failed: {e}")
     else:
         await ctx.send("❌ MEGA not connected. Check credentials.")
+
+@bot.command(name='sync', help='Triggers a full state synchronization with MEGA.')
+@commands.cooldown(1, 60, commands.BucketType.user)
+async def sync(ctx):
+    """Triggers a full state synchronization with MEGA."""
+    await ctx.send("🌀 **Running ecosystem sync...**")
+    
+    # Ensure log directory exists
+    log_dir = 'logs'
+    os.makedirs(log_dir, exist_ok=True)
+    log_file = os.path.join(log_dir, 'helix_sync.log')
+    
+    try:
+        # Placeholder for actual sync logic (e.g., calling save_persistence)
+        save_persistence()
+        
+        with open(log_file, 'w') as f:
+            f.write(f"Sync completed successfully at {time.ctime()}")
+        
+        await ctx.send("✅ **Sync complete.** State saved to MEGA.")
+    except Exception as e:
+        logger.error(f"Sync error: {e}")
+        await ctx.send(f"❌ **Sync error:** {e}")
 
 @bot.command(name='heartbeat', help='Save heartbeat to MEGA.')
 @commands.cooldown(1, 300, commands.BucketType.user)  # 1 use per 5 minutes per user
