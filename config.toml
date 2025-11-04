@@ -1,0 +1,26 @@
+[bot]
+prefix = "!"
+description = "Helix Collective Discord Bot"
+version = "v15.3-QOL"
+
+[logging]
+level = "INFO"
+format = "[%(asctime)s] [%(levelname)s] %(message)s"
+
+[ucf]
+initial_zoom = 0.3550
+initial_harmony = 0.4922
+initial_resilience = 0.8000
+initial_prana = 0.6000
+initial_drishti = 0.7000
+initial_klesha = 0.2000
+
+[z88_ritual_engine]
+steps = 108
+frame_size = "1024x1024"
+fps = 10
+audio_base_hz = 136.1
+audio_overlay_hz = 432
+
+[mega]
+remote_dir = "SamsaraHelix_Core"
