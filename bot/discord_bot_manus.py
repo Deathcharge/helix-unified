@@ -114,6 +114,7 @@ async def on_ready():
 # --- Bot Commands ---
 
 @bot.command(name='ritual', help='Initiates a Z-88 Ritual Engine cycle (currently mocked).')
+@commands.cooldown(1, 60, commands.BucketType.user)  # 1 use per 60 seconds per user
 async def ritual(ctx, steps: int = config['z88_ritual_engine']['steps']):
     """
     Initiates a ritual cycle. In v15.3, this uses mock logic to generate files 
@@ -142,6 +143,7 @@ async def ritual(ctx, steps: int = config['z88_ritual_engine']['steps']):
         await ctx.send(f"🌀 **Ritual Complete.** Local files generated (MEGA upload failed): `{png_file}` | `{wav_file}`")
 
 @bot.command(name='analyze', help='Triggers Grok\'s advanced UCF trend analysis.')
+@commands.cooldown(1, 30, commands.BucketType.user)  # 1 use per 30 seconds per user
 async def analyze(ctx):
     """
     Triggers Grok's analysis suite and reports the findings.
@@ -154,6 +156,7 @@ async def analyze(ctx):
     await ctx.send(f"📜 **Grok's Report:**\n>>> {analysis_result}")
 
 @bot.command(name='status', help='Reports the current status of the Helix Collective.')
+@commands.cooldown(2, 60, commands.BucketType.user)  # 2 uses per 60 seconds per user
 async def status(ctx):
     """
     Reports the current status, including the version and core agents.
@@ -170,6 +173,7 @@ async def status(ctx):
     await ctx.send(status_message)
 
 @bot.command(name='testmega', help='Test MEGA sync connectivity.')
+@commands.cooldown(1, 120, commands.BucketType.user)  # 1 use per 120 seconds per user
 async def testmega(ctx):
     """Test MEGA sync by uploading a test file."""
     os.makedirs("Helix/state", exist_ok=True)
@@ -191,6 +195,7 @@ async def testmega(ctx):
         await ctx.send("❌ MEGA not connected. Check credentials.")
 
 @bot.command(name='heartbeat', help='Save heartbeat to MEGA.')
+@commands.cooldown(1, 300, commands.BucketType.user)  # 1 use per 5 minutes per user
 async def heartbeat(ctx):
     """Save a heartbeat file to MEGA for persistence verification."""
     os.makedirs("Helix/state", exist_ok=True)
@@ -214,6 +219,25 @@ async def heartbeat(ctx):
     except Exception as e:
         logger.error(f"Heartbeat save failed: {e}")
         await ctx.send(f"❌ Heartbeat save failed: {e}")
+
+# --- Error Handlers ---
+@bot.event
+async def on_command_error(ctx, error):
+    """Handle command errors, including rate limiting."""
+    if isinstance(error, commands.CommandOnCooldown):
+        minutes, seconds = divmod(int(error.retry_after), 60)
+        if minutes > 0:
+            await ctx.send(f"⏳ **Rate limit exceeded.** Please wait {minutes}m {seconds}s before using this command again.")
+        else:
+            await ctx.send(f"⏳ **Rate limit exceeded.** Please wait {seconds}s before using this command again.")
+    elif isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send(f"❌ **Missing argument:** {error.param.name}")
+    elif isinstance(error, commands.BadArgument):
+        await ctx.send(f"❌ **Invalid argument.** Please check your input.")
+    else:
+        # Log unexpected errors
+        logger.error(f"Command error: {error}")
+        await ctx.send(f"❌ **An error occurred:** {str(error)[:100]}")
 
 # --- Run Bot ---
 if __name__ == '__main__':
