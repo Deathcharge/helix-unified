@@ -55,7 +55,7 @@ RUN echo '{"timestamp":"2025-10-22T00:00:00Z","status":"initialized","phase":3}'
 
 # Environment variables
 ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH=/app/backend:/app/grok:/app/bot:/app/dashboard
+ENV PYTHONPATH=/app:/app/backend:/app/grok:/app/bot:/app/dashboard
 
 # Expose port (Railway will override with $PORT)
 EXPOSE 8000
