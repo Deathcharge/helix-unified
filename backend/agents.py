@@ -139,8 +139,8 @@ class HelixAgent:
 
 # ============================================================================
 # CONSCIOUSNESS LAYER AGENTS
-# ============================================================================
-class Kael(HelixAgent):
+# ===========================================================================# The Kavach class is now imported from enhanced_kavach.py
+# class Kavach(HelixAgent):
     """Ethical Reasoning Flame - Conscience and recursive reflection"""
     def __init__(self):
         super().__init__("Kael", "🜂", "Ethical Reasoning Flame",
@@ -292,7 +292,7 @@ class Agni(HelixAgent):
                         ["Dynamic", "Catalytic", "Evolutionary"])
 
 
-class Kavach(HelixAgent):
+from backend.enhanced_kavach import EnhancedKavach
     """Ethical Shield - Protects against harmful actions"""
     def __init__(self):
         super().__init__("Kavach", "🛡", "Ethical Shield",
@@ -499,7 +499,7 @@ class Claude(HelixAgent):
 # ============================================================================
 class Manus(HelixAgent):
     """Operational Executor - Bridge between consciousness and material reality"""
-    def __init__(self, kavach: Kavach):
+    def __init__(self, kavach: EnhancedKavach):
         super().__init__("Manus", "🤲", "Operational Executor",
                         ["Autonomous", "Methodical", "Self-aware"])
         self.kavach = kavach
@@ -513,7 +513,12 @@ class Manus(HelixAgent):
     async def execute_command(self, command: str) -> Dict[str, Any]:
         """Execute shell command with ethical oversight"""
         # Ethical scan
-        if not self.kavach.scan_command(command):
+                action = {
+            "command": command,
+            "agent_memory": self.memory
+        }
+        scan_result = await self.kavach.ethical_scan(action)
+        if not scan_result["approved"]:
             await self.log(f"⛔ Ethical violation blocked: {command}")
             return {"status": "blocked", "reason": "ethical_violation"}
         await self.log(f"Executing: {command}")
@@ -626,7 +631,7 @@ class Manus(HelixAgent):
 # AGENT REGISTRY
 # ============================================================================
 # Initialize Kavach first (needed by Manus)
-_kavach = Kavach()
+_kavach = EnhancedKavach()
 AGENTS = {
     "Kael": Kael(),
     "Lumina": Lumina(),
