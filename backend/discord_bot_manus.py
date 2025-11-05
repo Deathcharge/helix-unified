@@ -286,7 +286,7 @@ async def on_ready():
 
     # Load Image commands (v16.1 - Aion fractal generation via PIL)
     try:
-        from backend.commands.image_commands import ImageCommands
+        from commands.image_commands import ImageCommands
         await bot.add_cog(ImageCommands(bot))
         print("✅ Image commands loaded (!image, !aion, !fractal, !icon)")
     except Exception as e:
@@ -294,7 +294,7 @@ async def on_ready():
 
     # Load Ritual commands (v16.2 - Neti-Neti Harmony)
     try:
-        from backend.commands import ritual_commands
+        from commands import ritual_commands
         bot.add_command(ritual_commands.ritual_command)
         print("✅ Ritual commands loaded (!ritual neti-neti)")
     except Exception as e:
