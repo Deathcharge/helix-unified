@@ -173,27 +173,23 @@ async def execute_command_batch(message):
 
     for cmd in commands:
         try:
-            # Create a fake message object for command processing
-            # This allows us to use the existing command infrastructure
-            ctx = await bot.get_context(message)
+            # Create a fake message with the command content
+            # This lets Discord.py handle argument parsing naturally
+            import copy
+            fake_message = copy.copy(message)
+            fake_message.content = f"!{cmd}"  # Reconstruct full command with prefix
 
-            # Parse the command and arguments
-            parts = cmd.split()
-            cmd_name = parts[0] if parts else cmd
-            args = parts[1:] if len(parts) > 1 else []
+            # Process the fake message through normal command handling
+            # This handles all argument parsing, type conversion, etc.
+            ctx = await bot.get_context(fake_message)
 
-            # Get the command object
-            command = bot.get_command(cmd_name)
-
-            if command is None:
-                await message.channel.send(f"❌ Unknown command: `!{cmd_name}`")
+            if ctx.command is None:
+                await message.channel.send(f"❌ Unknown command: `!{cmd.split()[0]}`")
                 failed += 1
                 continue
 
-            # Invoke the command with arguments
-            # Create a new context with the specific command
-            ctx.command = command
-            await ctx.invoke(command, *args)
+            # Invoke the command (Discord.py handles arguments automatically)
+            await bot.invoke(ctx)
             executed += 1
 
             # Small delay between commands to prevent rate limiting
