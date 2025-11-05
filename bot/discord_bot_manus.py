@@ -25,7 +25,10 @@ from backend.logging_config import setup_logging, get_module_logger
 
 # --- Configuration and Logging Setup ---
 try:
-    config = toml.load('config.toml')
+    # Environment-proof config loading
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    config_path = os.path.join(script_dir, "..", "config.toml")
+    config = toml.load(config_path)
 except FileNotFoundError:
     # Use basic logging for this fatal error
     logging.basicConfig(level=logging.ERROR)
@@ -213,7 +216,9 @@ async def sync(ctx):
     await ctx.send("🌀 **Running ecosystem sync...**")
     
     # Ensure log directory exists
-    log_dir = 'logs'
+    # Environment-proof log directory creation
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    log_dir = os.path.join(script_dir, "..", "logs")
     os.makedirs(log_dir, exist_ok=True)
     log_file = os.path.join(log_dir, 'helix_sync.log')
     
