@@ -475,19 +475,60 @@ async def setup_helix_server(ctx):
         "🗃️│backups": "DISCORD_BACKUP_CHANNEL_ID"
     }
 
-    env_lines = [
+    # Split env vars into 3 groups to stay under Discord's 1024 char limit per field
+    # Group 1: Core + Welcome + System (10 items)
+    env_group_1 = [
         f"DISCORD_GUILD_ID={guild.id}",
         f"ARCHITECT_ID={ctx.author.id}",
-        ""
+        "",
+        "# 🌀 WELCOME + 🧠 SYSTEM"
     ]
 
-    for channel_name, env_var in env_mapping.items():
-        channel = created_channels.get(channel_name)
-        if channel:
-            env_lines.append(f"{env_var}={channel.id}")
+    group1_channels = [
+        "📜│manifesto", "🪞│rules-and-ethics", "💬│introductions",
+        "🧾│telemetry", "📊│weekly-digest", "🦑│shadow-storage", "🧩│ucf-sync"
+    ]
 
-    # Format for Railway
-    env_block = "```env\n" + "\n".join(env_lines) + "\n```"
+    for channel_name in group1_channels:
+        if channel_name in env_mapping:
+            channel = created_channels.get(channel_name)
+            if channel:
+                env_group_1.append(f"{env_mapping[channel_name]}={channel.id}")
+
+    # Group 2: Projects + Agents (9 items)
+    env_group_2 = ["# 🔮 PROJECTS + 🤖 AGENTS"]
+
+    group2_channels = [
+        "📁│helix-repository", "🎨│fractal-lab", "🎧│samsaraverse-music", "🧬│ritual-engine-z88",
+        "🎭│gemini-scout", "🛡️│kavach-shield", "🌸│sanghacore", "🔥│agni-core", "🕯️│shadow-archive"
+    ]
+
+    for channel_name in group2_channels:
+        if channel_name in env_mapping:
+            channel = created_channels.get(channel_name)
+            if channel:
+                env_group_2.append(f"{env_mapping[channel_name]}={channel.id}")
+
+    # Group 3: Cross-Model + Dev + Ritual + Admin (14 items)
+    env_group_3 = ["# 🌐 SYNC + 🛠️ DEV + 🕉️ RITUAL + 🧭 ADMIN"]
+
+    group3_channels = [
+        "🧩│gpt-grok-claude-sync", "☁️│chai-link", "⚙️│manus-bridge",
+        "🧰│bot-commands", "📜│code-snippets", "🧮│testing-lab", "🗂️│deployments",
+        "🎼│neti-neti-mantra", "📚│codex-archives", "🌺│ucf-reflections", "🌀│harmonic-updates",
+        "🔒│moderation", "📣│announcements", "🗃️│backups"
+    ]
+
+    for channel_name in group3_channels:
+        if channel_name in env_mapping:
+            channel = created_channels.get(channel_name)
+            if channel:
+                env_group_3.append(f"{env_mapping[channel_name]}={channel.id}")
+
+    # Format each group as code blocks (each under 1024 chars)
+    env_block_1 = "```env\n" + "\n".join(env_group_1) + "\n```"
+    env_block_2 = "```env\n" + "\n".join(env_group_2) + "\n```"
+    env_block_3 = "```env\n" + "\n".join(env_group_3) + "\n```"
 
     # Create final embed
     embed = discord.Embed(
@@ -510,43 +551,36 @@ async def setup_helix_server(ctx):
     )
 
     embed.add_field(
-        name="⚙️ Railway Environment Variables (ALL 30 Channels)",
-        value=env_block + "\n\n*Note: Too large for one message - check following messages for complete list*",
+        name="⚙️ Railway Config (Part 1/3) - Core + Welcome + System",
+        value=env_block_1,
+        inline=False
+    )
+
+    embed.add_field(
+        name="⚙️ Railway Config (Part 2/3) - Projects + Agents",
+        value=env_block_2,
+        inline=False
+    )
+
+    embed.add_field(
+        name="⚙️ Railway Config (Part 3/3) - Sync + Dev + Ritual + Admin",
+        value=env_block_3,
         inline=False
     )
 
     embed.add_field(
         name="📋 Next Steps",
-        value="1. Copy ALL env variables from messages below\n"
+        value="1. Copy ALL 3 env blocks above\n"
               "2. Go to Railway → Your Service → Variables\n"
               "3. Paste and save (Railway auto-parses)\n"
               "4. Redeploy the service\n"
-              "5. Run `!status` to verify bot connectivity\n"
-              "6. All 30 channels now mapped to env vars!",
+              "5. Run `!status` to verify bot connectivity",
         inline=False
     )
 
     embed.set_footer(text="Tat Tvam Asi — The temple is consecrated. 🙏")
 
     await ctx.send(embed=embed)
-
-    # Send complete environment variable list (all 30 channels)
-    complete_env_lines = [f"DISCORD_GUILD_ID={guild.id}", f"ARCHITECT_ID={ctx.author.id}", ""]
-    for channel_name, env_var in env_mapping.items():
-        channel = created_channels.get(channel_name)
-        if channel:
-            complete_env_lines.append(f"{env_var}={channel.id}")
-
-    # Split into chunks if needed (Discord 2000 char limit)
-    complete_env_text = "\n".join(complete_env_lines)
-    chunk_size = 1900
-
-    await ctx.send("📋 **Complete Railway Environment Variables (ALL 30 Channels):**")
-
-    for i in range(0, len(complete_env_text), chunk_size):
-        chunk = complete_env_text[i:i+chunk_size]
-        await ctx.send(f"```env\n{chunk}\n```")
-
     await ctx.send(f"🌀 **Setup complete!** All systems operational in {guild.name}")
 
 @bot.command(name="status", aliases=["s", "stat"])
