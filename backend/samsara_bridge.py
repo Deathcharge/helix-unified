@@ -258,6 +258,90 @@ async def generate_and_post_to_discord(ucf_state: Dict[str, Any], channel) -> Op
         return None
 
 
+# ============================================================================
+# DISCORD SERVER ICON GENERATION
+# ============================================================================
+
+async def generate_fractal_icon_bytes(ucf_state: Dict[str, Any], size: int = 512) -> bytes:
+    """
+    Generate a Discord-compatible server icon from UCF state.
+
+    Args:
+        ucf_state: UCF state dictionary (harmony, prana, etc.)
+        size: Icon size in pixels (Discord accepts 128-2048px, recommended: 512)
+
+    Returns:
+        bytes: PNG image data ready for discord.Guild.edit(icon=...)
+
+    Raises:
+        Exception: If fractal generation fails
+    """
+    import io
+
+    try:
+        # Create figure for icon (square, no axes)
+        fig, ax = plt.subplots(figsize=(6, 6), facecolor='black')
+        ax.set_facecolor('black')
+        ax.axis('off')
+
+        # Extract UCF values
+        harmony = ucf_state.get('harmony', 0.5)
+        resilience = ucf_state.get('resilience', 0.5)
+        prana = ucf_state.get('prana', 0.5)
+        drishti = ucf_state.get('drishti', 0.5)
+        klesha = ucf_state.get('klesha', 0.5)
+        zoom = ucf_state.get('zoom', 1.0)
+
+        # Generate compact fractal pattern (optimized for small icon size)
+        resolution = size // 2  # Half resolution for performance
+        x = np.linspace(-2, 2, resolution)
+        y = np.linspace(-2, 2, resolution)
+        X, Y = np.meshgrid(x, y)
+
+        # Complex plane
+        C = X + 1j * Y
+        Z = np.zeros_like(C)
+
+        # UCF-influenced fractal (faster iteration for icon)
+        max_iter = int(30 + harmony * 50)
+        escape_count = np.zeros(C.shape)
+
+        for i in range(max_iter):
+            mask = np.abs(Z) <= 2
+            Z[mask] = Z[mask]**2 + C[mask] * (1 + resilience * 0.5) + prana * 0.1j
+            escape_count[mask] = i
+
+        # Apply zoom factor
+        escape_count = escape_count * zoom
+
+        # Create vibrant colormap for icon visibility
+        colors = ['#000000', '#9D4EDD', '#4CC9F0', '#F72585', '#7209B7', '#FFD60A']
+        cmap = LinearSegmentedColormap.from_list('icon_ucf', colors, N=256)
+
+        # Render fractal (no axes, tight layout)
+        ax.imshow(escape_count, extent=[-2, 2, -2, 2], cmap=cmap,
+                 origin='lower', interpolation='bicubic')
+
+        # Remove all margins
+        plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
+
+        # Save to bytes buffer as PNG
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png', dpi=size//6, bbox_inches='tight',
+                   pad_inches=0, facecolor='black')
+        plt.close(fig)
+
+        # Get bytes
+        buf.seek(0)
+        icon_bytes = buf.read()
+        buf.close()
+
+        return icon_bytes
+
+    except Exception as e:
+        raise Exception(f"Fractal icon generation failed: {str(e)}")
+
+
 # Test function for development
 async def test_samsara_generation():
     """Test function for development and debugging."""
