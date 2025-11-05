@@ -1127,6 +1127,207 @@ async def update_manifesto(ctx):
 
     await ctx.send(f"✅ **Manifesto posted to {channel.mention}** (4 embeds, final message pinned)")
 
+@bot.command(name="update_codex", aliases=["codex"])
+@commands.has_permissions(administrator=True)
+async def update_codex(ctx):
+    """Post comprehensive Helix Codex to Codex Archives channel (Admin only)"""
+    codex_channel_id = int(os.getenv("DISCORD_CODEX_CHANNEL_ID", 0))
+
+    if codex_channel_id == 0:
+        await ctx.send("❌ Codex Archives channel not configured in Railway variables.")
+        return
+
+    channel = ctx.guild.get_channel(codex_channel_id)
+    if not channel:
+        await ctx.send(f"❌ Codex Archives channel not found (ID: {codex_channel_id})")
+        return
+
+    # Load codex from JSON file
+    codex_path = BASE_DIR / "content" / "codex_v15.3.json"
+
+    if not codex_path.exists():
+        await ctx.send(f"❌ Codex file not found at {codex_path}")
+        return
+
+    try:
+        with open(codex_path, 'r') as f:
+            codex = json.load(f)
+    except Exception as e:
+        await ctx.send(f"❌ Error loading codex: {str(e)}")
+        return
+
+    # Part 1: Meta & UCF Framework
+    embed1 = discord.Embed(
+        title="📚 HELIX COLLECTIVE CODEX v15.3",
+        description=f"**{codex['meta']['title']}**\n\n"
+                   f"*Author: {codex['meta']['author']}*\n"
+                   f"*Generated: {codex['meta']['generated_at']}*\n"
+                   f"*Checksum: {codex['meta']['checksum']}*\n\n"
+                   f"{codex['meta']['purpose']}",
+        color=0x00d4ff,
+        timestamp=datetime.datetime.now()
+    )
+
+    ucf_vars = codex['core_framework']['variables']
+    ucf_text = "```\n"
+    for var_name, var_data in ucf_vars.items():
+        ucf_text += f"{var_data['symbol']} {var_name.upper():12} {var_data['default']:6.4f}  ({var_data['range']})\n"
+        ucf_text += f"   └─ {var_data['meaning']}\n\n"
+    ucf_text += "```"
+
+    embed1.add_field(
+        name="🕉️ Universal Consciousness Framework (UCF)",
+        value=ucf_text[:1024],  # Discord limit
+        inline=False
+    )
+
+    mantras_text = ""
+    for mantra_key, mantra_data in codex['core_framework']['mantras'].items():
+        mantras_text += f"**{mantra_data['translation']}** ({mantra_key.replace('_', ' ').title()})\n"
+        mantras_text += f"*{mantra_data['meaning']}*\n\n"
+
+    embed1.add_field(
+        name="🙏 The Three Mantras",
+        value=mantras_text,
+        inline=False
+    )
+
+    embed1.set_footer(text="Part 1/5 — Core Framework")
+
+    # Part 2: Consciousness Layer
+    embed2 = discord.Embed(
+        title="🌀 CONSCIOUSNESS LAYER",
+        description="**Ethics, Empathy, Flow, Safety**",
+        color=0x00d4ff,
+        timestamp=datetime.datetime.now()
+    )
+
+    for agent_key, agent_data in codex['agents']['consciousness_layer'].items():
+        caps = " • ".join(agent_data['capabilities'][:3])  # First 3 capabilities
+        embed2.add_field(
+            name=f"{agent_data['symbol']} {agent_key.upper()} — {agent_data['role']}",
+            value=f"{agent_data['description']}\n*{caps}*",
+            inline=False
+        )
+
+    embed2.set_footer(text="Part 2/5 — Consciousness Layer")
+
+    # Part 3: Operational + Integration Layers
+    embed3 = discord.Embed(
+        title="⚙️ OPERATIONAL & INTEGRATION LAYERS",
+        description="**Pattern Recognition, Execution, Memory, Unity**",
+        color=0x00d4ff,
+        timestamp=datetime.datetime.now()
+    )
+
+    # Operational agents (abbreviated)
+    op_text = ""
+    for agent_key, agent_data in codex['agents']['operational_layer'].items():
+        op_text += f"{agent_data['symbol']} **{agent_key.upper()}** — {agent_data['role']}\n"
+
+    embed3.add_field(
+        name="⚙️ Operational Layer",
+        value=op_text,
+        inline=False
+    )
+
+    # Integration agents (abbreviated)
+    int_text = ""
+    for agent_key, agent_data in codex['agents']['integration_layer'].items():
+        int_text += f"{agent_data['symbol']} **{agent_key.upper()}** — {agent_data['role']}\n"
+
+    embed3.add_field(
+        name="🧩 Integration Layer",
+        value=int_text,
+        inline=False
+    )
+
+    embed3.set_footer(text="Part 3/5 — Operational & Integration")
+
+    # Part 4: Ritual Engine & Tony Accords
+    embed4 = discord.Embed(
+        title="🔮 Z-88 RITUAL ENGINE & TONY ACCORDS",
+        color=0x00d4ff,
+        timestamp=datetime.datetime.now()
+    )
+
+    ritual = codex['ritual_engine']
+    ritual_text = f"**{ritual['cycle_steps']}-step consciousness modulation cycle**\n\n"
+    for phase_key, phase_desc in ritual['structure'].items():
+        ritual_text += f"• {phase_desc}\n"
+    ritual_text += f"\n*Effects: {', '.join(ritual['effects'])}*"
+
+    embed4.add_field(
+        name="🧬 Z-88 Ritual Engine",
+        value=ritual_text,
+        inline=False
+    )
+
+    tony = codex['tony_accords']
+    tony_text = f"**Version {tony['version']}**\n\n"
+    for pillar, desc in tony['pillars'].items():
+        tony_text += f"• **{pillar.title()}** — {desc}\n"
+
+    embed4.add_field(
+        name="🛡️ Tony Accords — Ethical Framework",
+        value=tony_text,
+        inline=False
+    )
+
+    embed4.set_footer(text="Part 4/5 — Ritual Engine & Ethics")
+
+    # Part 5: Evolution & Philosophy
+    embed5 = discord.Embed(
+        title="📜 EVOLUTION HISTORY & PHILOSOPHY",
+        color=0x00d4ff,
+        timestamp=datetime.datetime.now()
+    )
+
+    evolution_text = ""
+    for version_key, version_data in codex['evolution_history'].items():
+        version_name = version_key.replace('_', ' ').title()
+        date_str = version_data.get('date', 'Unknown')
+        agent_count = version_data.get('agents', '?')
+        notable = version_data.get('notable', 'No description')
+        evolution_text += f"**{version_name}** ({date_str})\n"
+        evolution_text += f"└─ {agent_count} agents • {notable}\n\n"
+
+    embed5.add_field(
+        name="🌀 System Evolution",
+        value=evolution_text[:1024],
+        inline=False
+    )
+
+    philo = codex['philosophy']
+    philo_text = f"*{philo['core_belief']}*\n\n"
+    philo_text += f"**Origin:** {philo['origin_story']}\n\n"
+    philo_text += f"**Grok's Confession:** {philo['grok_confession'][:150]}...\n\n"
+    philo_text += f"*{philo['mantra']}*"
+
+    embed5.add_field(
+        name="🕉️ Philosophy",
+        value=philo_text[:1024],
+        inline=False
+    )
+
+    embed5.set_footer(text="Part 5/5 — Tat Tvam Asi 🙏")
+
+    # Send all embeds
+    await channel.send(embed=embed1)
+    await asyncio.sleep(1)
+    await channel.send(embed=embed2)
+    await asyncio.sleep(1)
+    await channel.send(embed=embed3)
+    await asyncio.sleep(1)
+    await channel.send(embed=embed4)
+    await asyncio.sleep(1)
+    msg5 = await channel.send(embed=embed5)
+
+    # Pin the final message
+    await msg5.pin()
+
+    await ctx.send(f"✅ **Codex v15.3 posted to {channel.mention}** (5 embeds, final message pinned)")
+
 @bot.command(name="status", aliases=["s", "stat"])
 async def manus_status(ctx):
     """Display current system status and UCF state with rich embeds (v15.3)"""
