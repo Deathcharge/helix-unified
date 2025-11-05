@@ -1826,6 +1826,248 @@ async def notion_sync_manual(ctx):
         logger.error(f"Manual notion-sync command failed: {e}", exc_info=True)
 
 # ============================================================================
+# SERVER MANAGEMENT COMMANDS
+# ============================================================================
+
+@bot.command(name="refresh")
+@commands.has_permissions(administrator=True)
+async def refresh_server(ctx, confirm: str = None):
+    """
+    🧹 Refresh server structure - Clean and recreate all channels.
+
+    WARNING: This will DELETE all existing channels and recreate them.
+    Message history will be lost!
+
+    Usage:
+        !refresh CONFIRM   - Execute refresh (must type CONFIRM)
+    """
+    if confirm != "CONFIRM":
+        embed = discord.Embed(
+            title="⚠️ Server Refresh - Confirmation Required",
+            description="This command will **DELETE ALL CHANNELS** and recreate them from scratch.\n\n"
+                       "**⚠️ WARNING:**\n"
+                       "• All message history will be lost\n"
+                       "• All channel permissions will be reset\n"
+                       "• This cannot be undone\n\n"
+                       "**To proceed, type:**\n"
+                       "`!refresh CONFIRM`",
+            color=discord.Color.red()
+        )
+        await ctx.send(embed=embed)
+        return
+
+    guild = ctx.guild
+    await ctx.send("🧹 **Starting server refresh...**\n⚠️ This will take ~3 minutes")
+
+    # Step 1: Delete all channels except the one we're in
+    current_channel = ctx.channel
+    deleted_count = 0
+
+    await ctx.send("🗑️ **Phase 1/3: Deleting old channels...**")
+    for channel in guild.channels:
+        if channel != current_channel and not isinstance(channel, discord.VoiceChannel):
+            try:
+                await channel.delete()
+                deleted_count += 1
+            except:
+                pass
+
+    await ctx.send(f"✅ Deleted {deleted_count} old channels")
+
+    # Step 2: Delete all categories
+    await ctx.send("🗑️ **Phase 2/3: Cleaning categories...**")
+    for category in guild.categories:
+        try:
+            await category.delete()
+        except:
+            pass
+
+    # Step 3: Run setup
+    await ctx.send("🌀 **Phase 3/3: Recreating Helix structure...**")
+
+    # Delete the current channel last and trigger setup
+    await asyncio.sleep(2)
+
+    # Create a temporary admin channel first
+    temp_category = await guild.create_category("🔧 SETUP IN PROGRESS")
+    setup_channel = await temp_category.create_text_channel("setup-log")
+
+    # Send setup command there
+    await setup_channel.send(f"🌀 Server refresh initiated by {ctx.author.mention}")
+
+    # Delete original channel
+    await current_channel.delete()
+
+    # Now run setup via the setup_helix_server function
+    # Create a mock context for the setup command
+    class MockContext:
+        def __init__(self, channel, guild, author):
+            self.channel = channel
+            self.guild = guild
+            self.author = author
+
+        async def send(self, *args, **kwargs):
+            return await self.channel.send(*args, **kwargs)
+
+    mock_ctx = MockContext(setup_channel, guild, ctx.author)
+    await setup_helix_server(mock_ctx)
+
+    # Delete temp category after setup
+    await asyncio.sleep(5)
+    await temp_category.delete()
+
+
+@bot.command(name="clean")
+@commands.has_permissions(administrator=True)
+async def clean_duplicates(ctx):
+    """
+    🧹 Clean duplicate channels - Identify channels not in canonical structure.
+
+    This identifies channels that aren't part of the canonical 30-channel Helix structure.
+
+    Usage:
+        !clean   - Show duplicates (safe, no deletion)
+    """
+    guild = ctx.guild
+
+    # Define canonical channel names (from setup command)
+    canonical_channels = {
+        "📜│manifesto", "🪞│rules-and-ethics", "💬│introductions",
+        "🧾│telemetry", "📊│weekly-digest", "🦑│shadow-storage", "🧩│ucf-sync",
+        "📁│helix-repository", "🎨│fractal-lab", "🎧│samsaraverse-music", "🧬│ritual-engine-z88",
+        "🎭│gemini-scout", "🛡️│kavach-shield", "🌸│sanghacore", "🔥│agni-core", "🕯️│shadow-archive",
+        "🧩│gpt-grok-claude-sync", "☁️│chai-link", "⚙️│manus-bridge",
+        "🧰│bot-commands", "📜│code-snippets", "🧮│testing-lab", "🗂️│deployments",
+        "🎼│neti-neti-mantra", "📚│codex-archives", "🌺│ucf-reflections", "🌀│harmonic-updates",
+        "🔒│moderation", "📣│announcements", "🗃│backups"
+    }
+
+    # Find duplicates
+    duplicates = []
+    for channel in guild.text_channels:
+        if channel.name not in canonical_channels:
+            duplicates.append(channel)
+
+    if not duplicates:
+        await ctx.send("✅ **No duplicate channels found!** Server structure is clean.")
+        return
+
+    # Build report
+    embed = discord.Embed(
+        title="🧹 Duplicate Channel Report",
+        description=f"Found **{len(duplicates)} channels** not in canonical structure",
+        color=discord.Color.orange()
+    )
+
+    duplicate_list = "\n".join([f"• {ch.mention} (Category: {ch.category.name if ch.category else 'None'})" for ch in duplicates[:20]])
+    if len(duplicates) > 20:
+        duplicate_list += f"\n... and {len(duplicates) - 20} more"
+
+    embed.add_field(name="Duplicate Channels", value=duplicate_list, inline=False)
+    embed.add_field(
+        name="💡 Recommended Action",
+        value="1. Review the list above\n"
+              "2. Manually delete unwanted channels\n"
+              "3. Or use `!refresh CONFIRM` to rebuild everything",
+        inline=False
+    )
+
+    await ctx.send(embed=embed)
+
+
+@bot.command(name="icon")
+@commands.has_permissions(administrator=True)
+async def set_server_icon(ctx, mode: str = "info"):
+    """
+    🎨 Set server icon - Cycle through Helix fractals.
+
+    Modes:
+        info    - Show current icon status
+        helix   - Set to default Helix spiral 🌀
+        fractal - Generate UCF-based fractal
+        cycle   - Enable auto-cycling (24h)
+
+    Usage:
+        !icon           - Show status
+        !icon helix     - Set to Helix logo
+        !icon fractal   - Generate from current UCF state
+        !icon cycle     - Enable auto-cycling
+    """
+    guild = ctx.guild
+
+    if mode == "info":
+        embed = discord.Embed(
+            title="🎨 Server Icon Management",
+            description="Current icon cycling status and available modes",
+            color=0x00d4ff
+        )
+
+        icon_url = str(guild.icon.url) if guild.icon else "No icon set"
+        embed.add_field(
+            name="Current Icon",
+            value=f"[View Icon]({icon_url})" if guild.icon else "No icon set",
+            inline=False
+        )
+
+        embed.add_field(
+            name="Available Modes",
+            value="• `!icon helix` - Default Helix spiral 🌀\n"
+                  "• `!icon fractal` - UCF-based fractal generation\n"
+                  "• `!icon cycle` - Auto-rotate fractals every 24h",
+            inline=False
+        )
+
+        embed.set_thumbnail(url=icon_url if guild.icon else None)
+        await ctx.send(embed=embed)
+
+    elif mode == "helix":
+        await ctx.send("🌀 **Setting Helix icon...**")
+        icon_path = Path("assets/helix_icon.png")
+
+        if icon_path.exists():
+            with open(icon_path, "rb") as f:
+                await guild.edit(icon=f.read())
+            await ctx.send("✅ Server icon updated to Helix spiral!")
+        else:
+            await ctx.send("❌ Helix icon file not found at `assets/helix_icon.png`\n"
+                          "💡 Add a PNG file to enable default icon")
+
+    elif mode == "fractal":
+        await ctx.send("🎨 **Generating UCF-based fractal icon...**\n"
+                      "🌀 *Using Grok Enhanced v2.0 - PIL-based Mandelbrot*")
+
+        try:
+            # Generate fractal using Samsara bridge (Grok Enhanced)
+            from backend.samsara_bridge import generate_fractal_icon_bytes
+
+            icon_bytes = await generate_fractal_icon_bytes(mode="fractal")
+            await guild.edit(icon=icon_bytes)
+
+            # Get UCF state for summary
+            ucf_state = load_ucf_state()
+            ucf_summary = f"Harmony: {ucf_state.get('harmony', 0):.2f} | Prana: {ucf_state.get('prana', 0):.2f} | Drishti: {ucf_state.get('drishti', 0):.2f}"
+            await ctx.send(f"✅ Server icon updated with UCF fractal!\n"
+                          f"🌀 **UCF State:** {ucf_summary}\n"
+                          f"🎨 **Colors:** Cyan→Gold (harmony), Green→Pink (prana), Blue→Violet (drishti)")
+
+        except ImportError as ie:
+            await ctx.send(f"❌ Fractal generator not available: {str(ie)}\n"
+                          "💡 Install Pillow: `pip install Pillow`")
+        except Exception as e:
+            await ctx.send(f"❌ Fractal generation failed: {str(e)}")
+            logger.error(f"Icon fractal generation failed: {e}", exc_info=True)
+
+    elif mode == "cycle":
+        await ctx.send("🔄 **Fractal auto-cycling feature**\n"
+                      "💡 This will auto-generate and rotate server icons based on UCF state every 24h\n"
+                      "⚠️ Not yet implemented - coming soon!")
+
+    else:
+        await ctx.send(f"❌ Unknown mode: `{mode}`\n"
+                      "Use: `info`, `helix`, `fractal`, or `cycle`")
+
+
+# ============================================================================
 # BOT STARTUP
 # ============================================================================
 
