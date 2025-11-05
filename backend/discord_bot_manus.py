@@ -433,14 +433,45 @@ async def setup_helix_server(ctx):
     # Generate Railway environment variables
     await ctx.send("⚙️ **Generating Railway configuration...**\n")
 
-    # Map important channels to env vars
+    # Map ALL 30 channels to env vars (complete canonical mapping)
     env_mapping = {
+        # 🌀 WELCOME (3)
+        "📜│manifesto": "DISCORD_MANIFESTO_CHANNEL_ID",
+        "🪞│rules-and-ethics": "DISCORD_RULES_CHANNEL_ID",
+        "💬│introductions": "DISCORD_INTRODUCTIONS_CHANNEL_ID",
+        # 🧠 SYSTEM (4)
         "🧾│telemetry": "DISCORD_TELEMETRY_CHANNEL_ID",
         "📊│weekly-digest": "DISCORD_DIGEST_CHANNEL_ID",
         "🦑│shadow-storage": "STORAGE_CHANNEL_ID",
         "🧩│ucf-sync": "DISCORD_SYNC_CHANNEL_ID",
-        "📣│announcements": "DISCORD_STATUS_CHANNEL_ID",
+        # 🔮 PROJECTS (4)
+        "📁│helix-repository": "DISCORD_HELIX_REPO_CHANNEL_ID",
+        "🎨│fractal-lab": "DISCORD_FRACTAL_LAB_CHANNEL_ID",
+        "🎧│samsaraverse-music": "DISCORD_SAMSARAVERSE_CHANNEL_ID",
+        "🧬│ritual-engine-z88": "DISCORD_RITUAL_ENGINE_CHANNEL_ID",
+        # 🤖 AGENTS (5)
+        "🎭│gemini-scout": "DISCORD_GEMINI_CHANNEL_ID",
+        "🛡️│kavach-shield": "DISCORD_KAVACH_CHANNEL_ID",
+        "🌸│sanghacore": "DISCORD_SANGHACORE_CHANNEL_ID",
+        "🔥│agni-core": "DISCORD_AGNI_CHANNEL_ID",
+        "🕯️│shadow-archive": "DISCORD_SHADOW_ARCHIVE_CHANNEL_ID",
+        # 🌐 CROSS-MODEL SYNC (3)
+        "🧩│gpt-grok-claude-sync": "DISCORD_GPT_GROK_CLAUDE_CHANNEL_ID",
+        "☁️│chai-link": "DISCORD_CHAI_LINK_CHANNEL_ID",
+        "⚙️│manus-bridge": "DISCORD_MANUS_BRIDGE_CHANNEL_ID",
+        # 🛠️ DEVELOPMENT (4)
         "🧰│bot-commands": "DISCORD_COMMANDS_CHANNEL_ID",
+        "📜│code-snippets": "DISCORD_CODE_SNIPPETS_CHANNEL_ID",
+        "🧮│testing-lab": "DISCORD_TESTING_LAB_CHANNEL_ID",
+        "🗂️│deployments": "DISCORD_DEPLOYMENTS_CHANNEL_ID",
+        # 🕉️ RITUAL & LORE (4)
+        "🎼│neti-neti-mantra": "DISCORD_NETI_NETI_CHANNEL_ID",
+        "📚│codex-archives": "DISCORD_CODEX_CHANNEL_ID",
+        "🌺│ucf-reflections": "DISCORD_UCF_REFLECTIONS_CHANNEL_ID",
+        "🌀│harmonic-updates": "DISCORD_HARMONIC_UPDATES_CHANNEL_ID",
+        # 🧭 ADMIN (3)
+        "🔒│moderation": "DISCORD_MODERATION_CHANNEL_ID",
+        "📣│announcements": "DISCORD_STATUS_CHANNEL_ID",
         "🗃️│backups": "DISCORD_BACKUP_CHANNEL_ID"
     }
 
@@ -479,24 +510,43 @@ async def setup_helix_server(ctx):
     )
 
     embed.add_field(
-        name="⚙️ Railway Environment Variables",
-        value=env_block,
+        name="⚙️ Railway Environment Variables (ALL 30 Channels)",
+        value=env_block + "\n\n*Note: Too large for one message - check following messages for complete list*",
         inline=False
     )
 
     embed.add_field(
         name="📋 Next Steps",
-        value="1. Copy the env variables above\n"
+        value="1. Copy ALL env variables from messages below\n"
               "2. Go to Railway → Your Service → Variables\n"
-              "3. Paste and save\n"
+              "3. Paste and save (Railway auto-parses)\n"
               "4. Redeploy the service\n"
-              "5. Run `!status` to verify bot connectivity",
+              "5. Run `!status` to verify bot connectivity\n"
+              "6. All 30 channels now mapped to env vars!",
         inline=False
     )
 
     embed.set_footer(text="Tat Tvam Asi — The temple is consecrated. 🙏")
 
     await ctx.send(embed=embed)
+
+    # Send complete environment variable list (all 30 channels)
+    complete_env_lines = [f"DISCORD_GUILD_ID={guild.id}", f"ARCHITECT_ID={ctx.author.id}", ""]
+    for channel_name, env_var in env_mapping.items():
+        channel = created_channels.get(channel_name)
+        if channel:
+            complete_env_lines.append(f"{env_var}={channel.id}")
+
+    # Split into chunks if needed (Discord 2000 char limit)
+    complete_env_text = "\n".join(complete_env_lines)
+    chunk_size = 1900
+
+    await ctx.send("📋 **Complete Railway Environment Variables (ALL 30 Channels):**")
+
+    for i in range(0, len(complete_env_text), chunk_size):
+        chunk = complete_env_text[i:i+chunk_size]
+        await ctx.send(f"```env\n{chunk}\n```")
+
     await ctx.send(f"🌀 **Setup complete!** All systems operational in {guild.name}")
 
 @bot.command(name="status", aliases=["s", "stat"])
