@@ -20,6 +20,10 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any
 
 # Setup logging
+# Create logs directory if it doesn't exist
+import os
+os.makedirs('logs', exist_ok=True)
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
