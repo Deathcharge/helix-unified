@@ -15,11 +15,19 @@ async def ritual_command(ctx, mode: str = "z88"):
         await ctx.send("`Phase 4: GROUNDING` — Harmony restored")
 
         # Load UCF
-        with open("Helix/state/ucf_state.json") as f:
-            ucf = json.load(f)
-        ucf["harmony"] = min(1.0, ucf["harmony"] + 0.3)
-        json.dump(ucf, open("Helix/state/ucf_state.json", "w"), indent=2)
+        try:
+            with open("Helix/state/ucf_state.json") as f:
+                ucf = json.load(f)
 
-        await ctx.send(f"**HARMONY RESTORED** → `harmony={ucf['harmony']:.3f}`")
+            # Ensure harmony is numeric (handle string values)
+            current_harmony = float(ucf.get("harmony", 0))
+            ucf["harmony"] = min(1.0, current_harmony + 0.3)
+
+            with open("Helix/state/ucf_state.json", "w") as f:
+                json.dump(ucf, f, indent=2)
+
+            await ctx.send(f"**HARMONY RESTORED** → `harmony={ucf['harmony']:.3f}`")
+        except Exception as e:
+            await ctx.send(f"⚠️ UCF update error: {e}")
     else:
         await ctx.send("Use: `!ritual neti-neti` or `!ritual z88`")
