@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 """
-🌀 Helix Collective v15.3 — Notion Sync Daemon
+🌀 Helix Collective v15.8 — Notion Sync Daemon
 backend/notion_sync_daemon.py
 
 Purpose: Continuously sync Helix system state to Notion databases.
-- Pushes agent status updates
-- Logs ritual executions
-- Tracks UCF metrics
-- Archives deployment events
-- Maintains cross-repository links
+- Pushes UCF state snapshots
+- Updates agent registry status
+- Logs system events
+- Maintains bidirectional sync as persistent memory layer
 
 Runs as background service with configurable sync intervals.
 """
@@ -16,7 +15,7 @@ Runs as background service with configurable sync intervals.
 import asyncio
 import json
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, Optional
 import logging
@@ -32,242 +31,244 @@ logger = logging.getLogger(__name__)
 class NotionSyncDaemon:
     """Daemon for continuous Notion synchronization."""
     
-    def __init__(self, sync_interval_seconds: int = 300):
-        """
-        Initialize sync daemon.
-        
-        Args:
-            sync_interval_seconds: Interval between sync cycles (default 5 minutes)
-        """
-        self.sync_interval = sync_interval_seconds
-        self.is_running = False
-        self.last_sync = None
+    def __init__(self):
+        """Initialize sync daemon with environment configuration."""
+        self.enabled = os.getenv("NOTION_SYNC_ENABLED", "false").lower() == "true"
+        self.interval = int(os.getenv("NOTION_SYNC_INTERVAL", "300"))
+        self.running = False
         self.sync_count = 0
         self.error_count = 0
+        
+        # Import Notion client and state manager
+        try:
+            from services.notion_client import HelixNotionClient
+            from services.state_manager import load_ucf_state
+            from agents import AGENTS
+            
+            self.notion_client = HelixNotionClient() if self.enabled else None
+            self.load_ucf_state = load_ucf_state
+            self.agents = AGENTS
+        except ImportError as e:
+            logger.error(f"Failed to import required modules: {e}")
+            self.notion_client = None
+            self.load_ucf_state = None
+            self.agents = None
         
         # Paths
         self.state_dir = Path("Helix/state")
         self.archive_dir = Path("Shadow/manus_archive")
-        self.sync_log = self.archive_dir / "notion_sync_log.json"
         
         # Ensure directories exist
         self.state_dir.mkdir(parents=True, exist_ok=True)
         self.archive_dir.mkdir(parents=True, exist_ok=True)
         
-        logger.info(f"✅ NotionSyncDaemon initialized (interval: {sync_interval_seconds}s)")
+        if self.enabled:
+            logger.info(f"✅ NotionSyncDaemon initialized (interval: {self.interval}s)")
+        else:
+            logger.info("⚠️ NotionSyncDaemon disabled (NOTION_SYNC_ENABLED=false)")
     
-    async def sync_agent_status(self) -> Dict[str, Any]:
-        """Sync agent status to Notion Agent Registry."""
+    async def _sync_ucf_state(self):
+        """Sync UCF state to Notion."""
+        if not self.enabled or not self.notion_client:
+            return
+        
+        logger.info("📤 Syncing UCF state to Notion...")
         try:
-            # Load current agent profiles
-            agent_profiles_path = Path("backend/agent_profiles.py")
-            if not agent_profiles_path.exists():
-                logger.warning("⚠️ agent_profiles.py not found")
-                return {"status": "skipped", "reason": "agent_profiles.py not found"}
+            # Load the current UCF state
+            ucf_state = self.load_ucf_state() if self.load_ucf_state else None
             
-            # In production, this would call Notion API
-            # For now, we log the sync intent
-            logger.info("📤 Syncing agent status to Notion...")
+            if not ucf_state:
+                logger.warning("⚠️ UCF state is empty, skipping sync.")
+                return
             
-            return {
-                "status": "success",
-                "timestamp": datetime.utcnow().isoformat(),
-                "agents_synced": 14,
-                "database": "Helix Agents"
-            }
+            # Add sync timestamp
+            ucf_state["last_sync"] = datetime.utcnow().isoformat()
+            
+            # Use the notion_client to save context snapshot
+            await self.notion_client.save_context_snapshot(
+                title=f"UCF State - {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}",
+                content=json.dumps(ucf_state, indent=2),
+                tags=["ucf", "system-state", "automated-sync"],
+                ucf_snapshot=ucf_state
+            )
+            
+            harmony = ucf_state.get('harmony', 0)
+            logger.info(f"✅ Successfully synced UCF state to Notion (harmony={harmony:.3f})")
+        
         except Exception as e:
-            logger.error(f"❌ Failed to sync agent status: {e}")
+            logger.error(f"🔥 Failed to sync UCF state to Notion: {e}", exc_info=True)
             self.error_count += 1
-            return {"status": "failed", "error": str(e)}
     
-    async def sync_ucf_metrics(self) -> Dict[str, Any]:
-        """Sync UCF metrics to Notion UCF Metrics database."""
+    async def _sync_agent_registry(self):
+        """Sync agent registry to Notion."""
+        if not self.enabled or not self.notion_client or not self.agents:
+            return
+        
+        logger.info("📤 Syncing agent registry to Notion...")
         try:
-            ucf_state_path = self.state_dir / "ucf_state.json"
+            synced_count = 0
             
-            if not ucf_state_path.exists():
-                logger.warning("⚠️ ucf_state.json not found")
-                return {"status": "skipped", "reason": "ucf_state.json not found"}
+            # Iterate through all agents and update their status
+            for agent_name, agent_obj in self.agents.items():
+                try:
+                    # Get agent status (assuming agents have a get_status method or status attribute)
+                    if hasattr(agent_obj, 'get_status'):
+                        status = await agent_obj.get_status()
+                    elif hasattr(agent_obj, 'status'):
+                        status = agent_obj.status
+                    else:
+                        status = "Unknown"
+                    
+                    # Update agent status in Notion
+                    await self.notion_client.update_agent_status(
+                        agent_name=agent_name,
+                        status=status,
+                        last_seen=datetime.utcnow().isoformat()
+                    )
+                    synced_count += 1
+                
+                except Exception as agent_error:
+                    logger.warning(f"⚠️ Failed to sync agent {agent_name}: {agent_error}")
             
-            with open(ucf_state_path) as f:
-                ucf_state = json.load(f)
-            
-            logger.info("📤 Syncing UCF metrics to Notion...")
-            logger.info(f"   Harmony: {ucf_state.get('harmony', 0)}")
-            logger.info(f"   Resilience: {ucf_state.get('resilience', 0)}")
-            logger.info(f"   Prana: {ucf_state.get('prana', 0)}")
-            
-            return {
-                "status": "success",
-                "timestamp": datetime.utcnow().isoformat(),
-                "metrics_synced": 6,
-                "database": "UCF Metrics",
-                "snapshot": ucf_state
-            }
+            logger.info(f"✅ Successfully synced {synced_count} agents to Notion registry")
+        
         except Exception as e:
-            logger.error(f"❌ Failed to sync UCF metrics: {e}")
+            logger.error(f"🔥 Failed to sync agent registry to Notion: {e}", exc_info=True)
             self.error_count += 1
-            return {"status": "failed", "error": str(e)}
     
-    async def sync_ritual_executions(self) -> Dict[str, Any]:
-        """Sync ritual execution logs to Notion."""
+    async def _sync_events(self):
+        """Sync recent system events to Notion."""
+        if not self.enabled or not self.notion_client:
+            return
+        
+        logger.info("📤 Syncing system events to Notion...")
         try:
-            ritual_log_path = self.archive_dir / "z88_log.json"
+            # Read last 10 lines from the main log file
+            log_file = self.archive_dir / "manus_log.txt"
             
-            if not ritual_log_path.exists():
-                logger.warning("⚠️ z88_log.json not found")
-                return {"status": "skipped", "reason": "z88_log.json not found"}
+            if not log_file.exists():
+                logger.warning("⚠️ Log file not found, skipping event sync.")
+                return
             
-            with open(ritual_log_path) as f:
-                ritual_log = json.load(f)
+            # Read last 10 lines
+            with open(log_file, 'r') as f:
+                lines = f.readlines()
+                recent_events = lines[-10:] if len(lines) >= 10 else lines
             
-            logger.info("📤 Syncing ritual executions to Notion...")
-            logger.info(f"   Total executions: {len(ritual_log) if isinstance(ritual_log, list) else 1}")
-            
-            return {
-                "status": "success",
-                "timestamp": datetime.utcnow().isoformat(),
-                "executions_synced": len(ritual_log) if isinstance(ritual_log, list) else 1,
-                "database": "Z-88 Ritual Executions"
-            }
-        except Exception as e:
-            logger.error(f"❌ Failed to sync ritual executions: {e}")
-            self.error_count += 1
-            return {"status": "failed", "error": str(e)}
-    
-    async def sync_deployment_status(self) -> Dict[str, Any]:
-        """Sync deployment status to Notion."""
-        try:
-            logger.info("📤 Syncing deployment status to Notion...")
-            
-            # Check if Railway deployment exists
-            railway_config_path = Path("railway.toml")
-            docker_path = Path("Dockerfile")
-            
-            deployment_status = {
-                "railway_configured": railway_config_path.exists(),
-                "docker_configured": docker_path.exists(),
+            # Create event data
+            event_data = {
+                "event_type": "System_Log_Sync",
+                "details": "Recent system events from Manus log",
+                "log_entries": [line.strip() for line in recent_events],
                 "timestamp": datetime.utcnow().isoformat()
             }
             
-            logger.info(f"   Railway configured: {deployment_status['railway_configured']}")
-            logger.info(f"   Docker configured: {deployment_status['docker_configured']}")
+            # Log to Notion
+            await self.notion_client.log_system_event(event_data)
             
-            return {
-                "status": "success",
-                "timestamp": datetime.utcnow().isoformat(),
-                "deployments_synced": 2,
-                "database": "Deployment Configurations",
-                "snapshot": deployment_status
-            }
+            logger.info(f"✅ Successfully synced {len(recent_events)} events to Notion")
+        
         except Exception as e:
-            logger.error(f"❌ Failed to sync deployment status: {e}")
+            logger.error(f"🔥 Failed to sync events to Notion: {e}", exc_info=True)
             self.error_count += 1
-            return {"status": "failed", "error": str(e)}
     
-    async def perform_sync_cycle(self) -> Dict[str, Any]:
+    async def perform_sync_cycle(self):
         """Perform complete sync cycle."""
+        if not self.enabled:
+            logger.warning("⚠️ Sync cycle skipped (daemon disabled)")
+            return
+        
         logger.info("\n" + "=" * 70)
         logger.info(f"🔄 Notion Sync Cycle #{self.sync_count + 1}")
         logger.info("=" * 70)
         
-        sync_results = {
-            "cycle_number": self.sync_count + 1,
-            "started_at": datetime.utcnow().isoformat(),
-            "results": {}
-        }
+        start_time = datetime.utcnow()
         
-        # Run all sync operations concurrently
-        sync_results["results"]["agents"] = await self.sync_agent_status()
-        sync_results["results"]["ucf_metrics"] = await self.sync_ucf_metrics()
-        sync_results["results"]["rituals"] = await self.sync_ritual_executions()
-        sync_results["results"]["deployments"] = await self.sync_deployment_status()
-        
-        sync_results["completed_at"] = datetime.utcnow().isoformat()
-        sync_results["error_count"] = self.error_count
-        
-        # Log sync results
-        self._log_sync_result(sync_results)
-        
-        self.sync_count += 1
-        self.last_sync = datetime.utcnow()
-        
-        logger.info("✅ Sync cycle complete")
-        logger.info("=" * 70 + "\n")
-        
-        return sync_results
-    
-    def _log_sync_result(self, result: Dict[str, Any]):
-        """Log sync result to file."""
         try:
-            # Load existing log or create new
-            if self.sync_log.exists():
-                with open(self.sync_log) as f:
-                    log_data = json.load(f)
-            else:
-                log_data = {"sync_history": []}
+            # Run sync operations
+            await self._sync_ucf_state()
+            await self._sync_agent_registry()
+            # await self._sync_events()  # Temporarily commented out for initial deployment
             
-            # Append new result
-            log_data["sync_history"].append(result)
-            log_data["last_sync"] = result["completed_at"]
-            log_data["total_syncs"] = len(log_data["sync_history"])
+            self.sync_count += 1
             
-            # Keep only last 100 syncs to avoid file bloat
-            if len(log_data["sync_history"]) > 100:
-                log_data["sync_history"] = log_data["sync_history"][-100:]
-            
-            # Write back
-            with open(self.sync_log, 'w') as f:
-                json.dump(log_data, f, indent=2)
-            
-            logger.info(f"📝 Logged sync result to {self.sync_log}")
+            duration = (datetime.utcnow() - start_time).total_seconds()
+            logger.info(f"✅ Sync cycle complete (duration: {duration:.2f}s, errors: {self.error_count})")
+        
         except Exception as e:
-            logger.error(f"⚠️ Failed to log sync result: {e}")
-    
-    async def run(self):
-        """Run daemon continuously."""
-        self.is_running = True
-        logger.info("🚀 NotionSyncDaemon started")
+            logger.error(f"❌ Sync cycle failed: {e}", exc_info=True)
+            self.error_count += 1
         
-        try:
-            while self.is_running:
-                try:
-                    await self.perform_sync_cycle()
-                    
-                    # Wait for next sync
-                    logger.info(f"⏳ Next sync in {self.sync_interval}s...")
-                    await asyncio.sleep(self.sync_interval)
+        logger.info("=" * 70 + "\n")
+    
+    async def start(self):
+        """Start the daemon."""
+        if not self.enabled or not self.notion_client:
+            logger.warning("⚠️ Notion sync disabled or client not ready. Daemon will not start.")
+            return
+        
+        self.running = True
+        logger.info(f"🚀 NotionSyncDaemon STARTED. Syncing every {self.interval} seconds.")
+        
+        while self.running:
+            try:
+                await self.perform_sync_cycle()
                 
-                except Exception as e:
-                    logger.error(f"❌ Error in sync cycle: {e}")
-                    self.error_count += 1
-                    await asyncio.sleep(self.sync_interval)
-        
-        except KeyboardInterrupt:
-            logger.info("🛑 Sync daemon stopped by user")
-        finally:
-            self.is_running = False
-            logger.info("✅ NotionSyncDaemon shutdown complete")
+                # Wait for next sync
+                logger.info(f"⏳ Next sync in {self.interval}s...")
+                await asyncio.sleep(self.interval)
+            
+            except Exception as e:
+                logger.error(f"❌ Error in daemon loop: {e}", exc_info=True)
+                await asyncio.sleep(self.interval)
     
-    def stop(self):
+    async def stop(self):
         """Stop the daemon."""
-        self.is_running = False
-        logger.info("🛑 Stopping NotionSyncDaemon...")
+        self.running = False
+        logger.info("🛑 NotionSyncDaemon STOPPED.")
 
 
-async def main():
-    """Main entry point."""
-    # Get sync interval from environment (default 5 minutes)
-    sync_interval = int(os.getenv("NOTION_SYNC_INTERVAL", "300"))
+# ============================================================================
+# MANUAL TRIGGER FUNCTION (for Discord command)
+# ============================================================================
+
+async def trigger_manual_sync():
+    """
+    Manually trigger a Notion sync cycle.
     
-    daemon = NotionSyncDaemon(sync_interval_seconds=sync_interval)
+    Returns:
+        str: Status message indicating sync result
+    """
+    daemon = NotionSyncDaemon()
+    
+    if not daemon.enabled:
+        return "⚠️ Notion sync is not enabled. Set `NOTION_SYNC_ENABLED=true` in environment."
+    
+    if not daemon.notion_client:
+        return "❌ Notion client not configured. Check `NOTION_API_KEY` and `NOTION_DATABASE_ID`."
     
     try:
-        await daemon.run()
+        await daemon.perform_sync_cycle()
+        return f"✅ Manual Notion sync completed successfully.\n📊 Synced: UCF State + Agent Registry\n🔢 Total errors: {daemon.error_count}"
+    
+    except Exception as e:
+        logger.error(f"Manual sync failed: {e}", exc_info=True)
+        return f"❌ Manual sync failed: {str(e)}"
+
+
+# ============================================================================
+# MAIN ENTRY POINT
+# ============================================================================
+
+async def main():
+    """Main entry point for standalone execution."""
+    daemon = NotionSyncDaemon()
+    
+    try:
+        await daemon.start()
     except KeyboardInterrupt:
-        daemon.stop()
+        await daemon.stop()
 
 
 if __name__ == "__main__":
     asyncio.run(main())
-

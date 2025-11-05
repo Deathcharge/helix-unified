@@ -1738,6 +1738,36 @@ async def agent_command(ctx, agent_name: str = None):
     await ctx.send(embed=embed)
 
 # ============================================================================
+# NOTION SYNC COMMAND (v15.8)
+# ============================================================================
+
+from notion_sync_daemon import trigger_manual_sync
+
+@bot.command(name="notion-sync")
+@commands.has_permissions(administrator=True)
+async def notion_sync_manual(ctx):
+    """Manually triggers the Notion sync for UCF State and Agent Registry.
+    
+    Usage:
+        !notion-sync
+    
+    Requires: Administrator permissions
+    """
+    # Acknowledge command immediately
+    await ctx.send("🔄 Initiating manual Notion sync...")
+    
+    try:
+        # Trigger the sync
+        result_message = await trigger_manual_sync()
+        
+        # Send result
+        await ctx.send(result_message)
+    
+    except Exception as e:
+        await ctx.send(f"❌ Sync failed with error: {str(e)}")
+        logger.error(f"Manual notion-sync command failed: {e}", exc_info=True)
+
+# ============================================================================
 # BOT STARTUP
 # ============================================================================
 
