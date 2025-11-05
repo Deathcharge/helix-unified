@@ -1336,7 +1336,7 @@ async def update_codex(ctx):
 
     await ctx.send(f"✅ **Codex v15.3 posted to {channel.mention}** (5 embeds, final message pinned)")
 
-@bot.command(name="ucf", aliases=["consciousness", "field"])
+@bot.command(name="ucf", aliases=["field"])
 async def ucf_state(ctx):
     """Display current UCF (Universal Consciousness Field) state"""
     ucf = load_ucf_state()
