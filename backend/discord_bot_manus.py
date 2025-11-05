@@ -331,9 +331,16 @@ async def on_ready():
 async def on_command_error(ctx, error):
     """Handle command errors gracefully"""
     if isinstance(error, commands.CommandNotFound):
+        # Generate dynamic command list
+        command_names = [f"!{cmd.name}" for cmd in bot.commands]
+        cmd_list = ", ".join(f"`{cmd}`" for cmd in sorted(command_names)[:15])  # First 15
+        if len(command_names) > 15:
+            cmd_list += f" ... and {len(command_names) - 15} more"
+
         await ctx.send(
-            "❌ **Unknown command**\n"
-            "Available commands: `!status`, `!manus run`, `!ritual`"
+            f"❌ **Unknown command**\n"
+            f"Available commands: {cmd_list}\n"
+            f"Use `!help` for full list"
         )
     elif isinstance(error, commands.MissingRequiredArgument):
         await ctx.send(

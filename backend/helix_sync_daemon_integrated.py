@@ -30,7 +30,10 @@ from backend.sync.notion_exporter import NotionExporter
 # Import publishers
 from backend.sync.discord_publisher import DiscordPublisher
 
-# Setup logging
+# Setup logging - ensure log directory exists
+log_dir = Path('logs')
+log_dir.mkdir(exist_ok=True)
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',

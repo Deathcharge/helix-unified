@@ -299,6 +299,9 @@ def create_consciousness_embed(ucf_state: Dict[str, float]) -> discord.Embed:
     )
 
     for key, value in ucf_state.items():
+        # Skip non-numeric fields like timestamps
+        if not isinstance(value, (int, float)):
+            continue
         bar = get_emotion_bar(value)
         embed.add_field(name=key.capitalize(), value=bar, inline=False)
 
