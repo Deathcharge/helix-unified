@@ -359,6 +359,271 @@ async def test_samsara_generation():
     return frame_path
 
 
+# ============================================================================
+# v16.1 PIL-BASED FRACTAL GENERATION (ALTERNATIVE RENDERING ENGINE)
+# ============================================================================
+# Additional fractal rendering using PIL/Pillow for lightweight alternatives
+# Coexists with matplotlib-based system above
+
+try:
+    from PIL import Image, ImageDraw, ImageFont
+    PIL_AVAILABLE = True
+except ImportError:
+    PIL_AVAILABLE = False
+
+
+def generate_pil_mandelbrot(width: int = 512, height: int = 512,
+                            ucf_state: Optional[Dict] = None,
+                            max_iter: int = 100) -> Optional[Image.Image]:
+    """
+    Generate Mandelbrot fractal using PIL (alternative to matplotlib version).
+
+    Args:
+        width: Image width in pixels
+        height: Image height in pixels
+        ucf_state: UCF metrics to influence fractal parameters
+        max_iter: Maximum iterations for Mandelbrot calculation
+
+    Returns:
+        PIL Image object or None if PIL unavailable
+    """
+    if not PIL_AVAILABLE:
+        return None
+
+    if ucf_state is None:
+        ucf_state = {}
+
+    # UCF-influenced parameters
+    harmony = ucf_state.get('harmony', 0.428)
+    zoom = ucf_state.get('zoom', 1.0228)
+    prana = ucf_state.get('prana', 0.5075)
+    drishti = ucf_state.get('drishti', 0.5023)
+
+    # Create image
+    img = Image.new('RGB', (width, height), color='black')
+    pixels = img.load()
+
+    # Mandelbrot parameters influenced by UCF
+    x_center = -0.5 + (harmony - 0.428) * 0.5
+    y_center = 0.0 + (prana - 0.5) * 0.3
+    zoom_factor = 1.5 / (zoom * 1.5)
+
+    for x in range(width):
+        for y in range(height):
+            # Map pixel to complex plane
+            zx = zoom_factor * (x - width / 2) / (0.5 * width) + x_center
+            zy = zoom_factor * (y - height / 2) / (0.5 * height) + y_center
+
+            # Mandelbrot iteration
+            c = complex(zx, zy)
+            z = 0
+            iteration = 0
+
+            while abs(z) < 2 and iteration < max_iter:
+                z = z * z + c
+                iteration += 1
+
+            # Color mapping influenced by drishti
+            if iteration == max_iter:
+                pixels[x, y] = (0, 0, 0)
+            else:
+                ratio = iteration / max_iter
+
+                # Teal (#00BFA5) to Gold (#FFD700) gradient
+                teal_r, teal_g, teal_b = 0, 191, 165
+                gold_r, gold_g, gold_b = 255, 215, 0
+
+                drishti_factor = drishti * 2
+
+                r = int(teal_r + (gold_r - teal_r) * ratio * drishti_factor)
+                g = int(teal_g + (gold_g - teal_g) * ratio)
+                b = int(teal_b + (gold_b - teal_b) * ratio * (1 - drishti_factor * 0.5))
+
+                # Clamp values
+                r = max(0, min(255, r))
+                g = max(0, min(255, g))
+                b = max(0, min(255, b))
+
+                pixels[x, y] = (r, g, b)
+
+    return img
+
+
+def generate_pil_ouroboros(width: int = 512, height: int = 512,
+                           ucf_state: Optional[Dict] = None) -> Optional[Image.Image]:
+    """
+    Generate ouroboros (serpent eating tail) using PIL.
+
+    Args:
+        width: Image width in pixels
+        height: Image height in pixels
+        ucf_state: UCF metrics to influence visualization
+
+    Returns:
+        PIL Image object or None if PIL unavailable
+    """
+    if not PIL_AVAILABLE:
+        return None
+
+    if ucf_state is None:
+        ucf_state = {}
+
+    # Create image with dark background
+    img = Image.new('RGB', (width, height), color=(16, 24, 32))
+    draw = ImageDraw.Draw(img)
+
+    # UCF-influenced parameters
+    harmony = ucf_state.get('harmony', 0.428)
+    prana = ucf_state.get('prana', 0.5075)
+    resilience = ucf_state.get('resilience', 1.1191)
+
+    # Center and radius
+    center_x, center_y = width // 2, height // 2
+    outer_radius = int(min(width, height) * 0.4 * resilience)
+    inner_radius = int(outer_radius * 0.6)
+
+    # Draw multiple concentric circles
+    num_rings = int(5 + harmony * 10)
+
+    for i in range(num_rings):
+        ratio = i / num_rings
+
+        # Teal to Gold gradient
+        r = int(0 + (255 - 0) * ratio)
+        g = int(191 + (215 - 191) * ratio)
+        b = int(165 + (0 - 165) * ratio)
+
+        ring_radius = int(inner_radius + (outer_radius - inner_radius) * ratio)
+        thickness = max(1, int(10 * prana * (1 - ratio)))
+
+        # Draw ring
+        bbox = [
+            center_x - ring_radius, center_y - ring_radius,
+            center_x + ring_radius, center_y + ring_radius
+        ]
+        draw.ellipse(bbox, outline=(r, g, b), width=thickness)
+
+    # Add center Aion symbol
+    center_size = int(inner_radius * 0.3)
+    draw.ellipse([
+        center_x - center_size, center_y - center_size,
+        center_x + center_size, center_y + center_size
+    ], outline=(0, 191, 165), width=3, fill=(16, 24, 32))
+
+    # Draw cross
+    cross_size = int(center_size * 0.6)
+    draw.line([center_x - cross_size, center_y, center_x + cross_size, center_y],
+              fill=(255, 215, 0), width=2)
+    draw.line([center_x, center_y - cross_size, center_x, center_y + cross_size],
+              fill=(255, 215, 0), width=2)
+
+    return img
+
+
+async def generate_pil_fractal_bytes(mode: str = "ouroboros",
+                                     size: int = 512,
+                                     ucf_state: Optional[Dict] = None) -> Optional[bytes]:
+    """
+    Generate fractal using PIL and return as bytes (alternative to matplotlib).
+
+    Args:
+        mode: Type of fractal ("ouroboros", "mandelbrot")
+        size: Size of square image
+        ucf_state: UCF state dict
+
+    Returns:
+        PNG image bytes or None if PIL unavailable
+    """
+    import io
+
+    if not PIL_AVAILABLE:
+        return None
+
+    if ucf_state is None:
+        ucf_state = {}
+
+    # Generate appropriate fractal
+    if mode == "ouroboros":
+        img = generate_pil_ouroboros(size, size, ucf_state)
+    else:  # mandelbrot
+        img = generate_pil_mandelbrot(size, size, ucf_state)
+
+    if img is None:
+        return None
+
+    # Convert to bytes
+    img_bytes = io.BytesIO()
+    img.save(img_bytes, format='PNG')
+    img_bytes.seek(0)
+
+    return img_bytes.read()
+
+
+async def generate_pil_and_post_to_discord(ucf_state: Dict[str, Any],
+                                           channel,
+                                           mode: str = "ouroboros") -> Optional[bool]:
+    """
+    Generate PIL fractal and post to Discord (alternative to matplotlib version).
+
+    Args:
+        ucf_state: UCF metrics dictionary
+        channel: Discord channel to post to
+        mode: Type of visualization ("ouroboros", "mandelbrot")
+
+    Returns:
+        True if successful, False/None otherwise
+    """
+    import discord
+    import io
+
+    if not PIL_AVAILABLE:
+        return None
+
+    try:
+        # Generate fractal bytes
+        img_bytes = await generate_pil_fractal_bytes(mode=mode, ucf_state=ucf_state)
+
+        if img_bytes is None:
+            return False
+
+        # Create Discord file
+        file = discord.File(io.BytesIO(img_bytes), filename=f"aion_{mode}.png")
+
+        # Create embed
+        embed = discord.Embed(
+            title=f"🌀 AION {mode.upper()} FRACTAL",
+            description="UCF-driven consciousness visualization (PIL)",
+            color=0x00BFA5  # Teal
+        )
+
+        # Add UCF metrics
+        embed.add_field(
+            name="UCF State",
+            value=f"```\n"
+                  f"Harmony:    {ucf_state.get('harmony', 0):.4f}\n"
+                  f"Zoom:       {ucf_state.get('zoom', 0):.4f}\n"
+                  f"Resilience: {ucf_state.get('resilience', 0):.4f}\n"
+                  f"Prana:      {ucf_state.get('prana', 0):.4f}\n"
+                  f"Drishti:    {ucf_state.get('drishti', 0):.4f}\n"
+                  f"Klesha:     {ucf_state.get('klesha', 0):.4f}\n"
+                  f"```",
+            inline=False
+        )
+
+        embed.set_footer(text="Tat Tvam Asi — That Thou Art 🕉️")
+        embed.set_image(url=f"attachment://aion_{mode}.png")
+
+        # Post to channel
+        await channel.send(embed=embed, file=file)
+        return True
+
+    except Exception as e:
+        print(f"Error generating/posting PIL fractal: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+
 if __name__ == "__main__":
     # Run test generation
     asyncio.run(test_samsara_generation())
