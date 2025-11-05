@@ -97,10 +97,10 @@ bot.start_time = None
 
 import re
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import timedelta  # Only import timedelta, not datetime (avoid shadowing)
 
 # Track batch command usage (rate limiting)
-batch_cooldowns = defaultdict(lambda: datetime.min)
+batch_cooldowns = defaultdict(lambda: datetime.datetime.min)
 BATCH_COOLDOWN_SECONDS = 5  # Cooldown between batches per user
 MAX_COMMANDS_PER_BATCH = 10  # Maximum commands in one batch
 
@@ -140,7 +140,7 @@ async def execute_command_batch(message):
 
     # Check rate limit
     user_id = message.author.id
-    now = datetime.utcnow()
+    now = datetime.datetime.utcnow()
     last_batch = batch_cooldowns[user_id]
 
     if now - last_batch < timedelta(seconds=BATCH_COOLDOWN_SECONDS):
