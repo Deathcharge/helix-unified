@@ -124,7 +124,7 @@ Look for:
 ### 3. Test in Discord
 
 ```
-!ritual neti-neti
+!harmony
 ```
 
 **Expected Output:**
@@ -132,6 +132,8 @@ Look for:
 2. Phase messages (1-4)
 3. Audio file attachment (19MB .wav)
 4. "HARMONY RESTORED → `harmony=0.XX`"
+
+**Note:** Command renamed from `!ritual neti-neti` to `!harmony` in v16.3 to avoid conflicts with existing Z-88 `!ritual` command.
 
 ---
 
