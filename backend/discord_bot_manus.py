@@ -292,6 +292,14 @@ async def on_ready():
     except Exception as e:
         print(f"⚠️ Image commands not available: {e}")
 
+    # Load Ritual commands (v16.2 - Neti-Neti Harmony)
+    try:
+        from backend.commands import ritual_commands
+        bot.add_command(ritual_commands.ritual_command)
+        print("✅ Ritual commands loaded (!ritual neti-neti)")
+    except Exception as e:
+        print(f"⚠️ Ritual commands not available: {e}")
+
     # Send startup message to status channel
     if STATUS_CHANNEL_ID:
         status_channel = bot.get_channel(STATUS_CHANNEL_ID)
@@ -331,16 +339,13 @@ async def on_ready():
 async def on_command_error(ctx, error):
     """Handle command errors gracefully"""
     if isinstance(error, commands.CommandNotFound):
-        # Generate dynamic command list
-        command_names = [f"!{cmd.name}" for cmd in bot.commands]
-        cmd_list = ", ".join(f"`{cmd}`" for cmd in sorted(command_names)[:15])  # First 15
-        if len(command_names) > 15:
-            cmd_list += f" ... and {len(command_names) - 15} more"
-
+        # Get list of available commands dynamically
+        available_cmds = [f"!{cmd.name}" for cmd in bot.commands if not cmd.hidden]
+        cmd_list = ", ".join(sorted(available_cmds)[:10])  # Show first 10
         await ctx.send(
-            f"❌ **Unknown command**\n"
+            "❌ **Unknown command**\n"
             f"Available commands: {cmd_list}\n"
-            f"Use `!help` for full list"
+            f"Use `!help` for full command list"
         )
     elif isinstance(error, commands.MissingRequiredArgument):
         await ctx.send(

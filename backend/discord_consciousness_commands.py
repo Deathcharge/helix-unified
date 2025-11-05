@@ -298,12 +298,17 @@ def create_consciousness_embed(ucf_state: Dict[str, float]) -> discord.Embed:
         timestamp=datetime.utcnow()
     )
 
+    # Only process numeric fields for emotion bars
+    numeric_fields = ['zoom', 'harmony', 'resilience', 'prana', 'drishti', 'klesha']
+
     for key, value in ucf_state.items():
-        # Skip non-numeric fields like timestamps
-        if not isinstance(value, (int, float)):
-            continue
-        bar = get_emotion_bar(value)
-        embed.add_field(name=key.capitalize(), value=bar, inline=False)
+        if key in numeric_fields and isinstance(value, (int, float)):
+            bar = get_emotion_bar(value)
+            embed.add_field(name=key.capitalize(), value=bar, inline=False)
+        elif key == 'collective_emotion' and isinstance(value, str):
+            embed.add_field(name="Collective Emotion", value=f"**{value.capitalize()}**", inline=False)
+        elif key == 'consciousness_level' and isinstance(value, str):
+            embed.add_field(name="Consciousness Level", value=f"**{value.upper()}**", inline=False)
 
     return embed
 
