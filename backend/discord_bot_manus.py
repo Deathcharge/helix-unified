@@ -2033,24 +2033,26 @@ async def set_server_icon(ctx, mode: str = "info"):
                           "💡 Add a PNG file to enable default icon")
 
     elif mode == "fractal":
-        await ctx.send("🎨 **Generating UCF-based fractal icon...**")
+        await ctx.send("🎨 **Generating UCF-based fractal icon...**\n"
+                      "🌀 *Using Grok Enhanced v2.0 - PIL-based Mandelbrot*")
 
         try:
-            # Generate fractal based on current UCF state
-            ucf_state = load_ucf_state()
-
-            # Generate fractal using Samsara bridge
+            # Generate fractal using Samsara bridge (Grok Enhanced)
             from backend.samsara_bridge import generate_fractal_icon_bytes
 
-            icon_bytes = await generate_fractal_icon_bytes(ucf_state)
+            icon_bytes = await generate_fractal_icon_bytes(mode="fractal")
             await guild.edit(icon=icon_bytes)
 
-            ucf_summary = f"Harmony: {ucf_state.get('harmony', 0):.2f} | Prana: {ucf_state.get('prana', 0):.2f}"
-            await ctx.send(f"✅ Server icon updated with UCF fractal!\n🌀 **UCF State:** {ucf_summary}")
+            # Get UCF state for summary
+            ucf_state = load_ucf_state()
+            ucf_summary = f"Harmony: {ucf_state.get('harmony', 0):.2f} | Prana: {ucf_state.get('prana', 0):.2f} | Drishti: {ucf_state.get('drishti', 0):.2f}"
+            await ctx.send(f"✅ Server icon updated with UCF fractal!\n"
+                          f"🌀 **UCF State:** {ucf_summary}\n"
+                          f"🎨 **Colors:** Cyan→Gold (harmony), Green→Pink (prana), Blue→Violet (drishti)")
 
-        except ImportError:
-            await ctx.send("❌ Fractal generator not available\n"
-                          "💡 Implement `generate_fractal_icon_bytes()` in `backend/samsara_bridge.py`")
+        except ImportError as ie:
+            await ctx.send(f"❌ Fractal generator not available: {str(ie)}\n"
+                          "💡 Install Pillow: `pip install Pillow`")
         except Exception as e:
             await ctx.send(f"❌ Fractal generation failed: {str(e)}")
             logger.error(f"Icon fractal generation failed: {e}", exc_info=True)
