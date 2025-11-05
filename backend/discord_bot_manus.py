@@ -92,6 +92,125 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 bot.start_time = None
 
 # ============================================================================
+# MULTI-COMMAND BATCH EXECUTION (v16.3)
+# ============================================================================
+
+import re
+from collections import defaultdict
+from datetime import datetime, timedelta
+
+# Track batch command usage (rate limiting)
+batch_cooldowns = defaultdict(lambda: datetime.min)
+BATCH_COOLDOWN_SECONDS = 5  # Cooldown between batches per user
+MAX_COMMANDS_PER_BATCH = 10  # Maximum commands in one batch
+
+async def execute_command_batch(message):
+    """
+    Parse and execute multiple commands from a single message.
+
+    Supports:
+    - Multiple !commands on separate lines
+    - Inline comments with #
+    - Rate limiting per user
+
+    Example:
+        !status
+        !agents
+        !ucf  # Check harmony
+    """
+    # Extract all lines that start with !
+    lines = message.content.split('\n')
+    commands = []
+
+    for line in lines:
+        line = line.strip()
+        # Skip empty lines
+        if not line:
+            continue
+        # Check if line starts with command prefix
+        if line.startswith('!'):
+            # Strip comments (anything after #)
+            cmd = line.split('#')[0].strip()
+            if cmd and len(cmd) > 1:  # Must have more than just !
+                commands.append(cmd[1:])  # Remove the ! prefix
+
+    # If only 0-1 commands found, let normal processing handle it
+    if len(commands) <= 1:
+        return False
+
+    # Check rate limit
+    user_id = message.author.id
+    now = datetime.utcnow()
+    last_batch = batch_cooldowns[user_id]
+
+    if now - last_batch < timedelta(seconds=BATCH_COOLDOWN_SECONDS):
+        remaining = BATCH_COOLDOWN_SECONDS - (now - last_batch).total_seconds()
+        await message.channel.send(
+            f"⏳ **Batch cooldown**: Please wait {remaining:.1f}s before sending another batch"
+        )
+        return True
+
+    # Check batch size limit
+    if len(commands) > MAX_COMMANDS_PER_BATCH:
+        await message.channel.send(
+            f"⚠️ **Batch limit exceeded**: Maximum {MAX_COMMANDS_PER_BATCH} commands per batch "
+            f"(you sent {len(commands)})"
+        )
+        return True
+
+    # Update cooldown
+    batch_cooldowns[user_id] = now
+
+    # Send batch execution notice
+    await message.channel.send(
+        f"🔄 **Executing batch**: {len(commands)} commands\n"
+        f"```{chr(10).join([f'!{cmd}' for cmd in commands])}```"
+    )
+
+    # Execute each command
+    executed = 0
+    failed = 0
+
+    for cmd in commands:
+        try:
+            # Create a fake message object for command processing
+            # This allows us to use the existing command infrastructure
+            ctx = await bot.get_context(message)
+
+            # Parse the command and arguments
+            parts = cmd.split()
+            cmd_name = parts[0] if parts else cmd
+            args = parts[1:] if len(parts) > 1 else []
+
+            # Get the command object
+            command = bot.get_command(cmd_name)
+
+            if command is None:
+                await message.channel.send(f"❌ Unknown command: `!{cmd_name}`")
+                failed += 1
+                continue
+
+            # Invoke the command with arguments
+            # Create a new context with the specific command
+            ctx.command = command
+            await ctx.invoke(command, *args)
+            executed += 1
+
+            # Small delay between commands to prevent rate limiting
+            await asyncio.sleep(0.5)
+
+        except Exception as e:
+            await message.channel.send(f"❌ Error executing `!{cmd}`: {str(e)}")
+            failed += 1
+
+    # Send completion summary
+    await message.channel.send(
+        f"✅ **Batch complete**: {executed} succeeded, {failed} failed"
+    )
+
+    return True
+
+# ============================================================================
 # KAVACH ETHICAL SCANNING
 # ============================================================================
 
@@ -333,6 +452,28 @@ async def on_ready():
     if not weekly_storage_digest.is_running():
         weekly_storage_digest.start()
         print("✅ Weekly storage digest started (168h)")
+
+
+@bot.event
+async def on_message(message):
+    """
+    Intercept messages to handle multi-command batches.
+
+    Detects multiple !commands in a single message and executes them sequentially.
+    """
+    # Ignore messages from the bot itself
+    if message.author == bot.user:
+        return
+
+    # Check if message contains multiple commands
+    if '\n' in message.content and message.content.count('!') > 1:
+        # Attempt batch execution
+        handled = await execute_command_batch(message)
+        if handled:
+            return  # Batch was executed, don't process as single command
+
+    # Process commands normally (CRITICAL: must call this or commands won't work!)
+    await bot.process_commands(message)
 
 
 @bot.event
