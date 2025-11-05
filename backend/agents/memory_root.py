@@ -9,28 +9,15 @@ from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional
 from pathlib import Path
 
+# Import base agent class (refactored to prevent circular imports)
+from backend.agents_base import HelixAgent
+from backend.services.notion_client import get_notion_client
+from backend.helix_storage_adapter_async import HelixStorageAdapterAsync
+
 try:
     from openai import AsyncOpenAI
 except ImportError:
     AsyncOpenAI = None
-
-import sys
-from pathlib import Path
-
-# Add parent directory to path to access backend.agents module (not package)
-backend_path = Path(__file__).parent.parent
-if str(backend_path) not in sys.path:
-    sys.path.insert(0, str(backend_path))
-
-# Import from agents.py module (not agents/ package)
-import importlib.util
-spec = importlib.util.spec_from_file_location("agents_module", backend_path / "agents.py")
-agents_module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(agents_module)
-HelixAgent = agents_module.HelixAgent
-
-from backend.services.notion_client import get_notion_client
-from backend.helix_storage_adapter_async import HelixStorageAdapterAsync
 
 # ============================================================================
 # MEMORY ROOT AGENT
@@ -63,12 +50,22 @@ class MemoryRootAgent(HelixAgent):
             ]
         )
         
-        # Initialize OpenAI client
+        # Initialize OpenAI client with error handling for version compatibility
         if AsyncOpenAI is None:
             print("⚠ OpenAI client not available. Install with: pip install openai")
             self.openai_client = None
         else:
-            self.openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+            try:
+                api_key = os.getenv("OPENAI_API_KEY")
+                if api_key:
+                    self.openai_client = AsyncOpenAI(api_key=api_key)
+                else:
+                    print("⚠ OPENAI_API_KEY not set - MemoryRoot will function in limited mode")
+                    self.openai_client = None
+            except Exception as e:
+                print(f"⚠ OpenAI initialization failed: {e}")
+                print("   MemoryRoot will function in limited mode without GPT4o synthesis")
+                self.openai_client = None
         
         # Initialize Notion client reference
         self.notion_client = None
