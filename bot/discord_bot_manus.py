@@ -20,16 +20,27 @@ import asyncio
 from mega_sync import mega_sync
 import logging
 
+# Import centralized logging configuration
+from backend.logging_config import setup_logging, get_module_logger
+
 # --- Configuration and Logging Setup ---
 try:
     config = toml.load('config.toml')
 except FileNotFoundError:
-    print("FATAL: config.toml not found. Exiting.")
+    # Use basic logging for this fatal error
+    logging.basicConfig(level=logging.ERROR)
+    logging.error("FATAL: config.toml not found. Exiting.")
     sys.exit(1)
 
-# Setup Logging
-logging.basicConfig(level=config['logging']['level'], format=config['logging']['format'])
-logger = logging.getLogger('discord_bot')
+# Setup centralized logging (if not already done by main.py)
+# This is a fallback for standalone bot execution
+try:
+    setup_logging(log_level=config['logging']['level'], enable_rotation=True)
+except Exception:
+    # If setup fails, fall back to basic logging
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s | %(levelname)-8s | %(name)s | %(message)s')
+
+logger = get_module_logger('discord_bot')
 
 # Import Grok's core for the !analyze command
 # The actual import path will be 'grok.grok_agent_core' after deployment
@@ -84,7 +95,7 @@ def save_persistence():
             mega_sync.upload('Helix/state/ucf_state.json', 'state/ucf_state.json')
         logger.info("Persistence saved to MEGA.")
     except Exception as e:
-        logger.error(f"Failed to save persistence: {e}")
+        logger.error(f"Failed to save persistence: {e}", exc_info=True)
 
 # --- Bot Events ---
 @bot.event
@@ -185,7 +196,7 @@ async def testmega(ctx):
             else:
                 await ctx.send("❌ Upload failed. Check logs.")
         except Exception as e:
-            logger.error(f"MEGA test failed: {e}")
+            logger.error(f"MEGA test failed: {e}", exc_info=True)
             await ctx.send(f"❌ MEGA test failed: {e}")
     else:
         await ctx.send("❌ MEGA not connected. Check credentials.")
@@ -212,7 +223,7 @@ async def heartbeat(ctx):
         else:
             await ctx.send("❌ Heartbeat save failed.")
     except Exception as e:
-        logger.error(f"Heartbeat save failed: {e}")
+        logger.error(f"Heartbeat save failed: {e}", exc_info=True)
         await ctx.send(f"❌ Heartbeat save failed: {e}")
 
 # --- Run Bot ---

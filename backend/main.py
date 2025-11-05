@@ -10,6 +10,10 @@ import json
 from pathlib import Path
 from datetime import datetime
 from dotenv import load_dotenv
+import logging
+
+# Import centralized logging configuration
+from logging_config import setup_logging
 
 # FIX: Create Crypto → Cryptodome alias BEFORE importing mega
 import sys
@@ -53,6 +57,16 @@ class PersistenceEngine:
         self.m.download(remote, 'Helix/state/heartbeat.json')
         print("MEGA: State restored from cloud.")
 load_dotenv()
+
+# ============================================================================
+# LOGGING SETUP
+# ============================================================================
+logger = setup_logging(
+    log_dir="Shadow/manus_archive",
+    log_level=os.getenv("LOG_LEVEL", "INFO"),
+    enable_rotation=True
+)
+logger.info("🌀 Helix Collective v14.5 - Backend Initialization")
 
 # ✅ FIXED IMPORTS - Use relative imports instead of absolute
 from discord_bot_manus import bot as discord_bot
