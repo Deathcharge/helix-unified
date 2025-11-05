@@ -36,7 +36,7 @@ Add notes to remember what each command does:
 ```
 !image aion          # Generate ouroboros fractal
 !image mandelbrot    # Generate mandelbrot fractal
-!ritual neti-neti    # v16.2 Neti-Neti harmony ritual
+!harmony             # v16.2 Neti-Neti harmony ritual
 !ucf                 # Check harmony metrics
 ```
 

@@ -407,13 +407,13 @@ async def on_ready():
     except Exception as e:
         print(f"⚠️ Image commands not available: {e}")
 
-    # Load Ritual commands (v16.2 - Neti-Neti Harmony)
+    # Load Harmony Ritual commands (v16.2 - Neti-Neti Harmony)
     try:
         from commands import ritual_commands
-        bot.add_command(ritual_commands.ritual_command)
-        print("✅ Ritual commands loaded (!ritual neti-neti)")
+        bot.add_command(ritual_commands.harmony_command)
+        print("✅ Harmony ritual command loaded (!harmony)")
     except Exception as e:
-        print(f"⚠️ Ritual commands not available: {e}")
+        print(f"⚠️ Harmony ritual command not available: {e}")
 
     # Send startup message to status channel
     if STATUS_CHANNEL_ID:
