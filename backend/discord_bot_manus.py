@@ -276,6 +276,14 @@ async def on_ready():
     print(f"   Telemetry Channel: {TELEMETRY_CHANNEL_ID}")
     print(f"   Storage Channel: {STORAGE_CHANNEL_ID}")
 
+    # Load Memory Root commands (GPT4o long-term memory)
+    try:
+        from discord_commands_memory import MemoryRootCommands
+        await bot.add_cog(MemoryRootCommands(bot))
+        print("✅ Memory Root commands loaded")
+    except Exception as e:
+        print(f"⚠️ Memory Root commands not available: {e}")
+
     # Send startup message to status channel
     if STATUS_CHANNEL_ID:
         status_channel = bot.get_channel(STATUS_CHANNEL_ID)
