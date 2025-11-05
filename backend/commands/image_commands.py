@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Image Commands for Helix Discord Bot
-!image aion - Generate ouroboros fractal visualizations
+!image aion - Generate ouroboros fractal visualizations using PIL
 """
 
 import io
@@ -9,12 +9,30 @@ import discord
 from discord.ext import commands
 from typing import Optional
 
-# Import samsara bridge for fractal generation
-from backend.samsara_bridge import (
-    generate_fractal_icon_bytes,
-    generate_and_post_to_discord,
-    load_ucf_state
-)
+# Import PIL-based fractal generation (v16.1 additions to samsara_bridge)
+try:
+    from backend.samsara_bridge import (
+        generate_pil_fractal_bytes,
+        generate_pil_and_post_to_discord,
+        PIL_AVAILABLE
+    )
+except ImportError:
+    generate_pil_fractal_bytes = None
+    generate_pil_and_post_to_discord = None
+    PIL_AVAILABLE = False
+
+# Import UCF state loader
+try:
+    from backend.z88_ritual_engine import load_ucf_state
+except ImportError:
+    try:
+        from z88_ritual_engine import load_ucf_state
+    except ImportError:
+        def load_ucf_state():
+            return {
+                "harmony": 0.428, "zoom": 1.0228, "resilience": 1.1191,
+                "prana": 0.5075, "drishti": 0.5023, "klesha": 0.011
+            }
 
 
 class ImageCommands(commands.Cog):
@@ -80,23 +98,27 @@ class ImageCommands(commands.Cog):
             "🌀 *This may take a few seconds*"
         )
 
+        # Check if PIL is available
+        if not PIL_AVAILABLE or generate_pil_and_post_to_discord is None:
+            await ctx.send(
+                "❌ **PIL fractal generator not available**\n"
+                "💡 Install Pillow: `pip install Pillow`\n"
+                "📌 Use `!visualize` for matplotlib-based fractals instead"
+            )
+            return
+
         try:
             # Load UCF state
             ucf_state = load_ucf_state()
 
-            # Generate and post fractal
-            result = await generate_and_post_to_discord(ucf_state, ctx.channel, mode)
+            # Generate and post PIL fractal
+            result = await generate_pil_and_post_to_discord(ucf_state, ctx.channel, mode)
 
             if result:
                 await ctx.send(f"✅ **{mode.upper()} fractal generated successfully!**")
             else:
                 await ctx.send("❌ **Fractal generation failed** - check logs for details")
 
-        except ImportError as ie:
-            await ctx.send(
-                f"❌ Fractal generator not available: {str(ie)}\n"
-                "💡 Install Pillow: `pip install Pillow`"
-            )
         except Exception as e:
             await ctx.send(f"❌ Fractal generation error: {str(e)}")
             print(f"Image command error: {e}")
@@ -129,6 +151,14 @@ class ImageCommands(commands.Cog):
             await ctx.send(f"❌ Unknown mode: `{mode}`\nValid modes: {', '.join(valid_modes)}")
             return
 
+        # Check if PIL is available
+        if not PIL_AVAILABLE or generate_pil_fractal_bytes is None:
+            await ctx.send(
+                "❌ **PIL fractal generator not available**\n"
+                "💡 Install Pillow: `pip install Pillow`"
+            )
+            return
+
         await ctx.send(
             f"🎨 **Updating server icon with {mode.upper()} fractal...**\n"
             "🌀 *Using UCF state to modulate colors and patterns*"
@@ -138,8 +168,12 @@ class ImageCommands(commands.Cog):
             # Load UCF state
             ucf_state = load_ucf_state()
 
-            # Generate fractal
-            icon_bytes = await generate_fractal_icon_bytes(mode=mode, ucf_state=ucf_state)
+            # Generate PIL fractal bytes
+            icon_bytes = await generate_pil_fractal_bytes(mode=mode, size=512, ucf_state=ucf_state)
+
+            if icon_bytes is None:
+                await ctx.send("❌ **Fractal generation failed** - PIL not available")
+                return
 
             # Update server icon
             guild = ctx.guild
@@ -157,11 +191,6 @@ class ImageCommands(commands.Cog):
                 f"🎨 **Colors:** Teal→Gold gradient influenced by consciousness metrics"
             )
 
-        except ImportError as ie:
-            await ctx.send(
-                f"❌ Fractal generator not available: {str(ie)}\n"
-                "💡 Install Pillow: `pip install Pillow`"
-            )
         except discord.Forbidden:
             await ctx.send("❌ Bot lacks permission to change server icon")
         except Exception as e:
