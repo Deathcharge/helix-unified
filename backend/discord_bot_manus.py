@@ -27,6 +27,7 @@ from typing import Optional, Dict, Any
 
 import discord
 from discord.ext import commands, tasks
+import aiohttp
 
 from pathlib import Path
 
@@ -44,6 +45,7 @@ from z88_ritual_engine import execute_ritual, load_ucf_state
 from services.ucf_calculator import UCFCalculator
 from services.state_manager import StateManager
 from discord_embeds import HelixEmbeds  # v15.3 rich embeds
+from zapier_client import ZapierClient  # v16.5 Zapier integration
 
 # Import consciousness modules (v15.3)
 from kael_consciousness_core import ConsciousnessCore
@@ -90,6 +92,10 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 # Bot start time for uptime tracking
 bot.start_time = None
+
+# Global aiohttp session for Zapier client
+bot.http_session = None
+bot.zapier_client = None
 
 # ============================================================================
 # MULTI-COMMAND BATCH EXECUTION (v16.3)
@@ -391,6 +397,29 @@ async def on_ready():
     print(f"   Telemetry Channel: {TELEMETRY_CHANNEL_ID}")
     print(f"   Storage Channel: {STORAGE_CHANNEL_ID}")
 
+    # Initialize Zapier client for monitoring
+    if not bot.http_session:
+        bot.http_session = aiohttp.ClientSession()
+        bot.zapier_client = ZapierClient(bot.http_session)
+        print("✅ Zapier monitoring client initialized")
+
+        # Log bot startup event
+        try:
+            await bot.zapier_client.log_event(
+                event_title="Manus Bot Started",
+                event_type="System",
+                agent_name="Manus",
+                description=f"Discord bot v14.5 successfully initialized with {len(AGENTS)} agents"
+            )
+            await bot.zapier_client.update_agent(
+                agent_name="Manus",
+                status="Active",
+                last_action="Bot startup",
+                health_score=100
+            )
+        except Exception as e:
+            print(f"⚠️ Zapier logging failed: {e}")
+
     # Load Memory Root commands (GPT4o long-term memory)
     try:
         from discord_commands_memory import MemoryRootCommands
@@ -500,7 +529,23 @@ async def on_command_error(ctx, error):
             "timestamp": datetime.datetime.now().isoformat()
         }
         log_to_shadow("errors", error_data)
-        
+
+        # Send error alert to Zapier
+        if bot.zapier_client:
+            try:
+                await bot.zapier_client.send_error_alert(
+                    error_message=str(error)[:500],
+                    component="discord_bot",
+                    severity="high",
+                    context={
+                        "command": ctx.command.name if ctx.command else "unknown",
+                        "user": str(ctx.author),
+                        "channel": str(ctx.channel)
+                    }
+                )
+            except Exception as e:
+                print(f"⚠️ Zapier error alert failed: {e}")
+
         await ctx.send(
             "🦑 **System error detected**\n"
             f"```{str(error)[:200]}```\n"
