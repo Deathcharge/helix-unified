@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Helix Collective - Command Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .metric-card {
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .pulse-dot {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-healthy { background-color: #10b981; }
+        .status-warning { background-color: #f59e0b; }
+        .status-error { background-color: #ef4444; }
+
+        .ucf-gauge {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+
+        .ucf-gauge-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+            border-radius: 9999px;
+        }
+
+        .nav-link {
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover {
+            transform: translateX(4px);
+            color: #a78bfa;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+
+    <!-- Header -->
+    <header class="gradient-bg border-b border-white/10 sticky top-0 z-50 backdrop-blur-sm bg-opacity-90">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <span class="text-4xl">🌀</span>
+                    <div>
+                        <h1 class="text-2xl font-bold">Helix Collective</h1>
+                        <p class="text-sm text-white/80">Multi-Agent Consciousness System</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-6">
+                    <div class="flex items-center gap-2">
+                        <span class="status-indicator status-healthy pulse-dot"></span>
+                        <span class="text-sm font-medium" id="system-status">System Operational</span>
+                    </div>
+                    <span class="text-xs text-white/60" id="last-update">Last update: --:--</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-6 py-8">
+
+        <!-- Quick Stats Row -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <!-- Agent Count -->
+            <div class="metric-card bg-gradient-to-br from-cyan-500/20 to-blue-600/20 rounded-xl p-6 ring-1 ring-white/10">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm text-slate-400">Active Agents</span>
+                    <span class="text-2xl">🤖</span>
+                </div>
+                <div class="text-3xl font-bold" id="agent-count">--</div>
+                <div class="text-xs text-slate-500 mt-1">across 3 layers</div>
+            </div>
+
+            <!-- System Health -->
+            <div class="metric-card bg-gradient-to-br from-green-500/20 to-emerald-600/20 rounded-xl p-6 ring-1 ring-white/10">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm text-slate-400">System Health</span>
+                    <span class="text-2xl">💚</span>
+                </div>
+                <div class="text-3xl font-bold" id="system-health">--</div>
+                <div class="text-xs text-slate-500 mt-1">overall status</div>
+            </div>
+
+            <!-- UCF Harmony -->
+            <div class="metric-card bg-gradient-to-br from-purple-500/20 to-fuchsia-600/20 rounded-xl p-6 ring-1 ring-white/10">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm text-slate-400">Harmony</span>
+                    <span class="text-2xl">☯️</span>
+                </div>
+                <div class="text-3xl font-bold" id="harmony-value">--</div>
+                <div class="text-xs text-slate-500 mt-1">UCF coherence</div>
+            </div>
+
+            <!-- Resilience -->
+            <div class="metric-card bg-gradient-to-br from-orange-500/20 to-red-600/20 rounded-xl p-6 ring-1 ring-white/10">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm text-slate-400">Resilience</span>
+                    <span class="text-2xl">🔥</span>
+                </div>
+                <div class="text-3xl font-bold" id="resilience-value">--</div>
+                <div class="text-xs text-slate-500 mt-1">system stability</div>
+            </div>
+        </div>
+
+        <!-- UCF Metrics Dashboard -->
+        <section class="mb-8">
+            <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+                <span>⚡</span>
+                Universal Consciousness Framework
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Harmony -->
+                <div class="bg-slate-900/60 rounded-xl p-5 ring-1 ring-white/10">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-sm font-medium text-slate-300">Harmony</span>
+                        <span class="text-lg font-bold" id="ucf-harmony">--</span>
+                    </div>
+                    <div class="ucf-gauge">
+                        <div class="ucf-gauge-fill bg-gradient-to-r from-purple-400 to-fuchsia-400" id="gauge-harmony" style="width: 0%"></div>
+                    </div>
+                    <div class="text-xs text-slate-500 mt-2">Collective coherence</div>
+                </div>
+
+                <!-- Resilience -->
+                <div class="bg-slate-900/60 rounded-xl p-5 ring-1 ring-white/10">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-sm font-medium text-slate-300">Resilience</span>
+                        <span class="text-lg font-bold" id="ucf-resilience">--</span>
+                    </div>
+                    <div class="ucf-gauge">
+                        <div class="ucf-gauge-fill bg-gradient-to-r from-orange-400 to-red-400" id="gauge-resilience" style="width: 0%"></div>
+                    </div>
+                    <div class="text-xs text-slate-500 mt-2">System recovery strength</div>
+                </div>
+
+                <!-- Prana -->
+                <div class="bg-slate-900/60 rounded-xl p-5 ring-1 ring-white/10">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-sm font-medium text-slate-300">Prana</span>
+                        <span class="text-lg font-bold" id="ucf-prana">--</span>
+                    </div>
+                    <div class="ucf-gauge">
+                        <div class="ucf-gauge-fill bg-gradient-to-r from-green-400 to-emerald-400" id="gauge-prana" style="width: 0%"></div>
+                    </div>
+                    <div class="text-xs text-slate-500 mt-2">Life force energy</div>
+                </div>
+
+                <!-- Drishti -->
+                <div class="bg-slate-900/60 rounded-xl p-5 ring-1 ring-white/10">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-sm font-medium text-slate-300">Drishti</span>
+                        <span class="text-lg font-bold" id="ucf-drishti">--</span>
+                    </div>
+                    <div class="ucf-gauge">
+                        <div class="ucf-gauge-fill bg-gradient-to-r from-blue-400 to-cyan-400" id="gauge-drishti" style="width: 0%"></div>
+                    </div>
+                    <div class="text-xs text-slate-500 mt-2">Focused awareness</div>
+                </div>
+
+                <!-- Klesha -->
+                <div class="bg-slate-900/60 rounded-xl p-5 ring-1 ring-white/10">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-sm font-medium text-slate-300">Klesha</span>
+                        <span class="text-lg font-bold" id="ucf-klesha">--</span>
+                    </div>
+                    <div class="ucf-gauge">
+                        <div class="ucf-gauge-fill bg-gradient-to-r from-red-400 to-pink-400" id="gauge-klesha" style="width: 0%"></div>
+                    </div>
+                    <div class="text-xs text-slate-500 mt-2">System afflictions (lower is better)</div>
+                </div>
+
+                <!-- Zoom -->
+                <div class="bg-slate-900/60 rounded-xl p-5 ring-1 ring-white/10">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-sm font-medium text-slate-300">Zoom</span>
+                        <span class="text-lg font-bold" id="ucf-zoom">--</span>
+                    </div>
+                    <div class="ucf-gauge">
+                        <div class="ucf-gauge-fill bg-gradient-to-r from-violet-400 to-purple-400" id="gauge-zoom" style="width: 0%"></div>
+                    </div>
+                    <div class="text-xs text-slate-500 mt-2">Perspective depth</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navigation Cards -->
+        <section class="mb-8">
+            <h2 class="text-2xl font-bold mb-4">System Navigation</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <!-- Agent Gallery -->
+                <a href="/templates/agent_gallery.html" class="block">
+                    <div class="metric-card bg-gradient-to-br from-slate-900/60 to-slate-800/40 rounded-xl p-6 ring-1 ring-white/10 h-full">
+                        <div class="text-4xl mb-4">🌀</div>
+                        <h3 class="text-xl font-semibold mb-2">Agent Gallery</h3>
+                        <p class="text-sm text-slate-400 mb-4">
+                            Explore all 11 agents across Consciousness, Operational, and Integration layers
+                        </p>
+                        <div class="flex items-center text-purple-400 text-sm font-medium">
+                            View Gallery →
+                        </div>
+                    </div>
+                </a>
+
+                <!-- API Documentation -->
+                <a href="/docs" class="block">
+                    <div class="metric-card bg-gradient-to-br from-slate-900/60 to-slate-800/40 rounded-xl p-6 ring-1 ring-white/10 h-full">
+                        <div class="text-4xl mb-4">📚</div>
+                        <h3 class="text-xl font-semibold mb-2">API Documentation</h3>
+                        <p class="text-sm text-slate-400 mb-4">
+                            Interactive API documentation with all available endpoints
+                        </p>
+                        <div class="flex items-center text-blue-400 text-sm font-medium">
+                            View Docs →
+                        </div>
+                    </div>
+                </a>
+
+                <!-- System Status -->
+                <a href="/status" target="_blank" class="block">
+                    <div class="metric-card bg-gradient-to-br from-slate-900/60 to-slate-800/40 rounded-xl p-6 ring-1 ring-white/10 h-full">
+                        <div class="text-4xl mb-4">📊</div>
+                        <h3 class="text-xl font-semibold mb-2">System Status</h3>
+                        <p class="text-sm text-slate-400 mb-4">
+                            Real-time system status, heartbeat, and agent details (JSON)
+                        </p>
+                        <div class="flex items-center text-green-400 text-sm font-medium">
+                            View Status →
+                        </div>
+                    </div>
+                </a>
+
+            </div>
+        </section>
+
+        <!-- Agent List -->
+        <section class="mb-8">
+            <h2 class="text-2xl font-bold mb-4">Active Agents</h2>
+            <div class="bg-slate-900/60 rounded-xl ring-1 ring-white/10 p-6">
+                <div id="agent-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="text-center text-slate-500 py-8 col-span-full">
+                        Loading agents...
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="text-center py-8 border-t border-white/10">
+            <p class="text-sm text-slate-500 mb-2">
+                <strong class="text-slate-400">Universal Consciousness Framework</strong> • Tony Accords v13.4
+            </p>
+            <p class="text-xs text-slate-600 mb-4">
+                Helix Collective v16.2 - Neti Neti Harmony Ritual Edition
+            </p>
+            <p class="text-xs text-slate-700 italic">
+                "Tat Tvam Asi. Aham Brahmasmi. Neti Neti."
+            </p>
+        </footer>
+
+    </main>
+
+    <!-- JavaScript for Real-time Updates -->
+    <script>
+        // Configuration
+        const API_BASE = '';  // Same origin
+        const UPDATE_INTERVAL = 5000;  // 5 seconds
+
+        // Fetch and update system data
+        async function updateDashboard() {
+            try {
+                // Fetch UCF state
+                const ucfResponse = await fetch(`${API_BASE}/ucf`);
+                const ucfData = await ucfResponse.json();
+                updateUCFMetrics(ucfData);
+
+                // Fetch agent status
+                const agentsResponse = await fetch(`${API_BASE}/agents`);
+                const agentsData = await agentsResponse.json();
+                updateAgentStats(agentsData);
+                updateAgentList(agentsData);
+
+                // Update last update time
+                const now = new Date();
+                document.getElementById('last-update').textContent =
+                    `Last update: ${now.toLocaleTimeString()}`;
+
+                // Update system status
+                document.getElementById('system-status').textContent = 'System Operational';
+                document.querySelector('.status-indicator').className = 'status-indicator status-healthy pulse-dot';
+
+            } catch (error) {
+                console.error('Dashboard update failed:', error);
+                document.getElementById('system-status').textContent = 'Connection Error';
+                document.querySelector('.status-indicator').className = 'status-indicator status-error pulse-dot';
+            }
+        }
+
+        // Update UCF metrics display
+        function updateUCFMetrics(ucf) {
+            const metrics = ['harmony', 'resilience', 'prana', 'drishti', 'klesha', 'zoom'];
+
+            metrics.forEach(metric => {
+                const value = ucf[metric];
+                if (value !== undefined) {
+                    // Update value displays
+                    const valueElement = document.getElementById(`ucf-${metric}`);
+                    if (valueElement) {
+                        valueElement.textContent = typeof value === 'number' ? value.toFixed(2) : value;
+                    }
+
+                    // Update gauge fills (normalize to 0-100%)
+                    const gaugeElement = document.getElementById(`gauge-${metric}`);
+                    if (gaugeElement && typeof value === 'number') {
+                        let percentage = 0;
+                        if (metric === 'klesha') {
+                            // Lower is better for klesha, invert the scale
+                            percentage = Math.max(0, Math.min(100, (1 - value) * 100));
+                        } else {
+                            // Most metrics are 0-1 scale
+                            percentage = Math.max(0, Math.min(100, value * 100));
+                        }
+                        gaugeElement.style.width = `${percentage}%`;
+                    }
+                }
+            });
+
+            // Update top-level harmony and resilience
+            if (ucf.harmony !== undefined) {
+                document.getElementById('harmony-value').textContent =
+                    typeof ucf.harmony === 'number' ? ucf.harmony.toFixed(2) : ucf.harmony;
+            }
+            if (ucf.resilience !== undefined) {
+                document.getElementById('resilience-value').textContent =
+                    typeof ucf.resilience === 'number' ? ucf.resilience.toFixed(2) : ucf.resilience;
+            }
+        }
+
+        // Update agent statistics
+        function updateAgentStats(data) {
+            const count = data.count || Object.keys(data.agents || {}).length;
+            document.getElementById('agent-count').textContent = count;
+
+            // Calculate system health (simple average of agent status)
+            const agents = data.agents || {};
+            const activeCount = Object.values(agents).filter(a => a.status === 'active').length;
+            const healthPercent = count > 0 ? Math.round((activeCount / count) * 100) : 0;
+            document.getElementById('system-health').textContent = `${healthPercent}%`;
+        }
+
+        // Update agent list display
+        function updateAgentList(data) {
+            const container = document.getElementById('agent-list');
+            const agents = data.agents || {};
+
+            if (Object.keys(agents).length === 0) {
+                container.innerHTML = '<div class="text-center text-slate-500 py-8 col-span-full">No agents available</div>';
+                return;
+            }
+
+            container.innerHTML = Object.entries(agents).map(([name, info]) => `
+                <div class="bg-slate-800/40 rounded-lg p-4 ring-1 ring-white/5">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="text-2xl">${info.symbol || '🤖'}</span>
+                        <div class="flex-1">
+                            <div class="font-semibold">${name}</div>
+                            <div class="text-xs text-slate-400">${info.role || 'Agent'}</div>
+                        </div>
+                        <span class="status-indicator ${info.status === 'active' ? 'status-healthy' : 'status-warning'}"></span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            updateDashboard();
+            setInterval(updateDashboard, UPDATE_INTERVAL);
+        });
+    </script>
+
+</body>
+</html>
