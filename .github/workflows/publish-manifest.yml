@@ -6,9 +6,6 @@ name: Publish Helix Manifest to GitHub Pages
 on:
   push:
     branches: [ main ]
-    paths:
-      - 'helix-manifest.json'
-      - '.github/workflows/publish-manifest.yml'
   workflow_dispatch:  # Allow manual trigger
 
 permissions:
