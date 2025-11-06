@@ -4,18 +4,14 @@ import json
 import logging
 import sys
 
-# FIX: Create Crypto → Cryptodome alias BEFORE importing mega
+# FIX: Verify pycryptodome is installed (installs as 'Crypto', not 'Cryptodome')
 try:
-    import Cryptodome
-    sys.modules['Crypto'] = Cryptodome
-    sys.modules['Crypto.Cipher'] = Cryptodome.Cipher
-    sys.modules['Crypto.PublicKey'] = Cryptodome.PublicKey
-    sys.modules['Crypto.Protocol'] = Cryptodome.Protocol
-    sys.modules['Crypto.Random'] = Cryptodome.Random
-    sys.modules['Crypto.Hash'] = Cryptodome.Hash
-    sys.modules['Crypto.Util'] = Cryptodome.Util
+    import Crypto
+    from Crypto.Cipher import AES
+    logging.info(f"✅ pycryptodome found (version {Crypto.__version__}) - MEGA sync enabled")
 except ImportError:
     logging.warning("⚠️ pycryptodome not found - MEGA sync may fail")
+    Crypto = None
 
 from mega import Mega
 

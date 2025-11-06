@@ -58,9 +58,31 @@ class MemoryRootAgent(HelixAgent):
             try:
                 api_key = os.getenv("OPENAI_API_KEY")
                 if api_key:
-                    self.openai_client = AsyncOpenAI(api_key=api_key)
+                    # Initialize with explicit parameters to avoid compatibility issues
+                    # Note: AsyncOpenAI v1.54+ doesn't support 'proxies' parameter
+                    self.openai_client = AsyncOpenAI(
+                        api_key=api_key,
+                        max_retries=2,
+                        timeout=60.0
+                    )
+                    print("✅ OpenAI client initialized - GPT-4o synthesis enabled")
                 else:
                     print("⚠ OPENAI_API_KEY not set - MemoryRoot will function in limited mode")
+                    self.openai_client = None
+            except TypeError as e:
+                # Handle version incompatibility issues
+                if 'proxies' in str(e):
+                    try:
+                        # Fallback: Try initializing with just api_key
+                        self.openai_client = AsyncOpenAI(api_key=api_key)
+                        print("✅ OpenAI client initialized (compatibility mode)")
+                    except Exception as e2:
+                        print(f"⚠ OpenAI initialization failed: {e2}")
+                        print("   MemoryRoot will function in limited mode without GPT4o synthesis")
+                        self.openai_client = None
+                else:
+                    print(f"⚠ OpenAI initialization failed: {e}")
+                    print("   MemoryRoot will function in limited mode without GPT4o synthesis")
                     self.openai_client = None
             except Exception as e:
                 print(f"⚠ OpenAI initialization failed: {e}")
