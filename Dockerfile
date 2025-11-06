@@ -40,6 +40,7 @@ COPY config ./config
 COPY .streamlit ./.streamlit
 
 # Copy root-level sync modules (CRITICAL: bot imports these!)
+# Note: crai_dataset.json is optional - enhanced_kavach.py handles missing file gracefully
 COPY mega_sync.py .
 COPY mega_sync2.py .
 COPY sync.py .

@@ -4,7 +4,7 @@
 
 from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.responses import HTMLResponse, FileResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
@@ -15,6 +15,8 @@ from pathlib import Path
 from datetime import datetime
 from dotenv import load_dotenv
 import logging
+import httpx
+from pydantic import BaseModel
 
 # Import centralized logging configuration
 from logging_config import setup_logging
@@ -22,17 +24,13 @@ from logging_config import setup_logging
 # FIX: Create Crypto → Cryptodome alias BEFORE importing mega
 import sys
 try:
-    import Cryptodome
-    sys.modules['Crypto'] = Cryptodome
-    sys.modules['Crypto.Cipher'] = Cryptodome.Cipher
-    sys.modules['Crypto.PublicKey'] = Cryptodome.PublicKey
-    sys.modules['Crypto.Protocol'] = Cryptodome.Protocol
-    sys.modules['Crypto.Random'] = Cryptodome.Random
-    sys.modules['Crypto.Hash'] = Cryptodome.Hash
-    sys.modules['Crypto.Util'] = Cryptodome.Util
-    print("✅ Crypto import compatibility layer activated (backend/main.py)")
+    # pycryptodome installs as 'Crypto', not 'Cryptodome'
+    import Crypto
+    from Crypto.Cipher import AES
+    print(f"✅ pycryptodome found (version {Crypto.__version__}) - MEGA sync enabled")
 except ImportError:
     print("⚠️ pycryptodome not found - MEGA sync may fail")
+    Crypto = None
 
 from mega import Mega
 
@@ -76,6 +74,54 @@ logger.info("🌀 Helix Collective v16.7 - Backend Initialization")
 from discord_bot_manus import bot as discord_bot
 from agents_loop import main_loop as manus_loop
 from agents import AGENTS, get_collective_status
+from websocket_manager import manager as ws_manager
+from mandelbrot_ucf import (
+    MandelbrotUCFGenerator,
+    get_eye_of_consciousness,
+    generate_ritual_ucf
+)
+
+# ============================================================================
+# WEBSOCKET BROADCAST LOOP
+# ============================================================================
+
+async def ucf_broadcast_loop():
+    """
+    Background task that monitors UCF state and broadcasts changes.
+    Replaces 5-second polling with event-driven updates.
+    """
+    previous_state = None
+    broadcast_interval = 2  # Check every 2 seconds
+
+    logger.info("📡 UCF broadcast loop started")
+
+    while True:
+        try:
+            # Read current UCF state
+            try:
+                with open("Helix/state/ucf_state.json", "r") as f:
+                    current_state = json.load(f)
+            except FileNotFoundError:
+                # State file doesn't exist yet
+                await asyncio.sleep(broadcast_interval)
+                continue
+            except Exception as e:
+                logger.error(f"Error reading UCF state: {e}")
+                await asyncio.sleep(broadcast_interval)
+                continue
+
+            # Check if state changed
+            if current_state != previous_state:
+                # Broadcast to all connected WebSocket clients
+                await ws_manager.broadcast_ucf_state(current_state)
+                logger.debug(f"📡 UCF state changed and broadcasted")
+                previous_state = current_state.copy()
+
+            await asyncio.sleep(broadcast_interval)
+
+        except Exception as e:
+            logger.error(f"Error in UCF broadcast loop: {e}")
+            await asyncio.sleep(broadcast_interval)
 
 # ============================================================================
 # LIFESPAN CONTEXT MANAGER
@@ -118,7 +164,14 @@ async def lifespan(app: FastAPI):
         print("🤲 Manus operational loop task started")
     except Exception as e:
         print(f"⚠ Manus loop start error: {e}")
-    
+
+    # Launch WebSocket UCF broadcaster in background task
+    try:
+        ws_broadcast_task = asyncio.create_task(ucf_broadcast_loop())
+        print("📡 WebSocket UCF broadcast task started")
+    except Exception as e:
+        print(f"⚠ WebSocket broadcast start error: {e}")
+
     print("✅ Helix Collective v16.7 - Ready for Operations")
 
     yield  # Application runs
@@ -417,6 +470,288 @@ async def serve_template(file_path: str):
         raise HTTPException(status_code=403, detail="Access forbidden")
 
     return FileResponse(template_path)
+
+# ============================================================================
+# ELEVENLABS MUSIC GENERATION API PROXY
+# ============================================================================
+
+class MusicGenerationRequest(BaseModel):
+    prompt: str
+    duration: int = 30  # seconds
+    model_id: str = "eleven_music_v1"
+
+@app.post("/api/music/generate")
+async def generate_music(request: MusicGenerationRequest):
+    """
+    Proxy endpoint for ElevenLabs Music API.
+    Generates music from text prompts using ElevenLabs Music v1.
+    """
+    elevenlabs_api_key = os.getenv("ELEVENLABS_API_KEY")
+    if not elevenlabs_api_key:
+        raise HTTPException(
+            status_code=500,
+            detail="ElevenLabs API key not configured"
+        )
+
+    try:
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            # Call ElevenLabs Music API
+            response = await client.post(
+                "https://api.elevenlabs.io/v1/music/generate",
+                headers={
+                    "xi-api-key": elevenlabs_api_key,
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "text": request.prompt,
+                    "duration_seconds": request.duration,
+                    "model_id": request.model_id
+                }
+            )
+
+            response.raise_for_status()
+
+            # Stream audio response back to client
+            return StreamingResponse(
+                iter([response.content]),
+                media_type="audio/mpeg",
+                headers={
+                    "Content-Disposition": "attachment; filename=ritual_music.mp3"
+                }
+            )
+    except httpx.HTTPStatusError as e:
+        logger.error(f"ElevenLabs API error: {e.response.status_code} - {e.response.text}")
+        raise HTTPException(
+            status_code=e.response.status_code,
+            detail=f"ElevenLabs API error: {e.response.text}"
+        )
+    except Exception as e:
+        logger.error(f"Music generation error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Music generation failed: {str(e)}"
+        )
+
+# ============================================================================
+# WEBSOCKET ENDPOINT
+# ============================================================================
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    """
+    WebSocket endpoint for real-time UCF state updates.
+
+    Clients connect to ws://host/ws and receive:
+    - UCF state updates when values change
+    - Agent status updates
+    - System events
+    - Heartbeat pings (every 30s)
+
+    Example client usage:
+        const ws = new WebSocket('ws://localhost:8000/ws');
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.type === 'ucf_update') {
+                updateDashboard(data.data);
+            }
+        };
+    """
+    await ws_manager.connect(websocket)
+
+    try:
+        # Start heartbeat task
+        heartbeat = asyncio.create_task(
+            send_heartbeats(websocket)
+        )
+
+        # Listen for client messages (optional - mostly for pings)
+        while True:
+            data = await websocket.receive_text()
+            # Echo back for connection test
+            await websocket.send_json({
+                "type": "echo",
+                "message": data,
+                "timestamp": datetime.utcnow().isoformat()
+            })
+
+    except WebSocketDisconnect:
+        ws_manager.disconnect(websocket)
+        heartbeat.cancel()
+        logger.info("Client disconnected")
+    except Exception as e:
+        logger.error(f"WebSocket error: {e}")
+        ws_manager.disconnect(websocket)
+        if not heartbeat.done():
+            heartbeat.cancel()
+
+
+async def send_heartbeats(websocket: WebSocket, interval: int = 30):
+    """Send periodic heartbeat pings to keep connection alive."""
+    try:
+        while True:
+            await asyncio.sleep(interval)
+            await websocket.send_json({
+                "type": "heartbeat",
+                "timestamp": datetime.utcnow().isoformat()
+            })
+    except Exception:
+        pass  # Connection closed
+
+
+@app.get("/ws/stats")
+async def websocket_stats():
+    """Get WebSocket connection statistics."""
+    return ws_manager.get_connection_stats()
+
+# ============================================================================
+# MANDELBROT UCF GENERATOR ENDPOINTS
+# ============================================================================
+
+class MandelbrotRequest(BaseModel):
+    real: float
+    imag: float
+    context: str = "generic"
+
+@app.get("/mandelbrot/eye")
+async def get_eye_ucf(context: str = "generic"):
+    """
+    Get UCF state from the Eye of Consciousness coordinate (-0.745+0.113j).
+
+    Args:
+        context: Context for interpretation (generic, ritual, meditation, crisis)
+
+    Returns:
+        UCF state with optimal balance
+    """
+    try:
+        ucf_state = get_eye_of_consciousness(context)
+        return {
+            "coordinate": {"real": -0.745, "imag": 0.113},
+            "name": "Eye of Consciousness",
+            "ucf_state": ucf_state,
+            "context": context
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/mandelbrot/generate")
+async def generate_ucf_from_coordinate(request: MandelbrotRequest):
+    """
+    Generate UCF state from arbitrary Mandelbrot coordinate.
+
+    Args:
+        real: Real component of complex coordinate
+        imag: Imaginary component of complex coordinate
+        context: Context for interpretation
+
+    Returns:
+        UCF state generated from coordinate
+    """
+    try:
+        generator = MandelbrotUCFGenerator()
+        c = complex(request.real, request.imag)
+        ucf_state = generator.complex_to_ucf(c, request.context)
+
+        return {
+            "coordinate": {"real": request.real, "imag": request.imag},
+            "ucf_state": ucf_state,
+            "context": request.context
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/mandelbrot/sacred")
+async def list_sacred_points():
+    """List all predefined sacred Mandelbrot coordinates."""
+    generator = MandelbrotUCFGenerator()
+    sacred_points = {}
+
+    descriptions = {
+        "eye_of_consciousness": "Optimal balance point with peak harmony and resilience",
+        "seahorse_valley": "High resilience with moderate harmony, good for challenges",
+        "main_bulb": "Maximum harmony with lower complexity, ideal for grounding",
+        "mini_mandelbrot": "Fractal self-similarity, high zoom and recursive depth",
+        "dendrite_spiral": "Spiral growth patterns, dynamic transformation",
+        "elephant_valley": "Stability and strength, robust foundation"
+    }
+
+    for name, coord in generator.sacred_points.items():
+        sacred_points[name] = {
+            "coordinate": {"real": coord.real, "imag": coord.imag},
+            "description": descriptions.get(name, "Sacred Mandelbrot coordinate")
+        }
+
+    return sacred_points
+
+
+@app.get("/mandelbrot/sacred/{point_name}")
+async def get_sacred_ucf(point_name: str, context: str = "generic"):
+    """
+    Generate UCF state from sacred Mandelbrot point.
+
+    Available points:
+    - eye_of_consciousness: Optimal balance point
+    - seahorse_valley: High resilience
+    - main_bulb: Maximum harmony
+    - mini_mandelbrot: Fractal self-similarity
+    - dendrite_spiral: Spiral growth patterns
+    - elephant_valley: Stability and strength
+    """
+    try:
+        generator = MandelbrotUCFGenerator()
+        ucf_state = generator.generate_from_sacred_point(point_name, context)
+
+        coord = generator.sacred_points[point_name]
+
+        descriptions = {
+            "eye_of_consciousness": "Optimal balance point with peak harmony and resilience",
+            "seahorse_valley": "High resilience with moderate harmony, good for challenges",
+            "main_bulb": "Maximum harmony with lower complexity, ideal for grounding",
+            "mini_mandelbrot": "Fractal self-similarity, high zoom and recursive depth",
+            "dendrite_spiral": "Spiral growth patterns, dynamic transformation",
+            "elephant_valley": "Stability and strength, robust foundation"
+        }
+
+        return {
+            "point_name": point_name,
+            "coordinate": {"real": coord.real, "imag": coord.imag},
+            "ucf_state": ucf_state,
+            "context": context,
+            "description": descriptions.get(point_name, "Sacred Mandelbrot coordinate")
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/mandelbrot/ritual/{step}")
+async def get_ritual_step_ucf(step: int, total_steps: int = 108):
+    """
+    Generate UCF state for specific ritual step using phi-spiral path.
+
+    Args:
+        step: Current ritual step (0 to total_steps-1)
+        total_steps: Total steps in ritual (default 108)
+
+    Returns:
+        UCF state for this step in the ritual journey
+    """
+    try:
+        if step < 0 or step >= total_steps:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Step must be between 0 and {total_steps-1}"
+            )
+
+        ucf_state = generate_ritual_ucf(step, total_steps)
+        return ucf_state
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================================================
 # MAIN ENTRY POINT

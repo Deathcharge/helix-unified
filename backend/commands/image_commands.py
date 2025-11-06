@@ -5,6 +5,7 @@ Image Commands for Helix Discord Bot
 """
 
 import io
+import json
 import discord
 from discord.ext import commands
 from typing import Optional
@@ -124,14 +125,59 @@ class ImageCommands(commands.Cog):
 
             if result:
                 await ctx.send(f"✅ **{mode.upper()} fractal generated successfully!**")
+
+                # 🌀 ZAPIER WEBHOOK: Log fractal generation event
+                if hasattr(self.bot, 'zapier_client') and self.bot.zapier_client:
+                    try:
+                        await self.bot.zapier_client.log_event(
+                            event_title=f"{mode.capitalize()} Fractal Generated",
+                            event_type="fractal_generation",
+                            agent_name="Samsara (Visualization)",
+                            description=f"User {ctx.author.name} generated {mode} fractal. Command: !{ctx.invoked_with}",
+                            ucf_snapshot=json.dumps(ucf_state)
+                        )
+
+                        # Log telemetry
+                        await self.bot.zapier_client.log_telemetry(
+                            metric_name="fractal_generated",
+                            value=1.0,
+                            component="Samsara",
+                            metadata={"mode": mode, "user": str(ctx.author), "harmony": ucf_state.get("harmony", 0)}
+                        )
+                    except Exception as webhook_error:
+                        print(f"⚠️ Zapier webhook error: {webhook_error}")
             else:
                 await ctx.send("❌ **Fractal generation failed** - check logs for details")
+
+                # 🌀 ZAPIER WEBHOOK: Log error
+                if hasattr(self.bot, 'zapier_client') and self.bot.zapier_client:
+                    try:
+                        await self.bot.zapier_client.send_error_alert(
+                            error_message=f"Fractal generation failed for mode: {mode}",
+                            component="Samsara",
+                            severity="low",
+                            context={"mode": mode, "user": str(ctx.author)}
+                        )
+                    except Exception as webhook_error:
+                        print(f"⚠️ Zapier webhook error: {webhook_error}")
 
         except Exception as e:
             await ctx.send(f"❌ Fractal generation error: {str(e)}")
             print(f"Image command error: {e}")
             import traceback
             traceback.print_exc()
+
+            # 🌀 ZAPIER WEBHOOK: Log critical error
+            if hasattr(self.bot, 'zapier_client') and self.bot.zapier_client:
+                try:
+                    await self.bot.zapier_client.send_error_alert(
+                        error_message=f"Fractal generation exception: {str(e)}",
+                        component="Samsara",
+                        severity="medium",
+                        context={"mode": mode, "user": str(ctx.author), "error": str(e)}
+                    )
+                except Exception as webhook_error:
+                    print(f"⚠️ Zapier webhook error: {webhook_error}")
 
 
 async def setup(bot):

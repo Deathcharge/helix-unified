@@ -48,8 +48,13 @@ class NotionSyncDaemon:
             self.notion_client = HelixNotionClient() if self.enabled else None
             self.load_ucf_state = load_ucf_state
             self.agents = AGENTS
-        except ImportError as e:
-            logger.error(f"Failed to import required modules: {e}")
+        except (ImportError, ValueError) as e:
+            logger.error(f"Failed to initialize Notion client: {e}")
+            self.notion_client = None
+            self.load_ucf_state = None
+            self.agents = None
+        except Exception as e:
+            logger.error(f"Unexpected error during initialization: {e}", exc_info=True)
             self.notion_client = None
             self.load_ucf_state = None
             self.agents = None
@@ -245,7 +250,7 @@ async def trigger_manual_sync():
         return "⚠️ Notion sync is not enabled. Set `NOTION_SYNC_ENABLED=true` in environment."
     
     if not daemon.notion_client:
-        return "❌ Notion client not configured. Check `NOTION_API_KEY` and `NOTION_DATABASE_ID`."
+        return "❌ Notion client not configured. Check Railway logs for initialization errors. Verify `NOTION_API_KEY` is set correctly."
     
     try:
         await daemon.perform_sync_cycle()
