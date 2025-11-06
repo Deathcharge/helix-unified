@@ -2,7 +2,7 @@
 # backend/main.py — FastAPI + Discord Bot Launcher (FIXED IMPORTS)
 # Author: Andrew John Ward (Architect)
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
@@ -328,6 +328,78 @@ async def get_ucf_state():
         raise HTTPException(status_code=404, detail="UCF state not found")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================================================
+# WEBSOCKET ENDPOINT - REAL-TIME STREAMING
+# ============================================================================
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    """
+    WebSocket endpoint for real-time UCF and agent status streaming.
+
+    Streams updates every 5 seconds with:
+    - UCF state (harmony, resilience, prana, drishti, klesha, zoom)
+    - Agent statuses
+    - System heartbeat
+    - Timestamp
+
+    Usage:
+        const ws = new WebSocket('wss://helix-unified-production.up.railway.app/ws');
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            console.log('UCF:', data.ucf_state);
+            console.log('Agents:', data.agents);
+        };
+    """
+    await websocket.accept()
+
+    try:
+        while True:
+            # Gather current state
+            try:
+                # Get agent status
+                agents = await get_collective_status()
+
+                # Read UCF state
+                ucf_state = {}
+                try:
+                    with open("Helix/state/ucf_state.json", "r") as f:
+                        ucf_state = json.load(f)
+                except:
+                    pass
+
+                # Read heartbeat
+                heartbeat = {}
+                try:
+                    with open("Helix/state/heartbeat.json", "r") as f:
+                        heartbeat = json.load(f)
+                except:
+                    pass
+
+                # Send update
+                await websocket.send_json({
+                    "type": "status_update",
+                    "ucf_state": ucf_state,
+                    "agents": agents,
+                    "heartbeat": heartbeat,
+                    "timestamp": datetime.utcnow().isoformat()
+                })
+
+            except Exception as e:
+                await websocket.send_json({
+                    "type": "error",
+                    "error": str(e),
+                    "timestamp": datetime.utcnow().isoformat()
+                })
+
+            # Wait 5 seconds before next update
+            await asyncio.sleep(5)
+
+    except WebSocketDisconnect:
+        logger.info("WebSocket client disconnected")
+    except Exception as e:
+        logger.error(f"WebSocket error: {e}")
 
 # ============================================================================
 # TEMPLATE SERVING ENDPOINTS
