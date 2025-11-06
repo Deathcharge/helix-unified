@@ -3,6 +3,7 @@
 # Author: Andrew John Ward (Architect)
 
 from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
@@ -69,7 +70,7 @@ logger = setup_logging(
     log_level=os.getenv("LOG_LEVEL", "INFO"),
     enable_rotation=True
 )
-logger.info("🌀 Helix Collective v14.5 - Backend Initialization")
+logger.info("🌀 Helix Collective v16.7 - Backend Initialization")
 
 # ✅ FIXED IMPORTS - Use relative imports instead of absolute
 from discord_bot_manus import bot as discord_bot
@@ -83,7 +84,7 @@ from agents import AGENTS, get_collective_status
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Start Discord bot and Manus loop on startup."""
-    print("🌀 Helix Collective v14.5 - Startup Sequence")
+    print("🌀 Helix Collective v16.7 - Startup Sequence")
     
     # Initialize directories
     Path("Helix/state").mkdir(parents=True, exist_ok=True)
@@ -118,22 +119,31 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"⚠ Manus loop start error: {e}")
     
-    print("✅ Helix Collective v14.5 - Ready for Operations")
-    
+    print("✅ Helix Collective v16.7 - Ready for Operations")
+
     yield  # Application runs
-    
+
     # Cleanup on shutdown
-    print("🌙 Helix Collective v14.5 - Shutdown Sequence")
+    print("🌙 Helix Collective v16.7 - Shutdown Sequence")
 
 # ============================================================================
 # FASTAPI APP
 # ============================================================================
 
 app = FastAPI(
-    title="🌀 Helix Collective v14.5",
-    description="Quantum Handshake Edition - Multi-Agent AI System",
-    version="14.5.0",
+    title="🌀 Helix Collective v16.7",
+    description="Documentation Consolidation & Real-Time Streaming",
+    version="16.7.0",
     lifespan=lifespan
+)
+
+# Add CORS middleware to allow frontend access
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins for now
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["*"],
 )
 
 # Setup templates directory (use absolute path for Railway compatibility)
@@ -193,34 +203,9 @@ templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 # ============================================================================
 
 @app.get("/health")
-async def health_check():
-    """Railway health check endpoint."""
-    try:
-        # Check if state files exist
-        state_file = Path("Helix/state/ucf_state.json")
-        heartbeat_file = Path("Helix/state/heartbeat.json")
-        
-        state_exists = state_file.exists()
-        heartbeat_exists = heartbeat_file.exists()
-        
-        # Get agent count
-        agent_count = len(AGENTS)
-        
-        return {
-            "status": "healthy",
-            "service": "helix-collective",
-            "version": "14.5.0",
-            "agents": agent_count,
-            "state_initialized": state_exists,
-            "heartbeat_active": heartbeat_exists,
-            "timestamp": datetime.utcnow().isoformat()
-        }
-    except Exception as e:
-        return {
-            "status": "degraded",
-            "error": str(e),
-            "timestamp": datetime.utcnow().isoformat()
-        }
+def health_check():
+    """Minimal health check endpoint - always returns 200."""
+    return {"ok": True}
 
 # ============================================================================
 # ROOT ENDPOINT - WEB DASHBOARD
@@ -242,7 +227,7 @@ async def api_info():
     try:
         status = await get_collective_status()
         return {
-            "message": "🌀 Helix Collective v14.5 - Quantum Handshake Edition",
+            "message": "🌀 Helix Collective v16.7 - Documentation Consolidation & Real-Time Streaming",
             "status": "operational",
             "agents": len(status),
             "agent_names": list(status.keys()),
@@ -251,51 +236,63 @@ async def api_info():
                 "status": "/status",
                 "agents": "/agents",
                 "ucf": "/ucf",
+                "ws": "/ws",
                 "dashboard": "/",
                 "docs": "/docs"
             }
         }
     except Exception as e:
         return {
-            "message": "🌀 Helix Collective v14.5 - Quantum Handshake Edition",
+            "message": "🌀 Helix Collective v16.7 - Documentation Consolidation & Real-Time Streaming",
             "status": "initializing",
             "error": str(e)
         }
 
 # ============================================================================
-# AGENT STATUS ENDPOINT
+# AGENT STATUS ENDPOINT (MINIMAL ROBUST VERSION)
 # ============================================================================
 
-@app.get("/status")
-async def get_status():
-    """Get full system status."""
+def read_json(p: Path, default):
+    """Read JSON file with fallback to default."""
     try:
-        status = await get_collective_status()
-        
-        # Read UCF state
-        ucf_state = {}
-        try:
-            with open("Helix/state/ucf_state.json", "r") as f:
-                ucf_state = json.load(f)
-        except:
-            pass
-        
-        # Read heartbeat
-        heartbeat = {}
-        try:
-            with open("Helix/state/heartbeat.json", "r") as f:
-                heartbeat = json.load(f)
-        except:
-            pass
-        
-        return {
-            "agents": status,
-            "ucf_state": ucf_state,
-            "heartbeat": heartbeat,
-            "timestamp": datetime.utcnow().isoformat()
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        return json.loads(p.read_text())
+    except Exception:
+        return default
+
+@app.get("/status")
+def get_status():
+    """Get full system status - minimal robust version."""
+    # Read UCF state with defaults
+    ucf = read_json(Path("Helix/state/ucf_state.json"), {
+        "harmony": None,
+        "resilience": None,
+        "prana": None,
+        "drishti": None,
+        "klesha": None,
+        "zoom": None
+    })
+
+    # Read agents state with defaults
+    agents = read_json(Path("Helix/state/agents.json"), {
+        "active": [],
+        "count": 0
+    })
+
+    # Read heartbeat with defaults
+    heartbeat = read_json(Path("Helix/state/heartbeat.json"), {
+        "ts": None
+    })
+
+    return {
+        "system": {
+            "operational": True,
+            "ts": heartbeat.get("ts")
+        },
+        "ucf": ucf,
+        "agents": agents,
+        "version": os.getenv("SYSTEM_VERSION", "16.7"),
+        "timestamp": datetime.utcnow().isoformat()
+    }
 
 # ============================================================================
 # AGENT LIST ENDPOINT
@@ -427,11 +424,11 @@ async def serve_template(file_path: str):
 
 if __name__ == "__main__":
     import uvicorn
-    
+
     # Get port from Railway environment
     port = int(os.getenv("PORT", 8000))
-    
-    print(f"🚀 Starting Helix Collective v14.5 on port {port}")
+
+    print(f"🚀 Starting Helix Collective v16.7 on port {port}")
     
     # CRITICAL: Must bind to 0.0.0.0 for Railway
     uvicorn.run(
