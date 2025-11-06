@@ -1957,6 +1957,109 @@ async def manus_status(ctx):
 
     await ctx.send(embed=ucf_embed)
 
+@bot.command(name="discovery", aliases=["endpoints", "portals", "discover"])
+async def discovery_command(ctx):
+    """Display Helix discovery endpoints for external agents (v16.7)"""
+
+    # Fetch live status using aiohttp
+    harmony = "N/A"
+    agents_count = "N/A"
+    operational = False
+    health_emoji = "❓"
+
+    try:
+        if bot.http_session:
+            async with bot.http_session.get(
+                "https://helix-unified-production.up.railway.app/status",
+                timeout=aiohttp.ClientTimeout(total=5)
+            ) as resp:
+                if resp.status == 200:
+                    status = await resp.json()
+                    harmony = status.get('ucf', {}).get('harmony', 0)
+                    agents_count = status.get('agents', {}).get('count', 0)
+                    operational = status.get('system', {}).get('operational', False)
+
+                    # Determine health emoji
+                    if operational and harmony >= 0.60:
+                        health_emoji = "✅"
+                    elif operational and harmony >= 0.30:
+                        health_emoji = "⚠️"
+                    else:
+                        health_emoji = "❌"
+    except Exception as e:
+        print(f"Discovery command: Failed to fetch live status: {e}")
+
+    # Create embed
+    embed = discord.Embed(
+        title="🌀 Helix Discovery Protocol",
+        description="External agent discovery endpoints for Helix Collective v16.7",
+        color=discord.Color.from_rgb(0, 255, 255)  # Cyan
+    )
+
+    embed.add_field(
+        name="📚 Manifest (Static Architecture)",
+        value=(
+            "```\nhttps://deathcharge.github.io/helix-unified/helix-manifest.json\n```\n"
+            "→ Codex structure, 14 agents, UCF schema, Tony Accords\n"
+            "→ Static discovery via GitHub Pages"
+        ),
+        inline=False
+    )
+
+    embed.add_field(
+        name="🌐 Discovery Endpoint (.well-known)",
+        value=(
+            "```\nhttps://helix-unified-production.up.railway.app/.well-known/helix.json\n```\n"
+            "→ Complete system manifest with endpoints, features, agents\n"
+            "→ Standard discovery protocol for external agents"
+        ),
+        inline=False
+    )
+
+    embed.add_field(
+        name="🌊 Live State (Real-Time UCF)",
+        value=(
+            "```\nhttps://helix-unified-production.up.railway.app/status\n```\n"
+            f"→ Current UCF metrics (Harmony: {harmony})\n"
+            f"→ System health: {health_emoji} {agents_count}/14 agents"
+        ),
+        inline=False
+    )
+
+    embed.add_field(
+        name="📡 WebSocket Stream (Live Updates)",
+        value=(
+            "```\nwss://helix-unified-production.up.railway.app/ws\n```\n"
+            "→ Live UCF pulses every 5s\n"
+            "→ Ritual events, telemetry stream, agent state changes"
+        ),
+        inline=False
+    )
+
+    embed.add_field(
+        name="📖 API Documentation",
+        value=(
+            "```\nhttps://helix-unified-production.up.railway.app/docs\n```\n"
+            "→ Interactive Swagger/OpenAPI documentation\n"
+            "→ Test endpoints directly in browser"
+        ),
+        inline=False
+    )
+
+    embed.add_field(
+        name="🎯 Quick Test (curl)",
+        value=(
+            "```bash\n"
+            "curl https://helix-unified-production.up.railway.app/status | jq\n"
+            "```"
+        ),
+        inline=False
+    )
+
+    embed.set_footer(text="Tat Tvam Asi 🙏 | Helix Discovery Protocol v16.7 | Use !status for live UCF")
+
+    await ctx.send(embed=embed)
+
 @bot.command(name="zapier_test", aliases=["zap", "webhook_test"])
 async def test_zapier_webhook(ctx):
     """Test Zapier Master Webhook integration (all 7 paths)"""
@@ -2099,6 +2202,7 @@ async def commands_list(ctx):
         name="📊 Core System",
         value=(
             "`!status` (`!s`, `!stat`) - System status and UCF state\n"
+            "`!discovery` (`!endpoints`, `!portals`, `!discover`) - Discovery endpoints for external agents\n"
             "`!agents` (`!collective`, `!team`) - View all agents\n"
             "`!ucf` (`!field`) - UCF field metrics\n"
             "`!health` (`!check`, `!diagnostic`) - System diagnostics\n"
