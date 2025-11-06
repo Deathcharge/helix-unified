@@ -27,6 +27,7 @@ from typing import Optional, Dict, Any
 
 import discord
 from discord.ext import commands, tasks
+import aiohttp
 
 from pathlib import Path
 
@@ -44,6 +45,7 @@ from z88_ritual_engine import execute_ritual, load_ucf_state
 from services.ucf_calculator import UCFCalculator
 from services.state_manager import StateManager
 from discord_embeds import HelixEmbeds  # v15.3 rich embeds
+from zapier_client import ZapierClient  # v16.5 Zapier integration
 
 # Import consciousness modules (v15.3)
 from kael_consciousness_core import ConsciousnessCore
@@ -90,6 +92,10 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 # Bot start time for uptime tracking
 bot.start_time = None
+
+# Global aiohttp session for Zapier client
+bot.http_session = None
+bot.zapier_client = None
 
 # ============================================================================
 # MULTI-COMMAND BATCH EXECUTION (v16.3)
@@ -391,6 +397,29 @@ async def on_ready():
     print(f"   Telemetry Channel: {TELEMETRY_CHANNEL_ID}")
     print(f"   Storage Channel: {STORAGE_CHANNEL_ID}")
 
+    # Initialize Zapier client for monitoring
+    if not bot.http_session:
+        bot.http_session = aiohttp.ClientSession()
+        bot.zapier_client = ZapierClient(bot.http_session)
+        print("✅ Zapier monitoring client initialized")
+
+        # Log bot startup event
+        try:
+            await bot.zapier_client.log_event(
+                event_title="Manus Bot Started",
+                event_type="System",
+                agent_name="Manus",
+                description=f"Discord bot v14.5 successfully initialized with {len(AGENTS)} agents"
+            )
+            await bot.zapier_client.update_agent(
+                agent_name="Manus",
+                status="Active",
+                last_action="Bot startup",
+                health_score=100
+            )
+        except Exception as e:
+            print(f"⚠️ Zapier logging failed: {e}")
+
     # Load Memory Root commands (GPT4o long-term memory)
     try:
         from discord_commands_memory import MemoryRootCommands
@@ -482,7 +511,7 @@ async def on_command_error(ctx, error):
         await ctx.send(
             "❌ **Unknown command**\n"
             f"Available commands: {cmd_list}\n"
-            f"Use `!help` for full command list"
+            f"Use `!commands` for full command list"
         )
     elif isinstance(error, commands.MissingRequiredArgument):
         await ctx.send(
@@ -500,7 +529,23 @@ async def on_command_error(ctx, error):
             "timestamp": datetime.datetime.now().isoformat()
         }
         log_to_shadow("errors", error_data)
-        
+
+        # Send error alert to Zapier
+        if bot.zapier_client:
+            try:
+                await bot.zapier_client.send_error_alert(
+                    error_message=str(error)[:500],
+                    component="discord_bot",
+                    severity="high",
+                    context={
+                        "command": ctx.command.name if ctx.command else "unknown",
+                        "user": str(ctx.author),
+                        "channel": str(ctx.channel)
+                    }
+                )
+            except Exception as e:
+                print(f"⚠️ Zapier error alert failed: {e}")
+
         await ctx.send(
             "🦑 **System error detected**\n"
             f"```{str(error)[:200]}```\n"
@@ -1890,8 +1935,136 @@ async def manus_status(ctx):
 
     await ctx.send(embed=ucf_embed)
 
-@bot.command(name="help", aliases=["h", "commands", "?"])
-async def help_command(ctx):
+@bot.command(name="zapier_test", aliases=["zap", "webhook_test"])
+async def test_zapier_webhook(ctx):
+    """Test Zapier Master Webhook integration (all 7 paths)"""
+    if not bot.zapier_client:
+        await ctx.send("❌ **Zapier client not initialized**\nCheck Railway environment variable: `ZAPIER_MASTER_HOOK_URL`")
+        return
+
+    embed = discord.Embed(
+        title="🧪 Testing Zapier Master Webhook",
+        description="Sending test events to all 7 routing paths...",
+        color=discord.Color.blue()
+    )
+    await ctx.send(embed=embed)
+
+    results = []
+
+    try:
+        # Test Path A: Event Log
+        result_a = await bot.zapier_client.log_event(
+            event_title="Manual Webhook Test",
+            event_type="Test",
+            agent_name="Manus",
+            description=f"Test triggered by {ctx.author.name} in #{ctx.channel.name}"
+        )
+        results.append(("Path A: Event Log → Notion", "✅" if result_a else "❌"))
+
+        # Test Path B: Agent Registry
+        result_b = await bot.zapier_client.update_agent(
+            agent_name="Manus",
+            status="Testing",
+            last_action=f"Webhook test by {ctx.author.name}",
+            health_score=100
+        )
+        results.append(("Path B: Agent Registry → Notion", "✅" if result_b else "❌"))
+
+        # Test Path C: System State
+        ucf = load_ucf_state()
+        result_c = await bot.zapier_client.update_system_state(
+            component="Discord Bot",
+            status="Testing",
+            harmony=ucf.get('harmony', 0.5),
+            verified=True
+        )
+        results.append(("Path C: System State → Notion", "✅" if result_c else "❌"))
+
+        # Test Path D: Discord Notification
+        result_d = await bot.zapier_client.send_discord_notification(
+            channel_name="status",
+            message=f"Test notification from {ctx.author.name}",
+            priority="low"
+        )
+        results.append(("Path D: Discord → Slack (PRO)", "✅" if result_d else "❌"))
+
+        # Test Path E: Telemetry
+        result_e = await bot.zapier_client.log_telemetry(
+            metric_name="webhook_test_manual",
+            value=1.0,
+            component="Discord Bot",
+            metadata={"user": str(ctx.author), "channel": str(ctx.channel)}
+        )
+        results.append(("Path E: Telemetry → Sheets (PRO)", "✅" if result_e else "❌"))
+
+        # Test Path F: Error Alert (low severity test)
+        result_f = await bot.zapier_client.send_error_alert(
+            error_message="Test alert - not a real error",
+            component="Discord Bot",
+            severity="low",
+            context={"test": True, "user": str(ctx.author)}
+        )
+        results.append(("Path F: Error Alert → Email (PRO)", "✅" if result_f else "❌"))
+
+        # Test Path G: Repository Action
+        result_g = await bot.zapier_client.log_repository_action(
+            repo_name="helix-unified",
+            action="webhook_test",
+            details=f"Manual test from Discord by {ctx.author.name}",
+            commit_hash="manual_test"
+        )
+        results.append(("Path G: Repository → Notion (PRO)", "✅" if result_g else "❌"))
+
+    except Exception as e:
+        await ctx.send(f"❌ **Error during webhook test:**\n```{str(e)[:200]}```")
+        return
+
+    # Build result embed
+    result_embed = discord.Embed(
+        title="🎯 Zapier Webhook Test Results",
+        description="All paths have been tested. Check Zapier dashboard for events.",
+        color=discord.Color.green()
+    )
+
+    passed = sum(1 for _, status in results if status == "✅")
+    result_embed.add_field(
+        name="Summary",
+        value=f"**{passed}/7** paths responded successfully",
+        inline=False
+    )
+
+    # Week 1 paths (FREE)
+    week1 = "\n".join([f"{status} {name}" for name, status in results[:3]])
+    result_embed.add_field(
+        name="📅 Week 1: Core Monitoring (FREE)",
+        value=week1,
+        inline=False
+    )
+
+    # Week 2-4 paths (PRO)
+    pro = "\n".join([f"{status} {name}" for name, status in results[3:]])
+    result_embed.add_field(
+        name="📅 Week 2-4: Advanced Features (PRO)",
+        value=pro,
+        inline=False
+    )
+
+    result_embed.add_field(
+        name="Next Steps",
+        value=(
+            "1. Check [Zapier Dashboard](https://zapier.com/app/history) for events\n"
+            "2. Verify data in Notion, Slack, Email\n"
+            "3. Configure downstream actions if needed"
+        ),
+        inline=False
+    )
+
+    result_embed.set_footer(text="🌀 Helix Collective v16.5 | Tat Tvam Asi 🙏")
+
+    await ctx.send(embed=result_embed)
+
+@bot.command(name="commands", aliases=["cmds", "helix_help", "?"])
+async def commands_list(ctx):
     """Display comprehensive list of all available commands"""
     embed = discord.Embed(
         title="🌀 Helix Collective Command Reference",
@@ -1907,7 +2080,8 @@ async def help_command(ctx):
             "`!agents` (`!collective`, `!team`) - View all agents\n"
             "`!ucf` (`!field`) - UCF field metrics\n"
             "`!health` (`!check`, `!diagnostic`) - System diagnostics\n"
-            "`!help` (`!h`, `!commands`, `!?`) - This help message"
+            "`!zapier_test` (`!zap`, `!webhook_test`) - Test Zapier webhook integration\n"
+            "`!commands` (`!cmds`, `!helix_help`, `!?`) - This command list"
         ),
         inline=False
     )

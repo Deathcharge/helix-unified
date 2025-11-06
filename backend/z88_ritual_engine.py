@@ -401,6 +401,61 @@ def execute_ritual(steps: int = 108) -> Dict:
     return result
 
 
+async def execute_ritual_with_monitoring(steps: int = 108, zapier_client=None) -> Dict:
+    """
+    Execute a ritual cycle with Zapier monitoring integration.
+
+    Args:
+        steps: Number of ritual steps (default 108)
+        zapier_client: Optional ZapierClient instance for monitoring
+
+    Returns:
+        Dictionary with ritual cycle results and final UCF state
+    """
+    import time
+    start_time = time.time()
+
+    # Execute the ritual
+    result = execute_ritual(steps)
+
+    # Log to Zapier if client provided
+    if zapier_client:
+        try:
+            # Log ritual completion event
+            await zapier_client.log_event(
+                event_title=f"Z-88 Ritual Completed ({steps} steps)",
+                event_type="Ritual",
+                agent_name="Vega",
+                description=f"Successfully completed {steps}-step ritual with {len(result.get('events', []))} events recorded",
+                ucf_snapshot=json.dumps(result.get("ucf_final", {}))
+            )
+
+            # Log telemetry
+            completion_time = time.time() - start_time
+            await zapier_client.log_telemetry(
+                metric_name="ritual_completion_time",
+                value=completion_time,
+                component="Z-88 Engine",
+                metadata={
+                    "steps": steps,
+                    "events_count": len(result.get('events', [])),
+                    "harmony": result.get("ucf_final", {}).get("harmony", 0.5)
+                }
+            )
+
+            # Update agent status
+            await zapier_client.update_agent(
+                agent_name="Vega",
+                status="Active",
+                last_action=f"Completed {steps}-step ritual",
+                health_score=int(result.get("ucf_final", {}).get("harmony", 0.5) * 100)
+            )
+        except Exception as e:
+            print(f"⚠️ Zapier logging failed in ritual engine: {e}")
+
+    return result
+
+
 # ============================================================================
 # ENTRY POINT
 # ============================================================================
