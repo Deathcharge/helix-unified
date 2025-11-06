@@ -261,6 +261,39 @@ def health_check():
     return {"ok": True}
 
 # ============================================================================
+# DISCOVERY MANIFEST (for external AI agents)
+# ============================================================================
+
+@app.get("/.well-known/helix.json")
+def helix_manifest():
+    """
+    Machine-readable manifest for external AI agents.
+
+    Exposes system capabilities, endpoints, UCF metrics, agents,
+    and integration guides for Claude, Grok, Chai, and other AIs.
+
+    Spec: helix-discovery-v1
+    """
+    manifest_path = Path("helix-manifest.json")
+    try:
+        manifest_data = json.loads(manifest_path.read_text())
+        return manifest_data
+    except FileNotFoundError:
+        logger.error(f"❌ Manifest not found: {manifest_path.resolve()}")
+        return {
+            "version": "1",
+            "error": "manifest_missing",
+            "note": "helix-manifest.json not found in repository root"
+        }
+    except Exception as e:
+        logger.error(f"❌ Error loading manifest: {e}")
+        return {
+            "version": "1",
+            "error": "manifest_load_failed",
+            "detail": str(e)
+        }
+
+# ============================================================================
 # ROOT ENDPOINT - WEB DASHBOARD
 # ============================================================================
 
@@ -313,6 +346,7 @@ def read_json(p: Path, default):
         return default
 
 @app.get("/status")
+@app.get("/api/status")  # Alias for consistency with external agents
 def get_status():
     """Get full system status - minimal robust version."""
     # Read UCF state with defaults
@@ -476,6 +510,8 @@ async def serve_template(file_path: str):
 # ============================================================================
 
 class MusicGenerationRequest(BaseModel):
+    model_config = {"protected_namespaces": ()}  # Allow model_id field
+
     prompt: str
     duration: int = 30  # seconds
     model_id: str = "eleven_music_v1"
