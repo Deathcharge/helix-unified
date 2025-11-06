@@ -405,17 +405,39 @@ async def on_ready():
 
         # Log bot startup event
         try:
+            # Load UCF state for system state reporting
+            try:
+                import json
+                from pathlib import Path
+                ucf_path = Path("Helix/state/ucf_state.json")
+                if ucf_path.exists():
+                    with open(ucf_path) as f:
+                        ucf_state = json.load(f)
+                    harmony = float(ucf_state.get("harmony", 0.5))
+                else:
+                    harmony = 0.5
+            except Exception:
+                harmony = 0.5
+
             await bot.zapier_client.log_event(
                 event_title="Manus Bot Started",
-                event_type="System",
+                event_type="system_boot",
                 agent_name="Manus",
-                description=f"Discord bot v14.5 successfully initialized with {len(AGENTS)} agents"
+                description=f"Discord bot v14.5 successfully initialized with {len(AGENTS)} agents. Harmony: {harmony:.3f}",
+                ucf_snapshot=json.dumps(ucf_state) if 'ucf_state' in locals() else "{}"
             )
             await bot.zapier_client.update_agent(
                 agent_name="Manus",
                 status="Active",
                 last_action="Bot startup",
                 health_score=100
+            )
+            await bot.zapier_client.update_system_state(
+                component="Discord Bot",
+                status="Operational",
+                harmony=harmony,
+                error_log="",
+                verified=True
             )
         except Exception as e:
             print(f"⚠️ Zapier logging failed: {e}")
