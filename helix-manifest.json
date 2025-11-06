@@ -222,10 +222,12 @@
     "rate_limits": "None currently - be respectful"
   },
   "gh_pages_mirror": {
-    "enabled": false,
-    "planned_url": "https://deathcharge.github.io/helix-unified/helix-manifest.json",
+    "enabled": true,
+    "url": "https://deathcharge.github.io/helix-unified/helix-manifest.json",
+    "index_page": "https://deathcharge.github.io/helix-unified/",
     "benefit": "Static pull target without hitting Railway",
-    "status": "Pending GitHub Actions workflow"
+    "deployment_method": "Jekyll from main branch",
+    "status": "Active"
   },
   "meta": {
     "generated_by": "Claude Code (Sonnet 4.5)",
