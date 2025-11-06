@@ -1,8 +1,8 @@
 # 🚀 START HERE - Next Thread Handoff
 
 **Date:** 2025-11-06
-**Status:** ✅ v16.5 & v16.6 COMPLETE - Ready for Zapier Configuration
-**Branch:** `main` (local - needs push)
+**Status:** ✅ v16.5 & v16.6 COMPLETE - Ready for GitHub PR & Zapier Configuration
+**Branch:** `claude/test-chat-limits-011CUqXir7WhrWRzDhy8Ct2E` ✅ PUSHED
 **Current Harmony:** 0.96
 
 ---
@@ -36,13 +36,18 @@
 
 ## 🎯 IMMEDIATE NEXT STEPS (15 MINUTES)
 
-### Step 1: Push to GitHub (If Permitted)
-```bash
-cd helix-unified
-git push origin main
-```
+### Step 1: Create GitHub Pull Request ✅
+**Status:** ✅ Branch `claude/test-chat-limits-011CUqXir7WhrWRzDhy8Ct2E` pushed with v16.6
 
-**Note:** Got HTTP 403 error this thread. May need manual push or different permissions.
+**Create PR via GitHub:**
+1. Go to: https://github.com/Deathcharge/helix-unified/pulls
+2. Click "New Pull Request"
+3. Base: `main` ← Compare: `claude/test-chat-limits-011CUqXir7WhrWRzDhy8Ct2E`
+4. Title: "feat: v16.5 + v16.6 Zapier Master Webhook & NASA Monitoring"
+5. Description: See `MERGE_TO_MAIN_HANDOFF.md` for details
+6. Create and Merge PR
+
+**Note:** Direct push to `main` is restricted. Use GitHub PR workflow.
 
 ### Step 2: Verify Railway Deployment
 1. Railway will auto-deploy from main
@@ -113,11 +118,14 @@ UCF_STATE_PATH=Helix/state/ucf_state.json
 ✅ Updated with ZAPIER_MASTER_HOOK_URL
 
 ### Git Status
-- Branch: `main`
-- Status: 8 commits ahead of origin/main (can't push due to 403 error)
-- Working tree: Clean
-- v16.5: ✅ Merged locally
-- v16.6: ✅ Committed locally
+- **Feature Branch:** `claude/test-chat-limits-011CUqXir7WhrWRzDhy8Ct2E` ✅ PUSHED
+- **Branch Status:** Up to date with origin
+- **Local main:** 9 commits ahead (merged locally, pending PR)
+- **Working tree:** Clean
+- **v16.5:** ✅ Pushed to feature branch
+- **v16.6:** ✅ Pushed to feature branch
+
+**Next:** Create GitHub PR to merge feature branch → main
 
 ---
 
@@ -222,19 +230,19 @@ helix-unified/
 
 ---
 
-## 🚨 KNOWN ISSUES
+## 🚨 WHAT'S LEFT TO DO
 
-### 1. Git Push Failing with 403
-**Issue:** Can't push to origin/main directly
-**Status:** 8 commits ahead of origin (local only)
-**Impact:** Code works locally, needs manual push
-**Solution:** May need different git workflow or manual push
+### 1. Create GitHub Pull Request ⏳
+**Status:** Feature branch pushed, PR needs creation
+**Action:** Create PR from `claude/test-chat-limits-011CUqXir7WhrWRzDhy8Ct2E` → `main`
+**Time:** 2 minutes
+**Result:** Merging PR will trigger Railway deployment
 
-### 2. Zapier Paths Not Configured
-**Issue:** Webhook receiving events but not routing to destinations
-**Status:** Expected - requires 15-minute setup
-**Impact:** Events received but not going to Notion/Slack/Email
-**Solution:** Follow `Shadow/zapier_15min_guide.md`
+### 2. Configure Zapier Paths ⏳
+**Status:** Webhook live and receiving events, needs routing setup
+**Action:** Follow 15-minute guide in `Shadow/zapier_15min_guide.md`
+**Time:** 15 minutes
+**Result:** Events will flow to Notion, Slack, Email, Google Sheets
 
 ---
 
