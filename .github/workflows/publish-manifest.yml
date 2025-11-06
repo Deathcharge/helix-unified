@@ -1,0 +1,111 @@
+name: Publish Helix Manifest to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'helix-manifest.json'
+      - '.github/workflows/publish-manifest.yml'
+  workflow_dispatch:  # Allow manual trigger
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify manifest exists
+        run: |
+          if [ ! -f "helix-manifest.json" ]; then
+            echo "❌ helix-manifest.json not found!"
+            exit 1
+          fi
+          echo "✅ Manifest found"
+
+      - name: Validate JSON
+        run: |
+          if jq empty helix-manifest.json; then
+            echo "✅ Manifest is valid JSON"
+          else
+            echo "❌ Manifest JSON is invalid!"
+            exit 1
+          fi
+
+      - name: Prepare Pages directory
+        run: |
+          mkdir -p dist
+          cp helix-manifest.json dist/
+          echo "✅ Manifest copied to dist/"
+
+          # Create index.html redirect
+          cat > dist/index.html <<'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <meta charset="UTF-8">
+              <title>Helix Collective Discovery Manifest</title>
+              <meta http-equiv="refresh" content="0; url=./helix-manifest.json">
+              <style>
+                  body {
+                      font-family: monospace;
+                      background: #0a0a0a;
+                      color: #00ff00;
+                      padding: 40px;
+                      display: flex;
+                      justify-content: center;
+                      align-items: center;
+                      height: 100vh;
+                      margin: 0;
+                  }
+                  .container { text-align: center; }
+                  h1 { color: #00ffff; }
+                  a { color: #ffff00; text-decoration: none; }
+                  a:hover { text-decoration: underline; }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <h1>🌀 Helix Collective</h1>
+                  <p>Machine-Readable Discovery Manifest</p>
+                  <p>Redirecting to <a href="./helix-manifest.json">helix-manifest.json</a>...</p>
+                  <p style="margin-top: 40px; color: #888;">
+                      <small>helix-discovery-v1 • v16.7</small>
+                  </p>
+              </div>
+          </body>
+          </html>
+          EOF
+          echo "✅ index.html created"
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Verify deployment
+        run: |
+          echo "📦 Deployment complete!"
+          echo "📍 Manifest URL: ${{ steps.deployment.outputs.page_url }}helix-manifest.json"
+          echo "🏠 Index URL: ${{ steps.deployment.outputs.page_url }}"

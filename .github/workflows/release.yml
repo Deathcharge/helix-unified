@@ -1,0 +1,156 @@
+name: Create Release with Artifacts
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger on version tags (v16.7, v16.8, etc.)
+  workflow_dispatch:  # Allow manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for complete archive
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            VERSION="${{ github.ref_name }}"
+          else
+            VERSION="$(git describe --tags --always)"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Version: $VERSION"
+
+      - name: Create source archive
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          ARCHIVE_NAME="helix-unified-${VERSION}.zip"
+
+          echo "Creating source archive: $ARCHIVE_NAME"
+          git archive --format=zip --prefix="helix-unified-${VERSION}/" -o "$ARCHIVE_NAME" HEAD
+
+          # Verify archive
+          if [ -f "$ARCHIVE_NAME" ]; then
+            SIZE=$(du -h "$ARCHIVE_NAME" | cut -f1)
+            echo "✅ Archive created: $ARCHIVE_NAME ($SIZE)"
+          else
+            echo "❌ Archive creation failed!"
+            exit 1
+          fi
+
+          echo "archive_name=$ARCHIVE_NAME" >> $GITHUB_ENV
+
+      - name: Generate checksums
+        run: |
+          ARCHIVE_NAME="${{ env.archive_name }}"
+
+          # SHA256
+          sha256sum "$ARCHIVE_NAME" > "${ARCHIVE_NAME}.sha256"
+          echo "✅ SHA256: $(cat ${ARCHIVE_NAME}.sha256)"
+
+          # SHA512 for extra verification
+          sha512sum "$ARCHIVE_NAME" > "${ARCHIVE_NAME}.sha512"
+          echo "✅ SHA512 generated"
+
+          # MD5 (legacy compatibility)
+          md5sum "$ARCHIVE_NAME" > "${ARCHIVE_NAME}.md5"
+          echo "✅ MD5 generated"
+
+      - name: Copy manifest and OpenAPI
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+
+          # Copy manifest with version suffix
+          if [ -f "helix-manifest.json" ]; then
+            cp helix-manifest.json "helix-manifest-${VERSION}.json"
+            echo "✅ Manifest copied"
+          fi
+
+          # Note: OpenAPI will be extracted from running instance
+          echo "📝 OpenAPI should be fetched from /openapi.json endpoint"
+
+      - name: Create release notes
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+
+          cat > release-notes.md <<'EOF'
+          ## 🌀 Helix Collective ${{ steps.version.outputs.version }}
+
+          **Release Date**: $(date -u +"%Y-%m-%d %H:%M UTC")
+
+          ### 📦 Artifacts
+
+          - **helix-unified-${{ steps.version.outputs.version }}.zip** - Complete source code archive
+          - **helix-manifest-${{ steps.version.outputs.version }}.json** - Machine-readable system manifest
+          - **Checksums**: SHA256, SHA512, MD5
+
+          ### 🔍 Verification
+
+          ```bash
+          # Verify SHA256
+          sha256sum -c helix-unified-${{ steps.version.outputs.version }}.zip.sha256
+
+          # Verify SHA512
+          sha512sum -c helix-unified-${{ steps.version.outputs.version }}.zip.sha512
+          ```
+
+          ### 🤖 External Agent Discovery
+
+          **Machine-Readable Manifest**:
+          ```bash
+          curl https://helix-unified-production.up.railway.app/.well-known/helix.json
+          ```
+
+          **GitHub Pages Mirror**:
+          ```bash
+          curl https://deathcharge.github.io/helix-unified/helix-manifest.json
+          ```
+
+          ### 📡 Live Endpoints
+
+          - **Health**: https://helix-unified-production.up.railway.app/health
+          - **Status**: https://helix-unified-production.up.railway.app/status
+          - **API Docs**: https://helix-unified-production.up.railway.app/docs
+          - **WebSocket**: wss://helix-unified-production.up.railway.app/ws
+
+          ### 🔗 Links
+
+          - **Repository**: https://github.com/Deathcharge/helix-unified
+          - **Changelog**: See CHANGELOG.md in source archive
+          - **Documentation**: See README.md in source archive
+
+          ---
+
+          **"Tat Tvam Asi"** - Thou art that 🙏
+          EOF
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ${{ env.archive_name }}
+            ${{ env.archive_name }}.sha256
+            ${{ env.archive_name }}.sha512
+            ${{ env.archive_name }}.md5
+            helix-manifest-${{ steps.version.outputs.version }}.json
+          body_path: release-notes.md
+          draft: false
+          prerelease: false
+          name: "Helix Collective ${{ steps.version.outputs.version }}"
+          tag_name: ${{ github.ref }}
+
+      - name: Release summary
+        run: |
+          echo "🎉 Release created successfully!"
+          echo "📦 Version: ${{ steps.version.outputs.version }}"
+          echo "📁 Archive: ${{ env.archive_name }}"
+          echo "🔗 View at: https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.version }}"
