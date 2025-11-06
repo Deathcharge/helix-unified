@@ -2,7 +2,10 @@
 # backend/main.py — FastAPI + Discord Bot Launcher (FIXED IMPORTS)
 # Author: Andrew John Ward (Architect)
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 import asyncio
 import os
@@ -133,6 +136,9 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# Setup templates directory
+templates = Jinja2Templates(directory="templates")
+
 # ============================================================================
 # HEALTH CHECK ENDPOINT (REQUIRED FOR RAILWAY)
 # ============================================================================
@@ -168,12 +174,17 @@ async def health_check():
         }
 
 # ============================================================================
-# ROOT ENDPOINT
+# ROOT ENDPOINT - WEB DASHBOARD
 # ============================================================================
 
-@app.get("/")
-async def root():
-    """Root endpoint with system status."""
+@app.get("/", response_class=HTMLResponse)
+async def root(request: Request):
+    """Serve main web dashboard."""
+    return templates.TemplateResponse("index.html", {"request": request})
+
+@app.get("/api", response_class=HTMLResponse)
+async def api_info():
+    """API info endpoint (JSON)."""
     try:
         status = await get_collective_status()
         return {
@@ -185,7 +196,9 @@ async def root():
                 "health": "/health",
                 "status": "/status",
                 "agents": "/agents",
-                "ucf": "/ucf"
+                "ucf": "/ucf",
+                "dashboard": "/",
+                "docs": "/docs"
             }
         }
     except Exception as e:
@@ -261,6 +274,26 @@ async def get_ucf_state():
         raise HTTPException(status_code=404, detail="UCF state not found")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================================================
+# TEMPLATE SERVING ENDPOINTS
+# ============================================================================
+
+@app.get("/templates/{file_path:path}")
+async def serve_template(file_path: str):
+    """Serve HTML templates and assets."""
+    template_path = Path("templates") / file_path
+
+    if not template_path.exists():
+        raise HTTPException(status_code=404, detail="Template not found")
+
+    # Security check - ensure path is within templates directory
+    try:
+        template_path.resolve().relative_to(Path("templates").resolve())
+    except ValueError:
+        raise HTTPException(status_code=403, detail="Access forbidden")
+
+    return FileResponse(template_path)
 
 # ============================================================================
 # MAIN ENTRY POINT
