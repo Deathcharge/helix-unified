@@ -403,7 +403,7 @@ async def on_ready():
     try:
         from commands.image_commands import ImageCommands
         await bot.add_cog(ImageCommands(bot))
-        print("✅ Image commands loaded (!image, !aion, !fractal, !icon)")
+        print("✅ Image commands loaded (!image, !aion, !fractal)")
     except Exception as e:
         print(f"⚠️ Image commands not available: {e}")
 
