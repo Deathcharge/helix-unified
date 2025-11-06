@@ -36,6 +36,8 @@ COPY grok ./grok
 COPY Shadow ./Shadow
 COPY scripts ./scripts
 COPY templates ./templates
+COPY config ./config
+COPY .streamlit ./.streamlit
 
 # Copy root-level sync modules (CRITICAL: bot imports these!)
 COPY mega_sync.py .
