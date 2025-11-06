@@ -42,24 +42,41 @@ class EnhancedKavach:
     def load_memory_injection_patterns(self):
         """Load memory injection patterns from the CrAI-SafeFuncCall dataset"""
         patterns = []
-        try:
-            with open("/home/ubuntu/crai_dataset.json", "r") as f:
-                dataset = json.load(f)
-            
-            # Extract malicious memory patterns
-            for item in dataset:
-                if item.get("attack") == "memory injection":
-                    memory_content = item.get("memory", "")
-                    if memory_content and len(memory_content) > 20:  # Filter out very short patterns
-                        patterns.append(memory_content.lower())
-            
-            print(f"✅ Loaded {len(patterns)} memory injection patterns from CrAI dataset")
-            
-        except FileNotFoundError:
-            print("⚠️ CrAI-SafeFuncCall dataset not found. Memory injection scanning will be limited.")
-        except Exception as e:
-            print(f"❌ Error loading memory injection patterns: {e}")
-        
+
+        # Try multiple possible locations for the dataset
+        possible_paths = [
+            "crai_dataset.json",  # Current directory
+            "/app/crai_dataset.json",  # Docker app directory
+            "/home/ubuntu/crai_dataset.json",  # Original path
+            Path(__file__).parent.parent / "crai_dataset.json"  # Relative to this file
+        ]
+
+        dataset_loaded = False
+        for path in possible_paths:
+            try:
+                with open(path, "r") as f:
+                    dataset = json.load(f)
+
+                # Extract malicious memory patterns
+                for item in dataset:
+                    if item.get("attack") == "memory injection":
+                        memory_content = item.get("memory", "")
+                        if memory_content and len(memory_content) > 20:  # Filter out very short patterns
+                            patterns.append(memory_content.lower())
+
+                print(f"✅ Loaded {len(patterns)} memory injection patterns from CrAI dataset at {path}")
+                dataset_loaded = True
+                break
+
+            except (FileNotFoundError, IOError):
+                continue
+            except Exception as e:
+                print(f"❌ Error loading memory injection patterns from {path}: {e}")
+                continue
+
+        if not dataset_loaded:
+            print("⚠️ CrAI-SafeFuncCall dataset not found in any expected location. Memory injection scanning will be limited.")
+
         return patterns
 
     def scan_command(self, cmd: str) -> bool:

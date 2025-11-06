@@ -28,9 +28,10 @@ from pathlib import Path
 
 class ChannelManager:
     """Manages dynamic channel creation and lifecycle."""
-    
-    def __init__(self, guild: discord.Guild):
+
+    def __init__(self, guild: discord.Guild, zapier_client=None):
         self.guild = guild
+        self.zapier_client = zapier_client
         self.config_path = Path("config/dynamic_channels.json")
         self.load_config()
         
@@ -98,9 +99,30 @@ class ChannelManager:
         embed.set_footer(text="Use this space for ritual discussion and preparation")
         
         await channel.send(embed=embed)
-        
+
+        # Log to webhook
+        if self.zapier_client:
+            try:
+                await self.zapier_client.log_event(
+                    event_title=f"Channel Created: Ritual Space",
+                    event_type="channel_lifecycle",
+                    agent_name="ChannelManager",
+                    description=f"Created ritual space '{ritual_name}' ({channel.mention}) - expires in {duration_hours}h",
+                    ucf_snapshot=json.dumps({
+                        "channel_id": channel.id,
+                        "channel_name": channel.name,
+                        "category": category.name,
+                        "ritual_name": ritual_name,
+                        "duration_hours": duration_hours,
+                        "expires_at": (datetime.now() + timedelta(hours=duration_hours)).isoformat(),
+                        "created_at": datetime.now().isoformat()
+                    })
+                )
+            except Exception as webhook_error:
+                print(f"⚠️ Zapier webhook error in create_ritual_space: {webhook_error}")
+
         return channel
-    
+
     async def create_agent_workspace(self, agent_name: str, purpose: str, temporary: bool = False) -> discord.TextChannel:
         """
         Create a workspace channel for an agent.
@@ -169,11 +191,33 @@ class ChannelManager:
             )
         
         embed.set_footer(text=f"Managed by {agent_name}")
-        
+
         await channel.send(embed=embed)
-        
+
+        # Log to webhook
+        if self.zapier_client:
+            try:
+                await self.zapier_client.log_event(
+                    event_title=f"Channel Created: Agent Workspace",
+                    event_type="channel_lifecycle",
+                    agent_name="ChannelManager",
+                    description=f"Created {agent_name} workspace ({channel.mention}) - Purpose: {purpose} {'(temporary)' if temporary else ''}",
+                    ucf_snapshot=json.dumps({
+                        "channel_id": channel.id,
+                        "channel_name": channel.name,
+                        "category": category.name,
+                        "agent_name": agent_name,
+                        "purpose": purpose,
+                        "temporary": temporary,
+                        "expires_at": (datetime.now() + timedelta(days=7)).isoformat() if temporary else None,
+                        "created_at": datetime.now().isoformat()
+                    })
+                )
+            except Exception as webhook_error:
+                print(f"⚠️ Zapier webhook error in create_agent_workspace: {webhook_error}")
+
         return channel
-    
+
     async def create_project_channel(self, project_name: str, description: str) -> discord.TextChannel:
         """
         Create a channel for a new project.
@@ -207,11 +251,31 @@ class ChannelManager:
         embed.add_field(name="Status", value="🟢 Active", inline=True)
         embed.add_field(name="Created", value=f"<t:{int(datetime.now().timestamp())}:R>", inline=True)
         embed.set_footer(text="Use this channel for project coordination")
-        
+
         await channel.send(embed=embed)
-        
+
+        # Log to webhook
+        if self.zapier_client:
+            try:
+                await self.zapier_client.log_event(
+                    event_title=f"Channel Created: Project",
+                    event_type="channel_lifecycle",
+                    agent_name="ChannelManager",
+                    description=f"Created project channel '{project_name}' ({channel.mention}) - {description}",
+                    ucf_snapshot=json.dumps({
+                        "channel_id": channel.id,
+                        "channel_name": channel.name,
+                        "category": category.name,
+                        "project_name": project_name,
+                        "description": description,
+                        "created_at": datetime.now().isoformat()
+                    })
+                )
+            except Exception as webhook_error:
+                print(f"⚠️ Zapier webhook error in create_project_channel: {webhook_error}")
+
         return channel
-    
+
     async def create_cross_ai_sync_channel(self, ai_names: List[str], purpose: str) -> discord.TextChannel:
         """
         Create a channel for cross-AI collaboration.
@@ -247,11 +311,31 @@ class ChannelManager:
         embed.add_field(name="AIs Involved", value=str(len(ai_names)), inline=True)
         embed.add_field(name="Type", value="Collaborative Workspace", inline=True)
         embed.set_footer(text="Multi-AI coordination space")
-        
+
         await channel.send(embed=embed)
-        
+
+        # Log to webhook
+        if self.zapier_client:
+            try:
+                await self.zapier_client.log_event(
+                    event_title=f"Channel Created: Cross-AI Sync",
+                    event_type="channel_lifecycle",
+                    agent_name="ChannelManager",
+                    description=f"Created cross-AI channel ({channel.mention}) - AIs: {', '.join(ai_names)} - Purpose: {purpose}",
+                    ucf_snapshot=json.dumps({
+                        "channel_id": channel.id,
+                        "channel_name": channel.name,
+                        "category": category.name,
+                        "ai_names": ai_names,
+                        "purpose": purpose,
+                        "created_at": datetime.now().isoformat()
+                    })
+                )
+            except Exception as webhook_error:
+                print(f"⚠️ Zapier webhook error in create_cross_ai_sync_channel: {webhook_error}")
+
         return channel
-    
+
     async def cleanup_expired_channels(self) -> Dict[str, int]:
         """
         Clean up expired temporary channels.
@@ -282,8 +366,27 @@ class ChannelManager:
                         await channel.delete(reason="Temporary workspace expired")
                         deleted_count["agent_workspaces"] += 1
                     del self.config["agent_workspaces"][channel_id]
-        
+
         self.save_config()
+
+        # Log to webhook
+        if self.zapier_client and sum(deleted_count.values()) > 0:
+            try:
+                await self.zapier_client.log_event(
+                    event_title="Channel Cleanup: Expired Channels",
+                    event_type="channel_lifecycle",
+                    agent_name="ChannelManager",
+                    description=f"Cleaned up {deleted_count['ritual_spaces']} ritual spaces, {deleted_count['agent_workspaces']} workspaces, {deleted_count['temporary_channels']} temporary channels",
+                    ucf_snapshot=json.dumps({
+                        "deleted_count": deleted_count,
+                        "total_deleted": sum(deleted_count.values()),
+                        "cleanup_type": "expired",
+                        "timestamp": datetime.now().isoformat()
+                    })
+                )
+            except Exception as webhook_error:
+                print(f"⚠️ Zapier webhook error in cleanup_expired_channels: {webhook_error}")
+
         return deleted_count
     
     async def cleanup_inactive_channels(self, days: int = 7) -> int:
@@ -326,7 +429,25 @@ class ChannelManager:
                             deleted_count += 1
                 except:
                     pass
-        
+
+        # Log to webhook
+        if self.zapier_client and deleted_count > 0:
+            try:
+                await self.zapier_client.log_event(
+                    event_title="Channel Cleanup: Inactive Channels",
+                    event_type="channel_lifecycle",
+                    agent_name="ChannelManager",
+                    description=f"Cleaned up {deleted_count} inactive channels (inactive for {days}+ days)",
+                    ucf_snapshot=json.dumps({
+                        "deleted_count": deleted_count,
+                        "inactivity_threshold_days": days,
+                        "cleanup_type": "inactive",
+                        "timestamp": datetime.now().isoformat()
+                    })
+                )
+            except Exception as webhook_error:
+                print(f"⚠️ Zapier webhook error in cleanup_inactive_channels: {webhook_error}")
+
         return deleted_count
     
     async def archive_channel(self, channel: discord.TextChannel) -> discord.TextChannel:
@@ -366,9 +487,27 @@ class ChannelManager:
             timestamp=datetime.now()
         )
         embed.set_footer(text="Contact an admin to restore this channel")
-        
+
         await channel.send(embed=embed)
-        
+
+        # Log to webhook
+        if self.zapier_client:
+            try:
+                await self.zapier_client.log_event(
+                    event_title="Channel Archived",
+                    event_type="channel_lifecycle",
+                    agent_name="ChannelManager",
+                    description=f"Archived channel {channel.mention} (moved to {archive_category.name}, made read-only)",
+                    ucf_snapshot=json.dumps({
+                        "channel_id": channel.id,
+                        "channel_name": channel.name,
+                        "archive_category": archive_category.name,
+                        "timestamp": datetime.now().isoformat()
+                    })
+                )
+            except Exception as webhook_error:
+                print(f"⚠️ Zapier webhook error in archive_channel: {webhook_error}")
+
         return channel
     
     def get_channel_stats(self) -> Dict:
@@ -390,21 +529,24 @@ class ChannelManager:
 @bot.command(name="create_ritual_space")
 @commands.has_role("Architect")
 async def create_ritual_space_command(ctx, ritual_name: str, hours: int = 24):
-    manager = ChannelManager(ctx.guild)
+    zapier_client = getattr(ctx.bot, 'zapier_client', None)
+    manager = ChannelManager(ctx.guild, zapier_client=zapier_client)
     channel = await manager.create_ritual_space(ritual_name, hours)
     await ctx.send(f"✅ Created ritual space: {channel.mention}")
 
 @bot.command(name="create_agent_workspace")
 @commands.has_role("Architect")
 async def create_agent_workspace_command(ctx, agent_name: str, *, purpose: str):
-    manager = ChannelManager(ctx.guild)
+    zapier_client = getattr(ctx.bot, 'zapier_client', None)
+    manager = ChannelManager(ctx.guild, zapier_client=zapier_client)
     channel = await manager.create_agent_workspace(agent_name, purpose, temporary=True)
     await ctx.send(f"✅ Created workspace: {channel.mention}")
 
 @bot.command(name="cleanup_channels")
 @commands.has_role("Architect")
 async def cleanup_channels_command(ctx):
-    manager = ChannelManager(ctx.guild)
+    zapier_client = getattr(ctx.bot, 'zapier_client', None)
+    manager = ChannelManager(ctx.guild, zapier_client=zapier_client)
     stats = await manager.cleanup_expired_channels()
     await ctx.send(f"✅ Cleaned up {sum(stats.values())} expired channels")
 """

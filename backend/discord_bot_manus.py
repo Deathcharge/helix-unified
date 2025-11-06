@@ -2568,10 +2568,30 @@ async def storage_command(ctx, action: str = "status"):
 
             async def force_sync():
                 count = 0
+                stats = await storage.get_storage_stats()
                 for f in storage.root.glob("*.json"):
                     await storage.upload(str(f))
                     count += 1
                 await ctx.send(f"✅ **Sync complete** - {count} files uploaded")
+
+                # Log sync to webhook
+                if hasattr(bot, 'zapier_client') and bot.zapier_client:
+                    try:
+                        await bot.zapier_client.log_event(
+                            event_title="Storage Sync Complete",
+                            event_type="storage_sync",
+                            agent_name="Shadow",
+                            description=f"Synced {count} archives - {stats.get('total_size_mb', 0):.2f} MB total",
+                            ucf_snapshot=json.dumps({
+                                "files_synced": count,
+                                "total_size_mb": stats.get('total_size_mb', 0),
+                                "archive_count": stats.get('archive_count', 0),
+                                "mode": stats.get('mode', 'unknown'),
+                                "executor": str(ctx.author)
+                            })
+                        )
+                    except Exception as webhook_error:
+                        print(f"⚠️ Zapier webhook error: {webhook_error}")
 
             asyncio.create_task(force_sync())
 
@@ -2582,6 +2602,19 @@ async def storage_command(ctx, action: str = "status"):
                 for f in files[:-20]:
                     f.unlink(missing_ok=True)
                 await ctx.send(f"🧹 **Cleanup complete** - Removed {removed} old archives (kept latest 20)")
+
+                # Log cleanup to webhook
+                if hasattr(bot, 'zapier_client') and bot.zapier_client:
+                    try:
+                        await bot.zapier_client.log_telemetry(
+                            metric_name="storage_cleanup",
+                            value=removed,
+                            component="Shadow",
+                            unit="files",
+                            metadata={"kept": 20, "removed": removed, "executor": str(ctx.author)}
+                        )
+                    except Exception as webhook_error:
+                        print(f"⚠️ Zapier webhook error: {webhook_error}")
             else:
                 await ctx.send("✅ **No cleanup needed** - Archive count within limits")
 
@@ -2744,6 +2777,26 @@ async def health_check(ctx):
         "issues_count": len(issues),
         "warnings_count": len(warnings)
     })
+
+    # Send webhook alert for critical issues
+    if issues and hasattr(bot, 'zapier_client') and bot.zapier_client:
+        try:
+            await bot.zapier_client.send_error_alert(
+                error_message=f"Health alert: {'; '.join(issues)}",
+                component="UCF_Monitor",
+                severity="critical" if harmony < 0.3 or klesha > 0.7 or resilience < 0.3 else "high",
+                context={
+                    "harmony": harmony,
+                    "klesha": klesha,
+                    "resilience": resilience,
+                    "prana": prana,
+                    "issues": issues,
+                    "warnings": warnings,
+                    "executor": str(ctx.author)
+                }
+            )
+        except Exception as webhook_error:
+            print(f"⚠️ Zapier webhook error: {webhook_error}")
 
 
 # ============================================================================
@@ -3575,6 +3628,24 @@ async def clean_duplicates(ctx):
     )
 
     await ctx.send(embed=embed)
+
+    # Log deduplication results to webhook
+    if hasattr(bot, 'zapier_client') and bot.zapier_client:
+        try:
+            await bot.zapier_client.log_telemetry(
+                metric_name="deduplication_scan",
+                value=len(duplicates),
+                component="Archive",
+                unit="channels",
+                metadata={
+                    "duplicates_found": len(duplicates),
+                    "canonical_channels": len(canonical_channels),
+                    "executor": str(ctx.author),
+                    "guild": guild.name
+                }
+            )
+        except Exception as webhook_error:
+            print(f"⚠️ Zapier webhook error: {webhook_error}")
 
 
 @bot.command(name="icon")
