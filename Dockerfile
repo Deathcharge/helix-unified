@@ -37,6 +37,8 @@ COPY Shadow ./Shadow
 COPY scripts ./scripts
 
 # Copy root-level sync modules (CRITICAL: bot imports these!)
+COPY crai_dataset.json .
+# Copy security dataset for Kavach agent
 COPY mega_sync.py .
 COPY mega_sync2.py .
 COPY sync.py .
