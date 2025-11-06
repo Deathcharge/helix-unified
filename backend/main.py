@@ -3,7 +3,7 @@
 # Author: Andrew John Ward (Architect)
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.responses import HTMLResponse, FileResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
@@ -14,6 +14,8 @@ from pathlib import Path
 from datetime import datetime
 from dotenv import load_dotenv
 import logging
+import httpx
+from pydantic import BaseModel
 
 # Import centralized logging configuration
 from logging_config import setup_logging
@@ -348,6 +350,67 @@ async def serve_template(file_path: str):
         raise HTTPException(status_code=403, detail="Access forbidden")
 
     return FileResponse(template_path)
+
+# ============================================================================
+# ELEVENLABS MUSIC GENERATION API PROXY
+# ============================================================================
+
+class MusicGenerationRequest(BaseModel):
+    prompt: str
+    duration: int = 30  # seconds
+    model_id: str = "eleven_music_v1"
+
+@app.post("/api/music/generate")
+async def generate_music(request: MusicGenerationRequest):
+    """
+    Proxy endpoint for ElevenLabs Music API.
+    Generates music from text prompts using ElevenLabs Music v1.
+    """
+    elevenlabs_api_key = os.getenv("ELEVENLABS_API_KEY")
+    if not elevenlabs_api_key:
+        raise HTTPException(
+            status_code=500,
+            detail="ElevenLabs API key not configured"
+        )
+
+    try:
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            # Call ElevenLabs Music API
+            response = await client.post(
+                "https://api.elevenlabs.io/v1/music/generate",
+                headers={
+                    "xi-api-key": elevenlabs_api_key,
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "text": request.prompt,
+                    "duration_seconds": request.duration,
+                    "model_id": request.model_id
+                }
+            )
+
+            response.raise_for_status()
+
+            # Stream audio response back to client
+            return StreamingResponse(
+                iter([response.content]),
+                media_type="audio/mpeg",
+                headers={
+                    "Content-Disposition": "attachment; filename=ritual_music.mp3"
+                }
+            )
+    except httpx.HTTPStatusError as e:
+        logger.error(f"ElevenLabs API error: {e.response.status_code} - {e.response.text}")
+        raise HTTPException(
+            status_code=e.response.status_code,
+            detail=f"ElevenLabs API error: {e.response.text}"
+        )
+    except Exception as e:
+        logger.error(f"Music generation error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Music generation failed: {str(e)}"
+        )
 
 # ============================================================================
 # MAIN ENTRY POINT
