@@ -68,3 +68,5 @@ fetch('https://deathcharge.github.io/helix-unified/helix-manifest.json')
 **Last Updated**: 2025-11-06
 
 *"Tat Tvam Asi"* - Thou art that 🙏
+
+<!-- Last updated: 2025-11-06 -->

@@ -1,5 +1,8 @@
 name: Publish Helix Manifest to GitHub Pages
 
+# This workflow publishes the manifest to GitHub Pages using GitHub Actions
+# GitHub Pages settings must be set to source: "GitHub Actions"
+
 on:
   push:
     branches: [ main ]
