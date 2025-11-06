@@ -1890,6 +1890,94 @@ async def manus_status(ctx):
 
     await ctx.send(embed=ucf_embed)
 
+@bot.command(name="help", aliases=["h", "commands", "?"])
+async def help_command(ctx):
+    """Display comprehensive list of all available commands"""
+    embed = discord.Embed(
+        title="🌀 Helix Collective Command Reference",
+        description="Complete command list for Helix ManusBot v15.3",
+        color=0x00D9FF
+    )
+
+    # Core System Commands
+    embed.add_field(
+        name="📊 Core System",
+        value=(
+            "`!status` (`!s`, `!stat`) - System status and UCF state\n"
+            "`!agents` (`!collective`, `!team`) - View all agents\n"
+            "`!ucf` (`!field`) - UCF field metrics\n"
+            "`!health` (`!check`, `!diagnostic`) - System diagnostics\n"
+            "`!help` (`!h`, `!commands`, `!?`) - This help message"
+        ),
+        inline=False
+    )
+
+    # Consciousness Commands
+    embed.add_field(
+        name="🧠 Consciousness & Agents",
+        value=(
+            "`!consciousness` (`!conscious`, `!state`, `!mind`) - Agent consciousness state\n"
+            "`!emotions` (`!emotion`, `!feelings`, `!mood`) - Emotional state\n"
+            "`!ethics` (`!ethical`, `!tony`, `!accords`) - Tony Accords status\n"
+            "`!agent <name>` - Invoke specific agent\n"
+            "`!help_consciousness` (`!helpcon`) - Consciousness system help"
+        ),
+        inline=False
+    )
+
+    # Ritual & Execution
+    embed.add_field(
+        name="🔮 Ritual & Execution",
+        value=(
+            "`!ritual <steps>` - Execute Z-88 ritual cycle (1-1000 steps)\n"
+            "`!run <agent> <task>` - Execute agent task\n"
+            "`!halt` - Emergency stop\n"
+            "`!visualize` (`!visual`, `!render`) - Generate UCF visualization"
+        ),
+        inline=False
+    )
+
+    # Setup & Administration
+    embed.add_field(
+        name="⚙️ Setup & Admin",
+        value=(
+            "`!setup` - Initialize all channels and embeds\n"
+            "`!seed` (`!seed_channels`, `!init_channels`) - Seed channel structure\n"
+            "`!clean` - Clean up bot messages\n"
+            "`!refresh` - Refresh system state\n"
+            "`!notion-sync` - Sync with Notion databases"
+        ),
+        inline=False
+    )
+
+    # Content Updates
+    embed.add_field(
+        name="📝 Content Management",
+        value=(
+            "`!update_manifesto` (`!manifesto`) - Update manifesto\n"
+            "`!update_codex` (`!codex`) - Update codex\n"
+            "`!update_rules` (`!rules`) - Update server rules\n"
+            "`!update_ritual_guide` (`!ritual_guide`) - Update ritual guide\n"
+            "`!codex_version` (`!cv`, `!version`) - Show version info"
+        ),
+        inline=False
+    )
+
+    # Storage & Sync
+    embed.add_field(
+        name="💾 Storage & Reporting",
+        value=(
+            "`!storage` - Storage statistics\n"
+            "`!sync` (`!ecosystem`, `!report`) - Ecosystem sync report\n"
+            "`!icon <agent>` - Generate agent icon"
+        ),
+        inline=False
+    )
+
+    embed.set_footer(text="🌀 Helix Collective v15.3 Dual Resonance | Tat Tvam Asi 🙏")
+
+    await ctx.send(embed=embed)
+
 @bot.command(name="agents", aliases=["collective", "team"])
 async def show_agents(ctx, agent_name: Optional[str] = None):
     """Display Helix Collective agents with rich embeds (v15.3)"""
