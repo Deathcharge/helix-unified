@@ -42,7 +42,7 @@ class ImageCommands(commands.Cog):
         self.bot = bot
 
     @commands.command(name="image", aliases=["fractal", "aion"])
-    async def image_command(self, ctx, mode: str = "ouroboros"):
+    async def image_command(self, ctx, mode: str = None):
         """
         Generate AION fractal visualizations based on UCF state
 
@@ -52,18 +52,26 @@ class ImageCommands(commands.Cog):
             !fractal [mode]
 
         Modes:
-            - ouroboros: Serpent eating tail (default)
-            - mandelbrot: Classic fractal
+            - ouroboros: Serpent eating tail (default for !image and !aion)
+            - mandelbrot: Classic fractal (default for !fractal)
             - fractal: Mandelbrot alias
             - mandala: Ouroboros alias
             - cycle: Not yet implemented
 
         Examples:
-            !image aion
-            !image ouroboros
-            !fractal mandelbrot
-            !aion
+            !image aion          → Ouroboros
+            !aion                → Ouroboros
+            !fractal             → Mandelbrot
+            !fractal mandelbrot  → Mandelbrot
+            !image mandelbrot    → Mandelbrot
         """
+        # Set default based on which command alias was used
+        if mode is None:
+            if ctx.invoked_with == "fractal":
+                mode = "mandelbrot"
+            else:  # "image" or "aion"
+                mode = "ouroboros"
+
         # Normalize mode
         mode = mode.lower()
         mode_aliases = {

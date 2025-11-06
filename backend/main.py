@@ -136,8 +136,10 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Setup templates directory
-templates = Jinja2Templates(directory="templates")
+# Setup templates directory (use absolute path for Railway compatibility)
+BASE_DIR = Path(__file__).parent.parent  # Points to project root
+TEMPLATES_DIR = BASE_DIR / "templates"
+templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 # ============================================================================
 # HEALTH CHECK ENDPOINT (REQUIRED FOR RAILWAY)
@@ -181,6 +183,11 @@ async def health_check():
 async def root(request: Request):
     """Serve main web dashboard."""
     return templates.TemplateResponse("index.html", {"request": request})
+
+@app.get("/gallery", response_class=HTMLResponse)
+async def agent_gallery(request: Request):
+    """Serve agent gallery page."""
+    return templates.TemplateResponse("agent_gallery.html", {"request": request})
 
 @app.get("/api", response_class=HTMLResponse)
 async def api_info():
@@ -282,14 +289,14 @@ async def get_ucf_state():
 @app.get("/templates/{file_path:path}")
 async def serve_template(file_path: str):
     """Serve HTML templates and assets."""
-    template_path = Path("templates") / file_path
+    template_path = TEMPLATES_DIR / file_path
 
     if not template_path.exists():
         raise HTTPException(status_code=404, detail="Template not found")
 
     # Security check - ensure path is within templates directory
     try:
-        template_path.resolve().relative_to(Path("templates").resolve())
+        template_path.resolve().relative_to(TEMPLATES_DIR.resolve())
     except ValueError:
         raise HTTPException(status_code=403, detail="Access forbidden")
 
