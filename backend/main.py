@@ -16,6 +16,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 import logging
 import httpx
+import aiohttp
 from pydantic import BaseModel
 
 # Import centralized logging configuration
@@ -80,6 +81,7 @@ from mandelbrot_ucf import (
     get_eye_of_consciousness,
     generate_ritual_ucf
 )
+from zapier_integration import HelixZapierIntegration, set_zapier, get_zapier
 
 # ============================================================================
 # WEBSOCKET BROADCAST LOOP
@@ -89,9 +91,12 @@ async def ucf_broadcast_loop():
     """
     Background task that monitors UCF state and broadcasts changes.
     Replaces 5-second polling with event-driven updates.
+    Also sends telemetry to Zapier when UCF state changes.
     """
     previous_state = None
     broadcast_interval = 2  # Check every 2 seconds
+    zapier_send_interval = 30  # Send to Zapier every 30 seconds
+    last_zapier_send = 0
 
     logger.info("📡 UCF broadcast loop started")
 
@@ -117,6 +122,35 @@ async def ucf_broadcast_loop():
                 logger.debug(f"📡 UCF state changed and broadcasted")
                 previous_state = current_state.copy()
 
+                # Send to Zapier every 30 seconds (not every change)
+                import time
+                current_time = time.time()
+                if current_time - last_zapier_send >= zapier_send_interval:
+                    zapier = get_zapier()
+                    if zapier:
+                        try:
+                            # Get agent status for telemetry
+                            agents_status = await get_collective_status()
+                            agent_list = [
+                                {"name": name, "symbol": info["symbol"], "status": "active"}
+                                for name, info in agents_status.items()
+                            ]
+
+                            # Send telemetry to Zapier
+                            await zapier.send_telemetry(
+                                ucf_metrics=current_state,
+                                system_info={
+                                    "version": "16.7",
+                                    "agents_count": len(agents_status),
+                                    "timestamp": datetime.utcnow().isoformat(),
+                                    "codename": "Documentation Consolidation & Real-Time Streaming",
+                                    "agents": agent_list
+                                }
+                            )
+                            last_zapier_send = current_time
+                        except Exception as e:
+                            logger.error(f"Error sending to Zapier: {e}")
+
             await asyncio.sleep(broadcast_interval)
 
         except Exception as e:
@@ -131,13 +165,23 @@ async def ucf_broadcast_loop():
 async def lifespan(app: FastAPI):
     """Start Discord bot and Manus loop on startup."""
     print("🌀 Helix Collective v16.7 - Startup Sequence")
-    
+
     # Initialize directories
     Path("Helix/state").mkdir(parents=True, exist_ok=True)
     Path("Helix/commands").mkdir(parents=True, exist_ok=True)
     Path("Helix/ethics").mkdir(parents=True, exist_ok=True)
     Path("Shadow/manus_archive").mkdir(parents=True, exist_ok=True)
-    
+
+    # Initialize Zapier integration
+    zapier_webhook_url = os.getenv("ZAPIER_WEBHOOK_URL")
+    if zapier_webhook_url:
+        zapier = HelixZapierIntegration(zapier_webhook_url)
+        await zapier.__aenter__()  # Initialize session
+        set_zapier(zapier)
+        print(f"✅ Zapier integration enabled")
+    else:
+        print("⚠️ ZAPIER_WEBHOOK_URL not set - integration disabled")
+
     # Initialize agents
     try:
         status = await get_collective_status()
@@ -178,6 +222,12 @@ async def lifespan(app: FastAPI):
 
     # Cleanup on shutdown
     print("🌙 Helix Collective v16.7 - Shutdown Sequence")
+
+    # Close Zapier session
+    zapier = get_zapier()
+    if zapier:
+        await zapier.__aexit__(None, None, None)
+        print("✅ Zapier integration closed")
 
 # ============================================================================
 # FASTAPI APP
@@ -788,6 +838,109 @@ async def get_ritual_step_ucf(step: int, total_steps: int = 108):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================================================
+# ZAPIER WEBHOOK ENDPOINTS
+# ============================================================================
+
+@app.post("/api/trigger-zapier")
+async def trigger_zapier_webhook(payload: Dict[str, Any]):
+    """
+    Manual webhook trigger for testing Zapier integration.
+
+    Accepts any JSON payload and forwards it to the configured Zapier webhook.
+
+    Usage:
+        POST /api/trigger-zapier
+        {
+            "type": "telemetry",
+            "ucf": {...},
+            "system": {...}
+        }
+    """
+    zapier = get_zapier()
+    if not zapier:
+        raise HTTPException(
+            status_code=503,
+            detail="Zapier integration not configured. Set ZAPIER_WEBHOOK_URL environment variable."
+        )
+
+    try:
+        # Send raw payload to Zapier
+        async with zapier.session.post(
+            zapier.webhook_url,
+            json=payload,
+            headers={'Content-Type': 'application/json'},
+            timeout=aiohttp.ClientTimeout(total=10)
+        ) as response:
+            return {
+                "status": response.status,
+                "success": response.status == 200,
+                "message": "Webhook triggered successfully" if response.status == 200 else "Webhook returned non-200 status"
+            }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Webhook trigger failed: {str(e)}"
+        )
+
+
+@app.post("/api/zapier/telemetry")
+async def send_zapier_telemetry():
+    """
+    Send current UCF telemetry to Zapier webhook.
+
+    Reads current UCF state and agent status, then sends to Zapier.
+    Useful for manual testing or triggered updates.
+    """
+    zapier = get_zapier()
+    if not zapier:
+        raise HTTPException(
+            status_code=503,
+            detail="Zapier integration not configured. Set ZAPIER_WEBHOOK_URL environment variable."
+        )
+
+    try:
+        # Read current UCF state
+        try:
+            with open("Helix/state/ucf_state.json", "r") as f:
+                ucf_state = json.load(f)
+        except FileNotFoundError:
+            raise HTTPException(status_code=404, detail="UCF state not found")
+
+        # Get agent status
+        agents_status = await get_collective_status()
+        agent_list = [
+            {"name": name, "symbol": info["symbol"], "status": "active"}
+            for name, info in agents_status.items()
+        ]
+
+        # Send to Zapier
+        success = await zapier.send_telemetry(
+            ucf_metrics=ucf_state,
+            system_info={
+                "version": "16.7",
+                "agents_count": len(agents_status),
+                "timestamp": datetime.utcnow().isoformat(),
+                "codename": "Documentation Consolidation & Real-Time Streaming",
+                "agents": agent_list
+            }
+        )
+
+        if success:
+            return {
+                "success": True,
+                "message": "Telemetry sent to Zapier successfully",
+                "ucf": ucf_state,
+                "agents_count": len(agents_status)
+            }
+        else:
+            raise HTTPException(status_code=500, detail="Failed to send telemetry to Zapier")
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
 # ============================================================================
 # MAIN ENTRY POINT
