@@ -1,5 +1,9 @@
 name: Publish Helix Manifest to GitHub Pages
 
+# DISABLED: Using Jekyll from main branch instead
+# To re-enable: Change Pages settings to source: "GitHub Actions"
+# and remove the 'if: false' condition below
+
 on:
   push:
     branches: [ main ]
@@ -20,6 +24,8 @@ concurrency:
 
 jobs:
   publish:
+    # DISABLED: Remove this line to re-enable when using GitHub Actions source
+    if: false  # Workflow disabled - using Jekyll from main branch
     runs-on: ubuntu-latest
     environment:
       name: github-pages
