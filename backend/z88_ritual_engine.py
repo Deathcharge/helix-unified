@@ -10,6 +10,7 @@ import json
 import os
 import random
 from datetime import datetime
+from pathlib import Path
 from typing import Dict, List, Optional
 
 
@@ -341,6 +342,63 @@ class Z88RitualEngine:
             "recent": self.hallucinations.get_recent(20),
             "generated_at": datetime.utcnow().isoformat()
         }
+
+
+# ============================================================================
+# WRAPPER FUNCTIONS FOR BACKWARD COMPATIBILITY
+# ============================================================================
+
+def load_ucf_state() -> Dict[str, float]:
+    """
+    Load current UCF state from file.
+
+    Returns:
+        Dictionary with UCF state fields (zoom, harmony, resilience, prana, drishti, klesha)
+    """
+    state_path = Path("Helix/state/ucf_state.json")
+
+    if state_path.exists():
+        try:
+            with open(state_path, 'r') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"⚠ Error loading UCF state: {e}")
+
+    # Return default state if file doesn't exist
+    return {
+        "zoom": 1.0228,
+        "harmony": 0.355,
+        "resilience": 1.1191,
+        "prana": 0.5175,
+        "drishti": 0.5023,
+        "klesha": 0.010
+    }
+
+
+def execute_ritual(steps: int = 108) -> Dict:
+    """
+    Execute a ritual cycle and update UCF state.
+
+    Args:
+        steps: Number of ritual steps (default 108)
+
+    Returns:
+        Dictionary with ritual cycle results and final UCF state
+    """
+    engine = Z88RitualEngine()
+    result = engine.run_ritual_cycle(steps)
+
+    # Save the final UCF state to file
+    state_path = Path("Helix/state/ucf_state.json")
+    state_path.parent.mkdir(parents=True, exist_ok=True)
+
+    try:
+        with open(state_path, 'w') as f:
+            json.dump(result["ucf_final"], f, indent=2)
+    except Exception as e:
+        print(f"⚠ Error saving UCF state: {e}")
+
+    return result
 
 
 # ============================================================================
