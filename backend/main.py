@@ -476,6 +476,8 @@ async def serve_template(file_path: str):
 # ============================================================================
 
 class MusicGenerationRequest(BaseModel):
+    model_config = {"protected_namespaces": ()}  # Allow model_id field
+
     prompt: str
     duration: int = 30  # seconds
     model_id: str = "eleven_music_v1"
