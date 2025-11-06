@@ -137,8 +137,55 @@ app = FastAPI(
 )
 
 # Setup templates directory (use absolute path for Railway compatibility)
-BASE_DIR = Path(__file__).parent.parent  # Points to project root
-TEMPLATES_DIR = BASE_DIR / "templates"
+# Try multiple path resolution strategies for robustness
+def find_templates_directory():
+    """Find templates directory using multiple strategies."""
+    # Strategy 1: Relative to this file (backend/main.py)
+    strategy1 = Path(__file__).parent.parent / "templates"
+
+    # Strategy 2: Relative to current working directory
+    strategy2 = Path.cwd() / "templates"
+
+    # Strategy 3: Sibling to backend directory
+    strategy3 = Path(__file__).parent.parent / "templates"
+
+    # Strategy 4: In parent of current working directory
+    strategy4 = Path.cwd().parent / "templates"
+
+    # Strategy 5: Absolute from /app root (Railway specific)
+    strategy5 = Path("/app/templates")
+
+    strategies = [
+        ("parent.parent / templates", strategy1),
+        ("cwd() / templates", strategy2),
+        ("cwd().parent / templates", strategy4),
+        ("/app/templates", strategy5),
+    ]
+
+    logger.info("🔍 Searching for templates directory...")
+    logger.info(f"   __file__ = {Path(__file__).resolve()}")
+    logger.info(f"   cwd() = {Path.cwd().resolve()}")
+
+    for name, path in strategies:
+        logger.info(f"   Testing: {name} → {path.resolve()}")
+        if path.exists() and path.is_dir():
+            # Verify index.html exists
+            if (path / "index.html").exists():
+                logger.info(f"   ✅ Found templates at: {path.resolve()}")
+                return path
+            else:
+                logger.warning(f"   ⚠️  Directory exists but index.html not found: {path.resolve()}")
+        else:
+            logger.info(f"   ❌ Not found: {path.resolve()}")
+
+    # If nothing found, use default and let it fail with good error message
+    logger.error(f"❌ Could not find templates directory! Using fallback.")
+    return strategy1
+
+BASE_DIR = Path(__file__).parent.parent
+TEMPLATES_DIR = find_templates_directory()
+logger.info(f"📁 Templates directory: {TEMPLATES_DIR.resolve()}")
+
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 # ============================================================================
