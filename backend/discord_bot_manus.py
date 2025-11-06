@@ -482,7 +482,7 @@ async def on_command_error(ctx, error):
         await ctx.send(
             "❌ **Unknown command**\n"
             f"Available commands: {cmd_list}\n"
-            f"Use `!help` for full command list"
+            f"Use `!commands` for full command list"
         )
     elif isinstance(error, commands.MissingRequiredArgument):
         await ctx.send(
@@ -1890,8 +1890,8 @@ async def manus_status(ctx):
 
     await ctx.send(embed=ucf_embed)
 
-@bot.command(name="help", aliases=["h", "commands", "?"])
-async def help_command(ctx):
+@bot.command(name="commands", aliases=["cmds", "helix_help", "?"])
+async def commands_list(ctx):
     """Display comprehensive list of all available commands"""
     embed = discord.Embed(
         title="🌀 Helix Collective Command Reference",
@@ -1907,7 +1907,7 @@ async def help_command(ctx):
             "`!agents` (`!collective`, `!team`) - View all agents\n"
             "`!ucf` (`!field`) - UCF field metrics\n"
             "`!health` (`!check`, `!diagnostic`) - System diagnostics\n"
-            "`!help` (`!h`, `!commands`, `!?`) - This help message"
+            "`!commands` (`!cmds`, `!helix_help`, `!?`) - This command list"
         ),
         inline=False
     )
