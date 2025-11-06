@@ -181,12 +181,12 @@ class MemoryRootCommands(commands.Cog):
     # SYSTEM STATUS COMMANDS
     # ========================================================================
     
-    @commands.command(name="agents", aliases=["roster"])
+    @commands.command(name="roster", aliases=["memory-agents"])
     async def list_agents(self, ctx):
         """
-        List all agents in the collective.
-        
-        Usage: !agents
+        List all agents from Memory Root/Notion.
+
+        Usage: !roster or !memory-agents
         """
         async with ctx.typing():
             memory_root = await get_memory_root()

@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-from Helix.z88_ritual_engine import run_ritual
 import json, asyncio
 
 @commands.command(name="harmony")

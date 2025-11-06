@@ -2309,7 +2309,7 @@ async def storage_command(ctx, action: str = "status"):
         print(f"Storage command error: {e}")
 
 
-@bot.command(name="visualize", aliases=["visual", "render", "fractal"])
+@bot.command(name="visualize", aliases=["visual", "render"])
 async def visualize_command(ctx):
     """
     Generate and post Samsara consciousness fractal visualization.
