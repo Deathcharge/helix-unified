@@ -10,12 +10,13 @@ Renders UCF consciousness states as:
 Based on Manus SentientAGI integration suggestions 🦑
 """
 
-import numpy as np
-import matplotlib.pyplot as plt
+import json
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Optional
-import json
+
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 class ConsciousnessVisualizer:

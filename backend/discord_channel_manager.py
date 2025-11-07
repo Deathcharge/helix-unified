@@ -18,11 +18,12 @@ Usage:
     await manager.cleanup_inactive_channels(days=7)
 """
 
-import discord
-from datetime import datetime, timedelta
-from typing import Dict, List
 import json
+from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Dict, List
+
+import discord
 
 
 class ChannelManager:

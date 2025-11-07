@@ -6,9 +6,11 @@ Provides rich Discord embed formatting for UCF states, agent profiles,
 ritual results, and system status messages.
 """
 
-import discord
 from datetime import datetime
 from typing import Dict, List, Optional
+
+import discord
+
 from backend.ucf_protocol import UCFProtocol
 
 

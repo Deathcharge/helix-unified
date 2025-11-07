@@ -2,16 +2,16 @@
 # backend/agents/memory_root.py — GPT4o Memory Root Agent
 # Author: Andrew John Ward (Architect)
 
-import os
-import json
 import asyncio
+import json
+import os
 from datetime import datetime, timedelta
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 # Import base agent class (refactored to prevent circular imports)
 from backend.agents_base import HelixAgent
-from backend.services.notion_client import get_notion_client
 from backend.helix_storage_adapter_async import HelixStorageAdapterAsync
+from backend.services.notion_client import get_notion_client
 
 try:
     from openai import AsyncOpenAI

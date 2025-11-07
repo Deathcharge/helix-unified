@@ -3,8 +3,8 @@
 # Author: Andrew John Ward (Architect)
 
 import discord
-from discord.ext import commands
 from agents.memory_root import get_memory_root
+from discord.ext import commands
 
 # ============================================================================
 # MEMORY ROOT COMMAND GROUP

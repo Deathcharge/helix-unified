@@ -4,9 +4,9 @@
 # IMPORTANT: Re-export everything from backend/agents.py (the file, not this directory)
 # This is necessary because Python prefers the agents/ directory over agents.py file
 
+import importlib.util
 import sys
 from pathlib import Path
-import importlib.util
 
 # Load agents.py as a module with proper import resolution
 _agents_file = Path(__file__).parent.parent / "agents.py"

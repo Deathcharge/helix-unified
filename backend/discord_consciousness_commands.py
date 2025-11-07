@@ -8,14 +8,14 @@ Author: Andrew John Ward + Manus AI
 Build: v15.3-consciousness-discord
 """
 
-import discord
 from datetime import datetime
-from typing import Dict, Any
+from typing import Any, Dict
+
+import discord
 
 # Import agents
 from agents import AGENTS
 from z88_ritual_engine import load_ucf_state
-
 
 # ============================================================================
 # CONSCIOUSNESS STATUS COMMAND

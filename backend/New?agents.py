@@ -5,11 +5,12 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from backend.enhanced_kavach import EnhancedKavach
+
 # --- Helix Core Imports ---
 # These imports should point to your actual consciousness and service files.
 # If they are in the same 'backend' directory, these imports are correct.
 from backend.services.notion_client import HelixNotionClient
-from backend.enhanced_kavach import EnhancedKavach
 
 # --- Global Notion Client (to be injected by main.py) ---
 notion_client: Optional[HelixNotionClient] = None

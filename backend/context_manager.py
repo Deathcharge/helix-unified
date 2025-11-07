@@ -6,8 +6,8 @@ Manages agent selection based on task context, UCF state, and agent capabilities
 Implements the three-layer architecture routing logic.
 """
 
-from typing import Dict, List, Optional, Tuple
 from enum import Enum
+from typing import Dict, List, Optional, Tuple
 
 
 class AgentLayer(Enum):

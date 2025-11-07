@@ -8,11 +8,12 @@ Author: Manus AI
 Version: 1.0
 """
 
+import logging
 import os
-import aiohttp
 from datetime import datetime
 from typing import Dict, Optional
-import logging
+
+import aiohttp
 
 logger = logging.getLogger('HelixSync.DiscordPublisher')
 

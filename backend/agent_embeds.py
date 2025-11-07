@@ -12,10 +12,10 @@ Usage:
     await ctx.send(embed=embed)
 """
 
-import discord
-from typing import Optional
 from itertools import cycle
+from typing import Optional
 
+import discord
 
 # Agent embed configurations
 AGENT_CONFIGS = {

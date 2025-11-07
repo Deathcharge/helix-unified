@@ -2,19 +2,15 @@
 # backend/manus_bootstrap.py — Manus Bootstrap FastAPI Application
 # Author: Andrew John Ward (Architect)
 
-import os
 import json
-import aiohttp
+import os
 from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Optional
 
-from fastapi import FastAPI, Depends, HTTPException
-
-from services.zapier_client import (
-    ZapierClient,
-    validate_zapier_config
-)
+import aiohttp
+from fastapi import Depends, FastAPI, HTTPException
+from services.zapier_client import ZapierClient, validate_zapier_config
 
 # ============================================================================
 # GLOBAL STATE

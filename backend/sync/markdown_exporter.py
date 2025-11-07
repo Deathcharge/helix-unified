@@ -8,9 +8,9 @@ Author: Manus AI
 Version: 1.0
 """
 
+import logging
 from datetime import datetime
 from typing import Dict
-import logging
 
 logger = logging.getLogger('HelixSync.MarkdownExporter')
 

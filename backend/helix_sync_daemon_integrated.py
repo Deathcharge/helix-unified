@@ -12,27 +12,30 @@ Date: 2025-11-01
 import asyncio
 import json
 import logging
+
+# Setup logging
+# Create logs directory if it doesn't exist
 import os
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
+
+# Import publishers
+from backend.sync.discord_publisher import DiscordPublisher
 
 # Import collectors
 from backend.sync.github_collector import GitHubCollector
-# from backend.sync.ucf_collector import UCFCollector  # To be implemented
-# from backend.sync.agent_collector import AgentCollector  # To be implemented
 
 # Import exporters
 from backend.sync.markdown_exporter import MarkdownExporter
 from backend.sync.notion_exporter import NotionExporter
 
-# Import publishers
-from backend.sync.discord_publisher import DiscordPublisher
+# from backend.sync.ucf_collector import UCFCollector  # To be implemented
+# from backend.sync.agent_collector import AgentCollector  # To be implemented
 
-# Setup logging
-# Create logs directory if it doesn't exist
-import os
+
+
 os.makedirs('logs', exist_ok=True)
 
 logging.basicConfig(

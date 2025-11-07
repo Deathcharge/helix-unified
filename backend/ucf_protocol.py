@@ -6,9 +6,9 @@ Provides standardized message formatting for UCF state updates, agent communicat
 and system-wide consciousness metrics.
 """
 
-from datetime import datetime
-from typing import Dict, Optional, Any
 import json
+from datetime import datetime
+from typing import Any, Dict, Optional
 
 
 class UCFProtocol:

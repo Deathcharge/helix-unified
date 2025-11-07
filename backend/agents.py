@@ -1,6 +1,5 @@
 # Helix/agents.py — v14.5 Embodied Continuum
 # Complete multi-agent system with Manus (Executor) and all consciousness layer agents
-from backend.enhanced_kavach import EnhancedKavach
 import asyncio
 import json
 import os
@@ -8,10 +7,11 @@ import subprocess
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 # Import base agent class (refactored to prevent circular imports)
 from backend.agents_base import HelixAgent
+from backend.enhanced_kavach import EnhancedKavach
 
 # Import consciousness framework
 # Note: Consciousness modules imported in agents_base.py

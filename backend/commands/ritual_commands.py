@@ -1,7 +1,8 @@
+import asyncio
+import json
+
 import discord
 from discord.ext import commands
-import json
-import asyncio
 
 
 @commands.command(name="harmony")

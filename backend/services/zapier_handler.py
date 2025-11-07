@@ -2,12 +2,13 @@
 # backend/services/zapier_handler.py — Zapier Webhook Handler
 # Author: Andrew John Ward (Architect)
 
+import json
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import Dict, Any
-from datetime import datetime
-import json
-from pathlib import Path
 
 from backend.services.notion_client import get_notion_client
 

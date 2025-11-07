@@ -1,16 +1,18 @@
 # backend/main.py (v15.5 - Stable & Refactored)
 
-from .services.notion_client import get_notion_client
-from .bot_commands import *  # This registers all commands defined with @bot.command
-from . import agents
 import asyncio
 import os
 import sys
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
-from dotenv import load_dotenv
+
 import discord
 from discord.ext import commands
+from dotenv import load_dotenv
+from fastapi import FastAPI
+
+from . import agents
+from .bot_commands import *  # This registers all commands defined with @bot.command
+from .services.notion_client import get_notion_client
 
 # --- Load Environment & Apply Patches ---
 load_dotenv()

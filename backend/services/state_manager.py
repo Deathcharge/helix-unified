@@ -2,12 +2,13 @@
 # backend/services/state_manager.py — Redis + PostgreSQL State Manager
 # Author: Andrew John Ward (Architect)
 
-import redis.asyncio as redis
 import json
-import asyncpg
-from typing import Dict, Any, Optional
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Dict, Optional
+
+import asyncpg
+import redis.asyncio as redis
 
 # ============================================================================
 # STATE MANAGER

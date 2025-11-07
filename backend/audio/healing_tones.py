@@ -6,9 +6,10 @@ Author: Andrew John Ward
 Integrated: v16.3 Context Dump Implementation
 """
 
-import numpy as np
-from typing import Dict, Optional, Tuple
 from dataclasses import dataclass
+from typing import Dict, Optional, Tuple
+
+import numpy as np
 
 
 @dataclass

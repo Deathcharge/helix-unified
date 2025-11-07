@@ -14,10 +14,10 @@ Runs as background service with configurable sync intervals.
 
 import asyncio
 import json
+import logging
 import os
 from datetime import datetime
 from pathlib import Path
-import logging
 
 # Configure logging
 logging.basicConfig(
@@ -40,9 +40,9 @@ class NotionSyncDaemon:
 
         # Import Notion client and state manager
         try:
+            from agents import AGENTS
             from services.notion_client import HelixNotionClient
             from services.state_manager import load_ucf_state
-            from agents import AGENTS
 
             self.notion_client = HelixNotionClient() if self.enabled else None
             self.load_ucf_state = load_ucf_state

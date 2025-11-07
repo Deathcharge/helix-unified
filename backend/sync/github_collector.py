@@ -9,11 +9,11 @@ Author: Manus AI
 Version: 1.0
 """
 
+import logging
 import os
 import subprocess
 from datetime import datetime
 from typing import Dict, List, Optional
-import logging
 
 logger = logging.getLogger('HelixSync.GitHub')
 

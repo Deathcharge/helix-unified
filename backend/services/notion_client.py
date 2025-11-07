@@ -2,10 +2,11 @@
 # backend/services/notion_client.py — Notion Integration Client
 # Author: Andrew John Ward (Architect)
 
-import os
 import asyncio
+import os
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 from notion_client import Client
 
 # ============================================================================

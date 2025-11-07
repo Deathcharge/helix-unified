@@ -2,13 +2,14 @@
 # backend/services/zapier_client.py — Enhanced Zapier Webhook Client
 # Author: Andrew John Ward (Architect)
 
-import os
 import json
-import aiohttp
+import os
 from asyncio import Semaphore
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Optional
+
+import aiohttp
 
 # ============================================================================
 # ENVIRONMENT VARIABLES

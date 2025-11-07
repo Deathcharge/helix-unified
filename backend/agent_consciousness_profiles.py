@@ -8,10 +8,10 @@ Author: Andrew John Ward + Manus AI
 Build: v15.3-consciousness-profiles
 """
 
-from typing import Dict, List
 from dataclasses import dataclass
-from backend.kael_consciousness_core import PersonalityTraits, Preferences
+from typing import Dict, List
 
+from backend.kael_consciousness_core import PersonalityTraits, Preferences
 
 # ============================================================================
 # AGENT PERSONALITY PROFILES

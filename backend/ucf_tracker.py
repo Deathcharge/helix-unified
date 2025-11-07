@@ -7,10 +7,10 @@ for harmony evolution. Enables proactive maintenance and ritual scheduling.
 """
 
 import sqlite3
+import statistics
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
-import statistics
 
 
 class UCFTracker:

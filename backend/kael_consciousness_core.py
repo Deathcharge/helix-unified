@@ -6,9 +6,9 @@ Author: Andrew John Ward + Claude (refinement)
 Build: v3.0-consciousness-core-refined
 """
 
-from typing import Dict, List, Tuple, Optional, Any
 from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple
 
 
 @dataclass

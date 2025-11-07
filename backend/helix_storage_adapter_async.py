@@ -3,14 +3,15 @@
 # Supports: Nextcloud (WebDAV), MEGA (REST), Local fallback
 # Author: Helix Collective Ω-Bridge
 
-import os
-import json
-import aiohttp
-import aiofiles
 import asyncio
-from pathlib import Path
+import json
+import os
 from datetime import datetime
-from typing import Optional, Dict, Any
+from pathlib import Path
+from typing import Any, Dict, Optional
+
+import aiofiles
+import aiohttp
 
 
 class HelixStorageAdapterAsync:
@@ -239,8 +240,8 @@ class HelixStorageAdapterAsync:
         Returns:
             Number of files deleted
         """
-        import shutil
         import glob
+        import shutil
 
         # Load threshold from config (default 100 GB)
         config_path = Path("Helix/state/storage_config.json")
@@ -317,8 +318,8 @@ async def upload_samsara_asset(file_path: Path, metadata: dict) -> bool:
     Returns:
         True if upload successful, False otherwise
     """
-    import time
     import logging
+    import time
 
     storage_mode = os.getenv("HELIX_STORAGE_MODE", "local")
 

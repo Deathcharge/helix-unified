@@ -3,15 +3,17 @@
 # Automatically posts UCF trend charts to Discord
 # Author: Claude Code + Andrew John Ward
 
+import json
 import os
 from datetime import datetime, timedelta
 from pathlib import Path
-import json
-import pandas as pd
-import matplotlib.pyplot as plt
+
 import discord
-from discord.ext import tasks
 import matplotlib
+import matplotlib.pyplot as plt
+import pandas as pd
+from discord.ext import tasks
+
 matplotlib.use('Agg')  # Non-interactive backend
 
 # Configuration

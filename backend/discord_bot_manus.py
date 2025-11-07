@@ -13,31 +13,35 @@ Features:
 - Channel announcements
 """
 
-from notion_sync_daemon import trigger_manual_sync
-from agent_embeds import get_agent_embed, list_all_agents
-from datetime import timedelta  # Only import timedelta, not datetime (avoid shadowing)
-from collections import defaultdict
-from discord_consciousness_commands import create_consciousness_embed, create_agent_consciousness_embed, create_emotions_embed
-from agent_consciousness_profiles import AGENT_CONSCIOUSNESS_PROFILES
-from zapier_client import ZapierClient  # v16.5 Zapier integration
-from discord_embeds import HelixEmbeds  # v15.3 rich embeds
-from z88_ritual_engine import execute_ritual, load_ucf_state
-from agents import AGENTS
-import os
-import re
-import json
 import asyncio
 import datetime
+import json
 import logging
-from pathlib import Path
-import time
+import os
+import re
 import shutil
+import time
+from collections import defaultdict
+from datetime import timedelta  # Only import timedelta, not datetime (avoid shadowing)
+from pathlib import Path
 from statistics import mean, stdev
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
-import discord
-from discord.ext import commands, tasks
 import aiohttp
+import discord
+from agent_consciousness_profiles import AGENT_CONSCIOUSNESS_PROFILES
+from agent_embeds import get_agent_embed, list_all_agents
+from agents import AGENTS
+from discord.ext import commands, tasks
+from discord_consciousness_commands import (
+    create_agent_consciousness_embed,
+    create_consciousness_embed,
+    create_emotions_embed,
+)
+from discord_embeds import HelixEmbeds  # v15.3 rich embeds
+from notion_sync_daemon import trigger_manual_sync
+from z88_ritual_engine import execute_ritual, load_ucf_state
+from zapier_client import ZapierClient  # v16.5 Zapier integration
 
 # Configure logger
 logger = logging.getLogger(__name__)

@@ -14,10 +14,10 @@ Ensures data quality before pushing to Notion.
 
 import json
 import logging
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List, Tuple
-from dataclasses import dataclass
+from typing import Any, Dict, List, Tuple
 
 logger = logging.getLogger(__name__)
 

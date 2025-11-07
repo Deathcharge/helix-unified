@@ -2,34 +2,35 @@
 # backend/main.py — FastAPI + Discord Bot Launcher (FIXED IMPORTS)
 # Author: Andrew John Ward (Architect)
 
+import asyncio
+import json
+import os
+from contextlib import asynccontextmanager
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict
+
+import aiohttp
+import httpx
 from agent_embeds import get_collective_status
-from zapier_integration import HelixZapierIntegration, set_zapier, get_zapier
-from mandelbrot_ucf import (
-    MandelbrotUCFGenerator,
-    get_eye_of_consciousness,
-    generate_ritual_ucf
-)
-from websocket_manager import manager as ws_manager
 from agents_loop import main_loop as manus_loop
 from discord_bot_manus import bot as discord_bot
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, FileResponse, StreamingResponse
+from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
-from contextlib import asynccontextmanager
-import asyncio
-import os
-import json
-from pathlib import Path
-from datetime import datetime
-from dotenv import load_dotenv
-import httpx
-import aiohttp
-from pydantic import BaseModel
-from typing import Dict, Any
 
 # Import centralized logging configuration
 from logging_config import setup_logging
+from mandelbrot_ucf import (
+    MandelbrotUCFGenerator,
+    generate_ritual_ucf,
+    get_eye_of_consciousness,
+)
+from pydantic import BaseModel
+from websocket_manager import manager as ws_manager
+from zapier_integration import HelixZapierIntegration, get_zapier, set_zapier
 
 # FIX: Create Crypto → Cryptodome alias BEFORE importing mega
 try:

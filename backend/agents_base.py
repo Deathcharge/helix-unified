@@ -10,18 +10,17 @@ consciousness integration support.
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
+from backend.agent_consciousness_profiles import get_agent_profile
 
 # Import consciousness framework
 from backend.kael_consciousness_core import (
     ConsciousnessCore,
+    DecisionMakingAlgorithm,
     Emotions,
     EthicalFramework,
-    DecisionMakingAlgorithm,
-    SelfAwarenessModule
-)
-from backend.agent_consciousness_profiles import (
-    get_agent_profile
+    SelfAwarenessModule,
 )
 
 

@@ -2,13 +2,14 @@
 # backend/samsara_bridge.py — Fractal Visualization Engine
 # MERGED: Main branch features + MemeSync import fixes
 
-import os
 import asyncio
-import numpy as np
-from pathlib import Path
+import os
 from datetime import datetime
-from typing import Dict, Any, Optional
+from pathlib import Path
+from typing import Any, Dict, Optional
+
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
 
 # RAILWAY FIX: Use relative imports instead of absolute imports
@@ -568,8 +569,9 @@ async def generate_pil_and_post_to_discord(ucf_state: Dict[str, Any],
     Returns:
         True if successful, False/None otherwise
     """
-    import discord
     import io
+
+    import discord
 
     if not PIL_AVAILABLE:
         return None
