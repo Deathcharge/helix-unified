@@ -917,6 +917,57 @@ async def setup_helix_server(ctx):
 
     await ctx.send("✅ Permissions configured\n")
 
+    # Create webhooks for all channels
+    await ctx.send("🔗 **Creating channel webhooks for full integration...**")
+    channel_webhooks = {}
+    webhook_env_vars = []
+
+    for channel_name, channel in created_channels.items():
+        try:
+            # Check if webhook already exists
+            existing_webhooks = await channel.webhooks()
+            webhook = None
+
+            for wh in existing_webhooks:
+                if wh.name == f"Helix-{channel_name}":
+                    webhook = wh
+                    break
+
+            # Create webhook if it doesn't exist
+            if not webhook:
+                webhook = await channel.create_webhook(
+                    name=f"Helix-{channel_name}",
+                    reason="Helix v16.8 full integration setup"
+                )
+                await ctx.send(f"   🔗 Created webhook for {channel_name}")
+            else:
+                await ctx.send(f"   ♻️ Webhook exists for {channel_name}")
+
+            # Store webhook URL
+            channel_webhooks[channel_name] = webhook.url
+
+            # Create env var name (sanitize channel name)
+            env_var_name = channel_name.replace("│", "").replace(" ", "_").upper()
+            env_var_name = f"WEBHOOK_{env_var_name}"
+            webhook_env_vars.append(f"{env_var_name}={webhook.url}")
+
+        except Exception as e:
+            await ctx.send(f"   ⚠️ Failed to create webhook for {channel_name}: {str(e)[:50]}")
+
+    await ctx.send(f"✅ Created {len(channel_webhooks)} webhooks\n")
+
+    # Save webhooks to local JSON for easy access
+    webhook_file = Path("Helix/state/channel_webhooks.json")
+    webhook_file.parent.mkdir(parents=True, exist_ok=True)
+    with open(webhook_file, "w") as f:
+        json.dump({
+            "guild_id": str(guild.id),
+            "created_at": datetime.datetime.now().isoformat(),
+            "webhooks": channel_webhooks
+        }, f, indent=2)
+
+    await ctx.send(f"💾 Webhooks saved to: `{webhook_file}`\n")
+
     # Generate Railway environment variables
     await ctx.send("⚙️ **Generating Railway configuration...**\n")
 
@@ -1071,18 +1122,118 @@ async def setup_helix_server(ctx):
 
     embed.add_field(
         name="📋 Next Steps",
-        value="1. Copy ALL 3 env blocks above\n"
+        value="1. Copy ALL env blocks (channel IDs + webhooks)\n"
         "2. Go to Railway → Your Service → Variables\n"
         "3. Paste and save (Railway auto-parses)\n"
         "4. Redeploy the service\n"
-        "5. Run `!status` to verify bot connectivity",
+        "5. Run `!status` to verify bot connectivity\n"
+        "6. Use webhooks for forum/external integration",
         inline=False,
     )
 
     embed.set_footer(text="Tat Tvam Asi — The temple is consecrated. 🙏")
 
     await ctx.send(embed=embed)
-    await ctx.send(f"🌀 **Setup complete!** All systems operational in {guild.name}")
+
+    # Send webhook URLs in separate messages (too long for single embed)
+    if webhook_env_vars:
+        await ctx.send("🔗 **Channel Webhook URLs** (for external posting & forum sync):")
+
+        # Split webhooks into chunks of 10 to avoid message length limits
+        chunk_size = 10
+        for i in range(0, len(webhook_env_vars), chunk_size):
+            chunk = webhook_env_vars[i:i + chunk_size]
+            webhook_block = "```env\n" + "\n".join(chunk) + "\n```"
+
+            # Create webhook embed
+            webhook_embed = discord.Embed(
+                title=f"🔗 Webhooks ({i+1}-{min(i+chunk_size, len(webhook_env_vars))} of {len(webhook_env_vars)})",
+                description="Add these to Railway for external posting capabilities",
+                color=0x5865F2
+            )
+            webhook_embed.add_field(name="Environment Variables", value=webhook_block, inline=False)
+            await ctx.send(embed=webhook_embed)
+
+    await ctx.send(f"🌀 **Setup complete!** All systems operational in {guild.name}\n"
+                   f"✅ {len(created_channels)} channels created\n"
+                   f"✅ {len(channel_webhooks)} webhooks configured\n"
+                   f"📁 Webhook URLs saved to `Helix/state/channel_webhooks.json`")
+
+
+@bot.command(name="webhooks", aliases=["get-webhooks", "list-webhooks"])
+@commands.has_permissions(manage_channels=True)
+async def get_channel_webhooks(ctx):
+    """
+    🔗 Retrieve all channel webhook URLs from saved configuration.
+
+    Loads webhooks from Helix/state/channel_webhooks.json and displays them
+    for use in external integrations, forum mirroring, etc.
+
+    Usage: !webhooks
+    """
+    webhook_file = Path("Helix/state/channel_webhooks.json")
+
+    if not webhook_file.exists():
+        await ctx.send(
+            "❌ **No webhooks found!**\n"
+            "Run `!setup` first to create channels and webhooks."
+        )
+        return
+
+    try:
+        with open(webhook_file, "r") as f:
+            data = json.load(f)
+
+        webhooks = data.get("webhooks", {})
+        created_at = data.get("created_at", "Unknown")
+
+        if not webhooks:
+            await ctx.send("⚠️ Webhook file exists but contains no webhooks.")
+            return
+
+        await ctx.send(f"🔗 **Loading {len(webhooks)} channel webhooks...**\n"
+                      f"📅 Created: {created_at}")
+
+        # Send webhooks in chunks
+        webhook_list = list(webhooks.items())
+        chunk_size = 10
+
+        for i in range(0, len(webhook_list), chunk_size):
+            chunk = webhook_list[i:i + chunk_size]
+
+            embed = discord.Embed(
+                title=f"🔗 Channel Webhooks ({i+1}-{min(i+chunk_size, len(webhook_list))} of {len(webhook_list)})",
+                description="Use these URLs for external posting and forum integration",
+                color=0x5865F2
+            )
+
+            for channel_name, webhook_url in chunk:
+                # Truncate URL for display
+                display_url = webhook_url[:75] + "..." if len(webhook_url) > 75 else webhook_url
+                embed.add_field(
+                    name=f"🔗 {channel_name}",
+                    value=f"`{display_url}`",
+                    inline=False
+                )
+
+            await ctx.send(embed=embed)
+
+        # Send full env var format
+        env_vars = []
+        for channel_name, webhook_url in webhooks.items():
+            env_var_name = channel_name.replace("│", "").replace(" ", "_").upper()
+            env_var_name = f"WEBHOOK_{env_var_name}"
+            env_vars.append(f"{env_var_name}={webhook_url}")
+
+        await ctx.send("📋 **Railway Environment Variable Format:**")
+
+        for i in range(0, len(env_vars), 10):
+            chunk = env_vars[i:i + 10]
+            webhook_block = "```env\n" + "\n".join(chunk) + "\n```"
+            await ctx.send(webhook_block)
+
+    except Exception as e:
+        await ctx.send(f"❌ **Error loading webhooks:**\n```{str(e)[:200]}```")
 
 
 @bot.command(name="verify-setup", aliases=["verify", "check-setup"])
