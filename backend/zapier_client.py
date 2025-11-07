@@ -8,6 +8,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class ZapierClient:
     """Production-ready Zapier client for Helix Collective monitoring"""
 
@@ -50,8 +51,8 @@ class ZapierClient:
 
     # WEEK 1: Core Monitoring (FREE TIER)
     async def log_event(self, event_title: str, event_type: str,
-                       agent_name: str, description: str,
-                       ucf_snapshot: Optional[str] = None) -> bool:
+                        agent_name: str, description: str,
+                        ucf_snapshot: Optional[str] = None) -> bool:
         """Path A: Log events to Notion Event Log"""
         payload = {
             "type": "event_log",
@@ -66,7 +67,7 @@ class ZapierClient:
         return result is not None
 
     async def update_agent(self, agent_name: str, status: str,
-                          last_action: str, health_score: int) -> bool:
+                           last_action: str, health_score: int) -> bool:
         """Path B: Update agent status in Notion Agent Registry"""
         payload = {
             "type": "agent_registry",
@@ -80,8 +81,8 @@ class ZapierClient:
         return result is not None
 
     async def update_system_state(self, component: str, status: str,
-                                 harmony: float, error_log: str = "",
-                                 verified: bool = True) -> bool:
+                                  harmony: float, error_log: str = "",
+                                  verified: bool = True) -> bool:
         """Path C: Update system state in Notion"""
         payload = {
             "type": "system_state",
@@ -96,8 +97,8 @@ class ZapierClient:
 
     # WEEK 2: Telemetry (ZAPIER PRO)
     async def log_telemetry(self, metric_name: str, value: float,
-                           component: str = "system",
-                           metadata: Optional[Dict] = None) -> bool:
+                            component: str = "system",
+                            metadata: Optional[Dict] = None) -> bool:
         """Path E: Send telemetry data to Google Sheets/Tables"""
         payload = {
             "type": "telemetry",
@@ -113,7 +114,7 @@ class ZapierClient:
 
     # WEEK 3: Alert System (ZAPIER PRO)
     async def send_discord_notification(self, channel_name: str,
-                                       message: str, priority: str = "normal") -> bool:
+                                        message: str, priority: str = "normal") -> bool:
         """Path D: Send Discord alerts to Slack"""
         payload = {
             "type": "discord_notification",
@@ -126,8 +127,8 @@ class ZapierClient:
         return result is not None
 
     async def send_error_alert(self, error_message: str, component: str,
-                              severity: str = "high",
-                              context: Optional[Dict] = None) -> bool:
+                               severity: str = "high",
+                               context: Optional[Dict] = None) -> bool:
         """Path F: Send critical error alerts via Email + Slack"""
         payload = {
             "type": "error",
@@ -143,7 +144,7 @@ class ZapierClient:
 
     # WEEK 4: Advanced Automation (ZAPIER PRO)
     async def log_repository_action(self, repo_name: str, action: str,
-                                   details: str, commit_hash: Optional[str] = None) -> bool:
+                                    details: str, commit_hash: Optional[str] = None) -> bool:
         """Path G: Repository management and GitHub integration"""
         payload = {
             "type": "repository",
@@ -204,11 +205,14 @@ class ZapierClient:
         return channel_mappings.get(component, ["status"])
 
 # Convenience functions for easy integration
+
+
 async def quick_log_event(title: str, agent: str = "System", description: str = ""):
     """Quick event logging without session management"""
     async with aiohttp.ClientSession() as session:
         zap = ZapierClient(session)
         await zap.log_event(title, "Status", agent, description)
+
 
 async def quick_error_alert(error: str, component: str = "System"):
     """Quick error alert without session management"""

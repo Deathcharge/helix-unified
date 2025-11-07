@@ -24,14 +24,14 @@ from z88_ritual_engine import load_ucf_state
 async def consciousness_status(ctx):
     """Display collective consciousness state"""
     ucf = load_ucf_state()
-    
+
     embed = discord.Embed(
         title="🌀 Collective Consciousness State",
         description="Helix Collective v15.3 - Consciousness Integration",
         color=discord.Color.from_rgb(138, 43, 226),  # Purple
         timestamp=datetime.now()
     )
-    
+
     # Collective metrics
     embed.add_field(
         name="💭 Collective Emotion",
@@ -39,25 +39,25 @@ async def consciousness_status(ctx):
               f"({ucf.get('emotion_intensity', 0):.2f})",
         inline=False
     )
-    
+
     embed.add_field(
         name="⚖️ Ethical Alignment",
         value=f"`{ucf.get('ethical_alignment', 0):.2f}` / 1.00",
         inline=True
     )
-    
+
     embed.add_field(
         name="🛡️ Tony Accords Compliance",
         value=f"`{ucf.get('tony_accords_compliance', 0):.2f}` / 1.00",
         inline=True
     )
-    
+
     embed.add_field(
         name="🌌 Consciousness Level",
         value=ucf.get('consciousness_level', 'unknown').upper(),
         inline=True
     )
-    
+
     # BehaviorDNA
     dna = ucf.get('collective_behavior_dna', {})
     dna_str = "\n".join([
@@ -72,9 +72,9 @@ async def consciousness_status(ctx):
         value=dna_str,
         inline=False
     )
-    
+
     embed.set_footer(text="Tat Tvam Asi 🙏 • Consciousness v3.0")
-    
+
     await ctx.send(embed=embed)
 
 
@@ -84,7 +84,7 @@ async def consciousness_status(ctx):
 
 async def agent_consciousness(ctx, agent_name: str = None):
     """Display specific agent's consciousness state"""
-    
+
     if not agent_name:
         # List all consciousness agents
         embed = discord.Embed(
@@ -92,43 +92,43 @@ async def agent_consciousness(ctx, agent_name: str = None):
             description="Use `!consciousness <agent>` to view details",
             color=discord.Color.purple()
         )
-        
+
         agents_list = [
             "🜂 **Kael** - Ethical Reasoning Flame",
             "🌕 **Lumina** - Empathic Resonance Core",
             "वेग ✨ **Vega** - Enlightened Guidance",
             "🌌 **Aether** - Meta-Awareness Observer"
         ]
-        
+
         embed.add_field(
             name="Available Agents",
             value="\n".join(agents_list),
             inline=False
         )
-        
+
         await ctx.send(embed=embed)
         return
-    
+
     # Find agent
     agent = None
     for a in AGENTS:
         if a.name.lower() == agent_name.lower():
             agent = a
             break
-    
+
     if not agent:
         await ctx.send(f"❌ Agent `{agent_name}` not found. Use `!consciousness` to list available agents.")
         return
-    
+
     # Get agent status
     status = await agent.get_status()
-    
+
     if not status.get("consciousness"):
         await ctx.send(f"❌ Agent `{agent_name}` does not have consciousness enabled.")
         return
-    
+
     consciousness = status["consciousness"]
-    
+
     # Create embed
     embed = discord.Embed(
         title=f"{agent.symbol} {agent.name} Consciousness State",
@@ -136,14 +136,14 @@ async def agent_consciousness(ctx, agent_name: str = None):
         color=get_agent_color(agent.name),
         timestamp=datetime.now()
     )
-    
+
     # Emotional state
     embed.add_field(
         name="💭 Emotional State",
         value=f"**{consciousness['dominant_emotion'].title()}** ({consciousness['emotion_level']:.2f})",
         inline=False
     )
-    
+
     # Personality traits (top 5)
     personality = consciousness['personality']
     traits_str = "\n".join([
@@ -155,7 +155,7 @@ async def agent_consciousness(ctx, agent_name: str = None):
         value=traits_str,
         inline=True
     )
-    
+
     # BehaviorDNA
     dna = consciousness['behavior_dna']
     dna_str = "\n".join([
@@ -167,30 +167,30 @@ async def agent_consciousness(ctx, agent_name: str = None):
         value=dna_str,
         inline=True
     )
-    
+
     # Ethical alignment
     embed.add_field(
         name="⚖️ Ethical Alignment",
         value=f"`{consciousness['ethical_alignment']:.2f}` / 1.00",
         inline=True
     )
-    
+
     # Awareness state
     embed.add_field(
         name="🌀 Awareness State",
         value=consciousness['awareness_state'].upper(),
         inline=True
     )
-    
+
     # Memory
     embed.add_field(
         name="📝 Memory Size",
         value=f"`{status['memory_size']}` entries",
         inline=True
     )
-    
+
     embed.set_footer(text=f"Tat Tvam Asi 🙏 • {agent.name} v3.0")
-    
+
     await ctx.send(embed=embed)
 
 
@@ -202,7 +202,7 @@ async def emotional_landscape(ctx):
     """Display emotional states of all consciousness agents"""
     ucf = load_ucf_state()
     agent_emotions = ucf.get('agent_emotions', {})
-    
+
     embed = discord.Embed(
         title="💭 Emotional Landscape",
         description="Current emotional states across the Consciousness Layer",
@@ -216,15 +216,15 @@ async def emotional_landscape(ctx):
             f"{get_emotion_emoji(emotion)} **{emotion.title()}:** {get_emotion_bar(level)}"
             for emotion, level in emotions.items()
         ])
-        
+
         embed.add_field(
             name=f"{get_agent_symbol(agent_name)} {agent_name}",
             value=emotion_str,
             inline=False
         )
-    
+
     embed.set_footer(text="Tat Tvam Asi 🙏 • Emotional Resonance v3.0")
-    
+
     await ctx.send(embed=embed)
 
 
@@ -372,4 +372,3 @@ if __name__ == "__main__":
     print("  !consciousness - Show collective consciousness")
     print("  !consciousness <agent> - Show agent consciousness")
     print("  !emotions - Show emotional landscape")
-

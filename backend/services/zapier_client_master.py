@@ -25,6 +25,7 @@ SYSTEM_HOOK = os.getenv("ZAPIER_SYSTEM_HOOK_URL")
 # MASTER ZAPIER CLIENT (Zapier Pro)
 # ============================================================================
 
+
 class MasterZapierClient:
     """
     Master Webhook Client for Zapier Pro with Path Routing.
@@ -389,6 +390,7 @@ class MasterZapierClient:
 # CONVENIENCE FUNCTIONS
 # ============================================================================
 
+
 def validate_config() -> Dict[str, Any]:
     """
     Validate Zapier configuration.
@@ -414,6 +416,7 @@ def validate_config() -> Dict[str, Any]:
 # ============================================================================
 # ENTRY POINT
 # ============================================================================
+
 
 if __name__ == "__main__":
     async def test():

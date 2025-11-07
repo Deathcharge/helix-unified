@@ -17,10 +17,10 @@ logger = logging.getLogger('HelixSync.NotionExporter')
 
 class NotionExporter:
     """Exports data to Notion-compatible JSON"""
-    
+
     def __init__(self):
         self.database_schemas = self.get_database_schemas()
-    
+
     def get_database_schemas(self) -> Dict:
         """Define Notion database schemas"""
         return {
@@ -62,49 +62,49 @@ class NotionExporter:
                 }
             }
         }
-    
+
     async def export(self, data: Dict, output_path: str):
         """Export data to Notion JSON file"""
         logger.info(f"Exporting to Notion JSON: {output_path}")
-        
+
         notion_data = {
             'version': '1.0',
             'generated_at': datetime.utcnow().isoformat(),
             'databases': {}
         }
-        
+
         # Export GitHub repos
         if 'github' in data:
             notion_data['databases']['repos'] = self.export_repos(data['github'])
-        
+
         # Export UCF metrics
         if 'ucf_state' in data:
             notion_data['databases']['ucf_metrics'] = self.export_ucf_metrics(data['ucf_state'])
-        
+
         # Export agent metrics
         if 'agent_metrics' in data:
             notion_data['databases']['agents'] = self.export_agents(data['agent_metrics'])
-        
+
         # Write to file
         import json
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(notion_data, f, indent=2)
-        
+
         logger.info("Notion JSON export complete")
-    
+
     def export_repos(self, github_data: Dict) -> Dict:
         """Export repository data in Notion format"""
         repos_db = {
             'schema': self.database_schemas['repos'],
             'entries': []
         }
-        
+
         for repo_name, repo_data in github_data.get('repos', {}).items():
             if 'error' in repo_data:
                 continue
-            
+
             latest_commit = repo_data.get('latest_commit', {})
-            
+
             entry = {
                 'properties': {
                     'Name': {
@@ -134,18 +134,18 @@ class NotionExporter:
                     }
                 }
             }
-            
+
             repos_db['entries'].append(entry)
-        
+
         return repos_db
-    
+
     def export_ucf_metrics(self, ucf_data: Dict) -> Dict:
         """Export UCF metrics in Notion format"""
         ucf_db = {
             'schema': self.database_schemas['ucf_metrics'],
             'entries': []
         }
-        
+
         entry = {
             'properties': {
                 'Timestamp': {
@@ -177,17 +177,17 @@ class NotionExporter:
                 }
             }
         }
-        
+
         ucf_db['entries'].append(entry)
         return ucf_db
-    
+
     def export_agents(self, agent_data: Dict) -> Dict:
         """Export agent metrics in Notion format"""
         agents_db = {
             'schema': self.database_schemas['agents'],
             'entries': []
         }
-        
+
         # Placeholder - would iterate through actual agent data
         agents = agent_data.get('agents', [])
         for agent in agents:
@@ -213,8 +213,7 @@ class NotionExporter:
                     }
                 }
             }
-            
-            agents_db['entries'].append(entry)
-        
-        return agents_db
 
+            agents_db['entries'].append(entry)
+
+        return agents_db

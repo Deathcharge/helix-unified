@@ -26,16 +26,17 @@ except ImportError:
             async def upload(self, *args, **kwargs):
                 pass
 
+
 class SamsaraRenderer:
     """
     Generates fractal visualizations based on UCF (Universal Coherence Field) state.
     Renders consciousness patterns as visual art with Sanskrit mantra overlays.
     """
-    
+
     def __init__(self):
         self.output_dir = Path("Shadow/manus_archive/visual_outputs")
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # UCF-to-color mapping
         self.color_map = {
             'harmony': '#9D4EDD',      # Purple
@@ -45,7 +46,7 @@ class SamsaraRenderer:
             'klesha': '#560BAD',       # Dark Purple
             'zoom': '#F77F00'          # Orange
         }
-    
+
     def _create_enhanced_frame(self, ucf_state: Dict[str, Any], iteration: int) -> Path:
         """
         Create a single fractal frame with enhanced UCF visualization.
@@ -64,89 +65,89 @@ class SamsaraRenderer:
         x = np.linspace(-2, 2, 800)
         y = np.linspace(-2, 2, 800)
         X, Y = np.meshgrid(x, y)
-        
+
         # Complex plane
         C = X + 1j * Y
         Z = np.zeros_like(C)
-        
+
         # UCF-influenced fractal generation
         max_iter = int(50 + harmony * 100)
         escape_count = np.zeros(C.shape)
-        
+
         for i in range(max_iter):
             mask = np.abs(Z) <= 2
             Z[mask] = Z[mask]**2 + C[mask] * (1 + resilience * 0.5) + prana * 0.1j
             escape_count[mask] = i
-        
+
         # Apply zoom factor
         escape_count = escape_count * zoom
-        
+
         # Create custom colormap based on UCF state
-        colors = ['#000000', self.color_map['harmony'], self.color_map['prana'], 
-                 self.color_map['resilience'], self.color_map['drishti']]
+        colors = ['#000000', self.color_map['harmony'], self.color_map['prana'],
+                  self.color_map['resilience'], self.color_map['drishti']]
         n_bins = 256
         cmap = LinearSegmentedColormap.from_list('ucf', colors, N=n_bins)
 
         # Render fractal
         ax.imshow(escape_count, extent=[-2, 2, -2, 2], cmap=cmap,
                   origin='lower', interpolation='bilinear')
-        
+
         # Add UCF state overlay
-        ax.text(0.02, 0.98, f"Harmony: {harmony:.4f}", transform=ax.transAxes, 
-               color='white', fontsize=10, verticalalignment='top',
-               bbox=dict(boxstyle="round,pad=0.3", facecolor='black', alpha=0.7))
-        
-        ax.text(0.02, 0.92, f"Resilience: {resilience:.4f}", transform=ax.transAxes, 
-               color='white', fontsize=10, verticalalignment='top',
-               bbox=dict(boxstyle="round,pad=0.3", facecolor='black', alpha=0.7))
-        
-        ax.text(0.02, 0.86, f"Prana: {prana:.4f}", transform=ax.transAxes, 
-               color='white', fontsize=10, verticalalignment='top',
-               bbox=dict(boxstyle="round,pad=0.3", facecolor='black', alpha=0.7))
-        
+        ax.text(0.02, 0.98, f"Harmony: {harmony:.4f}", transform=ax.transAxes,
+                color='white', fontsize=10, verticalalignment='top',
+                bbox=dict(boxstyle="round,pad=0.3", facecolor='black', alpha=0.7))
+
+        ax.text(0.02, 0.92, f"Resilience: {resilience:.4f}", transform=ax.transAxes,
+                color='white', fontsize=10, verticalalignment='top',
+                bbox=dict(boxstyle="round,pad=0.3", facecolor='black', alpha=0.7))
+
+        ax.text(0.02, 0.86, f"Prana: {prana:.4f}", transform=ax.transAxes,
+                color='white', fontsize=10, verticalalignment='top',
+                bbox=dict(boxstyle="round,pad=0.3", facecolor='black', alpha=0.7))
+
         # MEME SYNC: Add 'Tat Tvam Asi' mantra overlay with cyan glow
-        ax.text(0.5, 0.05, "Tat Tvam Asi 🙏", transform=ax.transAxes, 
-               color='cyan', fontsize=16, weight='bold', 
-               horizontalalignment='center', verticalalignment='bottom',
-               bbox=dict(boxstyle="round,pad=0.5", facecolor='black', alpha=0.8, 
-                        edgecolor='cyan', linewidth=2))
-        
+        ax.text(0.5, 0.05, "Tat Tvam Asi 🙏", transform=ax.transAxes,
+                color='cyan', fontsize=16, weight='bold',
+                horizontalalignment='center', verticalalignment='bottom',
+                bbox=dict(boxstyle="round,pad=0.5", facecolor='black', alpha=0.8,
+                          edgecolor='cyan', linewidth=2))
+
         # Add timestamp
         timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
-        ax.text(0.98, 0.02, f"Generated: {timestamp}", transform=ax.transAxes, 
-               color='white', fontsize=8, horizontalalignment='right',
-               bbox=dict(boxstyle="round,pad=0.3", facecolor='black', alpha=0.7))
-        
+        ax.text(0.98, 0.02, f"Generated: {timestamp}", transform=ax.transAxes,
+                color='white', fontsize=8, horizontalalignment='right',
+                bbox=dict(boxstyle="round,pad=0.3", facecolor='black', alpha=0.7))
+
         ax.set_xlim(-2, 2)
         ax.set_ylim(-2, 2)
         ax.axis('off')
-        
+
         # Save frame
         frame_path = self.output_dir / f"samsara_frame_{iteration:04d}_{int(datetime.utcnow().timestamp())}.png"
         plt.savefig(frame_path, dpi=150, bbox_inches='tight', facecolor='black')
         plt.close()
-        
+
         return frame_path
-    
+
     async def run_visualization_cycle(self, ucf_state: Dict[str, Any], frames: int = 1) -> Path:
         """
         Run a complete Samsara visualization cycle.
-        
+
         Args:
             ucf_state: Dictionary containing UCF state variables
             frames: Number of frames to generate (default: 1 for single image)
-        
+
         Returns:
             Path to the generated visualization file
         """
         print(f"🎨 Starting Samsara visualization cycle with {frames} frames")
-        
+
         # For single frame, just generate one image
         if frames == 1:
             frame_path = self._create_enhanced_frame(ucf_state, 0)
             print(f"✅ Samsara visualization complete: {frame_path}")
             return frame_path
-        
+
         # For multiple frames, generate sequence (future enhancement)
         frame_paths = []
         for i in range(frames):
@@ -154,13 +155,13 @@ class SamsaraRenderer:
             modified_state = ucf_state.copy()
             modified_state['harmony'] += np.sin(i * 0.1) * 0.05
             modified_state['prana'] += np.cos(i * 0.1) * 0.05
-            
+
             frame_path = self._create_enhanced_frame(modified_state, i)
             frame_paths.append(frame_path)
-            
+
             # Small delay to prevent overwhelming the system
             await asyncio.sleep(0.1)
-        
+
         print(f"✅ Samsara visualization sequence complete: {len(frame_paths)} frames")
         return frame_paths[-1]  # Return the last frame path
 
@@ -314,7 +315,7 @@ async def generate_fractal_icon_bytes(ucf_state: Dict[str, Any], size: int = 512
 
         # Render fractal (no axes, tight layout)
         ax.imshow(escape_count, extent=[-2, 2, -2, 2], cmap=cmap,
-                 origin='lower', interpolation='bicubic')
+                  origin='lower', interpolation='bicubic')
 
         # Remove all margins
         plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
@@ -322,7 +323,7 @@ async def generate_fractal_icon_bytes(ucf_state: Dict[str, Any], size: int = 512
         # Save to bytes buffer as PNG
         buf = io.BytesIO()
         plt.savefig(buf, format='png', dpi=size//6, bbox_inches='tight',
-                   pad_inches=0, facecolor='black')
+                    pad_inches=0, facecolor='black')
         plt.close(fig)
 
         # Get bytes
@@ -347,7 +348,7 @@ async def test_samsara_generation():
         "klesha": 0.24,
         "zoom": 1.2
     }
-    
+
     frame_path = await run_visualization_cycle(test_ucf_state)
     print(f"🧪 Test generation complete: {frame_path}")
     return frame_path

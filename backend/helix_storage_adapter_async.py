@@ -12,6 +12,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import Optional, Dict, Any
 
+
 class HelixStorageAdapterAsync:
     """Non-blocking cloud/local archive handler for Shadow persistence."""
 

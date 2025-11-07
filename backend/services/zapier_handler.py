@@ -15,6 +15,7 @@ from backend.services.notion_client import get_notion_client
 # PYDANTIC MODELS
 # ============================================================================
 
+
 class EventPayload(BaseModel):
     """Payload for event logging via Zapier."""
     event_title: str
@@ -23,12 +24,14 @@ class EventPayload(BaseModel):
     description: str
     ucf_snapshot: Dict[str, Any]
 
+
 class AgentStatusPayload(BaseModel):
     """Payload for agent status updates via Zapier."""
     agent_name: str
     status: str
     last_action: str
     health_score: int
+
 
 class ComponentStatusPayload(BaseModel):
     """Payload for system component updates via Zapier."""
@@ -37,6 +40,7 @@ class ComponentStatusPayload(BaseModel):
     harmony: float
     error_log: str = ""
     verified: bool = False
+
 
 class ContextSnapshotPayload(BaseModel):
     """Payload for context snapshot via Zapier."""
@@ -51,17 +55,19 @@ class ContextSnapshotPayload(BaseModel):
 # ROUTER
 # ============================================================================
 
+
 router = APIRouter(prefix="/zapier", tags=["zapier"])
 
 # ============================================================================
 # WEBHOOK ENDPOINTS
 # ============================================================================
 
+
 @router.post("/event")
 async def webhook_log_event(payload: EventPayload):
     """
     Zapier webhook to log events to Notion.
-    
+
     Trigger: When Manus completes a task
     Action: Create page in Event Log
     """
@@ -69,7 +75,7 @@ async def webhook_log_event(payload: EventPayload):
         notion = await get_notion_client()
         if not notion:
             raise HTTPException(status_code=503, detail="Notion client unavailable")
-        
+
         # Log to Notion
         page_id = await notion.log_event(
             event_title=payload.event_title,
@@ -78,7 +84,7 @@ async def webhook_log_event(payload: EventPayload):
             description=payload.description,
             ucf_snapshot=payload.ucf_snapshot
         )
-        
+
         # Also log locally for audit trail
         log_path = Path("Shadow/manus_archive/zapier_events.log")
         log_path.parent.mkdir(parents=True, exist_ok=True)
@@ -89,7 +95,7 @@ async def webhook_log_event(payload: EventPayload):
                 "payload": payload.dict(),
                 "notion_page_id": page_id
             }) + "\n")
-        
+
         return {
             "status": "success",
             "message": f"Event logged: {payload.event_title}",
@@ -99,11 +105,12 @@ async def webhook_log_event(payload: EventPayload):
         print(f"❌ Error in webhook_log_event: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @router.post("/agent-status")
 async def webhook_update_agent_status(payload: AgentStatusPayload):
     """
     Zapier webhook to update agent status in Notion.
-    
+
     Trigger: When Manus starts/stops
     Action: Update page in Agent Registry
     """
@@ -111,7 +118,7 @@ async def webhook_update_agent_status(payload: AgentStatusPayload):
         notion = await get_notion_client()
         if not notion:
             raise HTTPException(status_code=503, detail="Notion client unavailable")
-        
+
         # Update in Notion
         success = await notion.update_agent_status(
             agent_name=payload.agent_name,
@@ -119,7 +126,7 @@ async def webhook_update_agent_status(payload: AgentStatusPayload):
             last_action=payload.last_action,
             health_score=payload.health_score
         )
-        
+
         # Log locally
         log_path = Path("Shadow/manus_archive/zapier_events.log")
         log_path.parent.mkdir(parents=True, exist_ok=True)
@@ -130,7 +137,7 @@ async def webhook_update_agent_status(payload: AgentStatusPayload):
                 "payload": payload.dict(),
                 "success": success
             }) + "\n")
-        
+
         return {
             "status": "success" if success else "failed",
             "message": f"Agent {payload.agent_name} status updated",
@@ -140,11 +147,12 @@ async def webhook_update_agent_status(payload: AgentStatusPayload):
         print(f"❌ Error in webhook_update_agent_status: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @router.post("/component-status")
 async def webhook_update_component_status(payload: ComponentStatusPayload):
     """
     Zapier webhook to update system component status in Notion.
-    
+
     Trigger: When component status changes
     Action: Update page in System State
     """
@@ -152,7 +160,7 @@ async def webhook_update_component_status(payload: ComponentStatusPayload):
         notion = await get_notion_client()
         if not notion:
             raise HTTPException(status_code=503, detail="Notion client unavailable")
-        
+
         # Update in Notion
         success = await notion.update_system_component(
             component_name=payload.component_name,
@@ -161,7 +169,7 @@ async def webhook_update_component_status(payload: ComponentStatusPayload):
             error_log=payload.error_log,
             verified=payload.verified
         )
-        
+
         # Log locally
         log_path = Path("Shadow/manus_archive/zapier_events.log")
         log_path.parent.mkdir(parents=True, exist_ok=True)
@@ -172,7 +180,7 @@ async def webhook_update_component_status(payload: ComponentStatusPayload):
                 "payload": payload.dict(),
                 "success": success
             }) + "\n")
-        
+
         return {
             "status": "success" if success else "failed",
             "message": f"Component {payload.component_name} status updated",
@@ -182,11 +190,12 @@ async def webhook_update_component_status(payload: ComponentStatusPayload):
         print(f"❌ Error in webhook_update_component_status: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @router.post("/context-snapshot")
 async def webhook_save_context_snapshot(payload: ContextSnapshotPayload):
     """
     Zapier webhook to save context snapshot to Notion.
-    
+
     Trigger: At end of session
     Action: Create page in Context Snapshots
     """
@@ -194,7 +203,7 @@ async def webhook_save_context_snapshot(payload: ContextSnapshotPayload):
         notion = await get_notion_client()
         if not notion:
             raise HTTPException(status_code=503, detail="Notion client unavailable")
-        
+
         # Save to Notion
         page_id = await notion.save_context_snapshot(
             session_id=payload.session_id,
@@ -204,7 +213,7 @@ async def webhook_save_context_snapshot(payload: ContextSnapshotPayload):
             next_steps=payload.next_steps,
             full_context=payload.full_context
         )
-        
+
         # Log locally
         log_path = Path("Shadow/manus_archive/zapier_events.log")
         log_path.parent.mkdir(parents=True, exist_ok=True)
@@ -215,7 +224,7 @@ async def webhook_save_context_snapshot(payload: ContextSnapshotPayload):
                 "payload": payload.dict(),
                 "notion_page_id": page_id
             }) + "\n")
-        
+
         return {
             "status": "success",
             "message": f"Context snapshot saved: {payload.session_id}",
@@ -229,6 +238,7 @@ async def webhook_save_context_snapshot(payload: ContextSnapshotPayload):
 # HEALTH CHECK
 # ============================================================================
 
+
 @router.get("/health")
 async def zapier_health():
     """Check Zapier webhook health."""
@@ -236,7 +246,7 @@ async def zapier_health():
         notion = await get_notion_client()
         if not notion:
             return {"status": "degraded", "notion": "unavailable"}
-        
+
         health = await notion.health_check()
         return {
             "status": "healthy" if health else "degraded",
@@ -252,4 +262,3 @@ async def zapier_health():
 # Include this router in main.py:
 # from backend.services.zapier_handler import router as zapier_router
 # app.include_router(zapier_router)
-

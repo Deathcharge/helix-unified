@@ -15,8 +15,11 @@ from backend.enhanced_kavach import EnhancedKavach
 notion_client: Optional[HelixNotionClient] = None
 
 # --- Base Agent Class ---
+
+
 class HelixAgent:
     """Base class for all Helix Collective agents."""
+
     def __init__(self, name: str, symbol: str, role: str, **kwargs) -> None:
         self.name = name
         self.symbol = symbol
@@ -33,13 +36,22 @@ class HelixAgent:
 
 # --- All Agent Classes (Kael, Lumina, Vega, etc.) ---
 # These classes remain unchanged. They inherit from HelixAgent.
-class Kael(HelixAgent): ...
-class Lumina(HelixAgent): ...
+
+
+class Kael(HelixAgent):
+    ...
+
+
+class Lumina(HelixAgent):
+    ...
 # ... etc. ...
 
 # --- Manus Agent (with Notion Integration) ---
+
+
 class Manus(HelixAgent):
     """Operational Executor with integrated Dream-Memory (Notion)."""
+
     def __init__(self, kavach: EnhancedKavach) -> None:
         super().__init__("Manus", "🤲", "Operational Executor")
         self.kavach = kavach
@@ -94,10 +106,12 @@ class Manus(HelixAgent):
             # Your existing loop logic from agents_loop.py goes here
             await asyncio.sleep(30)
 
+
 # --- Agent Registry ---
 _kavach = EnhancedKavach()
-AGENTS = { "Kael": Kael(), "Manus": Manus(_kavach), # Add all your agents here
-}
+AGENTS = {"Kael": Kael(), "Manus": Manus(_kavach),  # Add all your agents here
+          }
+
 
 async def get_collective_status() -> Dict[str, Any]:
     # ... (This function remains unchanged) ...

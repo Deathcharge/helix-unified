@@ -3,16 +3,16 @@
 # Automatically posts UCF trend charts to Discord
 # Author: Claude Code + Andrew John Ward
 
+import os
+from datetime import datetime, timedelta
+from pathlib import Path
+import json
+import pandas as pd
+import matplotlib.pyplot as plt
 import discord
 from discord.ext import tasks
 import matplotlib
 matplotlib.use('Agg')  # Non-interactive backend
-import matplotlib.pyplot as plt
-import pandas as pd
-import json
-from pathlib import Path
-from datetime import datetime, timedelta
-import os
 
 # Configuration
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
@@ -23,6 +23,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 bot = discord.Client(intents=intents)
 
+
 def load_ucf_state():
     """Load current UCF state."""
     state_path = Path("Helix/state/ucf_state.json")
@@ -30,6 +31,7 @@ def load_ucf_state():
         with open(state_path) as f:
             return json.load(f)
     return {}
+
 
 def load_ritual_history(days=30):
     """Load recent ritual history."""
@@ -57,6 +59,7 @@ def load_ritual_history(days=30):
         df = df[df['time'] >= cutoff]
     return df
 
+
 def generate_daily_trend_chart():
     """Generate comprehensive UCF trend chart."""
     ucf_state = load_ucf_state()
@@ -75,10 +78,10 @@ def generate_daily_trend_chart():
     if not ritual_history.empty and 'time' in ritual_history.columns:
         if 'harmony' in ritual_history.columns:
             ax1.plot(ritual_history['time'], ritual_history['harmony'],
-                    label='Harmony', color='cyan', marker='o', linewidth=2)
+                     label='Harmony', color='cyan', marker='o', linewidth=2)
         if 'resilience' in ritual_history.columns:
             ax1.plot(ritual_history['time'], ritual_history['resilience'],
-                    label='Resilience', color='gold', marker='s', linewidth=2)
+                     label='Resilience', color='gold', marker='s', linewidth=2)
         ax1.axhline(y=0.6, color='green', linestyle='--', label='Harmony Target')
         ax1.set_title('Harmony & Resilience Evolution', fontsize=14, color='white')
         ax1.set_xlabel('Date', color='white')
@@ -88,17 +91,17 @@ def generate_daily_trend_chart():
         ax1.tick_params(colors='white')
     else:
         ax1.text(0.5, 0.5, 'No historical data\nRun rituals to generate trends',
-                ha='center', va='center', transform=ax1.transAxes, fontsize=12, color='white')
+                 ha='center', va='center', transform=ax1.transAxes, fontsize=12, color='white')
         ax1.set_title('Harmony & Resilience Evolution', fontsize=14, color='white')
 
     # 2. Prana & Klesha Trend
     if not ritual_history.empty and 'time' in ritual_history.columns:
         if 'prana' in ritual_history.columns:
             ax2.plot(ritual_history['time'], ritual_history['prana'],
-                    label='Prana', color='magenta', marker='^', linewidth=2)
+                     label='Prana', color='magenta', marker='^', linewidth=2)
         if 'klesha' in ritual_history.columns:
             ax2.plot(ritual_history['time'], ritual_history['klesha'],
-                    label='Klesha', color='red', marker='v', linewidth=2)
+                     label='Klesha', color='red', marker='v', linewidth=2)
         ax2.axhline(y=0.5, color='yellow', linestyle='--', label='Balance')
         ax2.set_title('Prana & Klesha Balance', fontsize=14, color='white')
         ax2.set_xlabel('Date', color='white')
@@ -108,7 +111,7 @@ def generate_daily_trend_chart():
         ax2.tick_params(colors='white')
     else:
         ax2.text(0.5, 0.5, 'No historical data\nRun rituals to generate trends',
-                ha='center', va='center', transform=ax2.transAxes, fontsize=12, color='white')
+                 ha='center', va='center', transform=ax2.transAxes, fontsize=12, color='white')
         ax2.set_title('Prana & Klesha Balance', fontsize=14, color='white')
 
     # 3. Current UCF Metrics (Bar Chart)
@@ -135,7 +138,7 @@ def generate_daily_trend_chart():
     for bar, value in zip(bars, values):
         height = bar.get_height()
         ax3.text(bar.get_x() + bar.get_width()/2., height,
-                f'{value:.3f}', ha='center', va='bottom', color='white', fontsize=10)
+                 f'{value:.3f}', ha='center', va='bottom', color='white', fontsize=10)
 
     # 4. Ritual Count & Progress
     ritual_count = len(ritual_history) if not ritual_history.empty else 0
@@ -144,20 +147,20 @@ def generate_daily_trend_chart():
     progress = (current_harmony / target_harmony) * 100
 
     ax4.text(0.5, 0.8, f'Total Rituals\n{ritual_count}',
-            ha='center', va='center', transform=ax4.transAxes,
-            fontsize=24, fontweight='bold', color='gold')
+             ha='center', va='center', transform=ax4.transAxes,
+             fontsize=24, fontweight='bold', color='gold')
 
     ax4.text(0.5, 0.5, f'Harmony Progress\n{progress:.1f}%',
-            ha='center', va='center', transform=ax4.transAxes,
-            fontsize=18, color='cyan')
+             ha='center', va='center', transform=ax4.transAxes,
+             fontsize=18, color='cyan')
 
     ax4.text(0.5, 0.3, f'Current: {current_harmony:.4f}\nTarget: {target_harmony:.4f}',
-            ha='center', va='center', transform=ax4.transAxes,
-            fontsize=12, color='white')
+             ha='center', va='center', transform=ax4.transAxes,
+             fontsize=12, color='white')
 
     ax4.text(0.5, 0.1, f'Last Update: {datetime.now().strftime("%Y-%m-%d %H:%M")}',
-            ha='center', va='center', transform=ax4.transAxes,
-            fontsize=10, color='gray')
+             ha='center', va='center', transform=ax4.transAxes,
+             fontsize=10, color='gray')
 
     ax4.axis('off')
     ax4.set_title('Progress Tracker', fontsize=14, color='white')
@@ -174,6 +177,7 @@ def generate_daily_trend_chart():
 
     print(f"📊 Daily trend chart generated: {chart_path}")
     return chart_path
+
 
 @tasks.loop(hours=24)
 async def post_daily_trends():
@@ -276,6 +280,7 @@ async def post_daily_trends():
         print(f"❌ Daily trends error: {e}")
         import traceback
         traceback.print_exc()
+
 
 @bot.event
 async def on_ready():

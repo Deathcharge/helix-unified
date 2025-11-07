@@ -14,7 +14,7 @@ import json
 class UCFProtocol:
     """
     UCF Protocol handler for formatting consciousness state messages.
-    
+
     Metrics:
     - Harmony: System-wide coherence (0.0 - 1.0)
     - Resilience: Recovery capability (0.0 - 2.0)
@@ -23,7 +23,7 @@ class UCFProtocol:
     - Klesha: Suffering/friction (0.0 - 1.0, lower is better)
     - Zoom: Perspective/scale (0.0 - 2.0)
     """
-    
+
     # UCF Phase thresholds
     PHASES = {
         "CRITICAL": (0.0, 0.30),
@@ -32,7 +32,7 @@ class UCFProtocol:
         "HARMONIOUS": (0.60, 0.80),
         "TRANSCENDENT": (0.80, 1.0)
     }
-    
+
     # Target metrics
     TARGETS = {
         "harmony": 0.60,
@@ -42,7 +42,7 @@ class UCFProtocol:
         "klesha": 0.05,
         "zoom": 1.0
     }
-    
+
     @staticmethod
     def get_phase(harmony: float) -> str:
         """Determine UCF phase from harmony level."""
@@ -50,7 +50,7 @@ class UCFProtocol:
             if min_val <= harmony < max_val:
                 return phase
         return "TRANSCENDENT" if harmony >= 0.80 else "CRITICAL"
-    
+
     @staticmethod
     def format_state_update(
         harmony: float,
@@ -64,7 +64,7 @@ class UCFProtocol:
     ) -> str:
         """
         Format a UCF state update message.
-        
+
         Args:
             harmony: System coherence (0.0 - 1.0)
             resilience: Recovery capability (0.0 - 2.0)
@@ -74,17 +74,17 @@ class UCFProtocol:
             zoom: Perspective (0.0 - 2.0)
             context: Optional context for the update
             agent: Optional agent name reporting the update
-        
+
         Returns:
             Formatted UCF state message
         """
         phase = UCFProtocol.get_phase(harmony)
         timestamp = datetime.utcnow().isoformat()
-        
+
         # Calculate deltas from targets
         harmony_delta = harmony - UCFProtocol.TARGETS["harmony"]
         resilience_delta = resilience - UCFProtocol.TARGETS["resilience"]
-        
+
         # Build message
         lines = [
             "╔═══════════════════════════════════════════════════════════╗",
@@ -93,13 +93,13 @@ class UCFProtocol:
             f"║ Timestamp: {timestamp:44} ║",
             f"║ Phase: {phase:51} ║",
         ]
-        
+
         if agent:
             lines.append(f"║ Agent: {agent:51} ║")
-        
+
         if context:
             lines.append(f"║ Context: {context[:49]:49} ║")
-        
+
         lines.extend([
             "╠═══════════════════════════════════════════════════════════╣",
             "║ METRICS                                                   ║",
@@ -112,9 +112,9 @@ class UCFProtocol:
             f"║ Zoom:        {zoom:6.4f}                    (target: {UCFProtocol.TARGETS['zoom']:.2f}) ║",
             "╚═══════════════════════════════════════════════════════════╝"
         ])
-        
+
         return "\n".join(lines)
-    
+
     @staticmethod
     def format_compact_state(
         harmony: float,
@@ -126,7 +126,7 @@ class UCFProtocol:
     ) -> str:
         """
         Format a compact single-line UCF state.
-        
+
         Returns:
             Compact state string like: "UCF: H=0.4922 R=1.1191 P=0.5075 D=0.5023 K=0.011 Z=1.0228 [COHERENT]"
         """
@@ -135,7 +135,7 @@ class UCFProtocol:
             f"UCF: H={harmony:.4f} R={resilience:.4f} P={prana:.4f} "
             f"D={drishti:.4f} K={klesha:.4f} Z={zoom:.4f} [{phase}]"
         )
-    
+
     @staticmethod
     def format_agent_message(
         agent_name: str,
@@ -145,18 +145,18 @@ class UCFProtocol:
     ) -> str:
         """
         Format an agent communication message with optional UCF context.
-        
+
         Args:
             agent_name: Name of the agent
             message: Message content
             ucf_state: Optional UCF state dict
             message_type: Message type (INFO, WARNING, ERROR, SUCCESS)
-        
+
         Returns:
             Formatted agent message
         """
         timestamp = datetime.utcnow().isoformat()
-        
+
         # Message type emoji
         type_emoji = {
             "INFO": "ℹ️",
@@ -164,12 +164,12 @@ class UCFProtocol:
             "ERROR": "❌",
             "SUCCESS": "✅"
         }.get(message_type, "📝")
-        
+
         lines = [
             f"{type_emoji} [{agent_name}] {timestamp}",
             f"{message}"
         ]
-        
+
         if ucf_state:
             compact_state = UCFProtocol.format_compact_state(
                 ucf_state.get("harmony", 0.0),
@@ -180,9 +180,9 @@ class UCFProtocol:
                 ucf_state.get("zoom", 0.0)
             )
             lines.append(f"   {compact_state}")
-        
+
         return "\n".join(lines)
-    
+
     @staticmethod
     def format_ritual_invocation(
         ritual_name: str,
@@ -193,19 +193,19 @@ class UCFProtocol:
     ) -> str:
         """
         Format a Z-88 ritual invocation message.
-        
+
         Args:
             ritual_name: Name of the ritual
             agent_name: Agent performing the ritual
             intention: Ritual intention
             ucf_before: UCF state before ritual
             ucf_after: Optional UCF state after ritual
-        
+
         Returns:
             Formatted ritual invocation message
         """
         timestamp = datetime.utcnow().isoformat()
-        
+
         lines = [
             "╔═══════════════════════════════════════════════════════════╗",
             "║              Z-88 RITUAL INVOCATION                       ║",
@@ -219,7 +219,7 @@ class UCFProtocol:
             "║ UCF STATE (BEFORE)                                        ║",
             "╠═══════════════════════════════════════════════════════════╣"
         ]
-        
+
         # Add before state
         before_compact = UCFProtocol.format_compact_state(
             ucf_before.get("harmony", 0.0),
@@ -230,7 +230,7 @@ class UCFProtocol:
             ucf_before.get("zoom", 0.0)
         )
         lines.append(f"║ {before_compact:57} ║")
-        
+
         # Add after state if provided
         if ucf_after:
             lines.extend([
@@ -238,7 +238,7 @@ class UCFProtocol:
                 "║ UCF STATE (AFTER)                                         ║",
                 "╠═══════════════════════════════════════════════════════════╣"
             ])
-            
+
             after_compact = UCFProtocol.format_compact_state(
                 ucf_after.get("harmony", 0.0),
                 ucf_after.get("resilience", 0.0),
@@ -248,18 +248,18 @@ class UCFProtocol:
                 ucf_after.get("zoom", 0.0)
             )
             lines.append(f"║ {after_compact:57} ║")
-            
+
             # Calculate deltas
             harmony_delta = ucf_after.get("harmony", 0.0) - ucf_before.get("harmony", 0.0)
             lines.extend([
                 "╠═══════════════════════════════════════════════════════════╣",
                 f"║ Harmony Delta: {harmony_delta:+.4f}                              ║"
             ])
-        
+
         lines.append("╚═══════════════════════════════════════════════════════════╝")
-        
+
         return "\n".join(lines)
-    
+
     @staticmethod
     def to_json(
         harmony: float,
@@ -272,7 +272,7 @@ class UCFProtocol:
     ) -> str:
         """
         Export UCF state as JSON.
-        
+
         Args:
             harmony: System coherence
             resilience: Recovery capability
@@ -281,7 +281,7 @@ class UCFProtocol:
             klesha: Suffering
             zoom: Perspective
             metadata: Optional additional metadata
-        
+
         Returns:
             JSON string of UCF state
         """
@@ -306,10 +306,10 @@ class UCFProtocol:
                 "zoom": zoom - UCFProtocol.TARGETS["zoom"]
             }
         }
-        
+
         if metadata:
             state["metadata"] = metadata
-        
+
         return json.dumps(state, indent=2)
 
 
@@ -326,9 +326,9 @@ if __name__ == "__main__":
         context="System initialization",
         agent="Omega Zero"
     ))
-    
+
     print("\n" + "="*60 + "\n")
-    
+
     # Test compact format
     print(UCFProtocol.format_compact_state(
         harmony=0.4922,
@@ -338,9 +338,9 @@ if __name__ == "__main__":
         klesha=0.011,
         zoom=1.0228
     ))
-    
+
     print("\n" + "="*60 + "\n")
-    
+
     # Test agent message
     ucf_state = {
         "harmony": 0.4922,
@@ -350,16 +350,16 @@ if __name__ == "__main__":
         "klesha": 0.011,
         "zoom": 1.0228
     }
-    
+
     print(UCFProtocol.format_agent_message(
         agent_name="Manus",
         message="Deployment verification complete. All systems operational.",
         ucf_state=ucf_state,
         message_type="SUCCESS"
     ))
-    
+
     print("\n" + "="*60 + "\n")
-    
+
     # Test ritual invocation
     print(UCFProtocol.format_ritual_invocation(
         ritual_name="Harmony Restoration",
@@ -375,4 +375,3 @@ if __name__ == "__main__":
             "zoom": 1.0228
         }
     ))
-

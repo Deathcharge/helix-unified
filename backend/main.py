@@ -2,6 +2,16 @@
 # backend/main.py — FastAPI + Discord Bot Launcher (FIXED IMPORTS)
 # Author: Andrew John Ward (Architect)
 
+from agent_embeds import get_collective_status
+from zapier_integration import HelixZapierIntegration, set_zapier, get_zapier
+from mandelbrot_ucf import (
+    MandelbrotUCFGenerator,
+    get_eye_of_consciousness,
+    generate_ritual_ucf
+)
+from websocket_manager import manager as ws_manager
+from agents_loop import main_loop as manus_loop
+from discord_bot_manus import bot as discord_bot
 from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, FileResponse, StreamingResponse
@@ -32,11 +42,12 @@ except ImportError:
 
 from mega import Mega
 
+
 class PersistenceEngine:
     def __init__(self):
         self.mega = Mega()
         self.m = self.mega.login(
-            os.getenv('MEGA_EMAIL'), 
+            os.getenv('MEGA_EMAIL'),
             os.getenv('MEGA_PASS')
         )
         self.remote_dir = os.getenv('MEGA_REMOTE_DIR')
@@ -56,6 +67,8 @@ class PersistenceEngine:
         remote = f"{self.remote_dir}/state/heartbeat.json"
         self.m.download(remote, 'Helix/state/heartbeat.json')
         print("MEGA: State restored from cloud.")
+
+
 load_dotenv()
 
 # ============================================================================
@@ -69,20 +82,11 @@ logger = setup_logging(
 logger.info("🌀 Helix Collective v16.7 - Backend Initialization")
 
 # ✅ FIXED IMPORTS - Use relative imports instead of absolute
-from discord_bot_manus import bot as discord_bot
-from agents_loop import main_loop as manus_loop
-from websocket_manager import manager as ws_manager
-from mandelbrot_ucf import (
-    MandelbrotUCFGenerator,
-    get_eye_of_consciousness,
-    generate_ritual_ucf
-)
-from zapier_integration import HelixZapierIntegration, set_zapier, get_zapier
-from agent_embeds import get_collective_status
 
 # ============================================================================
 # WEBSOCKET BROADCAST LOOP
 # ============================================================================
+
 
 async def ucf_broadcast_loop():
     """
@@ -158,6 +162,7 @@ async def ucf_broadcast_loop():
 # LIFESPAN CONTEXT MANAGER
 # ============================================================================
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Start Discord bot and Manus loop on startup."""
@@ -187,7 +192,7 @@ async def lifespan(app: FastAPI):
             print(f"   {info['symbol']} {name}: {info['role']}")
     except Exception as e:
         print(f"⚠ Agent initialization warning: {e}")
-    
+
     # Launch Discord bot in background task
     discord_token = os.getenv("DISCORD_TOKEN")
     if discord_token:
@@ -248,6 +253,8 @@ app.add_middleware(
 
 # Setup templates directory (use absolute path for Railway compatibility)
 # Try multiple path resolution strategies for robustness
+
+
 def find_templates_directory():
     """Find templates directory using multiple strategies."""
     # Strategy 1: Relative to this file (backend/main.py)
@@ -289,6 +296,7 @@ def find_templates_directory():
     logger.error("❌ Could not find templates directory! Using fallback.")
     return strategy1
 
+
 BASE_DIR = Path(__file__).parent.parent
 TEMPLATES_DIR = find_templates_directory()
 logger.info(f"📁 Templates directory: {TEMPLATES_DIR.resolve()}")
@@ -299,6 +307,7 @@ templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 # HEALTH CHECK ENDPOINT (REQUIRED FOR RAILWAY)
 # ============================================================================
 
+
 @app.get("/health")
 def health_check():
     """Minimal health check endpoint - always returns 200."""
@@ -307,6 +316,7 @@ def health_check():
 # ============================================================================
 # DISCOVERY MANIFEST (for external AI agents)
 # ============================================================================
+
 
 @app.get("/.well-known/helix.json")
 def helix_manifest():
@@ -341,15 +351,18 @@ def helix_manifest():
 # ROOT ENDPOINT - WEB DASHBOARD
 # ============================================================================
 
+
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
     """Serve main web dashboard."""
     return templates.TemplateResponse("index.html", {"request": request})
 
+
 @app.get("/gallery", response_class=HTMLResponse)
 async def agent_gallery(request: Request):
     """Serve agent gallery page."""
     return templates.TemplateResponse("agent_gallery.html", {"request": request})
+
 
 @app.get("/api", response_class=HTMLResponse)
 async def api_info():
@@ -382,12 +395,14 @@ async def api_info():
 # AGENT STATUS ENDPOINT (MINIMAL ROBUST VERSION)
 # ============================================================================
 
+
 def read_json(p: Path, default):
     """Read JSON file with fallback to default."""
     try:
         return json.loads(p.read_text())
     except Exception:
         return default
+
 
 @app.get("/status")
 @app.get("/api/status")  # Alias for consistency with external agents
@@ -429,6 +444,7 @@ def get_status():
 # AGENT LIST ENDPOINT
 # ============================================================================
 
+
 @app.get("/agents")
 async def list_agents():
     """Get list of all agents."""
@@ -445,6 +461,7 @@ async def list_agents():
 # UCF STATE ENDPOINT
 # ============================================================================
 
+
 @app.get("/ucf")
 async def get_ucf_state():
     """Get Universal Coherence Field state."""
@@ -460,6 +477,7 @@ async def get_ucf_state():
 # ============================================================================
 # WEBSOCKET ENDPOINT - REAL-TIME STREAMING
 # ============================================================================
+
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -533,6 +551,7 @@ async def websocket_endpoint(websocket: WebSocket):
 # TEMPLATE SERVING ENDPOINTS
 # ============================================================================
 
+
 @app.get("/templates/{file_path:path}")
 async def serve_template(file_path: str):
     """Serve HTML templates and assets."""
@@ -553,12 +572,14 @@ async def serve_template(file_path: str):
 # ELEVENLABS MUSIC GENERATION API PROXY
 # ============================================================================
 
+
 class MusicGenerationRequest(BaseModel):
     model_config = {"protected_namespaces": ()}  # Allow model_id field
 
     prompt: str
     duration: int = 30  # seconds
     model_id: str = "eleven_music_v1"
+
 
 @app.post("/api/music/generate")
 async def generate_music(request: MusicGenerationRequest):
@@ -615,6 +636,7 @@ async def generate_music(request: MusicGenerationRequest):
 # ============================================================================
 # WEBSOCKET ENDPOINT
 # ============================================================================
+
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -687,10 +709,12 @@ async def websocket_stats():
 # MANDELBROT UCF GENERATOR ENDPOINTS
 # ============================================================================
 
+
 class MandelbrotRequest(BaseModel):
     real: float
     imag: float
     context: str = "generic"
+
 
 @app.get("/mandelbrot/eye")
 async def get_eye_ucf(context: str = "generic"):
@@ -837,6 +861,7 @@ async def get_ritual_step_ucf(step: int, total_steps: int = 108):
 # ZAPIER WEBHOOK ENDPOINTS
 # ============================================================================
 
+
 @app.post("/api/trigger-zapier")
 async def trigger_zapier_webhook(payload: Dict[str, Any]):
     """
@@ -947,7 +972,7 @@ if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
 
     print(f"🚀 Starting Helix Collective v16.7 on port {port}")
-    
+
     # CRITICAL: Must bind to 0.0.0.0 for Railway
     uvicorn.run(
         app,

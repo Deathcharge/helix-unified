@@ -8,6 +8,7 @@ Centralized constants for colors, mantras, and configuration
 Prevents hardcoded magic numbers and strings throughout the codebase.
 """
 
+from pathlib import Path
 from typing import Dict
 
 # ============================================================================
@@ -176,7 +177,6 @@ DISCORD_RATE_LIMIT_DELAY = 0.5  # seconds between rapid operations
 # PATHS
 # ============================================================================
 
-from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 HELIX_DIR = BASE_DIR / "Helix"

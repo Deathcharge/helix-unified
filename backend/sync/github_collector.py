@@ -20,16 +20,16 @@ logger = logging.getLogger('HelixSync.GitHub')
 
 class GitHubCollector:
     """Collects data from GitHub repositories"""
-    
+
     def __init__(self, repos: List[str], local_path: str = '/home/ubuntu'):
         self.repos = repos
         self.local_path = local_path
         self.github_token = os.getenv('GITHUB_TOKEN', '')
-    
+
     async def collect(self) -> Dict:
         """Collect all GitHub data"""
         logger.info(f"Collecting from {len(self.repos)} repositories...")
-        
+
         data = {
             'repos': {},
             'summary': {
@@ -40,31 +40,31 @@ class GitHubCollector:
             },
             'timestamp': datetime.utcnow().isoformat()
         }
-        
+
         for repo in self.repos:
             try:
                 repo_data = await self.collect_repo(repo)
                 data['repos'][repo] = repo_data
-                
+
                 # Update summary
                 data['summary']['total_commits_today'] += repo_data.get('commits_today', 0)
                 data['summary']['total_open_issues'] += repo_data.get('open_issues', 0)
                 data['summary']['total_open_prs'] += repo_data.get('open_prs', 0)
-                
+
             except Exception as e:
                 logger.error(f"Failed to collect from {repo}: {e}")
                 data['repos'][repo] = {'error': str(e)}
-        
+
         return data
-    
+
     async def collect_repo(self, repo: str) -> Dict:
         """Collect data from a single repository"""
         repo_path = f"{self.local_path}/{repo}"
-        
+
         if not os.path.exists(repo_path):
             logger.warning(f"Repository {repo} not found locally at {repo_path}")
             return {'error': 'Repository not found locally'}
-        
+
         data = {
             'name': repo,
             'path': repo_path,
@@ -75,7 +75,7 @@ class GitHubCollector:
             'remote_url': self.get_remote_url(repo_path),
             'last_updated': datetime.utcnow().isoformat()
         }
-        
+
         # Try to get GitHub-specific data via API
         if self.github_token:
             try:
@@ -83,9 +83,9 @@ class GitHubCollector:
                 data.update(api_data)
             except Exception as e:
                 logger.warning(f"Failed to get GitHub API data for {repo}: {e}")
-        
+
         return data
-    
+
     def get_latest_commit(self, repo_path: str) -> Optional[Dict]:
         """Get latest commit info"""
         try:
@@ -95,7 +95,7 @@ class GitHubCollector:
                 text=True,
                 timeout=10
             )
-            
+
             if result.returncode == 0 and result.stdout.strip():
                 parts = result.stdout.strip().split('|')
                 return {
@@ -107,9 +107,9 @@ class GitHubCollector:
                 }
         except Exception as e:
             logger.error(f"Failed to get latest commit: {e}")
-        
+
         return None
-    
+
     def get_commits_today(self, repo_path: str) -> int:
         """Get number of commits today"""
         try:
@@ -120,14 +120,14 @@ class GitHubCollector:
                 text=True,
                 timeout=10
             )
-            
+
             if result.returncode == 0:
                 return len([line for line in result.stdout.split('\n') if line.strip()])
         except Exception as e:
             logger.error(f"Failed to get commits today: {e}")
-        
+
         return 0
-    
+
     def get_total_commits(self, repo_path: str) -> int:
         """Get total commit count"""
         try:
@@ -137,14 +137,14 @@ class GitHubCollector:
                 text=True,
                 timeout=10
             )
-            
+
             if result.returncode == 0 and result.stdout.strip():
                 return int(result.stdout.strip())
         except Exception as e:
             logger.error(f"Failed to get total commits: {e}")
-        
+
         return 0
-    
+
     def get_branches(self, repo_path: str) -> List[str]:
         """Get list of branches"""
         try:
@@ -154,7 +154,7 @@ class GitHubCollector:
                 text=True,
                 timeout=10
             )
-            
+
             if result.returncode == 0:
                 branches = []
                 for line in result.stdout.split('\n'):
@@ -164,9 +164,9 @@ class GitHubCollector:
                 return branches
         except Exception as e:
             logger.error(f"Failed to get branches: {e}")
-        
+
         return []
-    
+
     def get_remote_url(self, repo_path: str) -> Optional[str]:
         """Get remote URL"""
         try:
@@ -176,14 +176,14 @@ class GitHubCollector:
                 text=True,
                 timeout=10
             )
-            
+
             if result.returncode == 0 and result.stdout.strip():
                 return result.stdout.strip()
         except Exception as e:
             logger.error(f"Failed to get remote URL: {e}")
-        
+
         return None
-    
+
     async def get_github_api_data(self, repo: str) -> Dict:
         """Get data from GitHub API"""
         # Placeholder for GitHub API integration
@@ -195,4 +195,3 @@ class GitHubCollector:
             'forks': 0,
             'watchers': 0
         }
-

@@ -7,6 +7,7 @@ from discord.ext import commands
 # This avoids circular dependencies.
 from .main import bot
 
+
 @bot.command(name="setup")
 @commands.has_permissions(manage_channels=True)
 async def setup_command(ctx):
@@ -18,7 +19,7 @@ async def setup_command(ctx):
         "TELEMETRY_CHANNEL_ID": "ucf-telemetry",
         "STORAGE_CHANNEL_ID": "storage-heartbeat",
     }
-    
+
     await ctx.send(f"✨ Starting Helix setup ritual for **{guild.name}**...")
     category = discord.utils.get(guild.categories, name=category_name)
     if not category:
@@ -44,10 +45,13 @@ async def setup_command(ctx):
 
 # --- Add all your other commands from discord_bot_manus.py here ---
 # Example:
+
+
 @bot.command(name="status")
 async def status_command(ctx):
     # Your existing !status logic
     await ctx.send("Displaying system status...")
+
 
 @bot.command(name="ritual")
 async def ritual_command(ctx, steps: int = 108):

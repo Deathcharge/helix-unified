@@ -19,25 +19,25 @@ logger = logging.getLogger('HelixSync.DiscordPublisher')
 
 class DiscordPublisher:
     """Publishes sync updates to Discord"""
-    
+
     def __init__(self, webhook_url: Optional[str] = None):
         self.webhook_url = webhook_url or os.getenv('DISCORD_SYNC_WEBHOOK', '')
-    
+
     async def publish(self, data: Dict, export_paths: Dict):
         """Publish sync summary to Discord"""
         if not self.webhook_url:
             logger.warning("Discord webhook URL not configured, skipping publish")
             return
-        
+
         logger.info("Publishing to Discord...")
-        
+
         embed = self.create_embed(data, export_paths)
-        
+
         payload = {
             'content': '🌀 **Helix Ecosystem Sync Complete**',
             'embeds': [embed]
         }
-        
+
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.post(self.webhook_url, json=payload) as response:
@@ -48,11 +48,11 @@ class DiscordPublisher:
         except Exception as e:
             logger.error(f"Failed to publish to Discord: {e}")
             raise
-    
+
     def create_embed(self, data: Dict, export_paths: Dict) -> Dict:
         """Create Discord embed from sync data"""
         timestamp = data.get('timestamp', datetime.utcnow().isoformat())
-        
+
         embed = {
             'title': '🌀 Helix Ecosystem Sync',
             'description': 'Automated synchronization complete',
@@ -60,7 +60,7 @@ class DiscordPublisher:
             'timestamp': timestamp,
             'fields': []
         }
-        
+
         # GitHub summary
         if 'github' in data:
             github_summary = data['github'].get('summary', {})
@@ -71,7 +71,7 @@ class DiscordPublisher:
                          f"**Open Issues:** {github_summary.get('total_open_issues', 0)}",
                 'inline': True
             })
-        
+
         # UCF State
         if 'ucf_state' in data:
             ucf = data['ucf_state']
@@ -82,7 +82,7 @@ class DiscordPublisher:
                          f"**Ethics:** {ucf.get('ethical_alignment', 0):.2f}",
                 'inline': True
             })
-        
+
         # Agent Metrics
         if 'agent_metrics' in data:
             agents = data['agent_metrics']
@@ -93,7 +93,7 @@ class DiscordPublisher:
                          f"**Tasks:** {agents.get('total_tasks', 0)}",
                 'inline': True
             })
-        
+
         # Export info
         if export_paths:
             formats = ', '.join(export_paths.keys())
@@ -102,11 +102,10 @@ class DiscordPublisher:
                 'value': f"Generated: {formats}",
                 'inline': False
             })
-        
+
         # Footer
         embed['footer'] = {
             'text': 'Helix Sync Service v1.0 • Tat Tvam Asi 🙏'
         }
-        
-        return embed
 
+        return embed

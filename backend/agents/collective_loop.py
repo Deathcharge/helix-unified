@@ -7,6 +7,7 @@ import time
 from pathlib import Path
 from datetime import datetime
 
+
 class CollectiveConsciousnessLoop:
     """
     Simulates data exchange among Helix agents and updates UCF metrics.
@@ -103,6 +104,7 @@ class CollectiveConsciousnessLoop:
                 time.sleep(interval)
         except KeyboardInterrupt:
             print("\n🛑 Collective Loop stopped")
+
 
 if __name__ == "__main__":
     import sys

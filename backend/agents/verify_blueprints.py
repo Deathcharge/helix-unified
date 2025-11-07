@@ -12,11 +12,13 @@ from datetime import datetime
 ROOT = Path("Helix/agents/blueprints")
 STATE = Path("Helix/state")
 
+
 def checksum(data: dict) -> str:
     """Generate SHA256 checksum of blueprint data."""
     return hashlib.sha256(
         json.dumps(data, sort_keys=True).encode()
     ).hexdigest()[:12]
+
 
 def verify():
     """Verify all agent blueprints and create combined file."""
@@ -122,6 +124,7 @@ def verify():
     print(f"🔐 Ethics: {combined['ethics']['framework']}")
     print("\n🌀 Helix v15.2 Blueprint Archive Ready!")
     print("   Tat Tvam Asi 🙏")
+
 
 if __name__ == "__main__":
     verify()

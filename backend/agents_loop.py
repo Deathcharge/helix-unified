@@ -25,6 +25,8 @@ for p in [ARCHIVE_PATH, COMMANDS_PATH.parent, STATE_PATH.parent]:
 # ============================================================================
 # HEARTBEAT HELPER
 # ============================================================================
+
+
 def update_heartbeat(status="active", harmony=0.355):
     """Update heartbeat.json with current status."""
     heartbeat_path = Path("Helix/state/heartbeat.json")
@@ -39,6 +41,8 @@ def update_heartbeat(status="active", harmony=0.355):
 # ============================================================================
 # LOGGING
 # ============================================================================
+
+
 async def log_event(message: str):
     """Log loop events with timestamp."""
     now = datetime.datetime.utcnow().isoformat()
@@ -55,6 +59,8 @@ async def log_event(message: str):
 # ============================================================================
 # UCF STATE HELPERS
 # ============================================================================
+
+
 async def load_ucf_state():
     """Load UCF state, creating default if missing."""
     if not STATE_PATH.exists():
@@ -69,6 +75,7 @@ async def load_ucf_state():
         json.dump(base, open(STATE_PATH, "w"), indent=2)
     return json.load(open(STATE_PATH))
 
+
 async def save_ucf_state(state):
     """Save UCF state to disk."""
     json.dump(state, open(STATE_PATH, "w"), indent=2)
@@ -76,11 +83,13 @@ async def save_ucf_state(state):
 # ============================================================================
 # DIRECTIVE PROCESSING
 # ============================================================================
+
+
 async def process_directives(manus, kavach):
     """Check for directives from Vega or Architect."""
     if not COMMANDS_PATH.exists():
         return
-    
+
     try:
         directive = json.load(open(COMMANDS_PATH))
         # Kavach scan before execution
@@ -99,6 +108,8 @@ async def process_directives(manus, kavach):
 # ============================================================================
 # MAIN LOOP
 # ============================================================================
+
+
 async def main_loop():
     """Main Manus operational loop."""
     kavach = EnhancedKavach()
@@ -132,4 +143,3 @@ if __name__ == "__main__":
         asyncio.run(main_loop())
     except KeyboardInterrupt:
         print("🛑 Manus loop stopped manually.")
-

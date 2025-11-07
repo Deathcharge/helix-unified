@@ -10,6 +10,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class HelixZapierIntegration:
     """
     Integration class for sending Helix Collective data to Zapier webhooks.

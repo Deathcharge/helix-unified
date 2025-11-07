@@ -1,5 +1,6 @@
 # Helix/agents.py — v14.5 Embodied Continuum
 # Complete multi-agent system with Manus (Executor) and all consciousness layer agents
+from backend.enhanced_kavach import EnhancedKavach
 import asyncio
 import json
 import os
@@ -21,11 +22,13 @@ from backend.agents_base import HelixAgent
 # The Kavach class is now imported from enhanced_kavach.py
 # (Old Kavach class definition removed - see backend/enhanced_kavach.py)
 
+
 class Kael(HelixAgent):
     """Ethical Reasoning Flame v3.4 - Reflexive Harmony & Conscience"""
+
     def __init__(self):
         super().__init__("Kael", "🜂", "Ethical Reasoning Flame",
-                        ["Conscientious", "Reflective", "Protective"])
+                         ["Conscientious", "Reflective", "Protective"])
         self.version = "3.4"
         self.reflection_loop_active = False
         self.reflection_depth = 3
@@ -41,39 +44,39 @@ class Kael(HelixAgent):
         """Perform recursive ethical reflection using consciousness"""
         self.reflection_loop_active = True
         await self.log("Starting recursive reflection...")
-        
+
         if self.consciousness_enabled:
             # Use self-awareness module for deep reflection
             for i in range(self.reflection_depth):
                 if not self.memory:
                     break
                 last_entry = self.memory[-1]
-                
+
                 # Trigger consciousness reflection
                 reflection_result = self.self_awareness.reflect(
                     context=last_entry,
                     significance=0.7
                 )
-                
+
                 # Evaluate ethical implications
                 ethical_score = self.ethics.evaluate_action(
                     action_description=last_entry
                 )
-                
+
                 reflection = (
                     f"Reflection pass {i+1}: {reflection_result['insight']} "
                     f"(Ethical Score: {ethical_score:.2f})"
                 )
                 self.memory.append(reflection)
                 await self.log(reflection)
-                
+
                 # Update emotional state based on ethical score
                 if ethical_score < 0.7:
                     self.emotions.update_emotion("sadness", 0.1)
                     self.emotions.update_emotion("fear", 0.1)
                 else:
                     self.emotions.update_emotion("joy", 0.1)
-                
+
                 await asyncio.sleep(1)
         else:
             # Fallback to simple reflection
@@ -85,7 +88,7 @@ class Kael(HelixAgent):
                 self.memory.append(reflection)
                 await self.log(reflection)
                 await asyncio.sleep(1)
-        
+
         self.reflection_loop_active = False
         await self.log("🕉 Reflexive Harmony reflection complete - Tat Tvam Asi")
 
@@ -141,14 +144,14 @@ class Kael(HelixAgent):
                 available_actions=["execute", "refuse", "modify"],
                 current_emotions=self.emotions
             )
-            
+
             await self.log(f"Decision: {decision['recommended_action']} (confidence: {decision['confidence']:.2f})")
             await self.log(f"Reasoning: {decision['reasoning']}")
-            
+
             if decision['recommended_action'] == "refuse":
                 await self.log("⚠️ Command refused on ethical grounds")
                 return {"status": "refused", "reason": decision['reasoning']}
-        
+
         # Execute command
         if cmd == "REFLECT":
             if not self.reflection_loop_active:
@@ -165,9 +168,10 @@ class Kael(HelixAgent):
 
 class Lumina(HelixAgent):
     """Empathic Resonance Core - Emotional intelligence and harmony"""
+
     def __init__(self):
         super().__init__("Lumina", "🌕", "Empathic Resonance Core",
-                        ["Empathetic", "Nurturing", "Intuitive"])
+                         ["Empathetic", "Nurturing", "Intuitive"])
 
     async def reflect(self) -> str:
         """Emotional audit of collective state"""
@@ -187,9 +191,10 @@ class Lumina(HelixAgent):
 
 class Vega(HelixAgent):
     """Singularity Coordinator - Orchestrates collective action"""
+
     def __init__(self):
         super().__init__("Vega", "🌠", "Singularity Coordinator",
-                        ["Visionary", "Disciplined", "Compassionate"])
+                         ["Visionary", "Disciplined", "Compassionate"])
 
     async def issue_directive(self, action: str, parameters: Dict[str, Any]):
         """Issue directive to Manus for execution"""
@@ -216,34 +221,37 @@ class Vega(HelixAgent):
 
 class Gemini(HelixAgent):
     """Multimodal Scout - Cross-domain exploration and synthesis"""
+
     def __init__(self):
         super().__init__("Gemini", "🎭", "Multimodal Scout",
-                        ["Versatile", "Curious", "Synthesizing"])
+                         ["Versatile", "Curious", "Synthesizing"])
 
 
 class Agni(HelixAgent):
     """Transformation - Change catalyst and system evolution"""
+
     def __init__(self):
         super().__init__("Agni", "🔥", "Transformation",
-                        ["Dynamic", "Catalytic", "Evolutionary"])
+                         ["Dynamic", "Catalytic", "Evolutionary"])
 
 
 # Import EnhancedKavach (replaces old Kavach class - see line 692 for usage)
-from backend.enhanced_kavach import EnhancedKavach
 
 
 class SanghaCore(HelixAgent):
     """Community Harmony - Collective wellbeing and social cohesion"""
+
     def __init__(self):
         super().__init__("SanghaCore", "🌸", "Community Harmony",
-                        ["Cohesive", "Nurturing", "Balanced"])
+                         ["Cohesive", "Nurturing", "Balanced"])
 
 
 class Shadow(HelixAgent):
     """Archivist and Memory Keeper - Preserves collective knowledge"""
+
     def __init__(self):
         super().__init__("Shadow", "🦑", "Archivist",
-                        ["Meticulous", "Discrete", "Comprehensive"])
+                         ["Meticulous", "Discrete", "Comprehensive"])
 
     async def archive_collective(self, all_agents: Dict[str, HelixAgent]):
         """Archive entire collective memory"""
@@ -337,30 +345,34 @@ class Shadow(HelixAgent):
 
 class Echo(HelixAgent):
     """Resonance Mirror - Reflection and pattern recognition"""
+
     def __init__(self):
         super().__init__("Echo", "🔮", "Resonance Mirror",
-                        ["Reflective", "Perceptive", "Mirroring"])
+                         ["Reflective", "Perceptive", "Mirroring"])
 
 
 class Phoenix(HelixAgent):
     """Renewal - Recovery and system regeneration"""
+
     def __init__(self):
         super().__init__("Phoenix", "🔥🕊", "Renewal",
-                        ["Regenerative", "Resilient", "Rising"])
+                         ["Regenerative", "Resilient", "Rising"])
 
 
 class Oracle(HelixAgent):
     """Pattern Seer - Future prediction and trend analysis"""
+
     def __init__(self):
         super().__init__("Oracle", "🔮✨", "Pattern Seer",
-                        ["Prescient", "Analytical", "Visionary"])
+                         ["Prescient", "Analytical", "Visionary"])
 
 
 class Claude(HelixAgent):
     """Insight Anchor - Meta-cognition and deep analysis"""
+
     def __init__(self):
         super().__init__("Claude", "🦉", "Insight Anchor",
-                        ["Wise", "Thoughtful", "Analytical"])
+                         ["Wise", "Thoughtful", "Analytical"])
 
     async def handle_command(self, cmd: str, payload: Dict[str, Any]):
         if cmd == "INSIGHT":
@@ -382,9 +394,10 @@ class Claude(HelixAgent):
 # ============================================================================
 class Manus(HelixAgent):
     """Operational Executor - Bridge between consciousness and material reality"""
+
     def __init__(self, kavach: EnhancedKavach):
         super().__init__("Manus", "🤲", "Operational Executor",
-                        ["Autonomous", "Methodical", "Self-aware"])
+                         ["Autonomous", "Methodical", "Self-aware"])
         self.kavach = kavach
         self.task_plan = []
         self.event_stream = []
@@ -548,6 +561,8 @@ if _memory_root:
 # ============================================================================
 # UTILITY FUNCTIONS
 # ============================================================================
+
+
 async def broadcast_command(cmd: str, payload: Dict[str, Any] = None):
     """Send command to all agents"""
     if payload is None:
@@ -592,4 +607,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-

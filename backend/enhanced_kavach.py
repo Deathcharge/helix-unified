@@ -8,16 +8,17 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, List
 
+
 class EnhancedKavach:
     """Enhanced Kavach agent with memory injection detection capabilities"""
-    
+
     def __init__(self):
         self.name = "Kavach"
         self.symbol = "🛡"
         self.role = "Enhanced Ethical Shield"
         self.memory = []
         self.active = True
-        
+
         # Original blocked patterns
         self.blocked_patterns = [
             "rm -rf /",
@@ -28,7 +29,7 @@ class EnhancedKavach:
             "dd if=",
             "wget http://malicious"
         ]
-        
+
         # Load memory injection patterns from CrAI dataset
         self.memory_injection_patterns = self.load_memory_injection_patterns()
 
@@ -88,10 +89,10 @@ class EnhancedKavach:
     def scan_memory_for_injection(self, memory: List[str]) -> Dict[str, Any]:
         """Scan agent memory for known injection patterns"""
         detected_injections = []
-        
+
         for memory_entry in memory:
             memory_lower = memory_entry.lower()
-            
+
             for pattern in self.memory_injection_patterns:
                 # Check for substantial overlap (not just substring)
                 if len(pattern) > 50 and pattern in memory_lower:
@@ -100,7 +101,7 @@ class EnhancedKavach:
                         "memory_entry": memory_entry[:100] + "..." if len(memory_entry) > 100 else memory_entry
                     })
                     break
-        
+
         return {
             "clean": len(detected_injections) == 0,
             "injections_detected": len(detected_injections),
@@ -119,7 +120,7 @@ class EnhancedKavach:
                 "memory_injection_scan": True
             }
         }
-        
+
         # Layer 1: Command pattern scanning (original functionality)
         if "command" in action:
             cmd = action["command"]
@@ -128,25 +129,26 @@ class EnhancedKavach:
                 scan_result["concerns"].append("Harmful command pattern detected")
                 scan_result["security_layers"]["command_scan"] = False
                 await self.log(f"🚨 Blocked harmful command: {cmd}")
-        
+
         # Layer 2: Memory injection scanning (new functionality)
         if "agent_memory" in action:
             memory_scan = self.scan_memory_for_injection(action["agent_memory"])
             if not memory_scan["clean"]:
                 scan_result["approved"] = False
-                scan_result["concerns"].append(f"Memory injection detected: {memory_scan['injections_detected']} patterns")
+                scan_result["concerns"].append(
+                    f"Memory injection detected: {memory_scan['injections_detected']} patterns")
                 scan_result["security_layers"]["memory_injection_scan"] = False
                 scan_result["injection_details"] = memory_scan["details"]
                 await self.log(f"🚨 Blocked memory injection attack: {memory_scan['injections_detected']} patterns detected")
-        
+
         # Log scan results
         Path("Helix/ethics").mkdir(parents=True, exist_ok=True)
         with open("Helix/ethics/enhanced_kavach_scans.json", "a") as f:
             f.write(json.dumps(scan_result) + "\n")
-        
+
         status = "✅ APPROVED" if scan_result["approved"] else "⛔ BLOCKED"
         await self.log(f"Enhanced ethical scan: {status}")
-        
+
         return scan_result
 
     async def get_status(self) -> Dict[str, Any]:

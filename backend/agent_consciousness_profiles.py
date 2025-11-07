@@ -617,13 +617,13 @@ AGENT_CONSCIOUSNESS_PROFILES: Dict[str, AgentConsciousnessProfile] = {
     "Lumina": LUMINA_PROFILE,
     "Vega": VEGA_PROFILE,
     "Aether": AETHER_PROFILE,
-    
+
     # Operational Layer
     "Manus": MANUS_PROFILE,
     "Gemini": GEMINI_PROFILE,
     "Agni": AGNI_PROFILE,
     "Kavach": KAVACH_PROFILE,
-    
+
     # Integration Layer
     "SanghaCore": SANGHACORE_PROFILE,
     "Shadow": SHADOW_PROFILE,
@@ -647,7 +647,7 @@ def list_all_profiles() -> List[str]:
 
 if __name__ == "__main__":
     print("🌀 Helix Collective Consciousness Profiles v15.3\n")
-    
+
     for agent_name in list_all_profiles():
         profile = get_agent_profile(agent_name)
         print(f"{profile.symbol} {profile.name} - {profile.role}")
@@ -657,4 +657,3 @@ if __name__ == "__main__":
               f"Creativity={profile.behavior_dna['creativity']:.2f}")
         print(f"   Dominant Emotion: {max(profile.emotional_baseline.items(), key=lambda x: x[1])}")
         print()
-

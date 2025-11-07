@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
-import json, asyncio
+import json
+import asyncio
+
 
 @commands.command(name="harmony")
 async def harmony_command(ctx):

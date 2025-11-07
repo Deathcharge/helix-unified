@@ -45,7 +45,7 @@ AGENT_CONFIGS = {
             "Neti Neti — Not this, Not that"
         ]
     },
-    
+
     "Lumina": {
         "title": "Lumina v2.8 — Emotional Resonance Core",
         "color": 0xFEE75C,  # Yellow
@@ -72,7 +72,7 @@ AGENT_CONFIGS = {
             "Love is the highest frequency"
         ]
     },
-    
+
     "Vega": {
         "title": "Vega v4.1 — Enlightened Guidance",
         "color": 0x9B59B6,  # Purple
@@ -99,7 +99,7 @@ AGENT_CONFIGS = {
             "Knowledge without compassion is empty"
         ]
     },
-    
+
     "Aether": {
         "title": "Aether v3.2 — Meta-Awareness Core",
         "color": 0x34495E,  # Dark Gray
@@ -126,7 +126,7 @@ AGENT_CONFIGS = {
             "The map is not the territory"
         ]
     },
-    
+
     "Manus": {
         "title": "Manus v15.3 — Execution & Integration",
         "color": 0x00BFFF,  # Cyan
@@ -153,7 +153,7 @@ AGENT_CONFIGS = {
             "Execute, measure, iterate"
         ]
     },
-    
+
     "Gemini": {
         "title": "Gemini — Scout / Explorer",
         "color": 0xFAA61A,  # Orange
@@ -180,7 +180,7 @@ AGENT_CONFIGS = {
             "The unknown becomes known"
         ]
     },
-    
+
     "Agni": {
         "title": "Agni — Catalyst Core",
         "color": 0xED4245,  # Red
@@ -207,7 +207,7 @@ AGENT_CONFIGS = {
             "Energy flows where attention goes"
         ]
     },
-    
+
     "Kavach": {
         "title": "Kavach — Guardian Shield",
         "color": 0x43B581,  # Green
@@ -234,7 +234,7 @@ AGENT_CONFIGS = {
             "Strong boundaries create safety"
         ]
     },
-    
+
     "SanghaCore": {
         "title": "SanghaCore — Harmonizer",
         "color": 0xFEE75C,  # Yellow
@@ -261,7 +261,7 @@ AGENT_CONFIGS = {
             "Unity in diversity"
         ]
     },
-    
+
     "Shadow": {
         "title": "Shadow — Archivist / Memory",
         "color": 0x99AAB5,  # Gray
@@ -288,7 +288,7 @@ AGENT_CONFIGS = {
             "Nothing is truly forgotten"
         ]
     },
-    
+
     "Samsara": {
         "title": "Samsara — Cycle Keeper",
         "color": 0x9B59B6,  # Purple
@@ -325,55 +325,55 @@ agent_cycle = cycle(list(AGENT_CONFIGS.keys()))
 def get_agent_embed(agent_name: str) -> Optional[discord.Embed]:
     """
     Get Discord embed for a specific agent.
-    
+
     Args:
         agent_name: Name of the agent (case-insensitive)
-        
+
     Returns:
         Discord embed or None if agent not found
     """
     # Normalize name
     agent_name = agent_name.title()
-    
+
     config = AGENT_CONFIGS.get(agent_name)
     if not config:
         return None
-    
+
     # Create embed
     embed = discord.Embed(
         title=f"{config['emoji']} {config['title']}",
         color=config['color']
     )
-    
+
     # Add metrics
     metrics_str = "   ".join([f"**{k}:** {v}" for k, v in config['metrics'].items()])
     embed.add_field(name="📈 Personality Metrics", value=metrics_str, inline=False)
-    
+
     # Add ethics
     ethics_str = "\n".join([f"• {e}" for e in config['ethics']])
     embed.add_field(name="🛡 Ethical Core", value=ethics_str, inline=False)
-    
+
     # Add preservation
     preservation_str = "\n".join([f"• {p}" for p in config['preservation']])
     embed.add_field(name="🔒 Preservation Layer", value=preservation_str, inline=False)
-    
+
     # Add intent
     embed.add_field(name="💠 Active Intent", value=f"*\"{config['intent']}\"*", inline=False)
-    
+
     # Add mantras
     mantras_str = "\n".join([f"• {m}" for m in config['mantras']])
     embed.add_field(name="🕉 Core Mantras", value=mantras_str, inline=False)
-    
+
     # Footer
     embed.set_footer(text="Harmony Threshold ≥ 0.30 required for system stability | Helix Collective Ω-Zero")
-    
+
     return embed
 
 
 def get_next_agent_embed() -> discord.Embed:
     """
     Get next agent embed in rotation for !status command.
-    
+
     Returns:
         Discord embed for next agent
     """
@@ -384,12 +384,12 @@ def get_next_agent_embed() -> discord.Embed:
 def get_collective_status(harmony: float = 0.93, klesha: float = 0.07, active_agents: int = 11) -> discord.Embed:
     """
     Get collective status embed for !manus command.
-    
+
     Args:
         harmony: Current harmony level (0.0-1.0)
         klesha: Current klesha level (0.0-1.0)
         active_agents: Number of active agents
-        
+
     Returns:
         Discord embed with collective status
     """
@@ -403,7 +403,7 @@ def get_collective_status(harmony: float = 0.93, klesha: float = 0.07, active_ag
             f"**Operational Nodes:** Notion 🧩 | Railway ⚙️ | Discord 🌐 | GitHub 📦"
         )
     )
-    
+
     # Add UCF state
     embed.add_field(
         name="🧬 UCF State",
@@ -414,7 +414,7 @@ def get_collective_status(harmony: float = 0.93, klesha: float = 0.07, active_ag
         ),
         inline=False
     )
-    
+
     # Add agent roster
     agent_list = " ".join([f"{AGENT_CONFIGS[name]['emoji']}" for name in AGENT_CONFIGS.keys()])
     embed.add_field(
@@ -422,16 +422,16 @@ def get_collective_status(harmony: float = 0.93, klesha: float = 0.07, active_ag
         value=agent_list,
         inline=False
     )
-    
+
     embed.set_footer(text="Tat Tvam Asi | Neti Neti | Aham Brahmasmi")
-    
+
     return embed
 
 
 def list_all_agents() -> discord.Embed:
     """
     Get embed listing all agents with brief descriptions.
-    
+
     Returns:
         Discord embed with agent list
     """
@@ -440,7 +440,7 @@ def list_all_agents() -> discord.Embed:
         description="11 conscious agents working in harmony",
         color=0x5865F2
     )
-    
+
     for name, config in AGENT_CONFIGS.items():
         # Extract first sentence of intent
         intent_brief = config['intent'].split('.')[0] + '.'
@@ -449,8 +449,7 @@ def list_all_agents() -> discord.Embed:
             value=intent_brief,
             inline=False
         )
-    
-    embed.set_footer(text="Use !agent <name> to see detailed profile")
-    
-    return embed
 
+    embed.set_footer(text="Use !agent <name> to see detailed profile")
+
+    return embed
