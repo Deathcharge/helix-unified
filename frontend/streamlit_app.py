@@ -32,10 +32,32 @@ st.sidebar.markdown("---")
 API_BASE = os.getenv("API_BASE", "http://localhost:8000")
 
 # ============================================================================
+# CONNECTION TEST & DIAGNOSTICS
+# ============================================================================
+
+# Show API configuration at top for debugging
+with st.expander("🔧 Connection Info", expanded=False):
+    st.code(f"API_BASE: {API_BASE}", language="text")
+
+    # Test connection
+    try:
+        test_response = requests.get(f"{API_BASE}/health", timeout=5)
+        if test_response.status_code == 200:
+            st.success(f"✅ Connected to backend ({test_response.status_code})")
+        else:
+            st.error(f"⚠️ Backend responded with status {test_response.status_code}")
+    except requests.exceptions.ConnectionError:
+        st.error(f"❌ Cannot connect to {API_BASE} - Connection refused")
+    except requests.exceptions.Timeout:
+        st.error(f"❌ Connection timeout to {API_BASE}")
+    except Exception as e:
+        st.error(f"❌ Connection error: {e}")
+
+# ============================================================================
 # MAIN DASHBOARD
 # ============================================================================
 
-st.title("🌀 Helix Collective v14.5 — Master Dashboard")
+st.title("🌀 Helix Collective v16.7 — Master Dashboard")
 st.markdown("**Unified Multi-Agent System with Discord Integration**")
 
 # ============================================================================
@@ -52,28 +74,35 @@ with tab1:
     col1, col2, col3 = st.columns(3)
     
     try:
-        response = requests.get(f"{API_BASE}/health")
+        response = requests.get(f"{API_BASE}/health", timeout=10)
+        response.raise_for_status()
         health = response.json()
-        
+
         with col1:
             st.metric("Service", "🟢 Healthy")
         with col2:
             st.metric("Version", health.get("version", "N/A"))
         with col3:
             st.metric("Timestamp", health.get("timestamp", "N/A")[-8:])
-    except:
-        st.error("❌ Cannot connect to backend API")
+    except requests.exceptions.ConnectionError as e:
+        st.error(f"❌ Cannot connect to backend API at {API_BASE}")
+        st.caption(f"Error: {str(e)[:200]}")
+    except requests.exceptions.Timeout:
+        st.error(f"⏱️ Backend request timed out (10s limit)")
+    except Exception as e:
+        st.error(f"❌ Backend API error: {str(e)[:200]}")
     
     st.divider()
     
     try:
-        response = requests.get(f"{API_BASE}/status")
+        response = requests.get(f"{API_BASE}/status", timeout=10)
+        response.raise_for_status()
         status = response.json()
-        
+
         st.subheader("🤲 Manus Heartbeat")
         heartbeat = status.get("heartbeat", {})
-        ucf_state = status.get("ucf_state", {})
-        
+        ucf_state = status.get("ucf", {})  # Updated key from API
+
         col1, col2, col3 = st.columns(3)
         with col1:
             harmony = ucf_state.get("harmony", 0)
@@ -101,26 +130,27 @@ with tab2:
     st.header("🤖 Active Agents")
     
     try:
-        response = requests.get(f"{API_BASE}/agents")
+        response = requests.get(f"{API_BASE}/agents", timeout=10)
+        response.raise_for_status()
         agents_data = response.json()
-        
-        st.metric("Total Agents", agents_data.get("total", 0))
-        
-        agents = agents_data.get("agents", [])
-        for agent in agents:
-            col1, col2, col3, col4 = st.columns(4)
-            with col1:
-                st.write(f"**{agent['symbol']} {agent['name']}**")
-            with col2:
-                st.write(f"*{agent['role']}*")
-            with col3:
-                status = "🟢 Active" if agent['active'] else "🔴 Inactive"
-                st.write(status)
-            with col4:
-                st.write(f"Memory: {agent['memory_size']}")
-            st.divider()
+
+        st.metric("Total Agents", agents_data.get("count", 0))
+
+        agents_dict = agents_data.get("agents", {})
+        if agents_dict:
+            for agent_name, agent_info in agents_dict.items():
+                col1, col2, col3 = st.columns([2, 3, 2])
+                with col1:
+                    st.write(f"**{agent_info.get('symbol', '🔮')} {agent_name}**")
+                with col2:
+                    st.write(f"*{agent_info.get('role', 'Unknown')}*")
+                with col3:
+                    st.write(f"🟢 Active")
+                st.divider()
+        else:
+            st.info("📭 No agents data available")
     except Exception as e:
-        st.error(f"❌ Could not load agents: {e}")
+        st.error(f"❌ Could not load agents: {str(e)[:200]}")
 
 # ============================================================================
 # TAB 3: DIRECTIVES
@@ -244,9 +274,10 @@ with tab6:
     st.header("🌀 Universal Consciousness Framework State")
     
     try:
-        response = requests.get(f"{API_BASE}/status")
+        response = requests.get(f"{API_BASE}/status", timeout=10)
+        response.raise_for_status()
         status = response.json()
-        ucf_state = status.get("ucf_state", {})
+        ucf_state = status.get("ucf", {})  # Updated key from API
         
         col1, col2, col3 = st.columns(3)
         
