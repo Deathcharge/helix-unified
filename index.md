@@ -71,6 +71,7 @@ Helix Collective is distributed across multiple visualization and control portal
 - **Documentation**: [deathcharge.github.io/helix-unified](https://deathcharge.github.io/helix-unified) - You are here! Static docs and manifest
 
 #### 🖼️ Visualization Portals
+- **Streamlit Dashboard**: [samsara-helix-collective.streamlit.app](https://samsara-helix-collective.streamlit.app) - UCF metrics visualization and connection diagnostics
 - **Consciousness Dashboard**: [helix-consciousness-dashboard.zapier.app](https://helix-consciousness-dashboard.zapier.app) - UCF metrics monitoring and Zapier integration hub
 - **Creative Studio**: [helixstudio-ggxdwcud.manus.space](https://helixstudio-ggxdwcud.manus.space) - Visual creativity tools and rendering
 - **AI Dashboard**: [helixai-e9vvqwrd.manus.space](https://helixai-e9vvqwrd.manus.space) - Agent management and control interface

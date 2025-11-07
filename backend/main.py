@@ -353,6 +353,12 @@ def helix_manifest():
                 }
             },
             "visualization": {
+                "streamlit": {
+                    "url": "https://samsara-helix-collective.streamlit.app",
+                    "type": "webapp",
+                    "description": "UCF metrics visualization dashboard with connection diagnostics",
+                    "status": "operational"
+                },
                 "dashboard": {
                     "url": "https://helix-consciousness-dashboard.zapier.app",
                     "type": "webapp",

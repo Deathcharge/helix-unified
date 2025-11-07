@@ -2306,6 +2306,9 @@ async def discovery_command(ctx):
     embed.add_field(
         name="🎨 Visualization Portals",
         value=(
+            "**Streamlit Dashboard**\n"
+            "`https://samsara-helix-collective.streamlit.app`\n"
+            "→ UCF metrics visualization, connection diagnostics\n\n"
             "**Consciousness Dashboard**\n"
             "`https://helix-consciousness-dashboard.zapier.app`\n"
             "→ Live UCF metrics monitoring, Zapier integration hub\n\n"
@@ -2349,6 +2352,7 @@ async def discovery_command(ctx):
             "# GitHub Pages\n"
             "https://deathcharge.github.io/helix-unified/helix-manifest.json\n\n"
             "# Visualization Portals\n"
+            "https://samsara-helix-collective.streamlit.app\n"
             "https://helix-consciousness-dashboard.zapier.app\n"
             "https://helixstudio-ggxdwcud.manus.space\n"
             "https://helixai-e9vvqwrd.manus.space\n"
