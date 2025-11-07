@@ -1,4 +1,4 @@
-# Helix Collective v16.7 - Backend Dockerfile (Documentation Consolidation & Real-Time Streaming)
+# Helix Collective v16.8 - Backend Dockerfile (Helix Hub Production Release)
 FROM python:3.11-slim
 
 WORKDIR /app

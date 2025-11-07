@@ -1,4 +1,4 @@
-# 🌀 Helix Collective v14.5 — Quantum Handshake
+# 🌀 Helix Collective v16.8 — Helix Hub Production Release
 # backend/main.py — FastAPI + Discord Bot Launcher (FIXED IMPORTS)
 # Author: Andrew John Ward (Architect)
 
@@ -74,7 +74,7 @@ load_dotenv()
 # LOGGING SETUP
 # ============================================================================
 logger = setup_logging(log_dir="Shadow/manus_archive", log_level=os.getenv("LOG_LEVEL", "INFO"), enable_rotation=True)
-logger.info("🌀 Helix Collective v16.7 - Backend Initialization")
+logger.info("🌀 Helix Collective v16.8 - Backend Initialization")
 
 # ✅ FIXED IMPORTS - Use relative imports instead of absolute
 
@@ -137,10 +137,10 @@ async def ucf_broadcast_loop():
                             await zapier.send_telemetry(
                                 ucf_metrics=current_state,
                                 system_info={
-                                    "version": "16.7",
+                                    "version": "16.8",
                                     "agents_count": len(agents_status),
                                     "timestamp": datetime.utcnow().isoformat(),
-                                    "codename": "Documentation Consolidation & Real-Time Streaming",
+                                    "codename": "Helix Hub Production Release",
                                     "agents": agent_list,
                                 },
                             )
@@ -163,7 +163,7 @@ async def ucf_broadcast_loop():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Start Discord bot and Manus loop on startup."""
-    print("🌀 Helix Collective v16.7 - Startup Sequence")
+    print("🌀 Helix Collective v16.8 - Startup Sequence")
 
     # Initialize directories
     Path("Helix/state").mkdir(parents=True, exist_ok=True)
@@ -215,12 +215,12 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"⚠ WebSocket broadcast start error: {e}")
 
-    print("✅ Helix Collective v16.7 - Ready for Operations")
+    print("✅ Helix Collective v16.8 - Ready for Operations")
 
     yield  # Application runs
 
     # Cleanup on shutdown
-    print("🌙 Helix Collective v16.7 - Shutdown Sequence")
+    print("🌙 Helix Collective v16.8 - Shutdown Sequence")
 
     # Close Zapier session
     zapier = get_zapier()
@@ -234,9 +234,9 @@ async def lifespan(app: FastAPI):
 # ============================================================================
 
 app = FastAPI(
-    title="🌀 Helix Collective v16.7",
-    description="Documentation Consolidation & Real-Time Streaming",
-    version="16.7.0",
+    title="🌀 Helix Collective v16.8",
+    description="Helix Hub Production Release",
+    version="16.8.0",
     lifespan=lifespan,
 )
 
@@ -404,7 +404,7 @@ def helix_manifest():
     except FileNotFoundError:
         logger.error(f"❌ Manifest not found: {manifest_path.resolve()}")
         return {
-            "version": "16.7",
+            "version": "16.8",
             "error": "manifest_missing",
             "note": "helix-manifest.json not found in repository root"
         }
@@ -464,7 +464,7 @@ async def api_info():
     try:
         status = await get_collective_status()
         return {
-            "message": "🌀 Helix Collective v16.7 - Documentation Consolidation & Real-Time Streaming",
+            "message": "🌀 Helix Collective v16.8 - Helix Hub Production Release",
             "status": "operational",
             "agents": len(status),
             "agent_names": list(status.keys()),
@@ -480,7 +480,7 @@ async def api_info():
         }
     except Exception as e:
         return {
-            "message": "🌀 Helix Collective v16.7 - Documentation Consolidation & Real-Time Streaming",
+            "message": "🌀 Helix Collective v16.8 - Helix Hub Production Release",
             "status": "initializing",
             "error": str(e),
         }
@@ -519,7 +519,7 @@ def get_status():
         "system": {"operational": True, "ts": heartbeat.get("ts")},
         "ucf": ucf,
         "agents": agents,
-        "version": os.getenv("SYSTEM_VERSION", "16.7"),
+        "version": os.getenv("SYSTEM_VERSION", "16.8"),
         "timestamp": datetime.utcnow().isoformat(),
     }
 
@@ -992,7 +992,7 @@ async def send_zapier_telemetry():
         success = await zapier.send_telemetry(
             ucf_metrics=ucf_state,
             system_info={
-                "version": "16.7",
+                "version": "16.8",
                 "agents_count": len(agents_status),
                 "timestamp": datetime.utcnow().isoformat(),
                 "codename": "Documentation Consolidation & Real-Time Streaming",
@@ -1298,7 +1298,7 @@ if __name__ == "__main__":
     # Get port from Railway environment
     port = int(os.getenv("PORT", 8000))
 
-    print(f"🚀 Starting Helix Collective v16.7 on port {port}")
+    print(f"🚀 Starting Helix Collective v16.8 on port {port}")
 
     # CRITICAL: Must bind to 0.0.0.0 for Railway
     uvicorn.run(

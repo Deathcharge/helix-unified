@@ -1,9 +1,9 @@
-# 🌀 Helix Collective v14.5 — Quantum Handshake
+# 🌀 Helix Collective v16.8 — Helix Hub Production Release
 # discord_bot_manus.py — Discord bridge (with async ritual fix + Kavach scanning fix)
 # Author: Andrew John Ward (Architect)
 """
-Manusbot - Discord Interface for Helix Collective v14.5
-Quantum Handshake Edition
+Manusbot - Discord Interface for Helix Collective v16.8
+Helix Hub Production Release
 
 Features:
 - Kavach ethical scanning
