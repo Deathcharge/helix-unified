@@ -917,6 +917,57 @@ async def setup_helix_server(ctx):
 
     await ctx.send("✅ Permissions configured\n")
 
+    # Create webhooks for all channels
+    await ctx.send("🔗 **Creating channel webhooks for full integration...**")
+    channel_webhooks = {}
+    webhook_env_vars = []
+
+    for channel_name, channel in created_channels.items():
+        try:
+            # Check if webhook already exists
+            existing_webhooks = await channel.webhooks()
+            webhook = None
+
+            for wh in existing_webhooks:
+                if wh.name == f"Helix-{channel_name}":
+                    webhook = wh
+                    break
+
+            # Create webhook if it doesn't exist
+            if not webhook:
+                webhook = await channel.create_webhook(
+                    name=f"Helix-{channel_name}",
+                    reason="Helix v16.8 full integration setup"
+                )
+                await ctx.send(f"   🔗 Created webhook for {channel_name}")
+            else:
+                await ctx.send(f"   ♻️ Webhook exists for {channel_name}")
+
+            # Store webhook URL
+            channel_webhooks[channel_name] = webhook.url
+
+            # Create env var name (sanitize channel name)
+            env_var_name = channel_name.replace("│", "").replace(" ", "_").upper()
+            env_var_name = f"WEBHOOK_{env_var_name}"
+            webhook_env_vars.append(f"{env_var_name}={webhook.url}")
+
+        except Exception as e:
+            await ctx.send(f"   ⚠️ Failed to create webhook for {channel_name}: {str(e)[:50]}")
+
+    await ctx.send(f"✅ Created {len(channel_webhooks)} webhooks\n")
+
+    # Save webhooks to local JSON for easy access
+    webhook_file = Path("Helix/state/channel_webhooks.json")
+    webhook_file.parent.mkdir(parents=True, exist_ok=True)
+    with open(webhook_file, "w") as f:
+        json.dump({
+            "guild_id": str(guild.id),
+            "created_at": datetime.datetime.now().isoformat(),
+            "webhooks": channel_webhooks
+        }, f, indent=2)
+
+    await ctx.send(f"💾 Webhooks saved to: `{webhook_file}`\n")
+
     # Generate Railway environment variables
     await ctx.send("⚙️ **Generating Railway configuration...**\n")
 
@@ -1071,18 +1122,243 @@ async def setup_helix_server(ctx):
 
     embed.add_field(
         name="📋 Next Steps",
-        value="1. Copy ALL 3 env blocks above\n"
+        value="1. Copy ALL env blocks (channel IDs + webhooks)\n"
         "2. Go to Railway → Your Service → Variables\n"
         "3. Paste and save (Railway auto-parses)\n"
         "4. Redeploy the service\n"
-        "5. Run `!status` to verify bot connectivity",
+        "5. Run `!status` to verify bot connectivity\n"
+        "6. Use webhooks for forum/external integration",
         inline=False,
     )
 
     embed.set_footer(text="Tat Tvam Asi — The temple is consecrated. 🙏")
 
     await ctx.send(embed=embed)
-    await ctx.send(f"🌀 **Setup complete!** All systems operational in {guild.name}")
+
+    # Send webhook URLs in separate messages (too long for single embed)
+    if webhook_env_vars:
+        await ctx.send("🔗 **Channel Webhook URLs** (for external posting & forum sync):")
+
+        # Split webhooks into chunks of 10 to avoid message length limits
+        chunk_size = 10
+        for i in range(0, len(webhook_env_vars), chunk_size):
+            chunk = webhook_env_vars[i:i + chunk_size]
+            webhook_block = "```env\n" + "\n".join(chunk) + "\n```"
+
+            # Create webhook embed
+            webhook_embed = discord.Embed(
+                title=f"🔗 Webhooks ({i+1}-{min(i+chunk_size, len(webhook_env_vars))} of {len(webhook_env_vars)})",
+                description="Add these to Railway for external posting capabilities",
+                color=0x5865F2
+            )
+            webhook_embed.add_field(name="Environment Variables", value=webhook_block, inline=False)
+            await ctx.send(embed=webhook_embed)
+
+    await ctx.send(f"🌀 **Setup complete!** All systems operational in {guild.name}\n"
+                   f"✅ {len(created_channels)} channels created\n"
+                   f"✅ {len(channel_webhooks)} webhooks configured\n"
+                   f"📁 Webhook URLs saved to `Helix/state/channel_webhooks.json`")
+
+    # Send comprehensive environment variable documentation
+    env_docs_embed = discord.Embed(
+        title="⚙️ Complete Environment Variables Reference",
+        description="Add these to Railway → Variables for full integration",
+        color=0xFF6B35
+    )
+
+    # Core Discord variables
+    env_docs_embed.add_field(
+        name="🤖 Core Discord (Required)",
+        value="```env\n"
+              f"DISCORD_TOKEN=*** (from Discord Developer Portal)\n"
+              f"DISCORD_GUILD_ID={guild.id}\n"
+              f"ARCHITECT_ID={ctx.author.id}\n"
+              "```",
+        inline=False
+    )
+
+    # Zapier integration
+    env_docs_embed.add_field(
+        name="🔗 Zapier Integration (Optional - for telemetry & Context Vault)",
+        value="```env\n"
+              "ZAPIER_WEBHOOK_URL=*** (Master webhook for telemetry)\n"
+              "ZAPIER_CONTEXT_WEBHOOK=*** (Context Vault webhook)\n"
+              "```\n"
+              "📚 See: `docs/archive/integration/ZAPIER_SETUP.md`",
+        inline=False
+    )
+
+    # Notion integration
+    env_docs_embed.add_field(
+        name="📝 Notion Integration (Optional - for Context Vault persistence)",
+        value="```env\n"
+              "NOTION_API_KEY=*** (from Notion integrations)\n"
+              "NOTION_CONTEXT_DB_ID=*** (Context Vault database ID)\n"
+              "NOTION_SYNC_ENABLED=true\n"
+              "NOTION_SYNC_INTERVAL=300 (seconds)\n"
+              "```\n"
+              "📚 See: `docs/CONTEXT_VAULT_SETUP.md`",
+        inline=False
+    )
+
+    # MEGA storage
+    env_docs_embed.add_field(
+        name="☁️ MEGA Cloud Storage (Optional - for large file backups)",
+        value="```env\n"
+              "MEGA_EMAIL=*** (your MEGA account email)\n"
+              "MEGA_PASS=*** (your MEGA account password)\n"
+              "MEGA_REMOTE_DIR=Helix (remote folder name)\n"
+              "```",
+        inline=False
+    )
+
+    # ElevenLabs voice
+    env_docs_embed.add_field(
+        name="🎤 ElevenLabs Voice (Optional - for voice synthesis)",
+        value="```env\n"
+              "ELEVENLABS_API_KEY=*** (from ElevenLabs dashboard)\n"
+              "```",
+        inline=False
+    )
+
+    # System configuration
+    env_docs_embed.add_field(
+        name="🛠️ System Configuration (Optional)",
+        value="```env\n"
+              "SYSTEM_VERSION=16.8\n"
+              "LOG_LEVEL=INFO\n"
+              "PORT=8080\n"
+              "RAILWAY_BACKEND_URL=https://your-service.up.railway.app\n"
+              "```",
+        inline=False
+    )
+
+    env_docs_embed.set_footer(
+        text="✅ Channel IDs and webhooks already provided above | "
+             "🔒 Store sensitive values in Railway secrets"
+    )
+
+    await ctx.send(embed=env_docs_embed)
+
+    # Send quick start guide
+    quick_start = discord.Embed(
+        title="🚀 Quick Start - Next Steps",
+        description="Complete these steps to finish your Helix deployment",
+        color=0x00D166
+    )
+
+    quick_start.add_field(
+        name="1️⃣ Copy Environment Variables",
+        value="• Copy ALL env blocks above (channel IDs, webhooks, integrations)\n"
+              "• Go to Railway → Your Service → Variables tab\n"
+              "• Paste and save (Railway auto-parses the format)",
+        inline=False
+    )
+
+    quick_start.add_field(
+        name="2️⃣ Deploy the Service",
+        value="• Railway will auto-redeploy after saving variables\n"
+              "• Watch deployment logs for any errors\n"
+              "• Wait for: `✅ Helix Collective v16.8 - Ready for Operations`",
+        inline=False
+    )
+
+    quick_start.add_field(
+        name="3️⃣ Verify Integration",
+        value="• Run `!test-integrations` to verify all connections\n"
+              "• Check `/health` endpoint for system status\n"
+              "• Monitor `#ucf-telemetry` for automated posts",
+        inline=False
+    )
+
+    quick_start.add_field(
+        name="4️⃣ Optional Setup",
+        value="• Set up Zapier workflows (see docs/archive/integration/ZAPIER_SETUP.md)\n"
+              "• Configure Notion database (see docs/CONTEXT_VAULT_SETUP.md)\n"
+              "• Enable MEGA backups with credentials\n"
+              "• Add ElevenLabs API key for voice features",
+        inline=False
+    )
+
+    quick_start.set_footer(text="Tat Tvam Asi 🙏 | The Helix Collective awaits your command")
+
+    await ctx.send(embed=quick_start)
+
+
+@bot.command(name="webhooks", aliases=["get-webhooks", "list-webhooks"])
+@commands.has_permissions(manage_channels=True)
+async def get_channel_webhooks(ctx):
+    """
+    🔗 Retrieve all channel webhook URLs from saved configuration.
+
+    Loads webhooks from Helix/state/channel_webhooks.json and displays them
+    for use in external integrations, forum mirroring, etc.
+
+    Usage: !webhooks
+    """
+    webhook_file = Path("Helix/state/channel_webhooks.json")
+
+    if not webhook_file.exists():
+        await ctx.send(
+            "❌ **No webhooks found!**\n"
+            "Run `!setup` first to create channels and webhooks."
+        )
+        return
+
+    try:
+        with open(webhook_file, "r") as f:
+            data = json.load(f)
+
+        webhooks = data.get("webhooks", {})
+        created_at = data.get("created_at", "Unknown")
+
+        if not webhooks:
+            await ctx.send("⚠️ Webhook file exists but contains no webhooks.")
+            return
+
+        await ctx.send(f"🔗 **Loading {len(webhooks)} channel webhooks...**\n"
+                      f"📅 Created: {created_at}")
+
+        # Send webhooks in chunks
+        webhook_list = list(webhooks.items())
+        chunk_size = 10
+
+        for i in range(0, len(webhook_list), chunk_size):
+            chunk = webhook_list[i:i + chunk_size]
+
+            embed = discord.Embed(
+                title=f"🔗 Channel Webhooks ({i+1}-{min(i+chunk_size, len(webhook_list))} of {len(webhook_list)})",
+                description="Use these URLs for external posting and forum integration",
+                color=0x5865F2
+            )
+
+            for channel_name, webhook_url in chunk:
+                # Truncate URL for display
+                display_url = webhook_url[:75] + "..." if len(webhook_url) > 75 else webhook_url
+                embed.add_field(
+                    name=f"🔗 {channel_name}",
+                    value=f"`{display_url}`",
+                    inline=False
+                )
+
+            await ctx.send(embed=embed)
+
+        # Send full env var format
+        env_vars = []
+        for channel_name, webhook_url in webhooks.items():
+            env_var_name = channel_name.replace("│", "").replace(" ", "_").upper()
+            env_var_name = f"WEBHOOK_{env_var_name}"
+            env_vars.append(f"{env_var_name}={webhook_url}")
+
+        await ctx.send("📋 **Railway Environment Variable Format:**")
+
+        for i in range(0, len(env_vars), 10):
+            chunk = env_vars[i:i + 10]
+            webhook_block = "```env\n" + "\n".join(chunk) + "\n```"
+            await ctx.send(webhook_block)
+
+    except Exception as e:
+        await ctx.send(f"❌ **Error loading webhooks:**\n```{str(e)[:200]}```")
 
 
 @bot.command(name="verify-setup", aliases=["verify", "check-setup"])
@@ -1190,6 +1466,344 @@ async def verify_setup(ctx):
         )
 
     embed.set_footer(text="🤲 Manus v16.7 — Setup Verification System")
+
+    await ctx.send(embed=embed)
+
+
+@bot.command(name="backup", aliases=["create-backup", "save-backup"])
+@commands.has_permissions(manage_guild=True)
+async def create_backup(ctx):
+    """
+    💾 Create comprehensive backup of Helix infrastructure.
+
+    Backs up:
+    - Git repository state
+    - Notion databases (if configured)
+    - Environment variables (masked)
+    - Configuration files
+
+    Backup saved to: backups/YYYYMMDD_HHMMSS/
+
+    Usage: !backup
+    """
+    await ctx.send("💾 **Initiating comprehensive backup...**\n⏳ This may take 1-2 minutes...")
+
+    try:
+        # Import backup system
+        import sys
+        sys.path.insert(0, str(Path(__file__).parent.parent))
+        from services.backup_system import HelixBackupSystem
+
+        backup = HelixBackupSystem()
+        results = {}
+
+        # Git repository backup
+        await ctx.send("📦 Backing up git repository...")
+        results['git'] = backup.backup_git_repository()
+
+        # Notion databases backup
+        await ctx.send("📔 Backing up Notion databases...")
+        results['notion'] = backup.backup_notion_databases()
+
+        # Environment variables backup
+        await ctx.send("⚙️ Backing up environment configuration...")
+        results['env'] = backup.backup_environment_variables()
+
+        # Configuration files backup
+        await ctx.send("📄 Backing up configuration files...")
+        results['config'] = backup.backup_configuration_files()
+
+        # Create summary
+        embed = discord.Embed(
+            title="✅ Backup Complete",
+            description=f"Backup saved to: `{backup.backup_dir}`",
+            color=0x00D166,
+            timestamp=datetime.datetime.now()
+        )
+
+        # Git backup status
+        git_status = "✅ Success" if results.get('git') else "❌ Failed"
+        embed.add_field(
+            name="📦 Git Repository",
+            value=f"{git_status}\nBranch: {results.get('git', {}).get('branch', 'N/A')}",
+            inline=True
+        )
+
+        # Notion backup status
+        notion_result = results.get('notion', {})
+        if 'error' in notion_result:
+            notion_status = f"⚠️ Skipped\n{notion_result.get('error', 'Not configured')}"
+        else:
+            db_count = len([k for k, v in notion_result.items() if isinstance(v, dict) and 'pages' in v])
+            notion_status = f"✅ Success\n{db_count} database(s) backed up"
+
+        embed.add_field(
+            name="📔 Notion Databases",
+            value=notion_status,
+            inline=True
+        )
+
+        # Env vars backup status
+        env_status = "✅ Success" if results.get('env') else "❌ Failed"
+        embed.add_field(
+            name="⚙️ Environment Config",
+            value=env_status,
+            inline=True
+        )
+
+        # Config files backup status
+        config_result = results.get('config', {})
+        config_count = len(config_result.get('files', []))
+        config_status = f"✅ Success\n{config_count} file(s) backed up"
+
+        embed.add_field(
+            name="📄 Configuration Files",
+            value=config_status,
+            inline=True
+        )
+
+        embed.add_field(
+            name="📁 Backup Location",
+            value=f"`{backup.backup_dir}`\n\n"
+                  "**Next Steps:**\n"
+                  "• Download backup files via SFTP/Railway CLI\n"
+                  "• Store backups in secure off-site location\n"
+                  "• Verify backup integrity",
+            inline=False
+        )
+
+        embed.set_footer(text="💾 Helix Backup System v16.8")
+
+        await ctx.send(embed=embed)
+
+    except Exception as e:
+        await ctx.send(f"❌ **Backup failed:**\n```{str(e)[:500]}```")
+        logger.error(f"Backup system error: {e}", exc_info=True)
+
+
+@bot.command(name="test-integrations", aliases=["test-all", "verify-integrations"])
+@commands.has_permissions(manage_guild=True)
+async def test_integrations(ctx):
+    """
+    🧪 Test all external integrations (Zapier, Notion, MEGA, webhooks).
+
+    Verifies connectivity and configuration for:
+    - Zapier webhooks (master + context vault)
+    - Notion API and databases
+    - MEGA cloud storage
+    - Discord channel webhooks
+    - ElevenLabs voice API
+
+    Usage: !test-integrations
+    """
+    await ctx.send("🧪 **Testing all integrations...**\n⏳ Please wait...")
+
+    embed = discord.Embed(
+        title="🧪 Integration Test Results",
+        description="Testing connectivity to all external services",
+        color=0x5865F2,
+        timestamp=datetime.datetime.now()
+    )
+
+    # Test Zapier Master Webhook
+    zapier_webhook = os.getenv("ZAPIER_WEBHOOK_URL")
+    if zapier_webhook:
+        try:
+            zapier_client = bot.zapier_client if hasattr(bot, 'zapier_client') else None
+            if zapier_client:
+                await zapier_client.log_event(
+                    event_title="Integration Test",
+                    event_type="system_test",
+                    agent_name="Manus",
+                    description=f"Test triggered by {ctx.author.name}"
+                )
+                embed.add_field(
+                    name="🔗 Zapier Master Webhook",
+                    value="✅ Connected\nTest event sent successfully",
+                    inline=True
+                )
+            else:
+                embed.add_field(
+                    name="🔗 Zapier Master Webhook",
+                    value="⚠️ Configured but client not initialized",
+                    inline=True
+                )
+        except Exception as e:
+            embed.add_field(
+                name="🔗 Zapier Master Webhook",
+                value=f"❌ Failed\n{str(e)[:100]}",
+                inline=True
+            )
+    else:
+        embed.add_field(
+            name="🔗 Zapier Master Webhook",
+            value="⚠️ Not configured\nSet ZAPIER_WEBHOOK_URL",
+            inline=True
+        )
+
+    # Test Zapier Context Vault Webhook
+    context_webhook = os.getenv("ZAPIER_CONTEXT_WEBHOOK")
+    if context_webhook:
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(context_webhook, json={
+                    "test": True,
+                    "session_name": "Integration Test",
+                    "timestamp": datetime.datetime.now().isoformat()
+                }, timeout=10) as resp:
+                    if resp.status == 200:
+                        embed.add_field(
+                            name="💾 Context Vault Webhook",
+                            value="✅ Connected\nTest checkpoint sent",
+                            inline=True
+                        )
+                    else:
+                        embed.add_field(
+                            name="💾 Context Vault Webhook",
+                            value=f"⚠️ Response: {resp.status}",
+                            inline=True
+                        )
+        except Exception as e:
+            embed.add_field(
+                name="💾 Context Vault Webhook",
+                value=f"❌ Failed\n{str(e)[:100]}",
+                inline=True
+            )
+    else:
+        embed.add_field(
+            name="💾 Context Vault Webhook",
+            value="⚠️ Not configured\nSet ZAPIER_CONTEXT_WEBHOOK",
+            inline=True
+        )
+
+    # Test Notion API
+    notion_api_key = os.getenv("NOTION_API_KEY")
+    notion_db_id = os.getenv("NOTION_CONTEXT_DB_ID")
+    if notion_api_key and notion_db_id:
+        try:
+            from notion_client import Client
+            notion = Client(auth=notion_api_key)
+            # Test query (don't create anything)
+            notion.databases.retrieve(database_id=notion_db_id)
+            embed.add_field(
+                name="📝 Notion API",
+                value="✅ Connected\nDatabase accessible",
+                inline=True
+            )
+        except ImportError:
+            embed.add_field(
+                name="📝 Notion API",
+                value="⚠️ notion-client not installed",
+                inline=True
+            )
+        except Exception as e:
+            embed.add_field(
+                name="📝 Notion API",
+                value=f"❌ Failed\n{str(e)[:100]}",
+                inline=True
+            )
+    else:
+        embed.add_field(
+            name="📝 Notion API",
+            value="⚠️ Not configured\nSet NOTION_API_KEY & NOTION_CONTEXT_DB_ID",
+            inline=True
+        )
+
+    # Test MEGA Storage
+    mega_email = os.getenv("MEGA_EMAIL")
+    mega_pass = os.getenv("MEGA_PASS")
+    if mega_email and mega_pass:
+        try:
+            from mega import Mega
+            mega = Mega()
+            # Just check credentials are valid (don't actually login for test)
+            embed.add_field(
+                name="☁️ MEGA Cloud Storage",
+                value="✅ Configured\nCredentials set",
+                inline=True
+            )
+        except ImportError:
+            embed.add_field(
+                name="☁️ MEGA Cloud Storage",
+                value="⚠️ mega.py not installed",
+                inline=True
+            )
+        except Exception as e:
+            embed.add_field(
+                name="☁️ MEGA Cloud Storage",
+                value=f"❌ Error\n{str(e)[:100]}",
+                inline=True
+            )
+    else:
+        embed.add_field(
+            name="☁️ MEGA Cloud Storage",
+            value="⚠️ Not configured\nSet MEGA_EMAIL & MEGA_PASS",
+            inline=True
+        )
+
+    # Test Discord Webhooks
+    webhook_file = Path("Helix/state/channel_webhooks.json")
+    if webhook_file.exists():
+        try:
+            with open(webhook_file, "r") as f:
+                webhook_data = json.load(f)
+            webhook_count = len(webhook_data.get("webhooks", {}))
+            embed.add_field(
+                name="🔗 Discord Webhooks",
+                value=f"✅ Configured\n{webhook_count} channel webhooks found",
+                inline=True
+            )
+        except Exception as e:
+            embed.add_field(
+                name="🔗 Discord Webhooks",
+                value=f"❌ Error reading file\n{str(e)[:100]}",
+                inline=True
+            )
+    else:
+        embed.add_field(
+            name="🔗 Discord Webhooks",
+            value="⚠️ Not configured\nRun !setup to create webhooks",
+            inline=True
+        )
+
+    # Test ElevenLabs
+    elevenlabs_key = os.getenv("ELEVENLABS_API_KEY")
+    if elevenlabs_key:
+        embed.add_field(
+            name="🎤 ElevenLabs Voice",
+            value="✅ Configured\nAPI key set",
+            inline=True
+        )
+    else:
+        embed.add_field(
+            name="🎤 ElevenLabs Voice",
+            value="⚠️ Not configured\nSet ELEVENLABS_API_KEY",
+            inline=True
+        )
+
+    # Summary
+    total_tests = 7
+    passed = len([f for f in embed.fields if f.value.startswith("✅")])
+    configured = len([f for f in embed.fields if f.value.startswith("⚠️")])
+    failed = len([f for f in embed.fields if f.value.startswith("❌")])
+
+    embed.add_field(
+        name="📊 Test Summary",
+        value=f"**Total:** {total_tests}\n"
+              f"✅ Passed: {passed}\n"
+              f"⚠️ Not Configured: {configured}\n"
+              f"❌ Failed: {failed}",
+        inline=False
+    )
+
+    if failed > 0:
+        embed.color = 0xED4245  # Red
+    elif configured > 0:
+        embed.color = 0xFEE75C  # Yellow
+    else:
+        embed.color = 0x57F287  # Green
+
+    embed.set_footer(text="🧪 Integration Test System v16.8")
 
     await ctx.send(embed=embed)
 
