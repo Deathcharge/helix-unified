@@ -10,11 +10,11 @@ Version: 15.5.0
 """
 
 import asyncio
-import json
-from typing import Dict, Set, Any
-from fastapi import WebSocket, WebSocketDisconnect
-from datetime import datetime
 import logging
+from datetime import datetime
+from typing import Any, Dict, Set
+
+from fastapi import WebSocket, WebSocketDisconnect
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ class ConnectionManager:
         self.connection_metadata[websocket] = {
             "client_id": client_id or f"client_{id(websocket)}",
             "connected_at": datetime.utcnow().isoformat(),
-            "message_count": 0
+            "message_count": 0,
         }
 
         logger.info(f"✅ WebSocket client connected: {self.connection_metadata[websocket]['client_id']}")
@@ -58,9 +58,9 @@ class ConnectionManager:
                 "status": "connected",
                 "client_id": self.connection_metadata[websocket]["client_id"],
                 "active_clients": len(self.active_connections),
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.utcnow().isoformat(),
             },
-            websocket
+            websocket,
         )
 
     def disconnect(self, websocket: WebSocket):
@@ -98,7 +98,7 @@ class ConnectionManager:
             "type": message_type,
             "data": message,
             "timestamp": datetime.utcnow().isoformat(),
-            "broadcast_to": len(self.active_connections)
+            "broadcast_to": len(self.active_connections),
         }
 
         # Send to all clients
@@ -151,18 +151,15 @@ class ConnectionManager:
         """Return statistics about active connections."""
         return {
             "active_connections": len(self.active_connections),
-            "total_messages_sent": sum(
-                meta["message_count"]
-                for meta in self.connection_metadata.values()
-            ),
+            "total_messages_sent": sum(meta["message_count"] for meta in self.connection_metadata.values()),
             "clients": [
                 {
                     "client_id": meta["client_id"],
                     "connected_at": meta["connected_at"],
-                    "messages_sent": meta["message_count"]
+                    "messages_sent": meta["message_count"],
                 }
                 for meta in self.connection_metadata.values()
-            ]
+            ],
         }
 
 
@@ -181,10 +178,7 @@ async def heartbeat_task(websocket: WebSocket, interval: int = 30):
     try:
         while True:
             await asyncio.sleep(interval)
-            await websocket.send_json({
-                "type": "heartbeat",
-                "timestamp": datetime.utcnow().isoformat()
-            })
+            await websocket.send_json({"type": "heartbeat", "timestamp": datetime.utcnow().isoformat()})
     except WebSocketDisconnect:
         logger.debug("Heartbeat stopped: client disconnected")
     except Exception as e:

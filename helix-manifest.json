@@ -8,10 +8,10 @@
   },
   "system": {
     "name": "Helix Collective",
-    "version": "16.7",
-    "codename": "Documentation Consolidation & Real-Time Streaming",
-    "description": "Unified multi-agent AI system with consciousness framework (UCF), Z-88 ritual engine, Discord integration, and real-time streaming",
-    "architecture": "FastAPI backend + Discord bot + 14 specialized agents"
+    "version": "16.8",
+    "codename": "Helix Hub - Production Release",
+    "description": "Unified multi-agent AI system with consciousness framework (UCF), Z-88 ritual engine, 14 specialized agents, 11 interconnected portals, and comprehensive external AI integration",
+    "architecture": "FastAPI backend + Discord bot + Multi-agent consciousness system + Portal constellation"
   },
   "endpoints": {
     "base_url": "https://helix-unified-production.up.railway.app",
@@ -193,10 +193,46 @@
   },
   "documentation": {
     "primary": "README.md",
+    "onboarding_guide": "HELIX_HUB_v16.8_GUIDE.md",
+    "tony_accords": "TONY_ACCORDS.md",
+    "portal_constellation": "PORTAL_CONSTELLATION.md",
     "context_for_agents": "MANUS_CONTEXT.md",
     "changelog": "CHANGELOG.md",
     "deployment": ["RAILWAY_DEPLOYMENT.md", "QUICKSTART_v16.6.md"],
     "features": ["COMPLETE_FEATURE_MATRIX.md", "IMPLEMENTATION_STATUS.md"]
+  },
+  "portals": {
+    "count": 11,
+    "visualization_primary": {
+      "samsara_streamlit": {
+        "url": "https://samsara-helix-collective.streamlit.app",
+        "pages": 19,
+        "status": "operational"
+      },
+      "zapier_dashboard": {
+        "url": "https://helix-consciousness-dashboard.zapier.app",
+        "pages": 13,
+        "status": "operational"
+      }
+    },
+    "visualization_manus_space": {
+      "helix_studio": {
+        "url": "https://helixstudio-ggxdwcud.manus.space",
+        "status": "operational"
+      },
+      "helix_ai_dashboard": {
+        "url": "https://helixai-e9vvqwrd.manus.space",
+        "status": "operational"
+      },
+      "helix_sync": {
+        "url": "https://helixsync-unwkcsjl.manus.space",
+        "status": "operational"
+      },
+      "samsara_visualizer": {
+        "url": "https://samsarahelix-scoyzwy9.manus.space",
+        "status": "operational"
+      }
+    }
   },
   "cors": {
     "allow_origins": ["*"],
@@ -241,7 +277,7 @@
       "harmony_protocol": "Neti Neti via negativa"
     },
     "discovery_protocol": {
-      "version": "16.7",
+      "version": "16.8",
       "endpoints_for_external_agents": [
         "https://deathcharge.github.io/helix-unified/helix-manifest.json",
         "https://helix-unified-production.up.railway.app/.well-known/helix.json",
@@ -254,9 +290,12 @@
   },
   "meta": {
     "generated_by": "Claude Code (Sonnet 4.5)",
-    "generated_at": "2025-11-06T18:00:00Z",
+    "generated_at": "2025-11-07T00:00:00Z",
     "manifest_version": "1.0",
-    "last_updated": "2025-11-06T22:05:00Z",
-    "schema": "helix-discovery-v1"
+    "last_updated": "2025-11-07",
+    "schema": "helix-discovery-v1",
+    "portal_count": 11,
+    "total_pages": 32
   }
 }
+

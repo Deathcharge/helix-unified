@@ -1,4 +1,4 @@
-# Helix Collective v15.2 - Backend Dockerfile (CONFLICT RESOLVED - MemeSync + Analytics)
+# Helix Collective v16.7 - Backend Dockerfile (Documentation Consolidation & Real-Time Streaming)
 FROM python:3.11-slim
 
 WORKDIR /app
@@ -37,6 +37,7 @@ COPY Shadow ./Shadow
 COPY scripts ./scripts
 COPY templates ./templates
 COPY config ./config
+COPY content ./content
 COPY .streamlit ./.streamlit
 
 # Copy root-level sync modules (CRITICAL: bot imports these!)
@@ -45,6 +46,9 @@ COPY mega_sync.py .
 COPY mega_sync2.py .
 COPY sync.py .
 COPY fix_crypto_imports.py .
+
+# Copy discovery manifest for external AI agents (v16.7)
+COPY helix-manifest.json .
 
 # MemeSync artifacts integrated into bot/discord_bot_manus.py
 

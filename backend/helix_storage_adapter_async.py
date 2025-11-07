@@ -3,14 +3,16 @@
 # Supports: Nextcloud (WebDAV), MEGA (REST), Local fallback
 # Author: Helix Collective Ω-Bridge
 
-import os
-import json
-import aiohttp
-import aiofiles
 import asyncio
-from pathlib import Path
+import json
+import os
 from datetime import datetime
-from typing import Optional, Dict, Any
+from pathlib import Path
+from typing import Any, Dict, Optional
+
+import aiofiles
+import aiohttp
+
 
 class HelixStorageAdapterAsync:
     """Non-blocking cloud/local archive handler for Shadow persistence."""
@@ -56,9 +58,7 @@ class HelixStorageAdapterAsync:
         target = f"{self.webdav_url.rstrip('/')}/{remote_dir}/{path.name}"
 
         try:
-            async with aiohttp.ClientSession(
-                auth=aiohttp.BasicAuth(self.webdav_user, self.webdav_pass)
-            ) as session:
+            async with aiohttp.ClientSession(auth=aiohttp.BasicAuth(self.webdav_user, self.webdav_pass)) as session:
                 async with aiofiles.open(path, "rb") as f:
                     data = await f.read()
                     async with session.put(target, data=data) as response:
@@ -177,12 +177,14 @@ class HelixStorageAdapterAsync:
         for file_path in files[:limit]:
             try:
                 stat = file_path.stat()
-                results.append({
-                    "filename": file_path.name,
-                    "size_kb": round(stat.st_size / 1024, 2),
-                    "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
-                    "path": str(file_path)
-                })
+                results.append(
+                    {
+                        "filename": file_path.name,
+                        "size_kb": round(stat.st_size / 1024, 2),
+                        "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                        "path": str(file_path),
+                    }
+                )
             except Exception as e:
                 print(f"⚠️ Error reading metadata for {file_path.name}: {e}")
 
@@ -225,8 +227,8 @@ class HelixStorageAdapterAsync:
             "mode": self.mode,
             "archive_count": len(files),
             "total_size_mb": round(total_size / 1024 / 1024, 2),
-            "free_gb": round(usage.free / (1024 ** 3), 2),
-            "latest": max((p.name for p in files), default=None)
+            "free_gb": round(usage.free / (1024**3), 2),
+            "latest": max((p.name for p in files), default=None),
         }
 
     async def auto_cleanup_if_needed(self) -> int:
@@ -238,24 +240,23 @@ class HelixStorageAdapterAsync:
         Returns:
             Number of files deleted
         """
-        import shutil
         import glob
-        import time
+        import shutil
 
         # Load threshold from config (default 100 GB)
         config_path = Path("Helix/state/storage_config.json")
         threshold_gb = 100
         if config_path.exists():
             try:
-                async with aiofiles.open(config_path, 'r') as f:
+                async with aiofiles.open(config_path, "r") as f:
                     content = await f.read()
                     config = json.loads(content)
                     threshold_gb = config.get("auto_cleanup_threshold_gb", 100)
-            except:
+            except Exception:
                 pass
 
         # Check free space
-        stat = shutil.disk_usage('/')
+        stat = shutil.disk_usage("/")
         free_gb = stat.free / (1024**3)
 
         if free_gb < threshold_gb:
@@ -287,11 +288,11 @@ class HelixStorageAdapterAsync:
                 "timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "deleted_files": deleted_count,
                 "free_space_gb": round(free_gb, 2),
-                "threshold_gb": threshold_gb
+                "threshold_gb": threshold_gb,
             }
 
             try:
-                async with aiofiles.open(cleanup_log_path, 'a') as f:
+                async with aiofiles.open(cleanup_log_path, "a") as f:
                     await f.write(json.dumps(log_entry) + "\n")
             except Exception as e:
                 print(f"⚠️  Cleanup log error: {e}")
@@ -305,6 +306,7 @@ class HelixStorageAdapterAsync:
 # SAMSARA ASSET UPLOADER (Manus Pass v15.2)
 # ============================================================================
 
+
 async def upload_samsara_asset(file_path: Path, metadata: dict) -> bool:
     """
     Upload Samsara assets to Nextcloud with UCF metadata.
@@ -317,8 +319,8 @@ async def upload_samsara_asset(file_path: Path, metadata: dict) -> bool:
     Returns:
         True if upload successful, False otherwise
     """
-    import time
     import logging
+    import time
 
     storage_mode = os.getenv("HELIX_STORAGE_MODE", "local")
 
@@ -353,7 +355,7 @@ async def upload_samsara_asset(file_path: Path, metadata: dict) -> bool:
                         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                         "file": str(file_path),
                         "status": status,
-                        "metadata": metadata
+                        "metadata": metadata,
                     }
 
                     logging.info(f"🦑 Shadow: Uploaded {file_path.name} - {status}")
@@ -376,6 +378,7 @@ async def upload_samsara_asset(file_path: Path, metadata: dict) -> bool:
 # PUBLIC API
 # ============================================================================
 
+
 async def get_storage_adapter() -> HelixStorageAdapterAsync:
     """Get singleton storage adapter instance."""
     return HelixStorageAdapterAsync()
@@ -385,16 +388,13 @@ async def get_storage_adapter() -> HelixStorageAdapterAsync:
 # TESTING
 # ============================================================================
 
+
 async def main():
     """Test the storage adapter."""
     storage = HelixStorageAdapterAsync()
 
     # Test archiving
-    test_data = {
-        "test": "data",
-        "timestamp": datetime.utcnow().isoformat(),
-        "harmony": 0.42
-    }
+    test_data = {"test": "data", "timestamp": datetime.utcnow().isoformat(), "harmony": 0.42}
 
     print(f"🧪 Testing storage adapter (mode: {storage.mode})")
     path = await storage.archive_json(test_data, "test_archive")

@@ -66,3 +66,4 @@ htmlcov/
 # Local config
 config.local.json
 secrets.json
+backups/
