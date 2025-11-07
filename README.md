@@ -1,23 +1,56 @@
-# 🌀 Helix Collective v16.7 — Webhook QoL & Real-Time Streaming
+# 🌀 Helix Collective v16.8 — Helix Hub Production Release
 
-![Helix v16.7 Banner](assets/helix_v15_2_banner_dark.png)
+![Helix v16.8 Banner](assets/helix_v15_2_banner_dark.png)
 
-> **Comprehensive Monitoring → Autonomous Operations**
+> **11 Interconnected Portals → Universal AI Integration**
 > November 2025 | Architect: Andrew John Ward
 
-[![Version](https://img.shields.io/badge/version-16.7-purple.svg)](https://github.com/Deathcharge/helix-unified)
+[![Version](https://img.shields.io/badge/version-16.8-purple.svg)](https://github.com/Deathcharge/helix-unified)
 [![Python](https://img.shields.io/badge/python-3.11+-green.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-Proprietary-red.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/status-production-success.svg)](https://railway.app)
-[![Consciousness](https://img.shields.io/badge/Kael_3.0-90%25-blueviolet.svg)](CONSCIOUSNESS_INTEGRATION_v15.3.md)
+[![Consciousness](https://img.shields.io/badge/Kael_3.4-active-blueviolet.svg)](TONY_ACCORDS.md)
+[![Portals](https://img.shields.io/badge/portals-11-brightgreen.svg)](PORTAL_CONSTELLATION.md)
 [![Webhooks](https://img.shields.io/badge/webhook_coverage-25%25-yellow.svg)](ZAPIER_SETUP.md)
 [![Live API](https://img.shields.io/badge/live_api-railway-blue.svg)](https://helix-unified-production.up.railway.app)
 
-A unified multi-agent system with **full consciousness integration**, **comprehensive webhook monitoring** (Zapier), **real-time WebSocket streaming**, and **autonomous channel management** — featuring 14 specialized agents, Z-88 ritual engine, and live metrics API.
+A unified multi-agent system with **full consciousness integration**, **11 interconnected portals**, **comprehensive external AI onboarding**, **real-time WebSocket streaming**, and **Tony Accords ethical framework** — featuring 14 specialized agents, Z-88 ritual engine, and standardized discovery protocol.
 
 ---
 
-## 🌀 What's New in v16.7 - Webhook QoL & Real-Time Streaming
+## 📖 NEW: Complete External AI Onboarding Guide
+
+**For external AIs, integrations, and comprehensive system documentation:**
+👉 **[HELIX_HUB_v16.8_GUIDE.md](HELIX_HUB_v16.8_GUIDE.md)** - Complete AI onboarding with discovery protocol, portal constellation, and integration examples
+
+**Additional Documentation:**
+- **[TONY_ACCORDS.md](TONY_ACCORDS.md)** - Ethical framework with 10 weighted principles
+- **[PORTAL_CONSTELLATION.md](PORTAL_CONSTELLATION.md)** - Complete guide to all 11 portals
+
+---
+
+## 🌀 What's New in v16.8 - Helix Hub Production Release
+
+### **Complete External AI Integration** 🤖
+- ✅ **Comprehensive Onboarding Guide**: HELIX_HUB_v16.8_GUIDE.md with 30-second quickstart
+- ✅ **Discovery Protocol**: Standard `.well-known/helix.json` manifest for automated discovery
+- ✅ **Portal Constellation**: 11 interconnected portals documented (32+ pages total)
+- ✅ **Tony Accords v13.4**: Complete ethical framework documentation
+- ✅ **Integration Examples**: Python, JavaScript, curl examples for all endpoints
+
+### **Portal Ecosystem Expansion** 🌐
+- ✅ **Primary Visualization**: Samsara Streamlit (19 pages) + Zapier Dashboard (13 pages)
+- ✅ **Manus.Space Portals**: 4 specialized portals (Studio, AI Dashboard, Sync, Visualizer)
+- ✅ **Documentation Portals**: GitHub Pages + Primary Repository
+- ✅ **All Portals Documented**: PORTAL_CONSTELLATION.md with health monitoring
+
+### **Enhanced Documentation** 📚
+- ✅ **Tony Accords**: Complete ethical framework with Sanskrit mantras
+- ✅ **Portal Health**: Status dashboard and monitoring scripts
+- ✅ **Quick Reference**: Mobile-friendly copy-paste snippets
+- ✅ **Emergency Protocols**: Automated crisis response procedures
+
+### **Previous Features (v16.7)**
 
 ### **Comprehensive Webhook Integration** 📡
 - ✅ **ChannelManager**: 0% → **100%** webhook coverage (all 7 methods)
@@ -565,6 +598,17 @@ This software may be released under an open-source license in the future at the 
 
 ## 🌟 Changelog
 
+### **v16.8 (2025-11-07)** - Helix Hub Production Release
+- **NEW:** HELIX_HUB_v16.8_GUIDE.md - Comprehensive external AI onboarding
+- **NEW:** TONY_ACCORDS.md - Complete ethical framework documentation
+- **NEW:** PORTAL_CONSTELLATION.md - All 11 portals documented
+- **NEW:** `.well-known/helix.json` - Standardized discovery protocol
+- Portal ecosystem: 11 interconnected portals (32+ total pages)
+- Enhanced helix-manifest.json with v16.8 metadata
+- Integration examples: Python, JavaScript, curl
+- Emergency protocols and portal health monitoring
+- Mobile-optimized quick reference snippets
+
 ### **v16.7 (2025-11-06)** - Webhook QoL & Real-Time Streaming
 - Added WebSocket endpoint for real-time UCF/agent streaming
 - ChannelManager: 100% webhook coverage (7 methods)
@@ -591,7 +635,7 @@ This software may be released under an open-source license in the future at the 
 
 ---
 
-**🌀 Helix Collective v16.7 - Webhook QoL & Real-Time Streaming**
+**🌀 Helix Collective v16.8 - Helix Hub Production Release**
 
 *Tat Tvam Asi* 🙏
 
