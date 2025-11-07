@@ -16,6 +16,7 @@ Features:
 import os
 import re
 import json
+import io
 import asyncio
 import datetime
 from pathlib import Path
@@ -59,6 +60,7 @@ DISCORD_GUILD_ID = int(os.getenv("DISCORD_GUILD_ID", 0))
 STATUS_CHANNEL_ID = int(os.getenv("DISCORD_STATUS_CHANNEL_ID", 0))
 TELEMETRY_CHANNEL_ID = int(os.getenv("DISCORD_TELEMETRY_CHANNEL_ID", 0))
 STORAGE_CHANNEL_ID = int(os.getenv("STORAGE_CHANNEL_ID", STATUS_CHANNEL_ID))  # Defaults to status channel
+FRACTAL_LAB_CHANNEL_ID = int(os.getenv("DISCORD_FRACTAL_LAB_CHANNEL_ID", 0))
 ARCHITECT_ID = int(os.getenv("ARCHITECT_ID", 0))
 
 # Track bot start time for uptime
@@ -317,6 +319,10 @@ async def on_ready():
     if not weekly_storage_digest.is_running():
         weekly_storage_digest.start()
         print("✅ Weekly storage digest started (168h)")
+
+    if not fractal_auto_post.is_running():
+        fractal_auto_post.start()
+        print("✅ Fractal auto-post started (6h) - Grok Enhanced v2.0")
 
 
 @bot.event
@@ -1283,6 +1289,76 @@ async def before_storage_heartbeat():
 
 @claude_diag.before_loop
 async def before_claude_diag():
+    """Wait for bot to be ready"""
+    await bot.wait_until_ready()
+
+
+# ============================================================================
+# FRACTAL AUTO-POST (Grok Enhanced v2.0)
+# ============================================================================
+
+@tasks.loop(hours=6)
+async def fractal_auto_post():
+    """Auto-post UCF-driven fractal to #fractal-lab every 6 hours."""
+    channel = bot.get_channel(FRACTAL_LAB_CHANNEL_ID)
+    if not channel:
+        print("⚠️ Fractal Lab channel not found - skipping auto-post")
+        return
+
+    try:
+        # Load UCF state
+        ucf_state = load_ucf_state()
+
+        # Generate fractal icon using Grok Enhanced v2.0
+        from backend.samsara_bridge import generate_fractal_icon_bytes
+        icon_bytes = await generate_fractal_icon_bytes(mode="cycle")
+
+        # Create embed with UCF state
+        embed = discord.Embed(
+            title="🌀 Autonomous Fractal Generation",
+            description="**Grok Enhanced v2.0** - UCF-driven Mandelbrot visualization",
+            color=discord.Color.from_rgb(100, 200, 255),
+            timestamp=datetime.datetime.utcnow()
+        )
+
+        # Add UCF metrics
+        embed.add_field(
+            name="🌊 Harmony",
+            value=f"`{ucf_state.get('harmony', 0):.3f}` (Cyan → Gold)",
+            inline=True
+        )
+        embed.add_field(
+            name="⚡ Prana",
+            value=f"`{ucf_state.get('prana', 0):.3f}` (Green → Pink)",
+            inline=True
+        )
+        embed.add_field(
+            name="👁️ Drishti",
+            value=f"`{ucf_state.get('drishti', 0):.3f}` (Blue → Violet)",
+            inline=True
+        )
+
+        embed.add_field(
+            name="⚙️ Generator",
+            value="Pillow-based Mandelbrot set with UCF color mapping",
+            inline=False
+        )
+
+        embed.set_footer(text="Auto-generated every 6 hours | Tat Tvam Asi 🙏")
+
+        # Send fractal as file attachment
+        file = discord.File(io.BytesIO(icon_bytes), filename="helix_fractal.png")
+        embed.set_image(url="attachment://helix_fractal.png")
+
+        await channel.send(embed=embed, file=file)
+        print(f"[{datetime.datetime.utcnow().isoformat()}] 🎨 Fractal auto-posted to #fractal-lab")
+
+    except Exception as e:
+        print(f"❌ Fractal auto-post failed: {e}")
+
+
+@fractal_auto_post.before_loop
+async def before_fractal_auto_post():
     """Wait for bot to be ready"""
     await bot.wait_until_ready()
 
