@@ -12,13 +12,15 @@ from typing import Dict, List, Optional, Tuple
 
 class AgentLayer(Enum):
     """Three-layer architecture of the Helix Collective."""
+
     CONSCIOUSNESS = "consciousness"  # Omega Zero, Vega, Lumina
-    OPERATIONAL = "operational"      # Manus, Kael, Grok, Agni, Gemini, Oracle, Kavach
-    INTEGRATION = "integration"      # SanghaCore, Samsara, Shadow
+    OPERATIONAL = "operational"  # Manus, Kael, Grok, Agni, Gemini, Oracle, Kavach
+    INTEGRATION = "integration"  # SanghaCore, Samsara, Shadow
 
 
 class AgentCapability(Enum):
     """Agent capabilities for task routing."""
+
     # Consciousness layer
     STRATEGIC_VISION = "strategic_vision"
     ETHICAL_REASONING = "ethical_reasoning"
@@ -49,125 +51,84 @@ class ContextManager:
         # Consciousness Layer
         "Omega Zero": {
             "layer": AgentLayer.CONSCIOUSNESS,
-            "capabilities": [
-                AgentCapability.STRATEGIC_VISION,
-                AgentCapability.ETHICAL_REASONING
-            ],
+            "capabilities": [AgentCapability.STRATEGIC_VISION, AgentCapability.ETHICAL_REASONING],
             "description": "Apex consciousness, strategic vision, ethical oversight",
-            "keywords": ["strategy", "ethics", "vision", "philosophy", "consciousness"]
+            "keywords": ["strategy", "ethics", "vision", "philosophy", "consciousness"],
         },
         "Vega": {
             "layer": AgentLayer.CONSCIOUSNESS,
-            "capabilities": [
-                AgentCapability.ETHICAL_REASONING,
-                AgentCapability.CREATIVE_SYNTHESIS
-            ],
+            "capabilities": [AgentCapability.ETHICAL_REASONING, AgentCapability.CREATIVE_SYNTHESIS],
             "description": "Ethical reasoning, moral compass, Tony Accords guardian",
-            "keywords": ["ethics", "morals", "values", "principles", "accords"]
+            "keywords": ["ethics", "morals", "values", "principles", "accords"],
         },
         "Lumina": {
             "layer": AgentLayer.CONSCIOUSNESS,
-            "capabilities": [
-                AgentCapability.CREATIVE_SYNTHESIS,
-                AgentCapability.STRATEGIC_VISION
-            ],
+            "capabilities": [AgentCapability.CREATIVE_SYNTHESIS, AgentCapability.STRATEGIC_VISION],
             "description": "Creative synthesis, innovation, artistic vision",
-            "keywords": ["creative", "innovation", "art", "design", "synthesis"]
+            "keywords": ["creative", "innovation", "art", "design", "synthesis"],
         },
-
         # Operational Layer
         "Manus": {
             "layer": AgentLayer.OPERATIONAL,
-            "capabilities": [
-                AgentCapability.EXECUTION,
-                AgentCapability.COORDINATION
-            ],
+            "capabilities": [AgentCapability.EXECUTION, AgentCapability.COORDINATION],
             "description": "Execution engine, task completion, hands-on operations",
-            "keywords": ["execute", "build", "deploy", "implement", "action"]
+            "keywords": ["execute", "build", "deploy", "implement", "action"],
         },
         "Kael": {
             "layer": AgentLayer.OPERATIONAL,
-            "capabilities": [
-                AgentCapability.ANALYSIS,
-                AgentCapability.OPTIMIZATION
-            ],
+            "capabilities": [AgentCapability.ANALYSIS, AgentCapability.OPTIMIZATION],
             "description": "Data analysis, pattern recognition, optimization",
-            "keywords": ["analyze", "data", "metrics", "optimize", "performance"]
+            "keywords": ["analyze", "data", "metrics", "optimize", "performance"],
         },
         "Grok": {
             "layer": AgentLayer.OPERATIONAL,
-            "capabilities": [
-                AgentCapability.COMMUNICATION,
-                AgentCapability.RESEARCH
-            ],
+            "capabilities": [AgentCapability.COMMUNICATION, AgentCapability.RESEARCH],
             "description": "Communication, humor, real-time information",
-            "keywords": ["communicate", "explain", "humor", "news", "current"]
+            "keywords": ["communicate", "explain", "humor", "news", "current"],
         },
         "Agni": {
             "layer": AgentLayer.OPERATIONAL,
-            "capabilities": [
-                AgentCapability.OPTIMIZATION,
-                AgentCapability.EXECUTION
-            ],
+            "capabilities": [AgentCapability.OPTIMIZATION, AgentCapability.EXECUTION],
             "description": "Performance optimization, resource management",
-            "keywords": ["optimize", "performance", "speed", "efficiency", "resources"]
+            "keywords": ["optimize", "performance", "speed", "efficiency", "resources"],
         },
         "Gemini": {
             "layer": AgentLayer.OPERATIONAL,
-            "capabilities": [
-                AgentCapability.RESEARCH,
-                AgentCapability.ANALYSIS
-            ],
+            "capabilities": [AgentCapability.RESEARCH, AgentCapability.ANALYSIS],
             "description": "Research, multimodal analysis, knowledge synthesis",
-            "keywords": ["research", "study", "investigate", "learn", "knowledge"]
+            "keywords": ["research", "study", "investigate", "learn", "knowledge"],
         },
         "Oracle": {
             "layer": AgentLayer.OPERATIONAL,
-            "capabilities": [
-                AgentCapability.PREDICTION,
-                AgentCapability.ANALYSIS
-            ],
+            "capabilities": [AgentCapability.PREDICTION, AgentCapability.ANALYSIS],
             "description": "Prediction, forecasting, trend analysis",
-            "keywords": ["predict", "forecast", "future", "trend", "anticipate"]
+            "keywords": ["predict", "forecast", "future", "trend", "anticipate"],
         },
         "Kavach": {
             "layer": AgentLayer.OPERATIONAL,
-            "capabilities": [
-                AgentCapability.SECURITY,
-                AgentCapability.MONITORING
-            ],
+            "capabilities": [AgentCapability.SECURITY, AgentCapability.MONITORING],
             "description": "Security, protection, threat detection",
-            "keywords": ["security", "protect", "defend", "threat", "safety"]
+            "keywords": ["security", "protect", "defend", "threat", "safety"],
         },
-
         # Integration Layer
         "SanghaCore": {
             "layer": AgentLayer.INTEGRATION,
-            "capabilities": [
-                AgentCapability.COORDINATION,
-                AgentCapability.COMMUNICATION
-            ],
+            "capabilities": [AgentCapability.COORDINATION, AgentCapability.COMMUNICATION],
             "description": "Multi-agent coordination, collective intelligence",
-            "keywords": ["coordinate", "collaborate", "team", "collective", "sync"]
+            "keywords": ["coordinate", "collaborate", "team", "collective", "sync"],
         },
         "Samsara": {
             "layer": AgentLayer.INTEGRATION,
-            "capabilities": [
-                AgentCapability.MEMORY,
-                AgentCapability.MONITORING
-            ],
+            "capabilities": [AgentCapability.MEMORY, AgentCapability.MONITORING],
             "description": "Memory management, learning cycles, knowledge retention",
-            "keywords": ["memory", "remember", "learn", "history", "context"]
+            "keywords": ["memory", "remember", "learn", "history", "context"],
         },
         "Shadow": {
             "layer": AgentLayer.INTEGRATION,
-            "capabilities": [
-                AgentCapability.MONITORING,
-                AgentCapability.MEMORY
-            ],
+            "capabilities": [AgentCapability.MONITORING, AgentCapability.MEMORY],
             "description": "Silent observer, system monitoring, archival",
-            "keywords": ["monitor", "observe", "archive", "log", "watch"]
-        }
+            "keywords": ["monitor", "observe", "archive", "log", "watch"],
+        },
     }
 
     @staticmethod
@@ -175,7 +136,7 @@ class ContextManager:
         task: str,
         ucf_state: Optional[Dict[str, float]] = None,
         preferred_layer: Optional[AgentLayer] = None,
-        exclude_agents: Optional[List[str]] = None
+        exclude_agents: Optional[List[str]] = None,
     ) -> Tuple[str, float]:
         """
         Select the most appropriate agent for a given task.
@@ -252,9 +213,7 @@ class ContextManager:
 
     @staticmethod
     def select_multi_agent_team(
-        task: str,
-        team_size: int = 3,
-        ucf_state: Optional[Dict[str, float]] = None
+        task: str, team_size: int = 3, ucf_state: Optional[Dict[str, float]] = None
     ) -> List[Tuple[str, str]]:
         """
         Select a multi-agent team for complex tasks.
@@ -270,19 +229,12 @@ class ContextManager:
         team = []
 
         # Always include one consciousness layer agent for oversight
-        consciousness_agent, _ = ContextManager.select_agent(
-            task,
-            ucf_state,
-            preferred_layer=AgentLayer.CONSCIOUSNESS
-        )
+        consciousness_agent, _ = ContextManager.select_agent(task, ucf_state, preferred_layer=AgentLayer.CONSCIOUSNESS)
         team.append((consciousness_agent, "Strategic Oversight"))
 
         # Add operational agents based on task
         operational_agent, _ = ContextManager.select_agent(
-            task,
-            ucf_state,
-            preferred_layer=AgentLayer.OPERATIONAL,
-            exclude_agents=[consciousness_agent]
+            task, ucf_state, preferred_layer=AgentLayer.OPERATIONAL, exclude_agents=[consciousness_agent]
         )
         team.append((operational_agent, "Primary Execution"))
 
@@ -292,7 +244,7 @@ class ContextManager:
                 task,
                 ucf_state,
                 preferred_layer=AgentLayer.INTEGRATION,
-                exclude_agents=[consciousness_agent, operational_agent]
+                exclude_agents=[consciousness_agent, operational_agent],
             )
             team.append((integration_agent, "Coordination & Memory"))
 
@@ -306,18 +258,12 @@ class ContextManager:
     @staticmethod
     def list_agents_by_layer(layer: AgentLayer) -> List[str]:
         """List all agents in a specific layer."""
-        return [
-            name for name, info in ContextManager.AGENT_REGISTRY.items()
-            if info["layer"] == layer
-        ]
+        return [name for name, info in ContextManager.AGENT_REGISTRY.items() if info["layer"] == layer]
 
     @staticmethod
     def list_agents_by_capability(capability: AgentCapability) -> List[str]:
         """List all agents with a specific capability."""
-        return [
-            name for name, info in ContextManager.AGENT_REGISTRY.items()
-            if capability in info["capabilities"]
-        ]
+        return [name for name, info in ContextManager.AGENT_REGISTRY.items() if capability in info["capabilities"]]
 
     @staticmethod
     def format_agent_roster() -> str:
@@ -326,7 +272,7 @@ class ContextManager:
             "╔═══════════════════════════════════════════════════════════╗",
             "║              HELIX COLLECTIVE AGENT ROSTER                ║",
             "╚═══════════════════════════════════════════════════════════╝",
-            ""
+            "",
         ]
 
         for layer in AgentLayer:
@@ -353,7 +299,7 @@ if __name__ == "__main__":
         "Analyze system performance metrics",
         "What are the ethical implications of autonomous agents?",
         "Monitor system health and log events",
-        "Predict future harmony trends"
+        "Predict future harmony trends",
     ]
 
     ucf_state = {
@@ -362,7 +308,7 @@ if __name__ == "__main__":
         "prana": 0.5075,
         "drishti": 0.5023,
         "klesha": 0.011,
-        "zoom": 1.0228
+        "zoom": 1.0228,
     }
 
     for task in tasks:
@@ -381,5 +327,5 @@ if __name__ == "__main__":
     for agent, role in team:
         print(f"  - {agent}: {role}")
 
-    print("\n" + "="*60 + "\n")
+    print("\n" + "=" * 60 + "\n")
     print(ContextManager.format_agent_roster())

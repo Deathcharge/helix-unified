@@ -20,10 +20,7 @@ from datetime import datetime
 from pathlib import Path
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -93,10 +90,10 @@ class NotionSyncDaemon:
                 title=f"UCF State - {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}",
                 content=json.dumps(ucf_state, indent=2),
                 tags=["ucf", "system-state", "automated-sync"],
-                ucf_snapshot=ucf_state
+                ucf_snapshot=ucf_state,
             )
 
-            harmony = ucf_state.get('harmony', 0)
+            harmony = ucf_state.get("harmony", 0)
             logger.info(f"✅ Successfully synced UCF state to Notion (harmony={harmony:.3f})")
 
         except Exception as e:
@@ -116,18 +113,16 @@ class NotionSyncDaemon:
             for agent_name, agent_obj in self.agents.items():
                 try:
                     # Get agent status (assuming agents have a get_status method or status attribute)
-                    if hasattr(agent_obj, 'get_status'):
+                    if hasattr(agent_obj, "get_status"):
                         status = await agent_obj.get_status()
-                    elif hasattr(agent_obj, 'status'):
+                    elif hasattr(agent_obj, "status"):
                         status = agent_obj.status
                     else:
                         status = "Unknown"
 
                     # Update agent status in Notion
                     await self.notion_client.update_agent_status(
-                        agent_name=agent_name,
-                        status=status,
-                        last_seen=datetime.utcnow().isoformat()
+                        agent_name=agent_name, status=status, last_seen=datetime.utcnow().isoformat()
                     )
                     synced_count += 1
 
@@ -155,7 +150,7 @@ class NotionSyncDaemon:
                 return
 
             # Read last 10 lines
-            with open(log_file, 'r') as f:
+            with open(log_file, "r") as f:
                 lines = f.readlines()
                 recent_events = lines[-10:] if len(lines) >= 10 else lines
 
@@ -164,7 +159,7 @@ class NotionSyncDaemon:
                 "event_type": "System_Log_Sync",
                 "details": "Recent system events from Manus log",
                 "log_entries": [line.strip() for line in recent_events],
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.utcnow().isoformat(),
             }
 
             # Log to Notion
@@ -236,6 +231,7 @@ class NotionSyncDaemon:
 # MANUAL TRIGGER FUNCTION (for Discord command)
 # ============================================================================
 
+
 async def trigger_manual_sync():
     """
     Manually trigger a Notion sync cycle.
@@ -263,6 +259,7 @@ async def trigger_manual_sync():
 # ============================================================================
 # MAIN ENTRY POINT
 # ============================================================================
+
 
 async def main():
     """Main entry point for standalone execution."""

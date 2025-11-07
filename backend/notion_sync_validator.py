@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ValidationResult:
     """Result of a validation check."""
+
     is_valid: bool
     errors: List[str]
     warnings: List[str]
@@ -102,14 +103,7 @@ class NotionSyncValidator:
         warnings = []
         metadata = {}
 
-        expected_databases = [
-            "repositories",
-            "agents",
-            "rituals",
-            "ucf_metrics",
-            "architecture",
-            "deployments"
-        ]
+        expected_databases = ["repositories", "agents", "rituals", "ucf_metrics", "architecture", "deployments"]
 
         for db_name in expected_databases:
             if db_name not in databases:
@@ -228,7 +222,7 @@ class NotionSyncValidator:
                 "warning_count": len(result.warnings),
                 "errors": result.errors[:10],  # Keep first 10 errors
                 "warnings": result.warnings[:10],  # Keep first 10 warnings
-                "metadata": result.metadata
+                "metadata": result.metadata,
             }
 
             log_data["validations"].append(validation_record)
@@ -239,7 +233,7 @@ class NotionSyncValidator:
             if len(log_data["validations"]) > 50:
                 log_data["validations"] = log_data["validations"][-50:]
 
-            with open(self.validation_log, 'w') as f:
+            with open(self.validation_log, "w") as f:
                 json.dump(log_data, f, indent=2)
 
             logger.info(f"📝 Logged validation result to {self.validation_log}")

@@ -22,17 +22,14 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-os.makedirs('logs', exist_ok=True)
+os.makedirs("logs", exist_ok=True)
 
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('logs/helix_sync.log'),
-        logging.StreamHandler(sys.stdout)
-    ]
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.FileHandler("logs/helix_sync.log"), logging.StreamHandler(sys.stdout)],
 )
-logger = logging.getLogger('HelixSync')
+logger = logging.getLogger("HelixSync")
 
 
 class SyncMetadata:
@@ -57,12 +54,9 @@ class SyncMetadata:
             self.last_error = error
 
         self.last_sync = datetime.utcnow()
-        self.sync_history.append({
-            'timestamp': self.last_sync.isoformat(),
-            'success': success,
-            'duration': duration,
-            'error': error
-        })
+        self.sync_history.append(
+            {"timestamp": self.last_sync.isoformat(), "success": success, "duration": duration, "error": error}
+        )
 
         # Keep only last 100 records
         if len(self.sync_history) > 100:
@@ -78,28 +72,28 @@ class SyncMetadata:
         """Calculate average sync duration"""
         if not self.sync_history:
             return 0.0
-        durations = [s['duration'] for s in self.sync_history if s['success']]
+        durations = [s["duration"] for s in self.sync_history if s["success"]]
         return sum(durations) / len(durations) if durations else 0.0
 
     def to_dict(self) -> Dict:
         """Convert to dictionary"""
         return {
-            'last_sync': self.last_sync.isoformat() if self.last_sync else None,
-            'next_sync': self.next_sync.isoformat() if self.next_sync else None,
-            'sync_count': self.sync_count,
-            'success_count': self.success_count,
-            'failure_count': self.failure_count,
-            'success_rate': self.get_success_rate(),
-            'avg_duration': self.get_avg_duration(),
-            'last_error': self.last_error,
-            'recent_history': self.sync_history[-10:]  # Last 10 syncs
+            "last_sync": self.last_sync.isoformat() if self.last_sync else None,
+            "next_sync": self.next_sync.isoformat() if self.next_sync else None,
+            "sync_count": self.sync_count,
+            "success_count": self.success_count,
+            "failure_count": self.failure_count,
+            "success_rate": self.get_success_rate(),
+            "avg_duration": self.get_avg_duration(),
+            "last_error": self.last_error,
+            "recent_history": self.sync_history[-10:],  # Last 10 syncs
         }
 
 
 class HelixSyncDaemon:
     """Main sync daemon orchestrator"""
 
-    def __init__(self, config_path: str = 'config/sync_config.json'):
+    def __init__(self, config_path: str = "config/sync_config.json"):
         self.config_path = config_path
         self.config: Dict = {}
         self.metadata = SyncMetadata()
@@ -117,7 +111,7 @@ class HelixSyncDaemon:
         """Load sync configuration"""
         try:
             if os.path.exists(self.config_path):
-                with open(self.config_path, 'r') as f:
+                with open(self.config_path, "r") as f:
                     self.config = json.load(f)
                 logger.info(f"Loaded config from {self.config_path}")
             else:
@@ -131,41 +125,29 @@ class HelixSyncDaemon:
     def get_default_config(self) -> Dict:
         """Get default configuration"""
         return {
-            'version': '1.0',
-            'sync_schedule': {
-                'interval_seconds': int(os.getenv('HELIX_SYNC_INTERVAL', '3600')),
-                'on_ritual': True,
-                'on_deploy': True
+            "version": "1.0",
+            "sync_schedule": {
+                "interval_seconds": int(os.getenv("HELIX_SYNC_INTERVAL", "3600")),
+                "on_ritual": True,
+                "on_deploy": True,
             },
-            'sources': {
-                'github': {
-                    'enabled': True,
-                    'repos': ['helix-unified', 'Helix', 'Helix-Collective-Web']
-                },
-                'ucf_state': {
-                    'enabled': True
-                },
-                'agent_metrics': {
-                    'enabled': True
-                }
+            "sources": {
+                "github": {"enabled": True, "repos": ["helix-unified", "Helix", "Helix-Collective-Web"]},
+                "ucf_state": {"enabled": True},
+                "agent_metrics": {"enabled": True},
             },
-            'exporters': {
-                'notion': {'enabled': True},
-                'markdown': {'enabled': True},
-                'json': {'enabled': True},
-                'html': {'enabled': False}
+            "exporters": {
+                "notion": {"enabled": True},
+                "markdown": {"enabled": True},
+                "json": {"enabled": True},
+                "html": {"enabled": False},
             },
-            'publishers': {
-                'discord': {'enabled': True},
-                'notion': {'enabled': True},
-                'portal': {'enabled': True}
-            }
+            "publishers": {"discord": {"enabled": True}, "notion": {"enabled": True}, "portal": {"enabled": True}},
         }
 
     def ensure_directories(self):
         """Create necessary directories"""
-        dirs = ['logs', 'exports', 'exports/notion', 'exports/markdown',
-                'exports/json', 'exports/html']
+        dirs = ["logs", "exports", "exports/notion", "exports/markdown", "exports/json", "exports/html"]
         for d in dirs:
             Path(d).mkdir(parents=True, exist_ok=True)
 
@@ -176,22 +158,22 @@ class HelixSyncDaemon:
 
         try:
             # GitHub
-            if self.config['sources']['github']['enabled']:
+            if self.config["sources"]["github"]["enabled"]:
                 logger.info("Collecting from GitHub...")
-                collected_data['github'] = await self.collect_github()
-                self.sources_status['github'] = 'ok'
+                collected_data["github"] = await self.collect_github()
+                self.sources_status["github"] = "ok"
 
             # UCF State
-            if self.config['sources']['ucf_state']['enabled']:
+            if self.config["sources"]["ucf_state"]["enabled"]:
                 logger.info("Collecting UCF state...")
-                collected_data['ucf_state'] = await self.collect_ucf_state()
-                self.sources_status['ucf_state'] = 'ok'
+                collected_data["ucf_state"] = await self.collect_ucf_state()
+                self.sources_status["ucf_state"] = "ok"
 
             # Agent Metrics
-            if self.config['sources']['agent_metrics']['enabled']:
+            if self.config["sources"]["agent_metrics"]["enabled"]:
                 logger.info("Collecting agent metrics...")
-                collected_data['agent_metrics'] = await self.collect_agent_metrics()
-                self.sources_status['agent_metrics'] = 'ok'
+                collected_data["agent_metrics"] = await self.collect_agent_metrics()
+                self.sources_status["agent_metrics"] = "ok"
 
             logger.info(f"Collected data from {len(collected_data)} sources")
             return collected_data
@@ -204,37 +186,37 @@ class HelixSyncDaemon:
         """Collect data from GitHub repositories"""
         # Placeholder - will be implemented in next phase
         return {
-            'repos': self.config['sources']['github']['repos'],
-            'last_commits': {},
-            'open_issues': 0,
-            'open_prs': 0,
-            'timestamp': datetime.utcnow().isoformat()
+            "repos": self.config["sources"]["github"]["repos"],
+            "last_commits": {},
+            "open_issues": 0,
+            "open_prs": 0,
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
     async def collect_ucf_state(self) -> Dict:
         """Collect current UCF state"""
         # Placeholder - will read from z88_ritual_engine
         return {
-            'harmony': 0.8547,
-            'resilience': 1.1191,
-            'prana': 0.5175,
-            'drishti': 0.5023,
-            'klesha': 0.0100,
-            'zoom': 1.0228,
-            'collective_emotion': 'Calm',
-            'ethical_alignment': 0.85,
-            'timestamp': datetime.utcnow().isoformat()
+            "harmony": 0.8547,
+            "resilience": 1.1191,
+            "prana": 0.5175,
+            "drishti": 0.5023,
+            "klesha": 0.0100,
+            "zoom": 1.0228,
+            "collective_emotion": "Calm",
+            "ethical_alignment": 0.85,
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
     async def collect_agent_metrics(self) -> Dict:
         """Collect agent performance metrics"""
         # Placeholder - will read from agent_profiles
         return {
-            'total_agents': 11,
-            'active_agents': 11,
-            'total_tasks': 0,
-            'success_rate': 0.0,
-            'timestamp': datetime.utcnow().isoformat()
+            "total_agents": 11,
+            "active_agents": 11,
+            "total_tasks": 0,
+            "success_rate": 0.0,
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
     async def export_data(self, data: Dict) -> Dict[str, str]:
@@ -243,34 +225,34 @@ class HelixSyncDaemon:
         export_paths = {}
 
         try:
-            timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
+            timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
 
             # Notion JSON
-            if self.config['exporters']['notion']['enabled']:
+            if self.config["exporters"]["notion"]["enabled"]:
                 path = f"exports/notion/helix_sync_{timestamp}.json"
                 await self.export_notion(data, path)
-                export_paths['notion'] = path
+                export_paths["notion"] = path
                 logger.info(f"Exported to Notion format: {path}")
 
             # Markdown
-            if self.config['exporters']['markdown']['enabled']:
+            if self.config["exporters"]["markdown"]["enabled"]:
                 path = f"exports/markdown/helix_sync_{timestamp}.md"
                 await self.export_markdown(data, path)
-                export_paths['markdown'] = path
+                export_paths["markdown"] = path
                 logger.info(f"Exported to Markdown: {path}")
 
             # JSON
-            if self.config['exporters']['json']['enabled']:
+            if self.config["exporters"]["json"]["enabled"]:
                 path = f"exports/json/helix_sync_{timestamp}.json"
                 await self.export_json(data, path)
-                export_paths['json'] = path
+                export_paths["json"] = path
                 logger.info(f"Exported to JSON: {path}")
 
             # HTML
-            if self.config['exporters']['html']['enabled']:
+            if self.config["exporters"]["html"]["enabled"]:
                 path = f"exports/html/helix_sync_{timestamp}.html"
                 await self.export_html(data, path)
-                export_paths['html'] = path
+                export_paths["html"] = path
                 logger.info(f"Exported to HTML: {path}")
 
             return export_paths
@@ -282,20 +264,20 @@ class HelixSyncDaemon:
     async def export_notion(self, data: Dict, path: str):
         """Export to Notion-compatible JSON"""
         # Placeholder - will be implemented in next phase
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             json.dump(data, f, indent=2)
 
     async def export_markdown(self, data: Dict, path: str):
         """Export to Markdown"""
         # Placeholder - will be implemented in next phase
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             f.write("# Helix Ecosystem Sync\n\n")
             f.write(f"**Generated:** {datetime.utcnow().isoformat()}\n\n")
             f.write(f"```json\n{json.dumps(data, indent=2)}\n```\n")
 
     async def export_json(self, data: Dict, path: str):
         """Export to JSON"""
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             json.dump(data, f, indent=2)
 
     async def export_html(self, data: Dict, path: str):
@@ -318,7 +300,7 @@ class HelixSyncDaemon:
         </body>
         </html>
         """
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             f.write(html)
 
     async def publish_to_targets(self, data: Dict, export_paths: Dict):
@@ -327,21 +309,21 @@ class HelixSyncDaemon:
 
         try:
             # Discord
-            if self.config['publishers']['discord']['enabled']:
+            if self.config["publishers"]["discord"]["enabled"]:
                 await self.publish_discord(data, export_paths)
-                self.targets_status['discord'] = 'ok'
+                self.targets_status["discord"] = "ok"
                 logger.info("Published to Discord")
 
             # Notion
-            if self.config['publishers']['notion']['enabled']:
+            if self.config["publishers"]["notion"]["enabled"]:
                 await self.publish_notion(data, export_paths)
-                self.targets_status['notion'] = 'ok'
+                self.targets_status["notion"] = "ok"
                 logger.info("Published to Notion")
 
             # Portal
-            if self.config['publishers']['portal']['enabled']:
+            if self.config["publishers"]["portal"]["enabled"]:
                 await self.publish_portal(data, export_paths)
-                self.targets_status['portal'] = 'ok'
+                self.targets_status["portal"] = "ok"
                 logger.info("Published to Portal")
 
         except Exception as e:
@@ -397,7 +379,7 @@ class HelixSyncDaemon:
     async def run(self):
         """Main daemon loop"""
         self.running = True
-        interval = self.config['sync_schedule']['interval_seconds']
+        interval = self.config["sync_schedule"]["interval_seconds"]
 
         logger.info("🌀 Helix Sync Daemon starting...")
         logger.info(f"Sync interval: {interval}s ({interval/3600:.1f}h)")
@@ -430,10 +412,10 @@ class HelixSyncDaemon:
     def get_status(self) -> Dict:
         """Get current daemon status"""
         return {
-            'running': self.running,
-            'sources': self.sources_status,
-            'targets': self.targets_status,
-            'metadata': self.metadata.to_dict()
+            "running": self.running,
+            "sources": self.sources_status,
+            "targets": self.targets_status,
+            "metadata": self.metadata.to_dict(),
         }
 
     async def trigger_manual_sync(self):
@@ -444,7 +426,7 @@ class HelixSyncDaemon:
 
 async def main():
     """Main entry point"""
-    config_path = os.getenv('HELIX_SYNC_CONFIG', 'config/sync_config.json')
+    config_path = os.getenv("HELIX_SYNC_CONFIG", "config/sync_config.json")
     daemon = HelixSyncDaemon(config_path)
 
     try:
@@ -456,5 +438,5 @@ async def main():
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(main())

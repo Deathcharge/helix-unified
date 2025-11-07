@@ -36,9 +36,10 @@ def update_heartbeat(status="active", harmony=0.355):
         "timestamp": datetime.datetime.utcnow().isoformat(),
         "alive": True,
         "status": status,
-        "ucf_state": {"harmony": harmony}
+        "ucf_state": {"harmony": harmony},
     }
     json.dump(data, open(heartbeat_path, "w"), indent=2)
+
 
 # ============================================================================
 # LOGGING
@@ -58,6 +59,7 @@ async def log_event(message: str):
     json.dump(data, open(log_file, "w"), indent=2)
     print(message)
 
+
 # ============================================================================
 # UCF STATE HELPERS
 # ============================================================================
@@ -72,7 +74,7 @@ async def load_ucf_state():
             "resilience": 1.1191,
             "prana": 0.5175,
             "drishti": 0.5023,
-            "klesha": 0.010
+            "klesha": 0.010,
         }
         json.dump(base, open(STATE_PATH, "w"), indent=2)
     return json.load(open(STATE_PATH))
@@ -81,6 +83,7 @@ async def load_ucf_state():
 async def save_ucf_state(state):
     """Save UCF state to disk."""
     json.dump(state, open(STATE_PATH, "w"), indent=2)
+
 
 # ============================================================================
 # DIRECTIVE PROCESSING
@@ -106,6 +109,7 @@ async def process_directives(manus, kavach):
         await log_event(f"✅ Processed directive: {directive}")
     except Exception as e:
         await log_event(f"⚠ Directive processing error: {e}")
+
 
 # ============================================================================
 # MAIN LOOP
@@ -136,6 +140,7 @@ async def main_loop():
         except Exception as e:
             await log_event(f"Error in Manus loop: {e}")
         await asyncio.sleep(30)
+
 
 # ============================================================================
 # ENTRY POINT

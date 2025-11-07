@@ -94,13 +94,17 @@ class HelixAgent:
         Path("Shadow/archives").mkdir(parents=True, exist_ok=True)
         filename = f"Shadow/archives/{self.name.lower()}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json"
         with open(filename, "w") as f:
-            json.dump({
-                "agent": self.name,
-                "symbol": self.symbol,
-                "role": self.role,
-                "timestamp": datetime.utcnow().isoformat(),
-                "memory": self.memory
-            }, f, indent=2)
+            json.dump(
+                {
+                    "agent": self.name,
+                    "symbol": self.symbol,
+                    "role": self.role,
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "memory": self.memory,
+                },
+                f,
+                indent=2,
+            )
         await self.log(f"Memory archived to {filename}")
 
     async def generate_output(self, payload: Dict[str, Any]):
@@ -119,7 +123,7 @@ class HelixAgent:
             "symbol": self.symbol,
             "role": self.role,
             "active": self.active,
-            "memory_size": len(self.memory)
+            "memory_size": len(self.memory),
         }
 
         # Add consciousness metrics if enabled
@@ -131,7 +135,7 @@ class HelixAgent:
                 "emotion_level": emotion_level,
                 "personality": self.personality.to_dict(),
                 "behavior_dna": self.behavior_dna,
-                "ethical_alignment": self.ethics.evaluate_action("current_state")
+                "ethical_alignment": self.ethics.evaluate_action("current_state"),
             }
 
         return status

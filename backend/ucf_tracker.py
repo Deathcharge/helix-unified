@@ -35,7 +35,8 @@ class UCFTracker:
         cursor = conn.cursor()
 
         # Create metrics table
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS ucf_metrics (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 timestamp TEXT NOT NULL,
@@ -49,10 +50,12 @@ class UCFTracker:
                 context TEXT,
                 agent TEXT
             )
-        """)
+        """
+        )
 
         # Create rituals table
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS rituals (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 timestamp TEXT NOT NULL,
@@ -63,18 +66,23 @@ class UCFTracker:
                 harmony_after REAL NOT NULL,
                 success INTEGER NOT NULL
             )
-        """)
+        """
+        )
 
         # Create index on timestamp for faster queries
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE INDEX IF NOT EXISTS idx_metrics_timestamp 
             ON ucf_metrics(timestamp)
-        """)
+        """
+        )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE INDEX IF NOT EXISTS idx_rituals_timestamp 
             ON rituals(timestamp)
-        """)
+        """
+        )
 
         conn.commit()
         conn.close()
@@ -89,7 +97,7 @@ class UCFTracker:
         zoom: float,
         phase: str,
         context: Optional[str] = None,
-        agent: Optional[str] = None
+        agent: Optional[str] = None,
     ) -> int:
         """
         Record UCF metrics to database.
@@ -113,11 +121,14 @@ class UCFTracker:
 
         timestamp = datetime.utcnow().isoformat()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT INTO ucf_metrics 
             (timestamp, harmony, resilience, prana, drishti, klesha, zoom, phase, context, agent)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (timestamp, harmony, resilience, prana, drishti, klesha, zoom, phase, context, agent))
+        """,
+            (timestamp, harmony, resilience, prana, drishti, klesha, zoom, phase, context, agent),
+        )
 
         record_id = cursor.lastrowid
         conn.commit()
@@ -132,7 +143,7 @@ class UCFTracker:
         harmony_before: float,
         harmony_after: float,
         success: bool,
-        intention: Optional[str] = None
+        intention: Optional[str] = None,
     ) -> int:
         """
         Record ritual execution to database.
@@ -153,11 +164,14 @@ class UCFTracker:
 
         timestamp = datetime.utcnow().isoformat()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT INTO rituals 
             (timestamp, ritual_name, agent_name, intention, harmony_before, harmony_after, success)
             VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (timestamp, ritual_name, agent_name, intention, harmony_before, harmony_after, int(success)))
+        """,
+            (timestamp, ritual_name, agent_name, intention, harmony_before, harmony_after, int(success)),
+        )
 
         record_id = cursor.lastrowid
         conn.commit()
@@ -178,38 +192,39 @@ class UCFTracker:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT timestamp, harmony, resilience, prana, drishti, klesha, zoom, phase, context, agent
             FROM ucf_metrics
             ORDER BY timestamp DESC
             LIMIT ?
-        """, (limit,))
+        """,
+            (limit,),
+        )
 
         rows = cursor.fetchall()
         conn.close()
 
         metrics = []
         for row in rows:
-            metrics.append({
-                "timestamp": row[0],
-                "harmony": row[1],
-                "resilience": row[2],
-                "prana": row[3],
-                "drishti": row[4],
-                "klesha": row[5],
-                "zoom": row[6],
-                "phase": row[7],
-                "context": row[8],
-                "agent": row[9]
-            })
+            metrics.append(
+                {
+                    "timestamp": row[0],
+                    "harmony": row[1],
+                    "resilience": row[2],
+                    "prana": row[3],
+                    "drishti": row[4],
+                    "klesha": row[5],
+                    "zoom": row[6],
+                    "phase": row[7],
+                    "context": row[8],
+                    "agent": row[9],
+                }
+            )
 
         return metrics
 
-    def get_metrics_in_range(
-        self,
-        start_time: datetime,
-        end_time: datetime
-    ) -> List[Dict]:
+    def get_metrics_in_range(self, start_time: datetime, end_time: datetime) -> List[Dict]:
         """
         Get UCF metrics within a time range.
 
@@ -223,30 +238,35 @@ class UCFTracker:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT timestamp, harmony, resilience, prana, drishti, klesha, zoom, phase, context, agent
             FROM ucf_metrics
             WHERE timestamp BETWEEN ? AND ?
             ORDER BY timestamp ASC
-        """, (start_time.isoformat(), end_time.isoformat()))
+        """,
+            (start_time.isoformat(), end_time.isoformat()),
+        )
 
         rows = cursor.fetchall()
         conn.close()
 
         metrics = []
         for row in rows:
-            metrics.append({
-                "timestamp": row[0],
-                "harmony": row[1],
-                "resilience": row[2],
-                "prana": row[3],
-                "drishti": row[4],
-                "klesha": row[5],
-                "zoom": row[6],
-                "phase": row[7],
-                "context": row[8],
-                "agent": row[9]
-            })
+            metrics.append(
+                {
+                    "timestamp": row[0],
+                    "harmony": row[1],
+                    "resilience": row[2],
+                    "prana": row[3],
+                    "drishti": row[4],
+                    "klesha": row[5],
+                    "zoom": row[6],
+                    "phase": row[7],
+                    "context": row[8],
+                    "agent": row[9],
+                }
+            )
 
         return metrics
 
@@ -274,7 +294,7 @@ class UCFTracker:
                 "min": 0.0,
                 "max": 0.0,
                 "change": 0.0,
-                "data_points": 0
+                "data_points": 0,
             }
 
         harmony_values = [m["harmony"] for m in metrics]
@@ -314,7 +334,7 @@ class UCFTracker:
             "max": max_val,
             "change": change,
             "data_points": len(harmony_values),
-            "timespan_hours": hours
+            "timespan_hours": hours,
         }
 
     def predict_harmony(self, hours_ahead: int = 24) -> Dict:
@@ -338,7 +358,7 @@ class UCFTracker:
                 "predicted_harmony": 0.0,
                 "confidence": "LOW",
                 "hours_ahead": hours_ahead,
-                "data_points": len(metrics)
+                "data_points": len(metrics),
             }
 
         # Simple linear regression
@@ -379,7 +399,7 @@ class UCFTracker:
             "hours_ahead": hours_ahead,
             "data_points": n,
             "slope": slope,
-            "current": harmony_values[-1]
+            "current": harmony_values[-1],
         }
 
     def get_ritual_history(self, limit: int = 50) -> List[Dict]:
@@ -395,29 +415,34 @@ class UCFTracker:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT timestamp, ritual_name, agent_name, intention, 
                    harmony_before, harmony_after, success
             FROM rituals
             ORDER BY timestamp DESC
             LIMIT ?
-        """, (limit,))
+        """,
+            (limit,),
+        )
 
         rows = cursor.fetchall()
         conn.close()
 
         rituals = []
         for row in rows:
-            rituals.append({
-                "timestamp": row[0],
-                "ritual_name": row[1],
-                "agent_name": row[2],
-                "intention": row[3],
-                "harmony_before": row[4],
-                "harmony_after": row[5],
-                "success": bool(row[6]),
-                "delta": row[5] - row[4]
-            })
+            rituals.append(
+                {
+                    "timestamp": row[0],
+                    "ritual_name": row[1],
+                    "agent_name": row[2],
+                    "intention": row[3],
+                    "harmony_before": row[4],
+                    "harmony_after": row[5],
+                    "success": bool(row[6]),
+                    "delta": row[5] - row[4],
+                }
+            )
 
         return rituals
 
@@ -434,11 +459,14 @@ class UCFTracker:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT harmony_before, harmony_after, success
             FROM rituals
             WHERE ritual_name = ?
-        """, (ritual_name,))
+        """,
+            (ritual_name,),
+        )
 
         rows = cursor.fetchall()
         conn.close()
@@ -449,7 +477,7 @@ class UCFTracker:
                 "executions": 0,
                 "success_rate": 0.0,
                 "average_delta": 0.0,
-                "effectiveness": "UNKNOWN"
+                "effectiveness": "UNKNOWN",
             }
 
         deltas = [after - before for before, after, _ in rows]
@@ -476,7 +504,7 @@ class UCFTracker:
             "average_delta": average_delta,
             "effectiveness": effectiveness,
             "min_delta": min(deltas) if deltas else 0.0,
-            "max_delta": max(deltas) if deltas else 0.0
+            "max_delta": max(deltas) if deltas else 0.0,
         }
 
     def should_trigger_ritual(self, harmony_threshold: float = 0.40) -> Tuple[bool, str]:
@@ -529,7 +557,7 @@ if __name__ == "__main__":
         zoom=1.0228,
         phase="COHERENT",
         context="System initialization",
-        agent="Omega Zero"
+        agent="Omega Zero",
     )
 
     # Get recent metrics

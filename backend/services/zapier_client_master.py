@@ -66,12 +66,7 @@ class MasterZapierClient:
     # ========================================================================
 
     async def log_event(
-        self,
-        event_title: str,
-        event_type: str,
-        agent_name: str,
-        description: str,
-        ucf_snapshot: Dict[str, Any]
+        self, event_title: str, event_type: str, agent_name: str, description: str, ucf_snapshot: Dict[str, Any]
     ) -> bool:
         """
         Log an event to Notion Event Log.
@@ -94,18 +89,12 @@ class MasterZapierClient:
             "description": description,
             "ucf_snapshot": json.dumps(ucf_snapshot),
             "helix_phase": os.getenv("HELIX_PHASE", "production"),
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
         return await self._send(payload, fallback_url=self._event_hook)
 
-    async def update_agent(
-        self,
-        agent_name: str,
-        status: str,
-        last_action: str,
-        health_score: int
-    ) -> bool:
+    async def update_agent(self, agent_name: str, status: str, last_action: str, health_score: int) -> bool:
         """
         Update agent status in Notion Agent Registry.
 
@@ -124,18 +113,13 @@ class MasterZapierClient:
             "status": status,
             "last_action": last_action,
             "health_score": health_score,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
         return await self._send(payload, fallback_url=self._agent_hook)
 
     async def update_system_state(
-        self,
-        component: str,
-        status: str,
-        harmony: float,
-        error_log: str = "",
-        verified: bool = False
+        self, component: str, status: str, harmony: float, error_log: str = "", verified: bool = False
     ) -> bool:
         """
         Update system component state in Notion.
@@ -157,17 +141,12 @@ class MasterZapierClient:
             "harmony": harmony,
             "error_log": error_log,
             "verified": verified,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
         return await self._send(payload, fallback_url=self._system_hook)
 
-    async def send_discord_notification(
-        self,
-        channel_name: str,
-        message: str,
-        priority: str = "normal"
-    ) -> bool:
+    async def send_discord_notification(self, channel_name: str, message: str, priority: str = "normal") -> bool:
         """
         Send notification to Discord via Slack integration.
 
@@ -185,18 +164,12 @@ class MasterZapierClient:
             "message": message,
             "priority": priority,
             "guild_id": os.getenv("DISCORD_GUILD_ID", ""),
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
         return await self._send(payload)
 
-    async def log_telemetry(
-        self,
-        metric_name: str,
-        value: float,
-        component: str = "system",
-        unit: str = ""
-    ) -> bool:
+    async def log_telemetry(self, metric_name: str, value: float, component: str = "system", unit: str = "") -> bool:
         """
         Log telemetry data to Google Sheets/Tables.
 
@@ -216,17 +189,13 @@ class MasterZapierClient:
             "component": component,
             "unit": unit,
             "harmony": os.getenv("UCF_HARMONY", "0.355"),
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
         return await self._send(payload)
 
     async def send_error_alert(
-        self,
-        error_message: str,
-        component: str,
-        severity: str = "high",
-        stack_trace: str = ""
+        self, error_message: str, component: str, severity: str = "high", stack_trace: str = ""
     ) -> bool:
         """
         Send critical error alert via Email/PagerDuty.
@@ -247,18 +216,12 @@ class MasterZapierClient:
             "severity": severity,
             "stack_trace": stack_trace[:1000] if stack_trace else "",  # Truncate
             "environment": os.getenv("RAILWAY_ENVIRONMENT", "production"),
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
         return await self._send(payload)
 
-    async def log_repository_action(
-        self,
-        repo_name: str,
-        action: str,
-        details: str,
-        commit_sha: str = ""
-    ) -> bool:
+    async def log_repository_action(self, repo_name: str, action: str, details: str, commit_sha: str = "") -> bool:
         """
         Log repository/archive action to GitHub Actions.
 
@@ -278,7 +241,7 @@ class MasterZapierClient:
             "details": details,
             "commit_sha": commit_sha,
             "helix_version": os.getenv("HELIX_VERSION", "15.3"),
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
         return await self._send(payload)
@@ -287,11 +250,7 @@ class MasterZapierClient:
     # INTERNAL METHODS
     # ========================================================================
 
-    async def _send(
-        self,
-        payload: Dict[str, Any],
-        fallback_url: Optional[str] = None
-    ) -> bool:
+    async def _send(self, payload: Dict[str, Any], fallback_url: Optional[str] = None) -> bool:
         """
         Send payload to master webhook or fallback URL.
 
@@ -320,19 +279,11 @@ class MasterZapierClient:
             session = aiohttp.ClientSession()
 
         try:
-            async with session.post(
-                url,
-                json=payload,
-                timeout=aiohttp.ClientTimeout(total=10)
-            ) as resp:
+            async with session.post(url, json=payload, timeout=aiohttp.ClientTimeout(total=10)) as resp:
                 success = resp.status == 200
 
                 if not success:
-                    await self._log_failure(
-                        payload,
-                        f"HTTP {resp.status}",
-                        payload.get("type", "unknown")
-                    )
+                    await self._log_failure(payload, f"HTTP {resp.status}", payload.get("type", "unknown"))
 
                 return success
 
@@ -361,12 +312,7 @@ class MasterZapierClient:
 
         return payload
 
-    async def _log_failure(
-        self,
-        payload: Dict[str, Any],
-        error: str,
-        webhook_type: str
-    ) -> None:
+    async def _log_failure(self, payload: Dict[str, Any], error: str, webhook_type: str) -> None:
         """Log failed webhook for later retry."""
         try:
             log_path = Path("Shadow/manus_archive/zapier_failures.log")
@@ -376,7 +322,7 @@ class MasterZapierClient:
                 "timestamp": datetime.utcnow().isoformat(),
                 "type": webhook_type,
                 "error": error,
-                "payload": payload
+                "payload": payload,
             }
 
             with open(log_path, "a") as f:
@@ -386,6 +332,7 @@ class MasterZapierClient:
 
         except Exception as e:
             print(f"❌ Failed to log Zapier failure: {e}")
+
 
 # ============================================================================
 # CONVENIENCE FUNCTIONS
@@ -410,9 +357,10 @@ def validate_config() -> Dict[str, Any]:
             "master": bool(MASTER_HOOK_URL),
             "event": bool(EVENT_HOOK),
             "agent": bool(AGENT_HOOK),
-            "system": bool(SYSTEM_HOOK)
-        }
+            "system": bool(SYSTEM_HOOK),
+        },
     }
+
 
 # ============================================================================
 # ENTRY POINT
@@ -420,6 +368,7 @@ def validate_config() -> Dict[str, Any]:
 
 
 if __name__ == "__main__":
+
     async def test():
         """Test master webhook client."""
         print("🧪 Testing Master Zapier Client")
@@ -431,7 +380,7 @@ if __name__ == "__main__":
         print(f"  Master Webhook: {'✅' if config['master_webhook'] else '❌'}")
         print(f"  Individual Webhooks: {'✅' if config['individual_webhooks'] else '❌'}")
 
-        if config['mode'] == 'none':
+        if config["mode"] == "none":
             print("\n⚠ No webhooks configured. Set ZAPIER_MASTER_HOOK_URL")
             return
 
@@ -442,46 +391,19 @@ if __name__ == "__main__":
 
             # Test all payload types
             tests = [
-                ("Event Log", client.log_event(
-                    "Test Event",
-                    "Status",
-                    "Manus",
-                    "Testing master webhook",
-                    {"harmony": 0.355}
-                )),
-                ("Agent Update", client.update_agent(
-                    "Manus",
-                    "Active",
-                    "Testing",
-                    100
-                )),
-                ("System State", client.update_system_state(
-                    "Master Webhook",
-                    "Active",
-                    0.355,
-                    verified=True
-                )),
-                ("Discord Notification", client.send_discord_notification(
-                    "testing",
-                    "🧪 Master webhook test",
-                    "normal"
-                )),
-                ("Telemetry", client.log_telemetry(
-                    "test_metric",
-                    42.0,
-                    "test_component",
-                    "units"
-                )),
-                ("Error Alert", client.send_error_alert(
-                    "Test error",
-                    "test_component",
-                    "low"
-                )),
-                ("Repository Action", client.log_repository_action(
-                    "helix-unified",
-                    "test",
-                    "Testing master webhook"
-                ))
+                (
+                    "Event Log",
+                    client.log_event("Test Event", "Status", "Manus", "Testing master webhook", {"harmony": 0.355}),
+                ),
+                ("Agent Update", client.update_agent("Manus", "Active", "Testing", 100)),
+                ("System State", client.update_system_state("Master Webhook", "Active", 0.355, verified=True)),
+                (
+                    "Discord Notification",
+                    client.send_discord_notification("testing", "🧪 Master webhook test", "normal"),
+                ),
+                ("Telemetry", client.log_telemetry("test_metric", 42.0, "test_component", "units")),
+                ("Error Alert", client.send_error_alert("Test error", "test_component", "low")),
+                ("Repository Action", client.log_repository_action("helix-unified", "test", "Testing master webhook")),
             ]
 
             for name, test_coro in tests:

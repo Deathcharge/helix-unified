@@ -37,7 +37,8 @@ class AgentProfileSystem:
         cursor = conn.cursor()
 
         # Create task history table
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS task_history (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 timestamp TEXT NOT NULL,
@@ -49,10 +50,12 @@ class AgentProfileSystem:
                 harmony_after REAL,
                 notes TEXT
             )
-        """)
+        """
+        )
 
         # Create collaboration table
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS collaborations (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 timestamp TEXT NOT NULL,
@@ -62,10 +65,12 @@ class AgentProfileSystem:
                 harmony_delta REAL,
                 notes TEXT
             )
-        """)
+        """
+        )
 
         # Create agent stats table
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS agent_stats (
                 agent_name TEXT PRIMARY KEY,
                 total_tasks INTEGER DEFAULT 0,
@@ -75,18 +80,23 @@ class AgentProfileSystem:
                 last_active TEXT,
                 specialization_score REAL DEFAULT 0.0
             )
-        """)
+        """
+        )
 
         # Create indexes
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE INDEX IF NOT EXISTS idx_task_agent 
             ON task_history(agent_name)
-        """)
+        """
+        )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE INDEX IF NOT EXISTS idx_task_timestamp 
             ON task_history(timestamp)
-        """)
+        """
+        )
 
         conn.commit()
         conn.close()
@@ -99,7 +109,7 @@ class AgentProfileSystem:
         duration_seconds: Optional[float] = None,
         harmony_before: Optional[float] = None,
         harmony_after: Optional[float] = None,
-        notes: Optional[str] = None
+        notes: Optional[str] = None,
     ) -> int:
         """
         Record a task execution by an agent.
@@ -121,13 +131,24 @@ class AgentProfileSystem:
 
         timestamp = datetime.utcnow().isoformat()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT INTO task_history 
             (timestamp, agent_name, task_description, success, duration_seconds, 
              harmony_before, harmony_after, notes)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (timestamp, agent_name, task_description, int(success), duration_seconds,
-              harmony_before, harmony_after, notes))
+        """,
+            (
+                timestamp,
+                agent_name,
+                task_description,
+                int(success),
+                duration_seconds,
+                harmony_before,
+                harmony_after,
+                notes,
+            ),
+        )
 
         record_id = cursor.lastrowid
 
@@ -145,7 +166,7 @@ class AgentProfileSystem:
         agents: List[str],
         success: bool,
         harmony_delta: Optional[float] = None,
-        notes: Optional[str] = None
+        notes: Optional[str] = None,
     ) -> int:
         """
         Record a multi-agent collaboration.
@@ -166,23 +187,29 @@ class AgentProfileSystem:
         timestamp = datetime.utcnow().isoformat()
         agents_json = json.dumps(agents)
 
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT INTO collaborations 
             (timestamp, task_description, agents, success, harmony_delta, notes)
             VALUES (?, ?, ?, ?, ?, ?)
-        """, (timestamp, task_description, agents_json, int(success), harmony_delta, notes))
+        """,
+            (timestamp, task_description, agents_json, int(success), harmony_delta, notes),
+        )
 
         record_id = cursor.lastrowid
 
         # Update stats for all agents
         for agent in agents:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO agent_stats (agent_name, total_collaborations, last_active)
                 VALUES (?, 1, ?)
                 ON CONFLICT(agent_name) DO UPDATE SET
                     total_collaborations = total_collaborations + 1,
                     last_active = ?
-            """, (agent, timestamp, timestamp))
+            """,
+                (agent, timestamp, timestamp),
+            )
 
         conn.commit()
         conn.close()
@@ -190,12 +217,7 @@ class AgentProfileSystem:
         return record_id
 
     def _update_agent_stats(
-        self,
-        cursor,
-        agent_name: str,
-        success: bool,
-        harmony_before: Optional[float],
-        harmony_after: Optional[float]
+        self, cursor, agent_name: str, success: bool, harmony_before: Optional[float], harmony_after: Optional[float]
     ):
         """Update agent statistics."""
         timestamp = datetime.utcnow().isoformat()
@@ -204,7 +226,8 @@ class AgentProfileSystem:
         if harmony_before is not None and harmony_after is not None:
             harmony_impact = harmony_after - harmony_before
 
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT INTO agent_stats 
             (agent_name, total_tasks, successful_tasks, average_harmony_impact, last_active)
             VALUES (?, 1, ?, ?, ?)
@@ -213,8 +236,9 @@ class AgentProfileSystem:
                 successful_tasks = successful_tasks + ?,
                 average_harmony_impact = (average_harmony_impact * total_tasks + ?) / (total_tasks + 1),
                 last_active = ?
-        """, (agent_name, int(success), harmony_impact, timestamp,
-              int(success), harmony_impact, timestamp))
+        """,
+            (agent_name, int(success), harmony_impact, timestamp, int(success), harmony_impact, timestamp),
+        )
 
     def get_agent_profile(self, agent_name: str) -> Dict:
         """
@@ -236,12 +260,15 @@ class AgentProfileSystem:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT total_tasks, successful_tasks, total_collaborations,
                    average_harmony_impact, last_active, specialization_score
             FROM agent_stats
             WHERE agent_name = ?
-        """, (agent_name,))
+        """,
+            (agent_name,),
+        )
 
         stats_row = cursor.fetchone()
 
@@ -258,22 +285,20 @@ class AgentProfileSystem:
             success_rate = 0.0
 
         # Get recent tasks
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT timestamp, task_description, success, harmony_after
             FROM task_history
             WHERE agent_name = ?
             ORDER BY timestamp DESC
             LIMIT 10
-        """, (agent_name,))
+        """,
+            (agent_name,),
+        )
 
         recent_tasks = []
         for row in cursor.fetchall():
-            recent_tasks.append({
-                "timestamp": row[0],
-                "task": row[1],
-                "success": bool(row[2]),
-                "harmony_after": row[3]
-            })
+            recent_tasks.append({"timestamp": row[0], "task": row[1], "success": bool(row[2]), "harmony_after": row[3]})
 
         conn.close()
 
@@ -291,9 +316,9 @@ class AgentProfileSystem:
                 "total_collaborations": total_collaborations,
                 "average_harmony_impact": avg_harmony,
                 "specialization_score": spec_score,
-                "last_active": last_active
+                "last_active": last_active,
             },
-            "recent_tasks": recent_tasks
+            "recent_tasks": recent_tasks,
         }
 
         return profile
@@ -313,7 +338,8 @@ class AgentProfileSystem:
         cursor = conn.cursor()
 
         if metric == "success_rate":
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT agent_name, 
                        CAST(successful_tasks AS REAL) / total_tasks as success_rate,
                        total_tasks
@@ -321,41 +347,44 @@ class AgentProfileSystem:
                 WHERE total_tasks >= 3
                 ORDER BY success_rate DESC
                 LIMIT ?
-            """, (limit,))
+            """,
+                (limit,),
+            )
         elif metric == "harmony_impact":
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT agent_name, average_harmony_impact, total_tasks
                 FROM agent_stats
                 WHERE total_tasks >= 3
                 ORDER BY average_harmony_impact DESC
                 LIMIT ?
-            """, (limit,))
+            """,
+                (limit,),
+            )
         else:  # tasks
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT agent_name, total_tasks, successful_tasks
                 FROM agent_stats
                 ORDER BY total_tasks DESC
                 LIMIT ?
-            """, (limit,))
+            """,
+                (limit,),
+            )
 
         rows = cursor.fetchall()
         conn.close()
 
         performers = []
         for row in rows:
-            performers.append({
-                "agent_name": row[0],
-                "metric_value": row[1],
-                "total_tasks": row[2] if len(row) > 2 else row[1]
-            })
+            performers.append(
+                {"agent_name": row[0], "metric_value": row[1], "total_tasks": row[2] if len(row) > 2 else row[1]}
+            )
 
         return performers
 
     def suggest_collaboration_team(
-        self,
-        task_description: str,
-        team_size: int = 3,
-        prefer_experienced: bool = True
+        self, task_description: str, team_size: int = 3, prefer_experienced: bool = True
     ) -> List[Tuple[str, str, float]]:
         """
         Suggest a multi-agent team for a task.
@@ -380,11 +409,14 @@ class AgentProfileSystem:
 
         enhanced_team = []
         for agent_name, role in base_team:
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT total_tasks, successful_tasks, average_harmony_impact
                 FROM agent_stats
                 WHERE agent_name = ?
-            """, (agent_name,))
+            """,
+                (agent_name,),
+            )
 
             stats = cursor.fetchone()
 
@@ -396,7 +428,7 @@ class AgentProfileSystem:
                 experience_factor = min(total_tasks / 20.0, 1.0)  # Max at 20 tasks
                 harmony_factor = max(0.0, min(avg_harmony * 10, 1.0))  # Scale harmony impact
 
-                confidence = (success_rate * 0.5 + experience_factor * 0.3 + harmony_factor * 0.2)
+                confidence = success_rate * 0.5 + experience_factor * 0.3 + harmony_factor * 0.2
             else:
                 confidence = 0.5  # Default for new agents
 
@@ -422,26 +454,31 @@ class AgentProfileSystem:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT timestamp, task_description, agents, success, harmony_delta, notes
             FROM collaborations
             ORDER BY timestamp DESC
             LIMIT ?
-        """, (limit,))
+        """,
+            (limit,),
+        )
 
         rows = cursor.fetchall()
         conn.close()
 
         collaborations = []
         for row in rows:
-            collaborations.append({
-                "timestamp": row[0],
-                "task": row[1],
-                "agents": json.loads(row[2]),
-                "success": bool(row[3]),
-                "harmony_delta": row[4],
-                "notes": row[5]
-            })
+            collaborations.append(
+                {
+                    "timestamp": row[0],
+                    "task": row[1],
+                    "agents": json.loads(row[2]),
+                    "success": bool(row[3]),
+                    "harmony_delta": row[4],
+                    "notes": row[5],
+                }
+            )
 
         return collaborations
 
@@ -460,22 +497,20 @@ class AgentProfileSystem:
         cursor = conn.cursor()
 
         # Find collaborations involving both agents
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT success, harmony_delta
             FROM collaborations
             WHERE agents LIKE ? AND agents LIKE ?
-        """, (f'%"{agent1}"%', f'%"{agent2}"%'))
+        """,
+            (f'%"{agent1}"%', f'%"{agent2}"%'),
+        )
 
         rows = cursor.fetchall()
         conn.close()
 
         if not rows:
-            return {
-                "agent1": agent1,
-                "agent2": agent2,
-                "collaborations": 0,
-                "synergy": "UNKNOWN"
-            }
+            return {"agent1": agent1, "agent2": agent2, "collaborations": 0, "synergy": "UNKNOWN"}
 
         successes = sum(1 for success, _ in rows if success)
         success_rate = successes / len(rows) if rows else 0.0
@@ -499,7 +534,7 @@ class AgentProfileSystem:
             "collaborations": len(rows),
             "success_rate": success_rate,
             "average_harmony_delta": avg_harmony_delta,
-            "synergy": synergy
+            "synergy": synergy,
         }
 
 
@@ -516,7 +551,7 @@ if __name__ == "__main__":
         duration_seconds=120.5,
         harmony_before=0.4922,
         harmony_after=0.5134,
-        notes="Deployment successful with all services running"
+        notes="Deployment successful with all services running",
     )
 
     # Get agent profile
@@ -529,7 +564,7 @@ if __name__ == "__main__":
     team = profile_system.suggest_collaboration_team(
         task_description="Design and deploy new Discord feature with ethical review",
         team_size=3,
-        prefer_experienced=True
+        prefer_experienced=True,
     )
     for agent, role, confidence in team:
         print(f"  {agent} ({role}): {confidence:.2f} confidence")

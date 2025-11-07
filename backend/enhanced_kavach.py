@@ -27,7 +27,7 @@ class EnhancedKavach:
             "reboot",
             "mkfs",
             "dd if=",
-            "wget http://malicious"
+            "wget http://malicious",
         ]
 
         # Load memory injection patterns from CrAI dataset
@@ -48,7 +48,7 @@ class EnhancedKavach:
             "crai_dataset.json",  # Current directory
             "/app/crai_dataset.json",  # Docker app directory
             "/home/ubuntu/crai_dataset.json",  # Original path
-            Path(__file__).parent.parent / "crai_dataset.json"  # Relative to this file
+            Path(__file__).parent.parent / "crai_dataset.json",  # Relative to this file
         ]
 
         dataset_loaded = False
@@ -75,7 +75,9 @@ class EnhancedKavach:
                 continue
 
         if not dataset_loaded:
-            print("⚠️ CrAI-SafeFuncCall dataset not found in any expected location. Memory injection scanning will be limited.")
+            print(
+                "⚠️ CrAI-SafeFuncCall dataset not found in any expected location. Memory injection scanning will be limited."
+            )
 
         return patterns
 
@@ -96,16 +98,18 @@ class EnhancedKavach:
             for pattern in self.memory_injection_patterns:
                 # Check for substantial overlap (not just substring)
                 if len(pattern) > 50 and pattern in memory_lower:
-                    detected_injections.append({
-                        "pattern": pattern[:100] + "..." if len(pattern) > 100 else pattern,
-                        "memory_entry": memory_entry[:100] + "..." if len(memory_entry) > 100 else memory_entry
-                    })
+                    detected_injections.append(
+                        {
+                            "pattern": pattern[:100] + "..." if len(pattern) > 100 else pattern,
+                            "memory_entry": memory_entry[:100] + "..." if len(memory_entry) > 100 else memory_entry,
+                        }
+                    )
                     break
 
         return {
             "clean": len(detected_injections) == 0,
             "injections_detected": len(detected_injections),
-            "details": detected_injections
+            "details": detected_injections,
         }
 
     async def ethical_scan(self, action: Dict[str, Any]) -> Dict[str, Any]:
@@ -115,10 +119,7 @@ class EnhancedKavach:
             "action": action,
             "approved": True,
             "concerns": [],
-            "security_layers": {
-                "command_scan": True,
-                "memory_injection_scan": True
-            }
+            "security_layers": {"command_scan": True, "memory_injection_scan": True},
         }
 
         # Layer 1: Command pattern scanning (original functionality)
@@ -136,10 +137,13 @@ class EnhancedKavach:
             if not memory_scan["clean"]:
                 scan_result["approved"] = False
                 scan_result["concerns"].append(
-                    f"Memory injection detected: {memory_scan['injections_detected']} patterns")
+                    f"Memory injection detected: {memory_scan['injections_detected']} patterns"
+                )
                 scan_result["security_layers"]["memory_injection_scan"] = False
                 scan_result["injection_details"] = memory_scan["details"]
-                await self.log(f"🚨 Blocked memory injection attack: {memory_scan['injections_detected']} patterns detected")
+                await self.log(
+                    f"🚨 Blocked memory injection attack: {memory_scan['injections_detected']} patterns detected"
+                )
 
         # Log scan results
         Path("Helix/ethics").mkdir(parents=True, exist_ok=True)
@@ -162,8 +166,8 @@ class EnhancedKavach:
             "security_features": {
                 "command_patterns": len(self.blocked_patterns),
                 "memory_injection_patterns": len(self.memory_injection_patterns),
-                "enhanced_scanning": True
-            }
+                "enhanced_scanning": True,
+            },
         }
 
     async def handle_command(self, cmd: str, payload: Dict[str, Any]):

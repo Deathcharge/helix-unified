@@ -19,6 +19,7 @@ from backend.services.notion_client import get_notion_client
 
 class EventPayload(BaseModel):
     """Payload for event logging via Zapier."""
+
     event_title: str
     event_type: str
     agent_name: str
@@ -28,6 +29,7 @@ class EventPayload(BaseModel):
 
 class AgentStatusPayload(BaseModel):
     """Payload for agent status updates via Zapier."""
+
     agent_name: str
     status: str
     last_action: str
@@ -36,6 +38,7 @@ class AgentStatusPayload(BaseModel):
 
 class ComponentStatusPayload(BaseModel):
     """Payload for system component updates via Zapier."""
+
     component_name: str
     status: str
     harmony: float
@@ -45,12 +48,14 @@ class ComponentStatusPayload(BaseModel):
 
 class ContextSnapshotPayload(BaseModel):
     """Payload for context snapshot via Zapier."""
+
     session_id: str
     ai_system: str
     summary: str
     key_decisions: str
     next_steps: str
     full_context: Dict[str, Any]
+
 
 # ============================================================================
 # ROUTER
@@ -83,25 +88,26 @@ async def webhook_log_event(payload: EventPayload):
             event_type=payload.event_type,
             agent_name=payload.agent_name,
             description=payload.description,
-            ucf_snapshot=payload.ucf_snapshot
+            ucf_snapshot=payload.ucf_snapshot,
         )
 
         # Also log locally for audit trail
         log_path = Path("Shadow/manus_archive/zapier_events.log")
         log_path.parent.mkdir(parents=True, exist_ok=True)
         with open(log_path, "a") as f:
-            f.write(json.dumps({
-                "timestamp": datetime.utcnow().isoformat(),
-                "type": "event",
-                "payload": payload.dict(),
-                "notion_page_id": page_id
-            }) + "\n")
+            f.write(
+                json.dumps(
+                    {
+                        "timestamp": datetime.utcnow().isoformat(),
+                        "type": "event",
+                        "payload": payload.dict(),
+                        "notion_page_id": page_id,
+                    }
+                )
+                + "\n"
+            )
 
-        return {
-            "status": "success",
-            "message": f"Event logged: {payload.event_title}",
-            "notion_page_id": page_id
-        }
+        return {"status": "success", "message": f"Event logged: {payload.event_title}", "notion_page_id": page_id}
     except Exception as e:
         print(f"❌ Error in webhook_log_event: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -125,24 +131,29 @@ async def webhook_update_agent_status(payload: AgentStatusPayload):
             agent_name=payload.agent_name,
             status=payload.status,
             last_action=payload.last_action,
-            health_score=payload.health_score
+            health_score=payload.health_score,
         )
 
         # Log locally
         log_path = Path("Shadow/manus_archive/zapier_events.log")
         log_path.parent.mkdir(parents=True, exist_ok=True)
         with open(log_path, "a") as f:
-            f.write(json.dumps({
-                "timestamp": datetime.utcnow().isoformat(),
-                "type": "agent_status",
-                "payload": payload.dict(),
-                "success": success
-            }) + "\n")
+            f.write(
+                json.dumps(
+                    {
+                        "timestamp": datetime.utcnow().isoformat(),
+                        "type": "agent_status",
+                        "payload": payload.dict(),
+                        "success": success,
+                    }
+                )
+                + "\n"
+            )
 
         return {
             "status": "success" if success else "failed",
             "message": f"Agent {payload.agent_name} status updated",
-            "agent_name": payload.agent_name
+            "agent_name": payload.agent_name,
         }
     except Exception as e:
         print(f"❌ Error in webhook_update_agent_status: {e}")
@@ -168,24 +179,29 @@ async def webhook_update_component_status(payload: ComponentStatusPayload):
             status=payload.status,
             harmony=payload.harmony,
             error_log=payload.error_log,
-            verified=payload.verified
+            verified=payload.verified,
         )
 
         # Log locally
         log_path = Path("Shadow/manus_archive/zapier_events.log")
         log_path.parent.mkdir(parents=True, exist_ok=True)
         with open(log_path, "a") as f:
-            f.write(json.dumps({
-                "timestamp": datetime.utcnow().isoformat(),
-                "type": "component_status",
-                "payload": payload.dict(),
-                "success": success
-            }) + "\n")
+            f.write(
+                json.dumps(
+                    {
+                        "timestamp": datetime.utcnow().isoformat(),
+                        "type": "component_status",
+                        "payload": payload.dict(),
+                        "success": success,
+                    }
+                )
+                + "\n"
+            )
 
         return {
             "status": "success" if success else "failed",
             "message": f"Component {payload.component_name} status updated",
-            "component_name": payload.component_name
+            "component_name": payload.component_name,
         }
     except Exception as e:
         print(f"❌ Error in webhook_update_component_status: {e}")
@@ -212,28 +228,34 @@ async def webhook_save_context_snapshot(payload: ContextSnapshotPayload):
             summary=payload.summary,
             key_decisions=payload.key_decisions,
             next_steps=payload.next_steps,
-            full_context=payload.full_context
+            full_context=payload.full_context,
         )
 
         # Log locally
         log_path = Path("Shadow/manus_archive/zapier_events.log")
         log_path.parent.mkdir(parents=True, exist_ok=True)
         with open(log_path, "a") as f:
-            f.write(json.dumps({
-                "timestamp": datetime.utcnow().isoformat(),
-                "type": "context_snapshot",
-                "payload": payload.dict(),
-                "notion_page_id": page_id
-            }) + "\n")
+            f.write(
+                json.dumps(
+                    {
+                        "timestamp": datetime.utcnow().isoformat(),
+                        "type": "context_snapshot",
+                        "payload": payload.dict(),
+                        "notion_page_id": page_id,
+                    }
+                )
+                + "\n"
+            )
 
         return {
             "status": "success",
             "message": f"Context snapshot saved: {payload.session_id}",
-            "notion_page_id": page_id
+            "notion_page_id": page_id,
         }
     except Exception as e:
         print(f"❌ Error in webhook_save_context_snapshot: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 # ============================================================================
 # HEALTH CHECK
@@ -249,12 +271,10 @@ async def zapier_health():
             return {"status": "degraded", "notion": "unavailable"}
 
         health = await notion.health_check()
-        return {
-            "status": "healthy" if health else "degraded",
-            "notion": "available" if health else "unavailable"
-        }
+        return {"status": "healthy" if health else "degraded", "notion": "available" if health else "unavailable"}
     except Exception as e:
         return {"status": "error", "detail": str(e)}
+
 
 # ============================================================================
 # ENTRY POINT

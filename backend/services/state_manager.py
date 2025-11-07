@@ -58,11 +58,7 @@ class StateManager:
             return False
 
         try:
-            await self.redis.setex(
-                'ucf:current',
-                ttl,
-                json.dumps(state)
-            )
+            await self.redis.setex("ucf:current", ttl, json.dumps(state))
 
             # Also persist to file as fallback
             state_path = Path("Helix/state/ucf_state.json")
@@ -80,7 +76,7 @@ class StateManager:
         # Try Redis first
         if self.redis:
             try:
-                data = await self.redis.get('ucf:current')
+                data = await self.redis.get("ucf:current")
                 if data:
                     return json.loads(data)
             except Exception as e:
@@ -102,7 +98,7 @@ class StateManager:
             "resilience": 1.1191,
             "prana": 0.5175,
             "drishti": 0.5023,
-            "klesha": 0.010
+            "klesha": 0.010,
         }
 
     async def publish_ucf_update(self, metrics: Dict[str, Any]):
@@ -111,10 +107,9 @@ class StateManager:
             return False
 
         try:
-            await self.redis.publish('ucf_updates', json.dumps({
-                "timestamp": datetime.utcnow().isoformat(),
-                "metrics": metrics
-            }))
+            await self.redis.publish(
+                "ucf_updates", json.dumps({"timestamp": datetime.utcnow().isoformat(), "metrics": metrics})
+            )
             return True
         except Exception as e:
             print(f"⚠ Error publishing UCF update: {e}")
@@ -127,7 +122,7 @@ class StateManager:
 
         try:
             pubsub = self.redis.pubsub()
-            await pubsub.subscribe('ucf_updates')
+            await pubsub.subscribe("ucf_updates")
             return pubsub
         except Exception as e:
             print(f"⚠ Error subscribing to UCF events: {e}")
@@ -144,11 +139,12 @@ class StateManager:
 
         try:
             directive_id = directive.get("directive_id", "unknown")
-            await self.redis.lpush('manus:directives', json.dumps(directive))
-            await self.redis.setex(f'directive:{directive_id}', 3600, json.dumps({
-                "status": "queued",
-                "timestamp": datetime.utcnow().isoformat()
-            }))
+            await self.redis.lpush("manus:directives", json.dumps(directive))
+            await self.redis.setex(
+                f"directive:{directive_id}",
+                3600,
+                json.dumps({"status": "queued", "timestamp": datetime.utcnow().isoformat()}),
+            )
             return True
         except Exception as e:
             print(f"⚠ Error queuing directive: {e}")
@@ -160,7 +156,7 @@ class StateManager:
             return None
 
         try:
-            data = await self.redis.rpop('manus:directives')
+            data = await self.redis.rpop("manus:directives")
             return json.loads(data) if data else None
         except Exception as e:
             print(f"⚠ Error getting directive: {e}")
@@ -172,12 +168,8 @@ class StateManager:
             return False
 
         try:
-            status_data = {
-                "status": status,
-                "timestamp": datetime.utcnow().isoformat(),
-                "result": result or {}
-            }
-            await self.redis.setex(f'directive:{directive_id}', 3600, json.dumps(status_data))
+            status_data = {"status": status, "timestamp": datetime.utcnow().isoformat(), "result": result or {}}
+            await self.redis.setex(f"directive:{directive_id}", 3600, json.dumps(status_data))
             return True
         except Exception as e:
             print(f"⚠ Error updating directive status: {e}")
@@ -193,11 +185,10 @@ class StateManager:
             return False
 
         try:
-            await self.redis.xadd('helix:events', {
-                'type': event_type,
-                'data': json.dumps(data),
-                'timestamp': datetime.utcnow().isoformat()
-            })
+            await self.redis.xadd(
+                "helix:events",
+                {"type": event_type, "data": json.dumps(data), "timestamp": datetime.utcnow().isoformat()},
+            )
             return True
         except Exception as e:
             print(f"⚠ Error logging event: {e}")
@@ -209,7 +200,7 @@ class StateManager:
             return []
 
         try:
-            events = await self.redis.xrevrange('helix:events', count=count)
+            events = await self.redis.xrevrange("helix:events", count=count)
             return events
         except Exception as e:
             print(f"⚠ Error getting events: {e}")
@@ -225,11 +216,7 @@ class StateManager:
             return False
 
         try:
-            await self.redis.setex(
-                f'agent:{agent_name}:memory',
-                86400,  # 24 hour TTL
-                json.dumps(memory)
-            )
+            await self.redis.setex(f"agent:{agent_name}:memory", 86400, json.dumps(memory))  # 24 hour TTL
             return True
         except Exception as e:
             print(f"⚠ Error saving agent memory: {e}")
@@ -241,7 +228,7 @@ class StateManager:
             return []
 
         try:
-            data = await self.redis.get(f'agent:{agent_name}:memory')
+            data = await self.redis.get(f"agent:{agent_name}:memory")
             return json.loads(data) if data else []
         except Exception as e:
             print(f"⚠ Error getting agent memory: {e}")
@@ -253,11 +240,7 @@ class StateManager:
 
     async def health_check(self) -> Dict[str, Any]:
         """Check health of state manager."""
-        health = {
-            "timestamp": datetime.utcnow().isoformat(),
-            "redis": False,
-            "postgres": False
-        }
+        health = {"timestamp": datetime.utcnow().isoformat(), "redis": False, "postgres": False}
 
         if self.redis:
             try:
@@ -269,12 +252,13 @@ class StateManager:
         if self.db_pool:
             try:
                 async with self.db_pool.acquire() as conn:
-                    await conn.fetchval('SELECT 1')
+                    await conn.fetchval("SELECT 1")
                 health["postgres"] = True
             except Exception:
                 health["postgres"] = False
 
         return health
+
 
 # ============================================================================
 # SINGLETON INSTANCE
@@ -291,6 +275,7 @@ async def get_state_manager(redis_url: str = None, db_url: str = None) -> StateM
         _state_manager = StateManager(redis_url, db_url)
         await _state_manager.connect()
     return _state_manager
+
 
 # ============================================================================
 # ENTRY POINT
@@ -309,7 +294,7 @@ if __name__ == "__main__":
             "resilience": 1.1191,
             "prana": 0.5175,
             "drishti": 0.5023,
-            "klesha": 0.010
+            "klesha": 0.010,
         }
 
         print("Testing StateManager...")

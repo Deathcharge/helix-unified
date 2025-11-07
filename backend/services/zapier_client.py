@@ -61,12 +61,7 @@ class ZapierClient:
     # ========================================================================
 
     async def log_event(
-        self,
-        title: str,
-        event_type: str,
-        agent_name: str,
-        description: str,
-        ucf_snapshot: Dict[str, Any]
+        self, title: str, event_type: str, agent_name: str, description: str, ucf_snapshot: Dict[str, Any]
     ) -> None:
         """
         Log an event to Notion Event Log via Zapier.
@@ -88,13 +83,7 @@ class ZapierClient:
 
         await self._post(EVENT_HOOK, payload, "Event Log")
 
-    async def update_agent(
-        self,
-        agent_name: str,
-        status: str,
-        last_action: str,
-        health_score: int
-    ) -> None:
+    async def update_agent(self, agent_name: str, status: str, last_action: str, health_score: int) -> None:
         """
         Update agent status in Notion Agent Registry via Zapier.
 
@@ -114,12 +103,7 @@ class ZapierClient:
         await self._post(AGENT_HOOK, payload, "Agent Registry")
 
     async def upsert_system_component(
-        self,
-        component: str,
-        status: str,
-        harmony: float,
-        error_log: str = "",
-        verified: bool = False
+        self, component: str, status: str, harmony: float, error_log: str = "", verified: bool = False
     ) -> None:
         """
         Update or create system component in Notion System State via Zapier.
@@ -145,12 +129,7 @@ class ZapierClient:
     # INTERNAL METHODS
     # ========================================================================
 
-    async def _post(
-        self,
-        url: Optional[str],
-        payload: Dict[str, Any],
-        webhook_name: str = "Unknown"
-    ) -> bool:
+    async def _post(self, url: Optional[str], payload: Dict[str, Any], webhook_name: str = "Unknown") -> bool:
         """
         Post payload to Zapier webhook with fallback logging.
 
@@ -177,35 +156,19 @@ class ZapierClient:
                 session = aiohttp.ClientSession()
 
             try:
-                async with session.post(
-                    url,
-                    json=payload,
-                    timeout=aiohttp.ClientTimeout(total=10)
-                ) as resp:
+                async with session.post(url, json=payload, timeout=aiohttp.ClientTimeout(total=10)) as resp:
                     if resp.status == 200:
                         return True
                     else:
-                        await self._log_failure(
-                            payload,
-                            f"HTTP {resp.status}",
-                            webhook_name
-                        )
+                        await self._log_failure(payload, f"HTTP {resp.status}", webhook_name)
                         return False
 
             except asyncio.TimeoutError:
-                await self._log_failure(
-                    payload,
-                    "Timeout (10s)",
-                    webhook_name
-                )
+                await self._log_failure(payload, "Timeout (10s)", webhook_name)
                 return False
 
             except Exception as e:
-                await self._log_failure(
-                    payload,
-                    str(e),
-                    webhook_name
-                )
+                await self._log_failure(payload, str(e), webhook_name)
                 return False
 
             finally:
@@ -235,12 +198,14 @@ class ZapierClient:
                 try:
                     ucf = json.loads(payload["ucf_snapshot"])
                     # Keep only essential fields
-                    payload["ucf_snapshot"] = json.dumps({
-                        "harmony": ucf.get("harmony", 0),
-                        "prana": ucf.get("prana", 0),
-                        "drishti": ucf.get("drishti", 0),
-                        "klesha": ucf.get("klesha", 0),
-                    })
+                    payload["ucf_snapshot"] = json.dumps(
+                        {
+                            "harmony": ucf.get("harmony", 0),
+                            "prana": ucf.get("prana", 0),
+                            "drishti": ucf.get("drishti", 0),
+                            "klesha": ucf.get("klesha", 0),
+                        }
+                    )
                 except (json.JSONDecodeError, TypeError):
                     payload["ucf_snapshot"] = "{}"
 
@@ -254,12 +219,7 @@ class ZapierClient:
 
         return payload
 
-    async def _log_failure(
-        self,
-        payload: Dict[str, Any],
-        error: str,
-        webhook_name: str = "Unknown"
-    ) -> None:
+    async def _log_failure(self, payload: Dict[str, Any], error: str, webhook_name: str = "Unknown") -> None:
         """
         Fallback logging when webhook fails.
 
@@ -278,7 +238,7 @@ class ZapierClient:
                 "timestamp": datetime.utcnow().isoformat(),
                 "webhook": webhook_name,
                 "error": error,
-                "payload": payload
+                "payload": payload,
             }
 
             with open(log_path, "a") as f:
@@ -290,6 +250,7 @@ class ZapierClient:
         except Exception as e:
             print(f"❌ Failed to log Zapier failure: {e}")
 
+
 # ============================================================================
 # SINGLETON INSTANCE
 # ============================================================================
@@ -298,14 +259,13 @@ class ZapierClient:
 _zapier_client: Optional[ZapierClient] = None
 
 
-async def get_zapier_client(
-    session: Optional[aiohttp.ClientSession] = None
-) -> ZapierClient:
+async def get_zapier_client(session: Optional[aiohttp.ClientSession] = None) -> ZapierClient:
     """Get or create Zapier client instance."""
     global _zapier_client
     if _zapier_client is None:
         _zapier_client = ZapierClient(session)
     return _zapier_client
+
 
 # ============================================================================
 # VALIDATION
@@ -325,6 +285,7 @@ def validate_zapier_config() -> Dict[str, bool]:
         "system_hook": bool(SYSTEM_HOOK),
         "all_configured": bool(EVENT_HOOK and AGENT_HOOK and SYSTEM_HOOK),
     }
+
 
 # ============================================================================
 # ENTRY POINT
@@ -346,7 +307,7 @@ if __name__ == "__main__":
         print(f"  Agent Hook:  {'✅' if config['agent_hook'] else '❌'}")
         print(f"  System Hook: {'✅' if config['system_hook'] else '❌'}")
 
-        if not config['all_configured']:
+        if not config["all_configured"]:
             print("\n⚠ Not all webhooks configured. Set environment variables:")
             print("  - ZAPIER_EVENT_HOOK_URL")
             print("  - ZAPIER_AGENT_HOOK_URL")
@@ -365,28 +326,21 @@ if __name__ == "__main__":
                 event_type="Status",
                 agent_name="Manus",
                 description="Testing Zapier integration",
-                ucf_snapshot={"harmony": 0.355, "prana": 0.7}
+                ucf_snapshot={"harmony": 0.355, "prana": 0.7},
             )
             print(f"    {'✅' if result else '❌'} Event Log webhook")
 
             # Test agent update
             print("\n  Testing Agent Registry webhook...")
             result = await zap.update_agent(
-                agent_name="Manus",
-                status="Active",
-                last_action="Testing Zapier",
-                health_score=100
+                agent_name="Manus", status="Active", last_action="Testing Zapier", health_score=100
             )
             print(f"    {'✅' if result else '❌'} Agent Registry webhook")
 
             # Test system component
             print("\n  Testing System State webhook...")
             result = await zap.upsert_system_component(
-                component="Zapier Integration",
-                status="Active",
-                harmony=0.355,
-                error_log="",
-                verified=True
+                component="Zapier Integration", status="Active", harmony=0.355, error_log="", verified=True
             )
             print(f"    {'✅' if result else '❌'} System State webhook")
 

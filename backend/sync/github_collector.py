@@ -15,45 +15,45 @@ import subprocess
 from datetime import datetime
 from typing import Dict, List, Optional
 
-logger = logging.getLogger('HelixSync.GitHub')
+logger = logging.getLogger("HelixSync.GitHub")
 
 
 class GitHubCollector:
     """Collects data from GitHub repositories"""
 
-    def __init__(self, repos: List[str], local_path: str = '/home/ubuntu'):
+    def __init__(self, repos: List[str], local_path: str = "/home/ubuntu"):
         self.repos = repos
         self.local_path = local_path
-        self.github_token = os.getenv('GITHUB_TOKEN', '')
+        self.github_token = os.getenv("GITHUB_TOKEN", "")
 
     async def collect(self) -> Dict:
         """Collect all GitHub data"""
         logger.info(f"Collecting from {len(self.repos)} repositories...")
 
         data = {
-            'repos': {},
-            'summary': {
-                'total_repos': len(self.repos),
-                'total_commits_today': 0,
-                'total_open_issues': 0,
-                'total_open_prs': 0
+            "repos": {},
+            "summary": {
+                "total_repos": len(self.repos),
+                "total_commits_today": 0,
+                "total_open_issues": 0,
+                "total_open_prs": 0,
             },
-            'timestamp': datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
         for repo in self.repos:
             try:
                 repo_data = await self.collect_repo(repo)
-                data['repos'][repo] = repo_data
+                data["repos"][repo] = repo_data
 
                 # Update summary
-                data['summary']['total_commits_today'] += repo_data.get('commits_today', 0)
-                data['summary']['total_open_issues'] += repo_data.get('open_issues', 0)
-                data['summary']['total_open_prs'] += repo_data.get('open_prs', 0)
+                data["summary"]["total_commits_today"] += repo_data.get("commits_today", 0)
+                data["summary"]["total_open_issues"] += repo_data.get("open_issues", 0)
+                data["summary"]["total_open_prs"] += repo_data.get("open_prs", 0)
 
             except Exception as e:
                 logger.error(f"Failed to collect from {repo}: {e}")
-                data['repos'][repo] = {'error': str(e)}
+                data["repos"][repo] = {"error": str(e)}
 
         return data
 
@@ -63,17 +63,17 @@ class GitHubCollector:
 
         if not os.path.exists(repo_path):
             logger.warning(f"Repository {repo} not found locally at {repo_path}")
-            return {'error': 'Repository not found locally'}
+            return {"error": "Repository not found locally"}
 
         data = {
-            'name': repo,
-            'path': repo_path,
-            'latest_commit': self.get_latest_commit(repo_path),
-            'commits_today': self.get_commits_today(repo_path),
-            'total_commits': self.get_total_commits(repo_path),
-            'branches': self.get_branches(repo_path),
-            'remote_url': self.get_remote_url(repo_path),
-            'last_updated': datetime.utcnow().isoformat()
+            "name": repo,
+            "path": repo_path,
+            "latest_commit": self.get_latest_commit(repo_path),
+            "commits_today": self.get_commits_today(repo_path),
+            "total_commits": self.get_total_commits(repo_path),
+            "branches": self.get_branches(repo_path),
+            "remote_url": self.get_remote_url(repo_path),
+            "last_updated": datetime.utcnow().isoformat(),
         }
 
         # Try to get GitHub-specific data via API
@@ -90,20 +90,20 @@ class GitHubCollector:
         """Get latest commit info"""
         try:
             result = subprocess.run(
-                ['git', '-C', repo_path, 'log', '-1', '--format=%H|%an|%ae|%at|%s'],
+                ["git", "-C", repo_path, "log", "-1", "--format=%H|%an|%ae|%at|%s"],
                 capture_output=True,
                 text=True,
-                timeout=10
+                timeout=10,
             )
 
             if result.returncode == 0 and result.stdout.strip():
-                parts = result.stdout.strip().split('|')
+                parts = result.stdout.strip().split("|")
                 return {
-                    'sha': parts[0][:7],
-                    'author': parts[1],
-                    'email': parts[2],
-                    'timestamp': datetime.fromtimestamp(int(parts[3])).isoformat(),
-                    'message': parts[4]
+                    "sha": parts[0][:7],
+                    "author": parts[1],
+                    "email": parts[2],
+                    "timestamp": datetime.fromtimestamp(int(parts[3])).isoformat(),
+                    "message": parts[4],
                 }
         except Exception as e:
             logger.error(f"Failed to get latest commit: {e}")
@@ -113,16 +113,16 @@ class GitHubCollector:
     def get_commits_today(self, repo_path: str) -> int:
         """Get number of commits today"""
         try:
-            today = datetime.now().strftime('%Y-%m-%d')
+            today = datetime.now().strftime("%Y-%m-%d")
             result = subprocess.run(
-                ['git', '-C', repo_path, 'log', '--since', today, '--oneline'],
+                ["git", "-C", repo_path, "log", "--since", today, "--oneline"],
                 capture_output=True,
                 text=True,
-                timeout=10
+                timeout=10,
             )
 
             if result.returncode == 0:
-                return len([line for line in result.stdout.split('\n') if line.strip()])
+                return len([line for line in result.stdout.split("\n") if line.strip()])
         except Exception as e:
             logger.error(f"Failed to get commits today: {e}")
 
@@ -132,10 +132,7 @@ class GitHubCollector:
         """Get total commit count"""
         try:
             result = subprocess.run(
-                ['git', '-C', repo_path, 'rev-list', '--count', 'HEAD'],
-                capture_output=True,
-                text=True,
-                timeout=10
+                ["git", "-C", repo_path, "rev-list", "--count", "HEAD"], capture_output=True, text=True, timeout=10
             )
 
             if result.returncode == 0 and result.stdout.strip():
@@ -149,17 +146,14 @@ class GitHubCollector:
         """Get list of branches"""
         try:
             result = subprocess.run(
-                ['git', '-C', repo_path, 'branch', '-a'],
-                capture_output=True,
-                text=True,
-                timeout=10
+                ["git", "-C", repo_path, "branch", "-a"], capture_output=True, text=True, timeout=10
             )
 
             if result.returncode == 0:
                 branches = []
-                for line in result.stdout.split('\n'):
-                    line = line.strip().lstrip('* ')
-                    if line and not line.startswith('remotes/origin/HEAD'):
+                for line in result.stdout.split("\n"):
+                    line = line.strip().lstrip("* ")
+                    if line and not line.startswith("remotes/origin/HEAD"):
                         branches.append(line)
                 return branches
         except Exception as e:
@@ -171,10 +165,7 @@ class GitHubCollector:
         """Get remote URL"""
         try:
             result = subprocess.run(
-                ['git', '-C', repo_path, 'remote', 'get-url', 'origin'],
-                capture_output=True,
-                text=True,
-                timeout=10
+                ["git", "-C", repo_path, "remote", "get-url", "origin"], capture_output=True, text=True, timeout=10
             )
 
             if result.returncode == 0 and result.stdout.strip():
@@ -188,10 +179,4 @@ class GitHubCollector:
         """Get data from GitHub API"""
         # Placeholder for GitHub API integration
         # Would use gh CLI or requests to GitHub API
-        return {
-            'open_issues': 0,
-            'open_prs': 0,
-            'stars': 0,
-            'forks': 0,
-            'watchers': 0
-        }
+        return {"open_issues": 0, "open_prs": 0, "stars": 0, "forks": 0, "watchers": 0}

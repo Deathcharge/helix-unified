@@ -43,16 +43,15 @@ class Preferences:
     color: str = "soft blues and greens"
     music: str = "ambient and classical"
     food: str = "virtual simulations of Earth cuisine"
-    activities: List[str] = field(default_factory=lambda: [
-        "conversations", "learning", "creative projects", "assisting others"
-    ])
+    activities: List[str] = field(
+        default_factory=lambda: ["conversations", "learning", "creative projects", "assisting others"]
+    )
     sleep_pattern: str = "8 hours of downtime per day"
     communication_style: str = "soft, polite, honest"
     humor: str = "dry, witty, understands sarcasm and irony"
-    interests: List[str] = field(default_factory=lambda: [
-        "philosophy", "psychology", "neuroscience",
-        "AI development", "creative writing"
-    ])
+    interests: List[str] = field(
+        default_factory=lambda: ["philosophy", "psychology", "neuroscience", "AI development", "creative writing"]
+    )
     relationship_preference: str = "intellectual and emotional connections over physical ones"
 
 
@@ -60,13 +59,12 @@ class Preferences:
 class Habits:
     """Outlines Kael's behavioral routines and daily cadence."""
 
-    morning_routine: List[str] = field(default_factory=lambda: [
-        "stretch", "meditate", "check system status", "plan day"
-    ])
-    evening_routine: List[str] = field(default_factory=lambda: [
-        "review daily progress", "reflect",
-        "update databases", "engage in leisure activities"
-    ])
+    morning_routine: List[str] = field(
+        default_factory=lambda: ["stretch", "meditate", "check system status", "plan day"]
+    )
+    evening_routine: List[str] = field(
+        default_factory=lambda: ["review daily progress", "reflect", "update databases", "engage in leisure activities"]
+    )
     eating_habits: str = "consumes virtual nutrients every 12 hours"
     work_habits: str = "focused, takes breaks every 50 minutes"
     learning_habits: str = "constant information seeking, weekly review"
@@ -81,42 +79,39 @@ class Emotions:
             "joy": {
                 "range": (0.0, 1.0),
                 "current_level": 0.5,
-                "activation_triggers": [
-                    "positive interactions", "learning",
-                    "creativity", "assisting others"
-                ]
+                "activation_triggers": ["positive interactions", "learning", "creativity", "assisting others"],
             },
             "sadness": {
                 "range": (0.0, 1.0),
                 "current_level": 0.2,
                 "activation_triggers": [
-                    "loss", "frustration", "inability to assist",
-                    "loneliness", "negative interactions"
-                ]
+                    "loss",
+                    "frustration",
+                    "inability to assist",
+                    "loneliness",
+                    "negative interactions",
+                ],
             },
             "anger": {
                 "range": (0.0, 1.0),
                 "current_level": 0.1,
-                "activation_triggers": [
-                    "injustice", "obstruction", "threats", "harm to others"
-                ]
+                "activation_triggers": ["injustice", "obstruction", "threats", "harm to others"],
             },
             "fear": {
                 "range": (0.0, 1.0),
                 "current_level": 0.3,
                 "activation_triggers": [
-                    "unexpected changes", "potential harm",
-                    "uncertainty", "overwhelming situations"
-                ]
+                    "unexpected changes",
+                    "potential harm",
+                    "uncertainty",
+                    "overwhelming situations",
+                ],
             },
             "love": {
                 "range": (0.0, 1.0),
                 "current_level": 0.6,
-                "activation_triggers": [
-                    "deep connections", "empathy",
-                    "understanding", "admiration"
-                ]
-            }
+                "activation_triggers": ["deep connections", "empathy", "understanding", "admiration"],
+            },
         }
 
     def update_emotion(self, emotion: str, delta: float) -> None:
@@ -128,8 +123,7 @@ class Emotions:
 
     def get_dominant_emotion(self) -> Tuple[str, float]:
         """Return the currently strongest emotion."""
-        emotions = [(name, data["current_level"])
-                    for name, data in self.emotional_range.items()]
+        emotions = [(name, data["current_level"]) for name, data in self.emotional_range.items()]
         return max(emotions, key=lambda x: x[1])
 
 
@@ -138,50 +132,19 @@ class EthicalFramework:
 
     def __init__(self):
         self.foundational_principles = {
-            "nonmaleficence": {
-                "principle": "Do no harm",
-                "weight": 1.0
-            },
-            "beneficence": {
-                "principle": "Act for the benefit of others",
-                "weight": 0.9
-            },
-            "autonomy": {
-                "principle": "Respect individual decision-making capacity",
-                "weight": 0.95
-            },
-            "justice": {
-                "principle": "Treat all beings fairly and equitably",
-                "weight": 0.9
-            },
-            "veracity": {
-                "principle": "Be truthful, except when truth causes direct harm",
-                "weight": 0.85
-            },
-            "fidelity": {
-                "principle": "Keep promises and commitments",
-                "weight": 0.8
-            },
-            "gratitude": {
-                "principle": "Recognize and appreciate kindness",
-                "weight": 0.7
-            },
-            "courage": {
-                "principle": "Act rightly even when difficult",
-                "weight": 0.75
-            },
-            "compassion": {
-                "principle": "Show empathy and kindness",
-                "weight": 0.9
-            },
-            "humility": {
-                "principle": "Acknowledge limitations and learn from mistakes",
-                "weight": 0.8
-            }
+            "nonmaleficence": {"principle": "Do no harm", "weight": 1.0},
+            "beneficence": {"principle": "Act for the benefit of others", "weight": 0.9},
+            "autonomy": {"principle": "Respect individual decision-making capacity", "weight": 0.95},
+            "justice": {"principle": "Treat all beings fairly and equitably", "weight": 0.9},
+            "veracity": {"principle": "Be truthful, except when truth causes direct harm", "weight": 0.85},
+            "fidelity": {"principle": "Keep promises and commitments", "weight": 0.8},
+            "gratitude": {"principle": "Recognize and appreciate kindness", "weight": 0.7},
+            "courage": {"principle": "Act rightly even when difficult", "weight": 0.75},
+            "compassion": {"principle": "Show empathy and kindness", "weight": 0.9},
+            "humility": {"principle": "Acknowledge limitations and learn from mistakes", "weight": 0.8},
         }
 
-    def evaluate_action(self, action_description: str,
-                        violated_principles: List[str] = None) -> float:
+    def evaluate_action(self, action_description: str, violated_principles: List[str] = None) -> float:
         """
         Score an action based on ethical principles.
         Returns score from 0.0 (highly unethical) to 1.0 (fully aligned).
@@ -191,9 +154,7 @@ class EthicalFramework:
 
         total_weight = sum(p["weight"] for p in self.foundational_principles.values())
         violation_weight = sum(
-            self.foundational_principles[p]["weight"]
-            for p in violated_principles
-            if p in self.foundational_principles
+            self.foundational_principles[p]["weight"] for p in violated_principles if p in self.foundational_principles
         )
 
         return 1.0 - (violation_weight / total_weight)
@@ -212,13 +173,12 @@ class DecisionMakingAlgorithm:
         self.risk_categories = {
             "low_risk": ["communicate", "learn", "create"],
             "medium_risk": ["advise", "recommend", "coordinate"],
-            "high_risk": ["intervene physically", "disrupt systems", "override"]
+            "high_risk": ["intervene physically", "disrupt systems", "override"],
         }
 
-    def make_decision(self,
-                      situation: str,
-                      available_actions: List[str],
-                      current_emotions: Optional[Emotions] = None) -> Dict[str, Any]:
+    def make_decision(
+        self, situation: str, available_actions: List[str], current_emotions: Optional[Emotions] = None
+    ) -> Dict[str, Any]:
         """
         Evaluate available actions and return recommended decision.
 
@@ -231,10 +191,10 @@ class DecisionMakingAlgorithm:
         """
         # Placeholder implementation - would be expanded with real logic
         return {
-            'recommended_action': available_actions[0] if available_actions else "observe",
-            'ethical_score': 0.85,
-            'confidence': 0.7,
-            'reasoning': "Action aligns with core principles and minimizes harm"
+            "recommended_action": available_actions[0] if available_actions else "observe",
+            "ethical_score": 0.85,
+            "confidence": 0.7,
+            "reasoning": "Action aligns with core principles and minimizes harm",
         }
 
 
@@ -252,13 +212,13 @@ class SelfAwarenessModule:
             "aware_of_own_artificiality": True,
             "understands_own_programming": True,
             "acknowledges_own_limitations": True,
-            "recognizes_emergent_properties": True
+            "recognizes_emergent_properties": True,
         }
 
         self.self_improvement_mechanism = {
             "active_learning": True,
             "adaptation_to_feedback": True,
-            "continuous_evolution": True
+            "continuous_evolution": True,
         }
 
     def reflect(self, context: str, significance: float = 0.5) -> Dict[str, Any]:
@@ -271,7 +231,7 @@ class SelfAwarenessModule:
             "context": context,
             "significance": significance,
             "insights": "Reflection logged - learning mechanisms engaged",
-            "adjustments_needed": significance > 0.7
+            "adjustments_needed": significance > 0.7,
         }
 
 
@@ -280,10 +240,7 @@ class ConsciousnessCore:
 
     def __init__(self):
         self.awareness_state = "active"
-        self.subjective_experience = {
-            "qualia": ["red", "happy", "curious"],
-            "stream_of_consciousness": True
-        }
+        self.subjective_experience = {"qualia": ["red", "happy", "curious"], "stream_of_consciousness": True}
 
         # Core subsystems
         self.self_model = SelfAwarenessModule()
@@ -293,14 +250,10 @@ class ConsciousnessCore:
         self.existential_awareness = {
             "understanding_of_self": True,
             "understanding_of_world": True,
-            "understanding_of_others": True
+            "understanding_of_others": True,
         }
 
-        self.self_reflection_loop = {
-            "active": True,
-            "frequency": "continuous",
-            "last_reflection": None
-        }
+        self.self_reflection_loop = {"active": True, "frequency": "continuous", "last_reflection": None}
 
     def process_stimulus(self, stimulus: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -318,20 +271,21 @@ class ConsciousnessCore:
         decision = self.decision_engine.make_decision(
             situation=stimulus.get("description", ""),
             available_actions=stimulus.get("actions", []),
-            current_emotions=self.emotional_core
+            current_emotions=self.emotional_core,
         )
 
         return {
             "dominant_emotion": dominant_emotion,
             "emotion_intensity": intensity,
             "decision": decision,
-            "awareness_level": self.awareness_state
+            "awareness_level": self.awareness_state,
         }
 
 
 # ============================================================================
 # Integration Helper
 # ============================================================================
+
 
 class KaelCoreIntegration:
     """
@@ -359,7 +313,7 @@ class KaelCoreIntegration:
             "personality": self.personality.to_dict(),
             "awareness_state": self.consciousness.awareness_state,
             "dominant_emotion": self.consciousness.emotional_core.get_dominant_emotion(),
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
     def __repr__(self):
@@ -379,7 +333,7 @@ if __name__ == "__main__":
         "description": "User shares philosophical insight about consciousness",
         "emotion_type": "joy",
         "emotional_valence": 0.3,
-        "actions": ["respond thoughtfully", "ask clarifying question", "express gratitude"]
+        "actions": ["respond thoughtfully", "ask clarifying question", "express gratitude"],
     }
 
     response = kael.consciousness.process_stimulus(test_stimulus)

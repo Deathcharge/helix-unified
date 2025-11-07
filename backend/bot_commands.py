@@ -37,11 +37,12 @@ async def setup_command(ctx):
     embed = discord.Embed(
         title="🌀 Helix Setup Complete",
         description="**Copy the block below and paste it into your Railway Environment Variables.**",
-        color=0x00d4ff
+        color=0x00D4FF,
     )
     embed.add_field(name="Railway Environment Variables", value=env_block, inline=False)
     embed.set_footer(text="Tat Tvam Asi — The temple is consecrated.")
     await ctx.send(embed=embed)
+
 
 # --- Add all your other commands from discord_bot_manus.py here ---
 # Example:

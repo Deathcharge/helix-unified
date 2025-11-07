@@ -14,14 +14,14 @@ _spec = importlib.util.spec_from_file_location("backend.agents_file", _agents_fi
 _agents_module = importlib.util.module_from_spec(_spec)
 
 # Add to sys.modules so imports work correctly
-sys.modules['backend.agents_file'] = _agents_module
+sys.modules["backend.agents_file"] = _agents_module
 
 # Execute the module
 _spec.loader.exec_module(_agents_module)
 
 # Re-export everything from the loaded module
 for _name in dir(_agents_module):
-    if not _name.startswith('_'):
+    if not _name.startswith("_"):
         globals()[_name] = getattr(_agents_module, _name)
 
 # Clean up helper variables

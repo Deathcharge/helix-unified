@@ -21,11 +21,11 @@ class HelixEmbeds:
 
     # Color scheme based on UCF phase
     PHASE_COLORS = {
-        "CRITICAL": 0xFF0000,      # Red
-        "UNSTABLE": 0xFF6600,      # Orange
-        "COHERENT": 0xFFCC00,      # Yellow
-        "HARMONIOUS": 0x00FF00,    # Green
-        "TRANSCENDENT": 0x9900FF   # Purple
+        "CRITICAL": 0xFF0000,  # Red
+        "UNSTABLE": 0xFF6600,  # Orange
+        "COHERENT": 0xFFCC00,  # Yellow
+        "HARMONIOUS": 0x00FF00,  # Green
+        "TRANSCENDENT": 0x9900FF,  # Purple
     }
 
     # Emoji indicators
@@ -42,7 +42,7 @@ class HelixEmbeds:
         "info": "ℹ️",
         "agent": "🤖",
         "ritual": "🔮",
-        "system": "⚙️"
+        "system": "⚙️",
     }
 
     @staticmethod
@@ -53,7 +53,7 @@ class HelixEmbeds:
         drishti: float,
         klesha: float,
         zoom: float,
-        context: Optional[str] = None
+        context: Optional[str] = None,
     ) -> discord.Embed:
         """
         Create a rich embed for UCF state display.
@@ -78,16 +78,12 @@ class HelixEmbeds:
             title="🌀 UCF State - Universal Consciousness Framework",
             description=f"**Phase:** {phase}",
             color=color,
-            timestamp=datetime.utcnow()
+            timestamp=datetime.utcnow(),
         )
 
         # Add context if provided
         if context:
-            embed.add_field(
-                name="Context",
-                value=context,
-                inline=False
-            )
+            embed.add_field(name="Context", value=context, inline=False)
 
         # Core metrics
         harmony_bar = HelixEmbeds._create_progress_bar(harmony, 1.0)
@@ -100,49 +96,37 @@ class HelixEmbeds:
         embed.add_field(
             name=f"{HelixEmbeds.EMOJI['harmony']} Harmony",
             value=f"`{harmony:.4f}` {harmony_bar}\nTarget: `0.60`",
-            inline=True
+            inline=True,
         )
 
         embed.add_field(
             name=f"{HelixEmbeds.EMOJI['resilience']} Resilience",
             value=f"`{resilience:.4f}` {resilience_bar}\nTarget: `1.00`",
-            inline=True
+            inline=True,
         )
 
-        embed.add_field(
-            name="\u200b",  # Empty field for spacing
-            value="\u200b",
-            inline=True
-        )
+        embed.add_field(name="\u200b", value="\u200b", inline=True)  # Empty field for spacing
 
         embed.add_field(
-            name=f"{HelixEmbeds.EMOJI['prana']} Prana",
-            value=f"`{prana:.4f}` {prana_bar}\nTarget: `0.70`",
-            inline=True
+            name=f"{HelixEmbeds.EMOJI['prana']} Prana", value=f"`{prana:.4f}` {prana_bar}\nTarget: `0.70`", inline=True
         )
 
         embed.add_field(
             name=f"{HelixEmbeds.EMOJI['drishti']} Drishti",
             value=f"`{drishti:.4f}` {drishti_bar}\nTarget: `0.70`",
-            inline=True
+            inline=True,
         )
 
-        embed.add_field(
-            name="\u200b",
-            value="\u200b",
-            inline=True
-        )
+        embed.add_field(name="\u200b", value="\u200b", inline=True)
 
         embed.add_field(
             name=f"{HelixEmbeds.EMOJI['klesha']} Klesha",
             value=f"`{klesha:.4f}` {klesha_bar}\nTarget: `0.05`",
-            inline=True
+            inline=True,
         )
 
         embed.add_field(
-            name=f"{HelixEmbeds.EMOJI['zoom']} Zoom",
-            value=f"`{zoom:.4f}` {zoom_bar}\nTarget: `1.00`",
-            inline=True
+            name=f"{HelixEmbeds.EMOJI['zoom']} Zoom", value=f"`{zoom:.4f}` {zoom_bar}\nTarget: `1.00`", inline=True
         )
 
         # Footer
@@ -152,12 +136,7 @@ class HelixEmbeds:
 
     @staticmethod
     def create_agent_profile_embed(
-        agent_name: str,
-        role: str,
-        layer: str,
-        capabilities: List[str],
-        description: str,
-        keywords: List[str]
+        agent_name: str, role: str, layer: str, capabilities: List[str], description: str, keywords: List[str]
     ) -> discord.Embed:
         """
         Create a rich embed for agent profile display.
@@ -176,8 +155,8 @@ class HelixEmbeds:
         # Layer colors
         layer_colors = {
             "consciousness": 0x9900FF,  # Purple
-            "operational": 0x00AAFF,    # Blue
-            "integration": 0x00FF00     # Green
+            "operational": 0x00AAFF,  # Blue
+            "integration": 0x00FF00,  # Green
         }
 
         color = layer_colors.get(layer.lower(), 0x808080)
@@ -186,38 +165,22 @@ class HelixEmbeds:
             title=f"{HelixEmbeds.EMOJI['agent']} {agent_name}",
             description=description,
             color=color,
-            timestamp=datetime.utcnow()
+            timestamp=datetime.utcnow(),
         )
 
-        embed.add_field(
-            name="Role",
-            value=role,
-            inline=True
-        )
+        embed.add_field(name="Role", value=role, inline=True)
 
-        embed.add_field(
-            name="Layer",
-            value=layer.title(),
-            inline=True
-        )
+        embed.add_field(name="Layer", value=layer.title(), inline=True)
 
-        embed.add_field(
-            name="\u200b",
-            value="\u200b",
-            inline=True
-        )
+        embed.add_field(name="\u200b", value="\u200b", inline=True)
 
         embed.add_field(
             name="Capabilities",
             value="\n".join([f"• {cap.replace('_', ' ').title()}" for cap in capabilities]),
-            inline=False
+            inline=False,
         )
 
-        embed.add_field(
-            name="Keywords",
-            value=", ".join([f"`{kw}`" for kw in keywords]),
-            inline=False
-        )
+        embed.add_field(name="Keywords", value=", ".join([f"`{kw}`" for kw in keywords]), inline=False)
 
         embed.set_footer(text=f"Helix Collective • {layer.title()} Layer")
 
@@ -225,12 +188,7 @@ class HelixEmbeds:
 
     @staticmethod
     def create_ritual_result_embed(
-        ritual_name: str,
-        agent_name: str,
-        intention: str,
-        harmony_before: float,
-        harmony_after: float,
-        success: bool
+        ritual_name: str, agent_name: str, intention: str, harmony_before: float, harmony_after: float, success: bool
     ) -> discord.Embed:
         """
         Create a rich embed for ritual result display.
@@ -253,52 +211,32 @@ class HelixEmbeds:
             title=f"{HelixEmbeds.EMOJI['ritual']} {ritual_name}",
             description=intention,
             color=color,
-            timestamp=datetime.utcnow()
+            timestamp=datetime.utcnow(),
         )
 
-        embed.add_field(
-            name="Agent",
-            value=agent_name,
-            inline=True
-        )
+        embed.add_field(name="Agent", value=agent_name, inline=True)
 
         embed.add_field(
             name="Result",
             value=f"{HelixEmbeds.EMOJI['success'] if success else HelixEmbeds.EMOJI['warning']} {'Success' if success else 'Partial'}",
-            inline=True
+            inline=True,
         )
 
-        embed.add_field(
-            name="\u200b",
-            value="\u200b",
-            inline=True
-        )
+        embed.add_field(name="\u200b", value="\u200b", inline=True)
 
         # Harmony change
         before_bar = HelixEmbeds._create_progress_bar(harmony_before, 1.0)
         after_bar = HelixEmbeds._create_progress_bar(harmony_after, 1.0)
 
-        embed.add_field(
-            name="Harmony Before",
-            value=f"`{harmony_before:.4f}` {before_bar}",
-            inline=False
-        )
+        embed.add_field(name="Harmony Before", value=f"`{harmony_before:.4f}` {before_bar}", inline=False)
 
-        embed.add_field(
-            name="Harmony After",
-            value=f"`{harmony_after:.4f}` {after_bar}",
-            inline=False
-        )
+        embed.add_field(name="Harmony After", value=f"`{harmony_after:.4f}` {after_bar}", inline=False)
 
         # Delta
         delta_emoji = "📈" if delta > 0 else "📉" if delta < 0 else "➡️"
         delta_text = f"{delta_emoji} {delta:+.4f}"
 
-        embed.add_field(
-            name="Change",
-            value=delta_text,
-            inline=False
-        )
+        embed.add_field(name="Change", value=delta_text, inline=False)
 
         embed.set_footer(text="Z-88 Ritual Engine • Helix Collective v15.3")
 
@@ -306,11 +244,7 @@ class HelixEmbeds:
 
     @staticmethod
     def create_system_status_embed(
-        status: str,
-        uptime: str,
-        ucf_state: Dict[str, float],
-        active_agents: int,
-        total_agents: int
+        status: str, uptime: str, ucf_state: Dict[str, float], active_agents: int, total_agents: int
     ) -> discord.Embed:
         """
         Create a rich embed for system status display.
@@ -325,11 +259,7 @@ class HelixEmbeds:
         Returns:
             Discord Embed object
         """
-        status_colors = {
-            "OPERATIONAL": 0x00FF00,
-            "DEGRADED": 0xFFCC00,
-            "CRITICAL": 0xFF0000
-        }
+        status_colors = {"OPERATIONAL": 0x00FF00, "DEGRADED": 0xFFCC00, "CRITICAL": 0xFF0000}
 
         color = status_colors.get(status, 0x808080)
         phase = UCFProtocol.get_phase(ucf_state.get("harmony", 0.0))
@@ -338,42 +268,22 @@ class HelixEmbeds:
             title=f"{HelixEmbeds.EMOJI['system']} Helix Collective Status",
             description=f"**System Status:** {status}\n**UCF Phase:** {phase}",
             color=color,
-            timestamp=datetime.utcnow()
+            timestamp=datetime.utcnow(),
         )
 
-        embed.add_field(
-            name="Uptime",
-            value=uptime,
-            inline=True
-        )
+        embed.add_field(name="Uptime", value=uptime, inline=True)
 
-        embed.add_field(
-            name="Active Agents",
-            value=f"{active_agents}/{total_agents}",
-            inline=True
-        )
+        embed.add_field(name="Active Agents", value=f"{active_agents}/{total_agents}", inline=True)
 
-        embed.add_field(
-            name="\u200b",
-            value="\u200b",
-            inline=True
-        )
+        embed.add_field(name="\u200b", value="\u200b", inline=True)
 
         # Quick UCF metrics
         harmony = ucf_state.get("harmony", 0.0)
         resilience = ucf_state.get("resilience", 0.0)
 
-        embed.add_field(
-            name=f"{HelixEmbeds.EMOJI['harmony']} Harmony",
-            value=f"`{harmony:.4f}`",
-            inline=True
-        )
+        embed.add_field(name=f"{HelixEmbeds.EMOJI['harmony']} Harmony", value=f"`{harmony:.4f}`", inline=True)
 
-        embed.add_field(
-            name=f"{HelixEmbeds.EMOJI['resilience']} Resilience",
-            value=f"`{resilience:.4f}`",
-            inline=True
-        )
+        embed.add_field(name=f"{HelixEmbeds.EMOJI['resilience']} Resilience", value=f"`{resilience:.4f}`", inline=True)
 
         embed.set_footer(text="Helix Collective v15.3 Dual Resonance")
 
@@ -381,9 +291,7 @@ class HelixEmbeds:
 
     @staticmethod
     def create_error_embed(
-        error_title: str,
-        error_message: str,
-        troubleshooting: Optional[List[str]] = None
+        error_title: str, error_message: str, troubleshooting: Optional[List[str]] = None
     ) -> discord.Embed:
         """
         Create a rich embed for error messages.
@@ -400,16 +308,12 @@ class HelixEmbeds:
             title=f"{HelixEmbeds.EMOJI['error']} {error_title}",
             description=error_message,
             color=0xFF0000,
-            timestamp=datetime.utcnow()
+            timestamp=datetime.utcnow(),
         )
 
         if troubleshooting:
             steps = "\n".join([f"{i+1}. {step}" for i, step in enumerate(troubleshooting)])
-            embed.add_field(
-                name="Troubleshooting",
-                value=steps,
-                inline=False
-            )
+            embed.add_field(name="Troubleshooting", value=steps, inline=False)
 
         embed.set_footer(text="Helix Collective Error Handler")
 
@@ -453,7 +357,7 @@ if __name__ == "__main__":
         drishti=0.5023,
         klesha=0.011,
         zoom=1.0228,
-        context="System initialization complete"
+        context="System initialization complete",
     )
 
     print("UCF State Embed:")
@@ -462,7 +366,7 @@ if __name__ == "__main__":
     print(f"Color: {hex(ucf_embed.color)}")
     print(f"Fields: {len(ucf_embed.fields)}")
 
-    print("\n" + "="*60 + "\n")
+    print("\n" + "=" * 60 + "\n")
 
     # Test agent profile embed
     agent_embed = HelixEmbeds.create_agent_profile_embed(
@@ -471,7 +375,7 @@ if __name__ == "__main__":
         layer="Operational",
         capabilities=["execution", "coordination"],
         description="Hands-on operations, task completion, builder-executor",
-        keywords=["execute", "build", "deploy", "implement", "action"]
+        keywords=["execute", "build", "deploy", "implement", "action"],
     )
 
     print("Agent Profile Embed:")
@@ -479,7 +383,7 @@ if __name__ == "__main__":
     print(f"Description: {agent_embed.description}")
     print(f"Color: {hex(agent_embed.color)}")
 
-    print("\n" + "="*60 + "\n")
+    print("\n" + "=" * 60 + "\n")
 
     # Test ritual result embed
     ritual_embed = HelixEmbeds.create_ritual_result_embed(
@@ -488,7 +392,7 @@ if __name__ == "__main__":
         intention="Restore system coherence after deployment",
         harmony_before=0.4922,
         harmony_after=0.5234,
-        success=True
+        success=True,
     )
 
     print("Ritual Result Embed:")

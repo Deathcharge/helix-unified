@@ -12,11 +12,7 @@ from pathlib import Path
 # ============================================================================
 
 
-def setup_logging(
-    log_dir: str = "Shadow/manus_archive",
-    log_level: str = "INFO",
-    enable_rotation: bool = True
-):
+def setup_logging(log_dir: str = "Shadow/manus_archive", log_level: str = "INFO", enable_rotation: bool = True):
     """
     Configure centralized logging with rotation for Helix Collective.
 
@@ -45,8 +41,7 @@ def setup_logging(
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.INFO)
     console_formatter = logging.Formatter(
-        '%(asctime)s | %(levelname)-8s | %(name)s | %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
+        "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
     )
     console_handler.setFormatter(console_formatter)
     logger.addHandler(console_handler)
@@ -57,23 +52,15 @@ def setup_logging(
     if enable_rotation:
         # Rotate daily, keep 30 days
         operations_handler = logging.handlers.TimedRotatingFileHandler(
-            filename=log_path / "operations.log",
-            when='midnight',
-            interval=1,
-            backupCount=30,
-            encoding='utf-8'
+            filename=log_path / "operations.log", when="midnight", interval=1, backupCount=30, encoding="utf-8"
         )
     else:
         # Simple file handler (no rotation)
-        operations_handler = logging.FileHandler(
-            filename=log_path / "operations.log",
-            encoding='utf-8'
-        )
+        operations_handler = logging.FileHandler(filename=log_path / "operations.log", encoding="utf-8")
 
     operations_handler.setLevel(logging.DEBUG)
     file_formatter = logging.Formatter(
-        '%(asctime)s | %(levelname)-8s | %(name)-20s | %(funcName)-20s | %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
+        "%(asctime)s | %(levelname)-8s | %(name)-20s | %(funcName)-20s | %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
     )
     operations_handler.setFormatter(file_formatter)
     logger.addHandler(operations_handler)
@@ -84,16 +71,10 @@ def setup_logging(
     if enable_rotation:
         # Rotate by size (10MB), keep 5 files
         error_handler = logging.handlers.RotatingFileHandler(
-            filename=log_path / "errors.log",
-            maxBytes=10*1024*1024,  # 10MB
-            backupCount=5,
-            encoding='utf-8'
+            filename=log_path / "errors.log", maxBytes=10 * 1024 * 1024, backupCount=5, encoding="utf-8"  # 10MB
         )
     else:
-        error_handler = logging.FileHandler(
-            filename=log_path / "errors.log",
-            encoding='utf-8'
-        )
+        error_handler = logging.FileHandler(filename=log_path / "errors.log", encoding="utf-8")
 
     error_handler.setLevel(logging.ERROR)
     error_handler.setFormatter(file_formatter)
@@ -103,9 +84,7 @@ def setup_logging(
     # JSON HANDLER (for structured logs)
     # ========================================================================
     json_handler = JSONFileHandler(
-        filename=log_path / "structured.jsonl",
-        max_bytes=50*1024*1024,  # 50MB
-        backup_count=3
+        filename=log_path / "structured.jsonl", max_bytes=50 * 1024 * 1024, backup_count=3  # 50MB
     )
     json_handler.setLevel(logging.INFO)
     logger.addHandler(json_handler)
@@ -122,13 +101,14 @@ def setup_logging(
 # JSON FILE HANDLER (for structured logging)
 # ============================================================================
 
+
 class JSONFileHandler(logging.Handler):
     """
     Custom handler that writes logs as JSON lines (JSONL format).
     Includes automatic rotation by file size.
     """
 
-    def __init__(self, filename, max_bytes=50*1024*1024, backup_count=3):
+    def __init__(self, filename, max_bytes=50 * 1024 * 1024, backup_count=3):
         """
         Initialize JSON file handler.
 
@@ -165,12 +145,12 @@ class JSONFileHandler(logging.Handler):
                 log_entry["exception"] = self.format(record)
 
             # Add extra fields if present
-            if hasattr(record, 'extra'):
+            if hasattr(record, "extra"):
                 log_entry.update(record.extra)
 
             # Write to file (append mode)
-            with open(self.filename, 'a', encoding='utf-8') as f:
-                f.write(json.dumps(log_entry) + '\n')
+            with open(self.filename, "a", encoding="utf-8") as f:
+                f.write(json.dumps(log_entry) + "\n")
 
         except Exception:
             self.handleError(record)
@@ -178,25 +158,26 @@ class JSONFileHandler(logging.Handler):
     def rotate(self):
         """Rotate log files."""
         # Delete oldest backup if exists
-        oldest = self.filename.with_suffix(f'.log.{self.backup_count}')
+        oldest = self.filename.with_suffix(f".log.{self.backup_count}")
         if oldest.exists():
             oldest.unlink()
 
         # Rotate existing backups
         for i in range(self.backup_count - 1, 0, -1):
-            old_file = self.filename.with_suffix(f'.log.{i}')
-            new_file = self.filename.with_suffix(f'.log.{i+1}')
+            old_file = self.filename.with_suffix(f".log.{i}")
+            new_file = self.filename.with_suffix(f".log.{i+1}")
             if old_file.exists():
                 old_file.rename(new_file)
 
         # Rotate current file to .1
         if self.filename.exists():
-            self.filename.rename(self.filename.with_suffix('.log.1'))
+            self.filename.rename(self.filename.with_suffix(".log.1"))
 
 
 # ============================================================================
 # AGENT-SPECIFIC LOGGERS
 # ============================================================================
+
 
 def get_agent_logger(agent_name: str):
     """
@@ -228,6 +209,7 @@ def get_module_logger(module_name: str):
 # LOG CLEANUP UTILITY
 # ============================================================================
 
+
 def cleanup_old_logs(log_dir: str = "Shadow/manus_archive", days: int = 30):
     """
     Clean up log files older than specified days.
@@ -241,6 +223,7 @@ def cleanup_old_logs(log_dir: str = "Shadow/manus_archive", days: int = 30):
         return
 
     import time
+
     cutoff_time = time.time() - (days * 86400)
     deleted_count = 0
 

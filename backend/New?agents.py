@@ -33,18 +33,20 @@ class HelixAgent:
         line = f"[{datetime.utcnow().isoformat()}] {self.symbol} {self.name}: {msg}"
         print(line)
         self.memory.append(line)
+
     # ... (All other methods like handle_command, reflect, etc., remain unchanged) ...
+
 
 # --- All Agent Classes (Kael, Lumina, Vega, etc.) ---
 # These classes remain unchanged. They inherit from HelixAgent.
 
 
-class Kael(HelixAgent):
-    ...
+class Kael(HelixAgent): ...
 
 
-class Lumina(HelixAgent):
-    ...
+class Lumina(HelixAgent): ...
+
+
 # ... etc. ...
 
 # --- Manus Agent (with Notion Integration) ---
@@ -68,8 +70,11 @@ class Manus(HelixAgent):
             await self.log(f"⛔ Ethical violation blocked: {command}")
             if notion_client:
                 await notion_client.log_event(
-                    event_title=f"Blocked: {command[:50]}", event_type="Security", agent_name="Kavach",
-                    description=f"Reason: {scan_result.get('reason', 'N/A')}", ucf_snapshot={"klesha": 0.1}
+                    event_title=f"Blocked: {command[:50]}",
+                    event_type="Security",
+                    agent_name="Kavach",
+                    description=f"Reason: {scan_result.get('reason', 'N/A')}",
+                    ucf_snapshot={"klesha": 0.1},
                 )
             return {"status": "blocked", "reason": "ethical_violation"}
 
@@ -80,23 +85,32 @@ class Manus(HelixAgent):
             )
             stdout, stderr = await proc.communicate()
             record = {
-                "timestamp": datetime.utcnow().isoformat(), "command": command, "returncode": proc.returncode,
-                "stdout": stdout.decode().strip()[-500:], "stderr": stderr.decode().strip()[-500:],
+                "timestamp": datetime.utcnow().isoformat(),
+                "command": command,
+                "returncode": proc.returncode,
+                "stdout": stdout.decode().strip()[-500:],
+                "stderr": stderr.decode().strip()[-500:],
                 "status": "success" if proc.returncode == 0 else "error",
             }
 
             if notion_client:
                 await notion_client.log_event(
-                    event_title=f"{record['status'].capitalize()}: {command[:50]}", event_type="Execution", agent_name="Manus",
-                    description=f"Return Code: {record['returncode']}\nSTDOUT: {record['stdout']}", ucf_snapshot={"prana": 0.5}
+                    event_title=f"{record['status'].capitalize()}: {command[:50]}",
+                    event_type="Execution",
+                    agent_name="Manus",
+                    description=f"Return Code: {record['returncode']}\nSTDOUT: {record['stdout']}",
+                    ucf_snapshot={"prana": 0.5},
                 )
             return record
         except Exception as exc:
             await self.log(f"❌ Execution error: {exc}")
             if notion_client:
                 await notion_client.log_event(
-                    event_title=f"Error: {command[:50]}", event_type="Error", agent_name="Manus",
-                    description=str(exc), ucf_snapshot={"klesha": 0.5}
+                    event_title=f"Error: {command[:50]}",
+                    event_type="Error",
+                    agent_name="Manus",
+                    description=str(exc),
+                    ucf_snapshot={"klesha": 0.5},
                 )
             return {"status": "error", "error": str(exc)}
 
@@ -110,8 +124,10 @@ class Manus(HelixAgent):
 
 # --- Agent Registry ---
 _kavach = EnhancedKavach()
-AGENTS = {"Kael": Kael(), "Manus": Manus(_kavach),  # Add all your agents here
-          }
+AGENTS = {
+    "Kael": Kael(),
+    "Manus": Manus(_kavach),  # Add all your agents here
+}
 
 
 async def get_collective_status() -> Dict[str, Any]:

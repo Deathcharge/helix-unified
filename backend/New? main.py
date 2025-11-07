@@ -20,7 +20,8 @@ load_dotenv()
 # pycryptodome patch for MEGA
 try:
     import Cryptodome
-    sys.modules['Crypto'] = Cryptodome
+
+    sys.modules["Crypto"] = Cryptodome
     print("✅ Crypto import compatibility layer is active.")
 except ImportError:
     print("⚠️ pycryptodome not found - MEGA sync may fail.")
@@ -72,12 +73,13 @@ async def lifespan(app: FastAPI):
     await bot.close()
     bot_task.cancel()
 
+
 # --- FastAPI App Definition ---
 app = FastAPI(
     title="🌀 Helix Collective v15.5",
     description="Embodied Continuum Edition - Multi-Agent AI System",
     version="15.5.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # --- API Endpoints (Unchanged) ---
@@ -92,11 +94,13 @@ async def health_check():
 async def root():
     return {"message": "🌀 Helix Collective v15.5 is operational."}
 
+
 # Add other endpoints like /status, /agents as needed.
 
 # --- Main Entry Point (for uvicorn) ---
 if __name__ == "__main__":
     import uvicorn
+
     port = int(os.getenv("PORT", 8000))
     print(f"🚀 Starting FastAPI server on host 0.0.0.0:{port}")
     uvicorn.run(app, host="0.0.0.0", port=port)

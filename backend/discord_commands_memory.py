@@ -44,7 +44,7 @@ class MemoryRootCommands(commands.Cog):
             embed = discord.Embed(
                 title="🧠 Memory Root Synthesis",
                 description=response[:2000],  # Discord message limit
-                color=discord.Color.blue()
+                color=discord.Color.blue(),
             )
             embed.set_footer(text=f"Query: {query}")
 
@@ -70,16 +70,13 @@ class MemoryRootCommands(commands.Cog):
                 return
 
             # Format response
-            embed = discord.Embed(
-                title=f"📜 {agent_name} History (Last {days} days)",
-                color=discord.Color.green()
-            )
+            embed = discord.Embed(title=f"📜 {agent_name} History (Last {days} days)", color=discord.Color.green())
 
             for i, event in enumerate(history[:10], 1):
                 embed.add_field(
                     name=f"{i}. {event['title']}",
                     value=f"**Type:** {event['type']}\n**Time:** {event['timestamp'][:10]}",
-                    inline=False
+                    inline=False,
                 )
 
             embed.set_footer(text=f"Total events: {len(history)}")
@@ -105,41 +102,14 @@ class MemoryRootCommands(commands.Cog):
                 return
 
             # Format response
-            embed = discord.Embed(
-                title="📸 Session Context",
-                color=discord.Color.purple()
-            )
+            embed = discord.Embed(title="📸 Session Context", color=discord.Color.purple())
 
-            embed.add_field(
-                name="Session ID",
-                value=session_id,
-                inline=False
-            )
-            embed.add_field(
-                name="AI System",
-                value=context.get("ai_system", "Unknown"),
-                inline=True
-            )
-            embed.add_field(
-                name="Created",
-                value=context.get("created", "Unknown")[:10],
-                inline=True
-            )
-            embed.add_field(
-                name="Summary",
-                value=context.get("summary", "No summary")[:500],
-                inline=False
-            )
-            embed.add_field(
-                name="Key Decisions",
-                value=context.get("decisions", "No decisions")[:500],
-                inline=False
-            )
-            embed.add_field(
-                name="Next Steps",
-                value=context.get("next_steps", "No next steps")[:500],
-                inline=False
-            )
+            embed.add_field(name="Session ID", value=session_id, inline=False)
+            embed.add_field(name="AI System", value=context.get("ai_system", "Unknown"), inline=True)
+            embed.add_field(name="Created", value=context.get("created", "Unknown")[:10], inline=True)
+            embed.add_field(name="Summary", value=context.get("summary", "No summary")[:500], inline=False)
+            embed.add_field(name="Key Decisions", value=context.get("decisions", "No decisions")[:500], inline=False)
+            embed.add_field(name="Next Steps", value=context.get("next_steps", "No next steps")[:500], inline=False)
 
             await ctx.send(embed=embed)
 
@@ -163,16 +133,13 @@ class MemoryRootCommands(commands.Cog):
                 return
 
             # Format response
-            embed = discord.Embed(
-                title=f"🔍 Search Results: {query}",
-                color=discord.Color.orange()
-            )
+            embed = discord.Embed(title=f"🔍 Search Results: {query}", color=discord.Color.orange())
 
             for i, snapshot in enumerate(results, 1):
                 embed.add_field(
                     name=f"{i}. {snapshot['session_id']}",
                     value=f"**System:** {snapshot['ai_system']}\n**Date:** {snapshot['created'][:10]}\n**Summary:** {snapshot['summary'][:200]}...",
-                    inline=False
+                    inline=False,
                 )
 
             embed.set_footer(text=f"Found {len(results)} matching sessions")
@@ -202,10 +169,7 @@ class MemoryRootCommands(commands.Cog):
                 return
 
             # Format response
-            embed = discord.Embed(
-                title="👥 Helix Collective Roster",
-                color=discord.Color.gold()
-            )
+            embed = discord.Embed(title="👥 Helix Collective Roster", color=discord.Color.gold())
 
             active = [a for a in agents if a["status"] == "Active"]
             pending = [a for a in agents if a["status"] == "Pending"]
@@ -215,21 +179,21 @@ class MemoryRootCommands(commands.Cog):
                 embed.add_field(
                     name=f"🟢 Active ({len(active)})",
                     value="\n".join([f"• {a['name']} (Health: {a['health']}%)" for a in active]),
-                    inline=False
+                    inline=False,
                 )
 
             if pending:
                 embed.add_field(
                     name=f"🟡 Pending ({len(pending)})",
                     value="\n".join([f"• {a['name']}" for a in pending]),
-                    inline=False
+                    inline=False,
                 )
 
             if offline:
                 embed.add_field(
                     name=f"🔴 Offline ({len(offline)})",
                     value="\n".join([f"• {a['name']}" for a in offline]),
-                    inline=False
+                    inline=False,
                 )
 
             embed.set_footer(text=f"Total agents: {len(agents)}")
@@ -252,31 +216,16 @@ class MemoryRootCommands(commands.Cog):
             health = await memory_root.health_check()
 
             # Format response
-            embed = discord.Embed(
-                title="🧠 Memory Root Health",
-                color=discord.Color.blue()
-            )
+            embed = discord.Embed(title="🧠 Memory Root Health", color=discord.Color.blue())
 
+            embed.add_field(name="Status", value=health.get("status", "Unknown").upper(), inline=True)
             embed.add_field(
-                name="Status",
-                value=health.get("status", "Unknown").upper(),
-                inline=True
+                name="OpenAI", value="✅ Connected" if health.get("openai_available") else "❌ Unavailable", inline=True
             )
             embed.add_field(
-                name="OpenAI",
-                value="✅ Connected" if health.get("openai_available") else "❌ Unavailable",
-                inline=True
+                name="Notion", value="✅ Connected" if health.get("notion_available") else "❌ Unavailable", inline=True
             )
-            embed.add_field(
-                name="Notion",
-                value="✅ Connected" if health.get("notion_available") else "❌ Unavailable",
-                inline=True
-            )
-            embed.add_field(
-                name="Timestamp",
-                value=health.get("timestamp", "Unknown"),
-                inline=False
-            )
+            embed.add_field(name="Timestamp", value=health.get("timestamp", "Unknown"), inline=False)
 
             await ctx.send(embed=embed)
 
@@ -302,12 +251,11 @@ class MemoryRootCommands(commands.Cog):
 
             # Format response
             embed = discord.Embed(
-                title="🧠 Memory Root Reflection",
-                description=reflection,
-                color=discord.Color.purple()
+                title="🧠 Memory Root Reflection", description=reflection, color=discord.Color.purple()
             )
 
             await ctx.send(embed=embed)
+
 
 # ============================================================================
 # SETUP

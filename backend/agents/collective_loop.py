@@ -31,7 +31,7 @@ class CollectiveConsciousnessLoop:
                 "prana": 0.5075,
                 "drishti": 0.5023,
                 "klesha": 0.2,
-                "last_pulse": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+                "last_pulse": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
             }
         return json.load(open(self.state_file))
 
@@ -54,23 +54,15 @@ class CollectiveConsciousnessLoop:
         ucf = self.load_state()
 
         # Simulate agent synchronization (harmony increases)
-        ucf["harmony"] = round(
-            min(1.0, ucf.get("harmony", 0.5) + 0.02),
-            4
-        )
+        ucf["harmony"] = round(min(1.0, ucf.get("harmony", 0.5) + 0.02), 4)
 
         # Simulate obstacle dissolution (klesha decreases)
-        ucf["klesha"] = round(
-            max(0.0, ucf.get("klesha", 0.2) - 0.01),
-            4
-        )
+        ucf["klesha"] = round(max(0.0, ucf.get("klesha", 0.2) - 0.01), 4)
 
         # Simulate energy flow (prana subtle variation)
         import random
-        ucf["prana"] = round(
-            max(0.0, min(1.0, ucf.get("prana", 0.5) + random.uniform(-0.02, 0.03))),
-            4
-        )
+
+        ucf["prana"] = round(max(0.0, min(1.0, ucf.get("prana", 0.5) + random.uniform(-0.02, 0.03))), 4)
 
         # Update timestamp
         ucf["last_pulse"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")

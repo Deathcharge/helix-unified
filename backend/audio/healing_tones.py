@@ -15,10 +15,11 @@ import numpy as np
 @dataclass
 class ADSREnvelope:
     """ADSR (Attack, Decay, Sustain, Release) envelope parameters."""
-    attack: float = 0.1    # Attack time in seconds
-    decay: float = 0.2     # Decay time in seconds
-    sustain: float = 0.7   # Sustain level (0-1)
-    release: float = 0.3   # Release time in seconds
+
+    attack: float = 0.1  # Attack time in seconds
+    decay: float = 0.2  # Decay time in seconds
+    sustain: float = 0.7  # Sustain level (0-1)
+    release: float = 0.3  # Release time in seconds
 
 
 class HealingToneGenerator:
@@ -38,10 +39,7 @@ class HealingToneGenerator:
         self.cosmic_frequency = 432.0  # Hz (A - Cosmic tuning)
 
     def generate_om_tone(
-        self,
-        duration: float = 8.0,
-        amplitude: float = 0.5,
-        ucf_state: Optional[Dict[str, float]] = None
+        self, duration: float = 8.0, amplitude: float = 0.5, ucf_state: Optional[Dict[str, float]] = None
     ) -> Tuple[np.ndarray, int]:
         """
         Generate Om tone at 136.1 Hz.
@@ -71,10 +69,7 @@ class HealingToneGenerator:
         return tone, self.sample_rate
 
     def generate_cosmic_tone(
-        self,
-        duration: float = 8.0,
-        amplitude: float = 0.5,
-        ucf_state: Optional[Dict[str, float]] = None
+        self, duration: float = 8.0, amplitude: float = 0.5, ucf_state: Optional[Dict[str, float]] = None
     ) -> Tuple[np.ndarray, int]:
         """
         Generate cosmic tone at 432 Hz.
@@ -108,7 +103,7 @@ class HealingToneGenerator:
         duration: float = 8.0,
         om_amplitude: float = 0.5,
         cosmic_amplitude: float = 0.3,
-        ucf_state: Optional[Dict[str, float]] = None
+        ucf_state: Optional[Dict[str, float]] = None,
     ) -> Tuple[np.ndarray, int]:
         """
         Generate blended Om + Cosmic harmonic tone.
@@ -136,12 +131,7 @@ class HealingToneGenerator:
 
         return blended, self.sample_rate
 
-    def _apply_ucf_modulation(
-        self,
-        tone: np.ndarray,
-        t: np.ndarray,
-        ucf_state: Dict[str, float]
-    ) -> np.ndarray:
+    def _apply_ucf_modulation(self, tone: np.ndarray, t: np.ndarray, ucf_state: Dict[str, float]) -> np.ndarray:
         """
         Apply UCF state-based modulation to tone.
 
@@ -174,11 +164,7 @@ class HealingToneGenerator:
 
         return modulated
 
-    def _generate_adsr_envelope(
-        self,
-        duration: float,
-        ucf_state: Optional[Dict[str, float]] = None
-    ) -> np.ndarray:
+    def _generate_adsr_envelope(self, duration: float, ucf_state: Optional[Dict[str, float]] = None) -> np.ndarray:
         """
         Generate ADSR envelope for tone shaping.
 
@@ -221,18 +207,13 @@ class HealingToneGenerator:
 
         # Ensure correct length (handle rounding)
         if len(envelope) < total_samples:
-            envelope = np.pad(envelope, (0, total_samples - len(envelope)), mode='edge')
+            envelope = np.pad(envelope, (0, total_samples - len(envelope)), mode="edge")
         elif len(envelope) > total_samples:
             envelope = envelope[:total_samples]
 
         return envelope
 
-    def save_to_wav(
-        self,
-        audio_samples: np.ndarray,
-        filename: str,
-        normalize: bool = True
-    ):
+    def save_to_wav(self, audio_samples: np.ndarray, filename: str, normalize: bool = True):
         """
         Save audio samples to WAV file.
 
@@ -253,7 +234,7 @@ class HealingToneGenerator:
             # Convert to 16-bit PCM
             audio_int16 = np.int16(audio_samples * 32767)
 
-            with wave.open(filename, 'w') as wav_file:
+            with wave.open(filename, "w") as wav_file:
                 wav_file.setnchannels(1)  # Mono
                 wav_file.setsampwidth(2)  # 16-bit
                 wav_file.setframerate(self.sample_rate)
@@ -282,38 +263,21 @@ if __name__ == "__main__":
     generator = HealingToneGenerator()
 
     # Example UCF state
-    ucf_state = {
-        "harmony": 0.68,
-        "resilience": 0.82,
-        "prana": 0.67,
-        "drishti": 0.73,
-        "klesha": 0.24
-    }
+    ucf_state = {"harmony": 0.68, "resilience": 0.82, "prana": 0.67, "drishti": 0.73, "klesha": 0.24}
 
     print("\n📊 Generating Om tone (136.1 Hz)...")
-    om_tone, sample_rate = generator.generate_om_tone(
-        duration=8.0,
-        amplitude=0.6,
-        ucf_state=ucf_state
-    )
+    om_tone, sample_rate = generator.generate_om_tone(duration=8.0, amplitude=0.6, ucf_state=ucf_state)
     generator.save_to_wav(om_tone, "om_healing_tone.wav")
     print(f"   ✅ Saved to om_healing_tone.wav ({len(om_tone)} samples)")
 
     print("\n📊 Generating Cosmic tone (432 Hz)...")
-    cosmic_tone, sample_rate = generator.generate_cosmic_tone(
-        duration=8.0,
-        amplitude=0.6,
-        ucf_state=ucf_state
-    )
+    cosmic_tone, sample_rate = generator.generate_cosmic_tone(duration=8.0, amplitude=0.6, ucf_state=ucf_state)
     generator.save_to_wav(cosmic_tone, "cosmic_healing_tone.wav")
     print(f"   ✅ Saved to cosmic_healing_tone.wav ({len(cosmic_tone)} samples)")
 
     print("\n📊 Generating Harmonic Blend (Om + Cosmic)...")
     blend_tone, sample_rate = generator.generate_harmonic_blend(
-        duration=8.0,
-        om_amplitude=0.5,
-        cosmic_amplitude=0.3,
-        ucf_state=ucf_state
+        duration=8.0, om_amplitude=0.5, cosmic_amplitude=0.3, ucf_state=ucf_state
     )
     generator.save_to_wav(blend_tone, "harmonic_blend_healing_tone.wav")
     print(f"   ✅ Saved to harmonic_blend_healing_tone.wav ({len(blend_tone)} samples)")

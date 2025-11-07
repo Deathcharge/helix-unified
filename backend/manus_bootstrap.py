@@ -63,7 +63,7 @@ async def lifespan(app: FastAPI):
     print(f"   Agent Hook:  {'✅' if config['agent_hook'] else '⚠'}")
     print(f"   System Hook: {'✅' if config['system_hook'] else '⚠'}")
 
-    if not config['all_configured']:
+    if not config["all_configured"]:
         print("\n   ⚠️  WARNING: Not all Zapier webhooks configured!")
         print("      Set environment variables:")
         print("      - ZAPIER_EVENT_HOOK_URL")
@@ -85,8 +85,8 @@ async def lifespan(app: FastAPI):
                 "prana": 0.7,
                 "drishti": 0.8,
                 "klesha": 0.2,
-                "timestamp": datetime.utcnow().isoformat()
-            }
+                "timestamp": datetime.utcnow().isoformat(),
+            },
         )
         print("   ✅ Startup event logged")
     except Exception as e:
@@ -96,10 +96,7 @@ async def lifespan(app: FastAPI):
     print("\n📊 Updating Manus status...")
     try:
         await _zapier_client.update_agent(
-            agent_name="Manus",
-            status="Active",
-            last_action="Bootstrap startup",
-            health_score=100
+            agent_name="Manus", status="Active", last_action="Bootstrap startup", health_score=100
         )
         print("   ✅ Status updated")
     except Exception as e:
@@ -109,11 +106,7 @@ async def lifespan(app: FastAPI):
     print("\n🔧 Updating system state...")
     try:
         await _zapier_client.upsert_system_component(
-            component="Manus Bootstrap",
-            status="Active",
-            harmony=0.355,
-            error_log="",
-            verified=True
+            component="Manus Bootstrap", status="Active", harmony=0.355, error_log="", verified=True
         )
         print("   ✅ System state updated")
     except Exception as e:
@@ -141,10 +134,7 @@ async def lifespan(app: FastAPI):
                 event_type="Status",
                 agent_name="Manus",
                 description="Manus bootstrap application shutting down",
-                ucf_snapshot={
-                    "harmony": 0.355,
-                    "timestamp": datetime.utcnow().isoformat()
-                }
+                ucf_snapshot={"harmony": 0.355, "timestamp": datetime.utcnow().isoformat()},
             )
             print("   ✅ Shutdown event logged")
     except Exception as e:
@@ -160,6 +150,7 @@ async def lifespan(app: FastAPI):
     print("✅ MANUS BOOTSTRAP SHUTDOWN COMPLETE")
     print("=" * 70 + "\n")
 
+
 # ============================================================================
 # FASTAPI APPLICATION
 # ============================================================================
@@ -168,7 +159,7 @@ app = FastAPI(
     title="Helix Collective v14.5 — Manus Bootstrap",
     description="Manus operational executor with Zapier integration",
     version="14.5",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # ============================================================================
@@ -179,21 +170,16 @@ app = FastAPI(
 def get_zapier() -> ZapierClient:
     """Dependency injection for Zapier client."""
     if _zapier_client is None:
-        raise HTTPException(
-            status_code=503,
-            detail="Zapier client not initialized"
-        )
+        raise HTTPException(status_code=503, detail="Zapier client not initialized")
     return _zapier_client
 
 
 def get_http_session() -> aiohttp.ClientSession:
     """Dependency injection for HTTP session."""
     if _http_session is None or _http_session.closed:
-        raise HTTPException(
-            status_code=503,
-            detail="HTTP session not available"
-        )
+        raise HTTPException(status_code=503, detail="HTTP session not available")
     return _http_session
+
 
 # ============================================================================
 # HEALTH CHECK ENDPOINTS
@@ -220,14 +206,14 @@ async def health_check() -> dict:
         "codename": "Quantum Handshake",
         "timestamp": datetime.utcnow().isoformat(),
         "zapier": {
-            "configured": config['all_configured'],
-            "event_hook": config['event_hook'],
-            "agent_hook": config['agent_hook'],
-            "system_hook": config['system_hook'],
+            "configured": config["all_configured"],
+            "event_hook": config["event_hook"],
+            "agent_hook": config["agent_hook"],
+            "system_hook": config["system_hook"],
         },
         "session": {
             "open": _http_session is not None and not _http_session.closed,
-        }
+        },
     }
 
 
@@ -245,8 +231,9 @@ async def api_status(zap: ZapierClient = Depends(get_zapier)) -> dict:
         "manus_status": "operational",
         "zapier_status": "connected",
         "uptime": "calculating...",
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.utcnow().isoformat(),
     }
+
 
 # ============================================================================
 # ZAPIER TEST ENDPOINTS
@@ -285,7 +272,7 @@ async def test_zapier(zap: ZapierClient = Depends(get_zapier)) -> dict:
                 "prana": 0.7,
                 "drishti": 0.8,
                 "klesha": 0.2,
-            }
+            },
         )
         results["event_log"] = True
     except Exception as e:
@@ -294,10 +281,7 @@ async def test_zapier(zap: ZapierClient = Depends(get_zapier)) -> dict:
     # Test Agent Registry webhook
     try:
         await zap.update_agent(
-            agent_name="Manus",
-            status="Active",
-            last_action="Testing Zapier integration",
-            health_score=100
+            agent_name="Manus", status="Active", last_action="Testing Zapier integration", health_score=100
         )
         results["agent_registry"] = True
     except Exception as e:
@@ -306,11 +290,7 @@ async def test_zapier(zap: ZapierClient = Depends(get_zapier)) -> dict:
     # Test System State webhook
     try:
         await zap.upsert_system_component(
-            component="Manus Bootstrap",
-            status="Active",
-            harmony=0.355,
-            error_log="",
-            verified=True
+            component="Manus Bootstrap", status="Active", harmony=0.355, error_log="", verified=True
         )
         results["system_state"] = True
     except Exception as e:
@@ -322,7 +302,7 @@ async def test_zapier(zap: ZapierClient = Depends(get_zapier)) -> dict:
     return {
         "status": "all_passed" if all_passed else "partial_failure",
         "results": results,
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.utcnow().isoformat(),
     }
 
 
@@ -335,7 +315,7 @@ async def test_event_webhook(zap: ZapierClient = Depends(get_zapier)) -> dict:
             event_type="Status",
             agent_name="Manus",
             description="Testing Event Log webhook",
-            ucf_snapshot={"harmony": 0.355}
+            ucf_snapshot={"harmony": 0.355},
         )
         return {"status": "success", "webhook": "event_log"}
     except Exception as e:
@@ -347,10 +327,7 @@ async def test_agent_webhook(zap: ZapierClient = Depends(get_zapier)) -> dict:
     """Test Agent Registry webhook only."""
     try:
         await zap.update_agent(
-            agent_name="Manus",
-            status="Active",
-            last_action="Testing Agent Registry webhook",
-            health_score=100
+            agent_name="Manus", status="Active", last_action="Testing Agent Registry webhook", health_score=100
         )
         return {"status": "success", "webhook": "agent_registry"}
     except Exception as e:
@@ -362,15 +339,12 @@ async def test_system_webhook(zap: ZapierClient = Depends(get_zapier)) -> dict:
     """Test System State webhook only."""
     try:
         await zap.upsert_system_component(
-            component="Manus Bootstrap",
-            status="Active",
-            harmony=0.355,
-            error_log="",
-            verified=True
+            component="Manus Bootstrap", status="Active", harmony=0.355, error_log="", verified=True
         )
         return {"status": "success", "webhook": "system_state"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 # ============================================================================
 # MANUS OPERATION ENDPOINTS
@@ -386,15 +360,12 @@ async def manus_status(zap: ZapierClient = Depends(get_zapier)) -> dict:
         "harmony": 0.355,
         "directives_processed": 0,
         "uptime_seconds": 0,
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.utcnow().isoformat(),
     }
 
 
 @app.post("/api/manus/directive")
-async def process_directive(
-    directive: dict,
-    zap: ZapierClient = Depends(get_zapier)
-) -> dict:
+async def process_directive(directive: dict, zap: ZapierClient = Depends(get_zapier)) -> dict:
     """
     Process a directive and log to Notion via Zapier.
 
@@ -411,7 +382,7 @@ async def process_directive(
             event_type="Command",
             agent_name="Manus",
             description=f"Processing directive: {json.dumps(directive)}",
-            ucf_snapshot={"harmony": 0.355}
+            ucf_snapshot={"harmony": 0.355},
         )
 
         # Update Manus status
@@ -419,16 +390,13 @@ async def process_directive(
             agent_name="Manus",
             status="Active",
             last_action=f"Processing {directive.get('command', 'unknown')}",
-            health_score=95
+            health_score=95,
         )
 
-        return {
-            "status": "success",
-            "directive": directive,
-            "timestamp": datetime.utcnow().isoformat()
-        }
+        return {"status": "success", "directive": directive, "timestamp": datetime.utcnow().isoformat()}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 # ============================================================================
 # CONFIGURATION ENDPOINTS
@@ -440,12 +408,12 @@ async def get_zapier_config() -> dict:
     """Get Zapier configuration status."""
     config = validate_zapier_config()
     return {
-        "configured": config['all_configured'],
+        "configured": config["all_configured"],
         "webhooks": {
-            "event_log": config['event_hook'],
-            "agent_registry": config['agent_hook'],
-            "system_state": config['system_hook'],
-        }
+            "event_log": config["event_hook"],
+            "agent_registry": config["agent_hook"],
+            "system_state": config["system_hook"],
+        },
     }
 
 
@@ -456,8 +424,9 @@ async def get_environment_config() -> dict:
         "environment": os.getenv("ENVIRONMENT", "development"),
         "version": "14.5",
         "codename": "Quantum Handshake",
-        "zapier_configured": validate_zapier_config()['all_configured'],
+        "zapier_configured": validate_zapier_config()["all_configured"],
     }
+
 
 # ============================================================================
 # ROOT ENDPOINT
@@ -481,8 +450,9 @@ async def root() -> dict:
             "test_zapier": "/test/zapier",
             "docs": "/docs",
             "redoc": "/redoc",
-        }
+        },
     }
+
 
 # ============================================================================
 # ENTRY POINT
@@ -492,9 +462,4 @@ if __name__ == "__main__":
     import uvicorn
 
     # Run with: uvicorn backend.manus_bootstrap:app --reload
-    uvicorn.run(
-        app,
-        host="0.0.0.0",
-        port=int(os.getenv("PORT", "8000")),
-        log_level="info"
-    )
+    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", "8000")), log_level="info")

@@ -136,9 +136,7 @@ class MandelbrotUCFGenerator:
         logger.debug(f"Generated UCF from {c}: {ucf_state}")
         return ucf_state
 
-    def generate_from_sacred_point(
-        self, point_name: str, context: str = "generic"
-    ) -> Dict[str, float]:
+    def generate_from_sacred_point(self, point_name: str, context: str = "generic") -> Dict[str, float]:
         """
         Generate UCF state from predefined sacred Mandelbrot coordinate.
 
@@ -154,9 +152,7 @@ class MandelbrotUCFGenerator:
         """
         if point_name not in self.sacred_points:
             available = ", ".join(self.sacred_points.keys())
-            raise ValueError(
-                f"Unknown sacred point '{point_name}'. Available: {available}"
-            )
+            raise ValueError(f"Unknown sacred point '{point_name}'. Available: {available}")
 
         c = self.sacred_points[point_name]
         ucf_state = self.complex_to_ucf(c, context)
@@ -197,14 +193,10 @@ class MandelbrotUCFGenerator:
             sample_name = f"sample_{i}_{int(np.degrees(angle))}"
             results[sample_name] = self.complex_to_ucf(sample_point, context)
 
-        logger.info(
-            f"🌀 Explored region around {center} with {samples} samples (radius={radius})"
-        )
+        logger.info(f"🌀 Explored region around {center} with {samples} samples (radius={radius})")
         return results
 
-    def phi_spiral_journey(
-        self, start: complex, steps: int = 108, context: str = "ritual"
-    ) -> list[Dict[str, float]]:
+    def phi_spiral_journey(self, start: complex, steps: int = 108, context: str = "ritual") -> list[Dict[str, float]]:
         """
         Generate UCF states along a phi-modulated spiral path.
 
@@ -221,7 +213,7 @@ class MandelbrotUCFGenerator:
 
         for step in range(steps):
             # Phi spiral: radius grows by phi, angle by golden angle
-            golden_angle = 2 * np.pi / (phi ** 2)
+            golden_angle = 2 * np.pi / (phi**2)
             radius = 0.01 * (phi ** (step / 30))  # Exponential growth
             angle = step * golden_angle
 
@@ -236,9 +228,7 @@ class MandelbrotUCFGenerator:
 
             journey.append(ucf)
 
-        logger.info(
-            f"🌀 Generated {steps}-step phi spiral journey from {start}"
-        )
+        logger.info(f"🌀 Generated {steps}-step phi spiral journey from {start}")
         return journey
 
 
@@ -281,7 +271,7 @@ def generate_ritual_ucf(step: int = 0, total_steps: int = 108) -> Dict[str, floa
     # Add small phi-modulated offset based on step
     phi = 1.618033988749895
     progress = step / total_steps
-    angle = progress * 2 * np.pi / (phi ** 2)  # Golden angle
+    angle = progress * 2 * np.pi / (phi**2)  # Golden angle
     radius = 0.05 * progress  # Gradually expand
 
     offset = radius * np.exp(1j * angle)

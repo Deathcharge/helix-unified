@@ -37,23 +37,23 @@ async def harmony_command(ctx):
         await ctx.send(f"**HARMONY RESTORED** → `harmony={ucf['harmony']:.3f}`")
 
         # 🌀 ZAPIER WEBHOOK: Log ritual completion to Notion Event Log
-        if hasattr(ctx.bot, 'zapier_client') and ctx.bot.zapier_client:
+        if hasattr(ctx.bot, "zapier_client") and ctx.bot.zapier_client:
             try:
                 await ctx.bot.zapier_client.log_event(
                     event_title="Neti-Neti Harmony Ritual Complete",
                     event_type="ritual_complete",
                     agent_name="Z-88 Ritual Engine",
                     description=f"Harmony ritual executed by {ctx.author.name}. Harmony increased from {current_harmony:.3f} to {ucf['harmony']:.3f}",
-                    ucf_snapshot=json.dumps(ucf)
+                    ucf_snapshot=json.dumps(ucf),
                 )
 
                 # Update system state with new harmony level
                 await ctx.bot.zapier_client.update_system_state(
                     component="Z-88 Ritual Engine",
                     status="Operational",
-                    harmony=ucf['harmony'],
+                    harmony=ucf["harmony"],
                     error_log="",
-                    verified=True
+                    verified=True,
                 )
             except Exception as webhook_error:
                 print(f"⚠️ Zapier webhook error: {webhook_error}")
@@ -62,13 +62,13 @@ async def harmony_command(ctx):
         await ctx.send(f"⚠️ UCF update error: {e}")
 
         # 🌀 ZAPIER WEBHOOK: Log error alert
-        if hasattr(ctx.bot, 'zapier_client') and ctx.bot.zapier_client:
+        if hasattr(ctx.bot, "zapier_client") and ctx.bot.zapier_client:
             try:
                 await ctx.bot.zapier_client.send_error_alert(
                     error_message=f"Harmony ritual UCF update failed: {str(e)}",
                     component="Z-88 Ritual Engine",
                     severity="medium",
-                    context={"command": "!harmony", "user": str(ctx.author)}
+                    context={"command": "!harmony", "user": str(ctx.author)},
                 )
             except Exception as webhook_error:
                 print(f"⚠️ Zapier webhook error: {webhook_error}")
