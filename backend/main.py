@@ -18,6 +18,7 @@ import logging
 import httpx
 import aiohttp
 from pydantic import BaseModel
+from typing import Dict, Any
 
 # Import centralized logging configuration
 from logging_config import setup_logging

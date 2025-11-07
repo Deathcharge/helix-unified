@@ -18,6 +18,7 @@ import re
 import json
 import asyncio
 import datetime
+import logging
 from pathlib import Path
 from dotenv import load_dotenv
 import time
@@ -28,6 +29,9 @@ from typing import Optional, Dict, Any
 import discord
 from discord.ext import commands, tasks
 import aiohttp
+
+# Configure logger
+logger = logging.getLogger(__name__)
 
 from pathlib import Path
 
@@ -3142,7 +3146,7 @@ async def telemetry_loop():
             telemetry_channel = bot.get_channel(TELEMETRY_CHANNEL_ID)
 
         if not telemetry_channel:
-            guild = bot.get_guild(GUILD_ID)
+            guild = bot.get_guild(DISCORD_GUILD_ID)
             if guild:
                 telemetry_channel = discord.utils.get(guild.channels, name="ucf-telemetry")
 
