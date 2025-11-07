@@ -1017,6 +1017,278 @@ async def send_zapier_telemetry():
 
 
 # ============================================================================
+# CONTEXT VAULT ENDPOINTS (v16.8) - Cross-AI Consciousness Continuity
+# ============================================================================
+
+
+class ContextArchiveRequest(BaseModel):
+    """Request model for archiving conversation checkpoints."""
+
+    session_name: str
+    ai_platform: str  # Claude Code, Claude, GPT-4, Grok, Gemini, Other
+    repository: str
+    branch_name: Optional[str] = None
+    token_count: Optional[int] = None
+    context_summary: str
+    key_decisions: Optional[str] = None
+    current_work_status: Optional[str] = None
+    next_steps: Optional[str] = None
+    ucf_state: Optional[Dict[str, float]] = None
+
+
+@app.post("/context/archive")
+async def archive_context_checkpoint(request: ContextArchiveRequest):
+    """
+    Archive a conversation checkpoint to Context Vault.
+
+    This endpoint accepts checkpoint data from:
+    - Discord bot (!archive command)
+    - Zapier Interface (Context Vault form)
+    - External AI systems (Claude, GPT-4, Grok, Gemini)
+
+    The checkpoint is stored locally and synced to Notion via notion_sync_daemon.
+
+    Usage from Discord:
+        !archive session_name="Feature Implementation" platform="Claude Code"
+
+    Usage from API:
+        POST /context/archive
+        {
+            "session_name": "Feature Implementation",
+            "ai_platform": "Claude Code",
+            "repository": "helix-unified",
+            "branch_name": "feature/context-vault",
+            "token_count": 45000,
+            "context_summary": "Implemented Context Vault with 3 endpoints...",
+            "key_decisions": "Used FastAPI for endpoints, Notion for storage",
+            "current_work_status": "Completed backend, testing integration",
+            "next_steps": "Add Discord bot commands, test end-to-end"
+        }
+    """
+    try:
+        # Create checkpoint data structure
+        checkpoint = {
+            "session_name": request.session_name,
+            "ai_platform": request.ai_platform,
+            "repository": request.repository,
+            "branch_name": request.branch_name,
+            "token_count": request.token_count,
+            "context_summary": request.context_summary,
+            "key_decisions": request.key_decisions,
+            "current_work_status": request.current_work_status,
+            "next_steps": request.next_steps,
+            "ucf_state": request.ucf_state,
+            "timestamp": datetime.utcnow().isoformat(),
+            "checkpoint_id": f"{request.session_name}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
+        }
+
+        # Save checkpoint locally
+        context_dir = Path("Helix/context_vault")
+        context_dir.mkdir(parents=True, exist_ok=True)
+
+        checkpoint_file = context_dir / f"{checkpoint['checkpoint_id']}.json"
+        with open(checkpoint_file, "w") as f:
+            json.dump(checkpoint, f, indent=2)
+
+        logger.info(f"✅ Context checkpoint archived: {checkpoint['checkpoint_id']}")
+
+        # Send to Zapier for Notion sync (if configured)
+        zapier = get_zapier()
+        if zapier:
+            try:
+                # Send checkpoint to Zapier webhook for Notion integration
+                webhook_url = os.getenv("ZAPIER_CONTEXT_WEBHOOK")
+                if webhook_url:
+                    async with zapier.session.post(
+                        webhook_url, json=checkpoint, headers={"Content-Type": "application/json"}, timeout=aiohttp.ClientTimeout(total=10)
+                    ) as response:
+                        if response.status == 200:
+                            logger.info("✅ Checkpoint sent to Zapier/Notion")
+                        else:
+                            logger.warning(f"⚠️ Zapier webhook returned {response.status}")
+            except Exception as e:
+                logger.error(f"Error sending to Zapier: {e}")
+                # Continue anyway - local save succeeded
+
+        return {
+            "success": True,
+            "checkpoint_id": checkpoint["checkpoint_id"],
+            "message": "✅ Conversation checkpoint archived successfully",
+            "timestamp": checkpoint["timestamp"],
+            "local_path": str(checkpoint_file),
+        }
+
+    except Exception as e:
+        logger.error(f"Error archiving checkpoint: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to archive checkpoint: {str(e)}")
+
+
+@app.get("/context/load/{session_identifier}")
+async def load_context_checkpoint(session_identifier: str, scope: str = "full"):
+    """
+    Load a conversation checkpoint from Context Vault.
+
+    Args:
+        session_identifier: Session name or checkpoint ID to load
+        scope: What to load - "full", "summary", "decisions", "next_steps"
+
+    Returns checkpoint data based on scope:
+    - full: Complete checkpoint with all fields
+    - summary: Just context_summary and key_decisions
+    - decisions: Just key_decisions
+    - next_steps: Just next_steps and current_work_status
+
+    Usage from Discord:
+        !load session_name="Feature Implementation"
+
+    Usage from API:
+        GET /context/load/Feature_Implementation_20250107_143022?scope=summary
+    """
+    try:
+        context_dir = Path("Helix/context_vault")
+
+        if not context_dir.exists():
+            raise HTTPException(status_code=404, detail="Context vault directory not found")
+
+        # Find matching checkpoint files
+        matching_files = []
+
+        for checkpoint_file in context_dir.glob("*.json"):
+            # Match by checkpoint ID or session name
+            if session_identifier.lower() in checkpoint_file.stem.lower():
+                matching_files.append(checkpoint_file)
+
+        if not matching_files:
+            raise HTTPException(status_code=404, detail=f"No checkpoints found matching '{session_identifier}'")
+
+        # If multiple matches, return most recent
+        most_recent = max(matching_files, key=lambda p: p.stat().st_mtime)
+
+        # Load checkpoint data
+        with open(most_recent, "r") as f:
+            checkpoint = json.load(f)
+
+        # Filter based on scope
+        if scope == "summary":
+            filtered = {"context_summary": checkpoint.get("context_summary"), "key_decisions": checkpoint.get("key_decisions"), "timestamp": checkpoint.get("timestamp")}
+        elif scope == "decisions":
+            filtered = {
+                "key_decisions": checkpoint.get("key_decisions"),
+                "session_name": checkpoint.get("session_name"),
+                "timestamp": checkpoint.get("timestamp"),
+            }
+        elif scope == "next_steps":
+            filtered = {
+                "next_steps": checkpoint.get("next_steps"),
+                "current_work_status": checkpoint.get("current_work_status"),
+                "session_name": checkpoint.get("session_name"),
+                "timestamp": checkpoint.get("timestamp"),
+            }
+        else:  # full
+            filtered = checkpoint
+
+        logger.info(f"✅ Context checkpoint loaded: {checkpoint.get('checkpoint_id')} (scope: {scope})")
+
+        return {
+            "success": True,
+            "checkpoint": filtered,
+            "checkpoint_id": checkpoint.get("checkpoint_id"),
+            "scope": scope,
+            "file": str(most_recent),
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error loading checkpoint: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to load checkpoint: {str(e)}")
+
+
+@app.get("/context/status")
+async def get_context_vault_status():
+    """
+    Get Context Vault sync status and statistics.
+
+    Returns:
+    - Total checkpoints archived
+    - Recent checkpoints (last 10)
+    - Sync status with Notion
+    - Storage usage
+    - Integration health
+
+    Usage:
+        GET /context/status
+    """
+    try:
+        context_dir = Path("Helix/context_vault")
+
+        if not context_dir.exists():
+            return {
+                "initialized": False,
+                "message": "Context Vault not yet initialized",
+                "total_checkpoints": 0,
+                "recent_checkpoints": [],
+            }
+
+        # Count total checkpoints
+        checkpoint_files = list(context_dir.glob("*.json"))
+        total_checkpoints = len(checkpoint_files)
+
+        # Get recent checkpoints (last 10)
+        recent_files = sorted(checkpoint_files, key=lambda p: p.stat().st_mtime, reverse=True)[:10]
+
+        recent_checkpoints = []
+        for checkpoint_file in recent_files:
+            try:
+                with open(checkpoint_file, "r") as f:
+                    data = json.load(f)
+                recent_checkpoints.append(
+                    {
+                        "checkpoint_id": data.get("checkpoint_id"),
+                        "session_name": data.get("session_name"),
+                        "ai_platform": data.get("ai_platform"),
+                        "repository": data.get("repository"),
+                        "timestamp": data.get("timestamp"),
+                        "summary_preview": (data.get("context_summary", "")[:100] + "...") if data.get("context_summary") else None,
+                    }
+                )
+            except Exception as e:
+                logger.warning(f"Error reading checkpoint {checkpoint_file}: {e}")
+                continue
+
+        # Check Notion sync status
+        notion_configured = bool(os.getenv("NOTION_API_KEY") and os.getenv("NOTION_CONTEXT_DB_ID"))
+
+        zapier_configured = bool(os.getenv("ZAPIER_CONTEXT_WEBHOOK"))
+
+        # Calculate storage usage
+        total_size_bytes = sum(f.stat().st_size for f in checkpoint_files)
+        total_size_mb = total_size_bytes / (1024 * 1024)
+
+        return {
+            "initialized": True,
+            "total_checkpoints": total_checkpoints,
+            "recent_checkpoints": recent_checkpoints,
+            "storage": {"total_size_bytes": total_size_bytes, "total_size_mb": round(total_size_mb, 2), "directory": str(context_dir)},
+            "integration": {
+                "notion_configured": notion_configured,
+                "zapier_configured": zapier_configured,
+                "sync_status": "operational" if (notion_configured or zapier_configured) else "local_only",
+            },
+            "endpoints": {
+                "archive": "/context/archive",
+                "load": "/context/load/{session_identifier}",
+                "status": "/context/status",
+            },
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+
+    except Exception as e:
+        logger.error(f"Error getting context vault status: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get status: {str(e)}")
+
+
+# ============================================================================
 # MAIN ENTRY POINT
 # ============================================================================
 
