@@ -215,7 +215,7 @@ def setup_commands(bot):
 
         try:
             ucf_state = load_ucf_state()
-            result = await generate_and_post_to_discord(ucf_state, ctx.channel, mode)
+            result = await generate_pil_and_post_to_discord(ucf_state, ctx.channel, mode)
 
             if result:
                 await ctx.send(f"✅ **{mode.upper()} fractal complete!**")
