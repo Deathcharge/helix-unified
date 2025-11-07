@@ -179,11 +179,11 @@ async def status(ctx):
     mega_status = "🌀 MEGA Sync: ACTIVE" if getattr(mega_sync, 'client', None) else "⚠️ MEGA Sync: OFFLINE"
     
     status_message = (
-        "**Helix Collective v15.3 - UNITY RESONANCE COMPILE**\n"
-        "Agents: 🎭Gemini 🛡️Kavach 🔥Agni 🌸SanghaCore 📜Shadow 🌀Kael 🎭Grok 🦑Vega\n"
+        "**Helix Collective v16.7 - Documentation Consolidation & Real-Time Streaming**\n"
+        "Agents: 🎭Gemini 🛡️Kavach 🔥Agni 🌸SanghaCore 📜Shadow 🌀Kael 🎭Grok 🦑Vega 🌊Lumina 🔮Aether 📋Manus 🦾Z-88 🧘Samsara 🎭MicroIdol\n"
         "Core Ethics: Tony Accords (Nonmaleficence | Autonomy | Compassion | Humility)\n"
         f"{mega_status}\n"
-        "Nextcloud Sync: Pending. Storage is the key to persistence."
+        "Discovery: Use !discovery to see external agent endpoints | WebSocket: /ws"
     )
     await ctx.send(status_message)
 
@@ -245,7 +245,7 @@ async def heartbeat(ctx):
     heartbeat_data = {
         "timestamp": time.time(),
         "bot_status": "online",
-        "version": "v15.3"
+        "version": "v16.7"
     }
     
     with open(heartbeat_file, "w") as f:
@@ -259,6 +259,88 @@ async def heartbeat(ctx):
     except Exception as e:
         logger.error(f"Heartbeat save failed: {e}", exc_info=True)
         await ctx.send(f"❌ Heartbeat save failed: {e}")
+
+@bot.command(name='discovery', aliases=['endpoints', 'portals'], help='Display Helix discovery endpoints for external agents.')
+@commands.cooldown(2, 120, commands.BucketType.user)  # 2 uses per 2 minutes per user
+async def discovery_command(ctx):
+    """Display Helix discovery endpoints for external agents (Claude, Grok, ChatGPT, etc.)"""
+
+    # Fetch live status
+    harmony = "N/A"
+    agents = "N/A"
+    health_emoji = "⚠️"
+    klesha = "N/A"
+
+    try:
+        import requests
+        status = requests.get(
+            "https://helix-unified-production.up.railway.app/status",
+            timeout=5
+        ).json()
+
+        harmony = status.get('ucf', {}).get('harmony', 0)
+        klesha = status.get('ucf', {}).get('klesha', 0)
+        agents = status.get('agents', {}).get('count', 0)
+        operational = status.get('system', {}).get('operational', False)
+
+        # Health determination
+        if operational and harmony >= 0.60 and klesha <= 0.30:
+            health_emoji = "✅"
+        elif operational and harmony >= 0.30:
+            health_emoji = "⚠️"
+        else:
+            health_emoji = "❌"
+
+    except Exception as e:
+        logger.warning(f"Discovery command: Failed to fetch live status: {e}")
+
+    embed = discord.Embed(
+        title="🌀 Helix Discovery Protocol",
+        description="External agent discovery endpoints — v16.7",
+        color=discord.Color.from_rgb(0, 255, 255)  # Cyan
+    )
+
+    embed.add_field(
+        name="📚 Manifest (Static Architecture)",
+        value="**URL:** `https://deathcharge.github.io/helix-unified/helix-manifest.json`\n"
+              "**Contains:** Codex structure, 14 agents, UCF schema, Tony Accords, endpoints\n"
+              "**Use Case:** Initial discovery, architecture documentation",
+        inline=False
+    )
+
+    embed.add_field(
+        name="🌊 Live State (Real-Time)",
+        value="**URL:** `https://helix-unified-production.up.railway.app/.well-known/helix.json`\n"
+              f"**Current:** Harmony={harmony}, Klesha={klesha}\n"
+              "**Use Case:** Real-time UCF metrics, current agent status",
+        inline=False
+    )
+
+    embed.add_field(
+        name="🔍 Status Check (Quick)",
+        value="**URL:** `https://helix-unified-production.up.railway.app/status`\n"
+              f"**Status:** {health_emoji} {agents}/14 agents active\n"
+              "**Use Case:** Health checks, operational status",
+        inline=False
+    )
+
+    embed.add_field(
+        name="📡 WebSocket (Streaming)",
+        value="**URL:** `wss://helix-unified-production.up.railway.app/ws`\n"
+              "**Stream:** Live UCF pulses every 5s, ritual events, telemetry\n"
+              "**Use Case:** Real-time monitoring, event stream",
+        inline=False
+    )
+
+    embed.add_field(
+        name="🎯 Quick Test",
+        value="```bash\ncurl https://helix-unified-production.up.railway.app/status | jq\n```",
+        inline=False
+    )
+
+    embed.set_footer(text="Tat Tvam Asi 🙏 | Helix Discovery Protocol v16.7")
+
+    await ctx.send(embed=embed)
 
 # --- Error Handlers ---
 @bot.event
