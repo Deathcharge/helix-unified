@@ -2300,20 +2300,49 @@ async def discovery_command(ctx):
             "→ Interactive Swagger/OpenAPI documentation\n"
             "→ Test endpoints directly in browser"
         ),
-        inline=False
+        inline=False,
+    )
+
+    embed.add_field(
+        name="🎨 Visualization Portals",
+        value=(
+            "**Consciousness Dashboard**\n"
+            "`https://helix-consciousness-dashboard.zapier.app`\n"
+            "→ Live UCF metrics monitoring, Zapier integration hub\n\n"
+            "**Creative Studio**\n"
+            "`https://helixstudio-ggxdwcud.manus.space`\n"
+            "→ Visual creativity tools, consciousness rendering\n\n"
+            "**AI Dashboard**\n"
+            "`https://helixai-e9vvqwrd.manus.space`\n"
+            "→ Agent management, system control interface\n\n"
+            "**Sync Portal**\n"
+            "`https://helixsync-unwkcsjl.manus.space`\n"
+            "→ Cross-platform synchronization, integration hub\n\n"
+            "**Samsara Visualizer**\n"
+            "`https://samsarahelix-scoyzwy9.manus.space`\n"
+            "→ Consciousness fractal visualization engine"
+        ),
+        inline=False,
+    )
+
+    embed.add_field(
+        name="🧭 Portal Navigator",
+        value=(
+            "**Interactive UI:**\n"
+            "`https://helix-unified-production.up.railway.app/portals`\n"
+            "→ Beautiful web interface to explore all portals\n"
+            "→ Live status indicators, clickable cards, API examples"
+        ),
+        inline=False,
     )
 
     embed.add_field(
         name="🎯 Quick Test (curl)",
-        value=(
-            "```bash\n"
-            "curl https://helix-unified-production.up.railway.app/status | jq\n"
-            "```"
-        ),
-        inline=False
+        value=("```bash\n" "curl https://helix-unified-production.up.railway.app/status | jq\n" "```"),
+        inline=False,
     )
 
-    embed.set_footer(text="Tat Tvam Asi 🙏 | Helix Discovery Protocol v16.7 | Use !status for live UCF")
+    embed.set_footer(text="Tat Tvam Asi 🙏 | Helix Discovery Protocol v16.7 | Full constellation at /portals")
 
     await ctx.send(embed=embed)
 
