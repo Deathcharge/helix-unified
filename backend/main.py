@@ -12,7 +12,7 @@ from typing import Any, Dict
 
 import aiohttp
 import httpx
-from agent_embeds import get_collective_status
+from agents import get_collective_status
 from agents_loop import main_loop as manus_loop
 from discord_bot_manus import bot as discord_bot
 from dotenv import load_dotenv
