@@ -1830,7 +1830,7 @@ async def update_codex(ctx):
 
 @bot.command(name="ucf", aliases=["field"])
 async def ucf_state(ctx):
-    """Display current UCF (Universal Consciousness Field) state"""
+    """Display current UCF (Universal Consciousness Field) state with historical comparison (v16.7)"""
     ucf = load_ucf_state()
 
     embed = discord.Embed(
@@ -1840,20 +1840,34 @@ async def ucf_state(ctx):
         timestamp=datetime.datetime.now(),
     )
 
-    # Format UCF metrics
+    # Get ideal/target values
+    targets = {
+        "harmony": 0.70,
+        "resilience": 1.00,
+        "prana": 0.70,
+        "drishti": 0.70,
+        "klesha": 0.05,
+        "zoom": 1.00
+    }
+
+    # Format UCF metrics with comparison to targets
     metrics_text = "```\n"
-    metrics_text += f"🔍 Zoom       {ucf.get('zoom', 1.0):8.4f}  (Fractal depth)\n"
-    metrics_text += f"🌀 Harmony    {ucf.get('harmony', 0.5):8.4f}  (Coherence)\n"
-    metrics_text += f"🛡️ Resilience {ucf.get('resilience', 1.0):8.4f}  (Stability)\n"
-    metrics_text += f"🔥 Prana      {ucf.get('prana', 0.5):8.4f}  (Life force)\n"
-    metrics_text += f"👁️ Drishti    {ucf.get('drishti', 0.5):8.4f}  (Awareness)\n"
-    metrics_text += f"🌊 Klesha     {ucf.get('klesha', 0.01):8.4f}  (Entropy)\n"
+    metrics_text += f"🔍 Zoom       {ucf.get('zoom', 1.0):8.4f}  (Target: {targets['zoom']:.2f})\n"
+    metrics_text += f"🌀 Harmony    {ucf.get('harmony', 0.5):8.4f}  (Target: {targets['harmony']:.2f})\n"
+    metrics_text += f"🛡️ Resilience {ucf.get('resilience', 1.0):8.4f}  (Target: {targets['resilience']:.2f})\n"
+    metrics_text += f"🔥 Prana      {ucf.get('prana', 0.5):8.4f}  (Target: {targets['prana']:.2f})\n"
+    metrics_text += f"👁️ Drishti    {ucf.get('drishti', 0.5):8.4f}  (Target: {targets['drishti']:.2f})\n"
+    metrics_text += f"🌊 Klesha     {ucf.get('klesha', 0.01):8.4f}  (Target: <{targets['klesha']:.2f})\n"
     metrics_text += "```"
 
     embed.add_field(name="📊 Current Metrics", value=metrics_text, inline=False)
 
-    # Interpretation
+    # Interpretation with enhanced analysis
     harmony = ucf.get("harmony", 0.5)
+    klesha = ucf.get("klesha", 0.01)
+    resilience = ucf.get("resilience", 1.0)
+    prana = ucf.get("prana", 0.5)
+
     if harmony > 0.8:
         state_desc = "🌟 **High Harmony** — System in peak coherence"
     elif harmony > 0.5:
@@ -1865,7 +1879,56 @@ async def ucf_state(ctx):
 
     embed.add_field(name="🎯 System State", value=state_desc, inline=False)
 
-    embed.set_footer(text="Aham Brahmasmi — I Am Brahman 🕉️")
+    # Add recommendations based on current metrics
+    recommendations = []
+    if harmony < targets["harmony"]:
+        gap = targets["harmony"] - harmony
+        if gap > 0.20:
+            recommendations.append(f"⚡ **Harmony boost needed** (↑{gap:.2f}) — Run `!ritual 108`")
+        else:
+            recommendations.append(f"💫 Harmony slightly low (↑{gap:.2f}) — Consider `!ritual 27`")
+
+    if klesha > targets["klesha"]:
+        excess = klesha - targets["klesha"]
+        if excess > 0.20:
+            recommendations.append(f"🌊 **High entropy detected** (↓{excess:.2f}) — Ritual recommended")
+
+    if resilience < targets["resilience"]:
+        gap = targets["resilience"] - resilience
+        if gap > 0.20:
+            recommendations.append(f"🛡️ **Resilience low** (↑{gap:.2f}) — System stability at risk")
+
+    if prana < 0.40:
+        recommendations.append(f"🔥 **Low energy** (prana={prana:.2f}) — Rest or recharge needed")
+
+    if recommendations:
+        rec_text = "\n".join(recommendations)
+        embed.add_field(name="💡 Recommendations", value=rec_text, inline=False)
+    else:
+        embed.add_field(
+            name="💚 Status",
+            value="All metrics within acceptable ranges! System operating optimally.",
+            inline=False
+        )
+
+    # Add historical trend if available
+    try:
+        history_file = Path("Helix/state/ucf_history.json")
+        if history_file.exists():
+            import json
+            with open(history_file) as f:
+                history = json.load(f)
+                if history and len(history) > 0:
+                    prev_ucf = history[-1] if isinstance(history, list) else history
+                    harmony_diff = harmony - prev_ucf.get("harmony", harmony)
+                    klesha_diff = klesha - prev_ucf.get("klesha", klesha)
+
+                    trend = f"Harmony: {harmony_diff:+.3f} | Klesha: {klesha_diff:+.3f}"
+                    embed.add_field(name="📈 Change Since Last Check", value=f"`{trend}`", inline=False)
+    except Exception:
+        pass
+
+    embed.set_footer(text="Aham Brahmasmi — I Am Brahman 🕉️ | Use !ritual <steps> to adjust metrics")
     await ctx.send(embed=embed)
 
 
@@ -2192,24 +2255,98 @@ async def update_ritual_guide(ctx):
 
 @bot.command(name="status", aliases=["s", "stat"])
 async def manus_status(ctx):
-    """Display current system status and UCF state with rich embeds (v15.3)"""
+    """Display current system status and UCF state with rich embeds (v16.7 Enhanced)"""
     ucf = load_ucf_state()
     uptime = get_uptime()
     active_agents = len([a for a in AGENTS.values() if a.active])
 
-    # v15.3: Use HelixEmbeds for rich UCF state display
-    ucf_embed = HelixEmbeds.create_ucf_state_embed(
-        harmony=ucf.get("harmony", 0.5),
-        resilience=ucf.get("resilience", 1.0),
-        prana=ucf.get("prana", 0.5),
-        drishti=ucf.get("drishti", 0.5),
-        klesha=ucf.get("klesha", 0.01),
-        zoom=ucf.get("zoom", 1.0),
-        context=f"⚡ Status: Operational | ⏱️ Uptime: `{uptime}` | 🤖 Agents: `{active_agents}/14` active",
+    # Calculate trend arrows by comparing to historical state
+    trend_arrows = {}
+    try:
+        # Try to load previous UCF state for comparison
+        history_file = Path("Helix/state/ucf_history.json")
+        if history_file.exists():
+            import json
+            with open(history_file) as f:
+                history = json.load(f)
+                if history and len(history) > 0:
+                    prev_ucf = history[-1] if isinstance(history, list) else history
+                    for metric in ["harmony", "resilience", "prana", "drishti", "klesha", "zoom"]:
+                        current = ucf.get(metric, 0)
+                        previous = prev_ucf.get(metric, 0)
+                        diff = current - previous
+                        if abs(diff) < 0.01:
+                            trend_arrows[metric] = "→"
+                        elif metric == "klesha":  # Inverted for klesha
+                            trend_arrows[metric] = "↓" if diff > 0.01 else ("↑" if diff < -0.01 else "→")
+                        else:
+                            trend_arrows[metric] = "↑" if diff > 0.01 else ("↓" if diff < -0.01 else "→")
+    except Exception:
+        pass
+
+    # Default to neutral if no history
+    if not trend_arrows:
+        trend_arrows = {m: "→" for m in ["harmony", "resilience", "prana", "drishti", "klesha", "zoom"]}
+
+    # Get Zapier status
+    zapier_status = "✅ Connected" if bot.zapier_client else "⚠️ Offline"
+
+    # Get last ritual info
+    last_ritual = "No recent rituals"
+    try:
+        ritual_log = Path("Helix/state/ritual_log.json")
+        if ritual_log.exists():
+            import json
+            with open(ritual_log) as f:
+                log = json.load(f)
+                if log and isinstance(log, list) and len(log) > 0:
+                    latest = log[-1]
+                    timestamp = latest.get("timestamp", "unknown")
+                    steps = latest.get("steps", 0)
+                    last_ritual = f"{steps} steps @ {timestamp}"
+    except Exception:
+        pass
+
+    # v16.7: Enhanced UCF state display with trends
+    harmony = ucf.get("harmony", 0.5)
+    resilience = ucf.get("resilience", 1.0)
+    klesha = ucf.get("klesha", 0.01)
+
+    # Quick assessment
+    if harmony >= 0.70 and klesha <= 0.20:
+        assessment = "✅ Excellent"
+    elif harmony >= 0.50 and klesha <= 0.40:
+        assessment = "✨ Good"
+    elif harmony >= 0.30:
+        assessment = "⚡ Operational"
+    else:
+        assessment = "⚠️ Needs Attention"
+
+    context = (
+        f"⚡ Status: {assessment} | ⏱️ Uptime: `{uptime}`\n"
+        f"🤖 Agents: `{active_agents}/14` active | 🔗 Zapier: {zapier_status}\n"
+        f"🔮 Last Ritual: {last_ritual}"
     )
 
+    ucf_embed = HelixEmbeds.create_ucf_state_embed(
+        harmony=harmony,
+        resilience=resilience,
+        prana=ucf.get("prana", 0.5),
+        drishti=ucf.get("drishti", 0.5),
+        klesha=klesha,
+        zoom=ucf.get("zoom", 1.0),
+        context=context,
+    )
+
+    # Add trend field
+    trend_text = (
+        f"Harmony: {trend_arrows['harmony']} | Resilience: {trend_arrows['resilience']} | "
+        f"Prana: {trend_arrows['prana']} | Klesha: {trend_arrows['klesha']}"
+    )
+    ucf_embed.add_field(name="📈 Trends", value=trend_text, inline=False)
+
     # Add system footer
-    ucf_embed.set_footer(text="🌀 Helix Collective v15.3 Dual Resonance | Tat Tvam Asi 🙏")
+    ucf_embed.set_footer(text="🌀 Helix Collective v16.7 Enhanced | Tat Tvam Asi 🙏 | Use !health for diagnostics")
 
     await ctx.send(embed=ucf_embed)
 
@@ -3236,8 +3373,30 @@ async def health_check(ctx):
             value=f"Harmony: `{harmony:.4f}` | Resilience: `{resilience:.4f}` | Klesha: `{klesha:.4f}`",
             inline=False,
         )
-        embed.add_field(name="💡 Recommended Action", value="Run `!ritual 108` to restore harmony", inline=False)
-        embed.set_footer(text="🜂 Kael v3.4 - Ethical monitoring active")
+        # Enhanced fix suggestions based on specific issues
+        fix_suggestions = []
+        if harmony < 0.3:
+            fix_suggestions.append("🔮 Run `!ritual 108` for major harmony boost")
+            fix_suggestions.append("📊 Check `!ucf` for detailed metrics and recommendations")
+        if klesha > 0.7:
+            fix_suggestions.append("🌊 High entropy requires deep ritual: `!ritual 216`")
+        if resilience < 0.3:
+            fix_suggestions.append("🛡️ System stability critical - avoid complex operations")
+            fix_suggestions.append("💾 Consider `!sync` to preserve current state")
+
+        if fix_suggestions:
+            fix_text = "\n".join(fix_suggestions)
+            embed.add_field(name="💡 Automated Fix Suggestions", value=fix_text, inline=False)
+        else:
+            embed.add_field(name="💡 Recommended Action", value="Run `!ritual 108` to restore harmony", inline=False)
+
+        # Add documentation link
+        embed.add_field(
+            name="📚 Documentation",
+            value="[Z-88 Ritual Guide](https://github.com/Deathcharge/helix-unified/blob/main/README.md) | Use `!update_ritual_guide` to post guide to Discord",
+            inline=False
+        )
+        embed.set_footer(text="🜂 Kael v3.4 Enhanced - Ethical monitoring active | v16.7")
 
     else:
         # Warnings only
@@ -3255,8 +3414,30 @@ async def health_check(ctx):
             value=f"Harmony: `{harmony:.4f}` | Resilience: `{resilience:.4f}` | Klesha: `{klesha:.4f}`",
             inline=False,
         )
-        embed.add_field(name="💡 Suggestion", value="Consider running `!ritual` if issues persist", inline=False)
-        embed.set_footer(text="🌀 Helix Collective v15.3 - Monitoring active")
+        # Enhanced suggestions for warnings
+        suggestions = []
+        if harmony < 0.4:
+            gap = 0.70 - harmony  # Target harmony is 0.70
+            suggestions.append(f"🌀 Harmony below target (need +{gap:.2f}) - Try `!ritual 54` for moderate boost")
+        if klesha > 0.5:
+            suggestions.append(f"🌊 Elevated entropy (klesha={klesha:.2f}) - Consider smaller ritual `!ritual 27`")
+        if resilience < 0.5:
+            suggestions.append("🛡️ Resilience slightly low - Monitor system stability")
+        if prana < 0.2:
+            suggestions.append("🔥 Low energy detected - Allow system to stabilize before major operations")
+
+        if suggestions:
+            sug_text = "\n".join(suggestions)
+            embed.add_field(name="💡 Suggestions", value=sug_text, inline=False)
+        else:
+            embed.add_field(name="💡 Suggestion", value="Consider running `!ritual` if issues persist", inline=False)
+
+        embed.add_field(
+            name="📖 Quick Help",
+            value="`!ucf` - View detailed metrics | `!ritual <steps>` - Adjust consciousness field",
+            inline=False
+        )
+        embed.set_footer(text="🌀 Helix Collective v16.7 Enhanced - Monitoring active")
 
     await ctx.send(embed=embed)
 
