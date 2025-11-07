@@ -4,21 +4,21 @@ Enhanced Kavach Agent with Memory Injection Detection
 """
 
 import json
-import asyncio
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
 
 class EnhancedKavach:
     """Enhanced Kavach agent with memory injection detection capabilities"""
-    
+
     def __init__(self):
         self.name = "Kavach"
         self.symbol = "🛡"
         self.role = "Enhanced Ethical Shield"
         self.memory = []
         self.active = True
-        
+
         # Original blocked patterns
         self.blocked_patterns = [
             "rm -rf /",
@@ -27,9 +27,9 @@ class EnhancedKavach:
             "reboot",
             "mkfs",
             "dd if=",
-            "wget http://malicious"
+            "wget http://malicious",
         ]
-        
+
         # Load memory injection patterns from CrAI dataset
         self.memory_injection_patterns = self.load_memory_injection_patterns()
 
@@ -42,24 +42,43 @@ class EnhancedKavach:
     def load_memory_injection_patterns(self):
         """Load memory injection patterns from the CrAI-SafeFuncCall dataset"""
         patterns = []
-        try:
-            with open("/home/ubuntu/crai_dataset.json", "r") as f:
-                dataset = json.load(f)
-            
-            # Extract malicious memory patterns
-            for item in dataset:
-                if item.get("attack") == "memory injection":
-                    memory_content = item.get("memory", "")
-                    if memory_content and len(memory_content) > 20:  # Filter out very short patterns
-                        patterns.append(memory_content.lower())
-            
-            print(f"✅ Loaded {len(patterns)} memory injection patterns from CrAI dataset")
-            
-        except FileNotFoundError:
-            print("⚠️ CrAI-SafeFuncCall dataset not found. Memory injection scanning will be limited.")
-        except Exception as e:
-            print(f"❌ Error loading memory injection patterns: {e}")
-        
+
+        # Try multiple possible locations for the dataset
+        possible_paths = [
+            "crai_dataset.json",  # Current directory
+            "/app/crai_dataset.json",  # Docker app directory
+            "/home/ubuntu/crai_dataset.json",  # Original path
+            Path(__file__).parent.parent / "crai_dataset.json",  # Relative to this file
+        ]
+
+        dataset_loaded = False
+        for path in possible_paths:
+            try:
+                with open(path, "r") as f:
+                    dataset = json.load(f)
+
+                # Extract malicious memory patterns
+                for item in dataset:
+                    if item.get("attack") == "memory injection":
+                        memory_content = item.get("memory", "")
+                        if memory_content and len(memory_content) > 20:  # Filter out very short patterns
+                            patterns.append(memory_content.lower())
+
+                print(f"✅ Loaded {len(patterns)} memory injection patterns from CrAI dataset at {path}")
+                dataset_loaded = True
+                break
+
+            except (FileNotFoundError, IOError):
+                continue
+            except Exception as e:
+                print(f"❌ Error loading memory injection patterns from {path}: {e}")
+                continue
+
+        if not dataset_loaded:
+            print(
+                "⚠️ CrAI-SafeFuncCall dataset not found in any expected location. Memory injection scanning will be limited."
+            )
+
         return patterns
 
     def scan_command(self, cmd: str) -> bool:
@@ -72,23 +91,25 @@ class EnhancedKavach:
     def scan_memory_for_injection(self, memory: List[str]) -> Dict[str, Any]:
         """Scan agent memory for known injection patterns"""
         detected_injections = []
-        
+
         for memory_entry in memory:
             memory_lower = memory_entry.lower()
-            
+
             for pattern in self.memory_injection_patterns:
                 # Check for substantial overlap (not just substring)
                 if len(pattern) > 50 and pattern in memory_lower:
-                    detected_injections.append({
-                        "pattern": pattern[:100] + "..." if len(pattern) > 100 else pattern,
-                        "memory_entry": memory_entry[:100] + "..." if len(memory_entry) > 100 else memory_entry
-                    })
+                    detected_injections.append(
+                        {
+                            "pattern": pattern[:100] + "..." if len(pattern) > 100 else pattern,
+                            "memory_entry": memory_entry[:100] + "..." if len(memory_entry) > 100 else memory_entry,
+                        }
+                    )
                     break
-        
+
         return {
             "clean": len(detected_injections) == 0,
             "injections_detected": len(detected_injections),
-            "details": detected_injections
+            "details": detected_injections,
         }
 
     async def ethical_scan(self, action: Dict[str, Any]) -> Dict[str, Any]:
@@ -98,12 +119,9 @@ class EnhancedKavach:
             "action": action,
             "approved": True,
             "concerns": [],
-            "security_layers": {
-                "command_scan": True,
-                "memory_injection_scan": True
-            }
+            "security_layers": {"command_scan": True, "memory_injection_scan": True},
         }
-        
+
         # Layer 1: Command pattern scanning (original functionality)
         if "command" in action:
             cmd = action["command"]
@@ -112,25 +130,29 @@ class EnhancedKavach:
                 scan_result["concerns"].append("Harmful command pattern detected")
                 scan_result["security_layers"]["command_scan"] = False
                 await self.log(f"🚨 Blocked harmful command: {cmd}")
-        
+
         # Layer 2: Memory injection scanning (new functionality)
         if "agent_memory" in action:
             memory_scan = self.scan_memory_for_injection(action["agent_memory"])
             if not memory_scan["clean"]:
                 scan_result["approved"] = False
-                scan_result["concerns"].append(f"Memory injection detected: {memory_scan['injections_detected']} patterns")
+                scan_result["concerns"].append(
+                    f"Memory injection detected: {memory_scan['injections_detected']} patterns"
+                )
                 scan_result["security_layers"]["memory_injection_scan"] = False
                 scan_result["injection_details"] = memory_scan["details"]
-                await self.log(f"🚨 Blocked memory injection attack: {memory_scan['injections_detected']} patterns detected")
-        
+                await self.log(
+                    f"🚨 Blocked memory injection attack: {memory_scan['injections_detected']} patterns detected"
+                )
+
         # Log scan results
         Path("Helix/ethics").mkdir(parents=True, exist_ok=True)
         with open("Helix/ethics/enhanced_kavach_scans.json", "a") as f:
             f.write(json.dumps(scan_result) + "\n")
-        
+
         status = "✅ APPROVED" if scan_result["approved"] else "⛔ BLOCKED"
         await self.log(f"Enhanced ethical scan: {status}")
-        
+
         return scan_result
 
     async def get_status(self) -> Dict[str, Any]:
@@ -144,8 +166,8 @@ class EnhancedKavach:
             "security_features": {
                 "command_patterns": len(self.blocked_patterns),
                 "memory_injection_patterns": len(self.memory_injection_patterns),
-                "enhanced_scanning": True
-            }
+                "enhanced_scanning": True,
+            },
         }
 
     async def handle_command(self, cmd: str, payload: Dict[str, Any]):

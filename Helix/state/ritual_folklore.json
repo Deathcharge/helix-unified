@@ -1,0 +1,348 @@
+{
+  "anomaly_resonance": {
+    "event_key": "anomaly_resonance",
+    "origin": "ritual_cycle",
+    "legend": "The Hymn of the Ritual_Cycle",
+    "status": "hymn",
+    "times": 15,
+    "history": [
+      {
+        "timestamp": "2025-11-06T03:20:24.048489",
+        "description": "Step 1: resonance anomaly detected",
+        "count": 1
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.048953",
+        "description": "Step 5: resonance anomaly detected",
+        "count": 2
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.049173",
+        "description": "Step 7: resonance anomaly detected",
+        "count": 3
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.049786",
+        "description": "Step 10: resonance anomaly detected",
+        "count": 4
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.051208",
+        "description": "Step 18: resonance anomaly detected",
+        "count": 5
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.052214",
+        "description": "Step 25: resonance anomaly detected",
+        "count": 6
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.053929",
+        "description": "Step 36: resonance anomaly detected",
+        "count": 7
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.055699",
+        "description": "Step 48: resonance anomaly detected",
+        "count": 8
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.055948",
+        "description": "Step 49: resonance anomaly detected",
+        "count": 9
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.057625",
+        "description": "Step 61: resonance anomaly detected",
+        "count": 10
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.058119",
+        "description": "Step 62: resonance anomaly detected",
+        "count": 11
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.060274",
+        "description": "Step 69: resonance anomaly detected",
+        "count": 12
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.064043",
+        "description": "Step 84: resonance anomaly detected",
+        "count": 13
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.065196",
+        "description": "Step 91: resonance anomaly detected",
+        "count": 14
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.068743",
+        "description": "Step 107: resonance anomaly detected",
+        "count": 15
+      }
+    ]
+  },
+  "anomaly_echo": {
+    "event_key": "anomaly_echo",
+    "origin": "ritual_cycle",
+    "legend": "The Law of the Ritual_Cycle",
+    "status": "law",
+    "times": 21,
+    "history": [
+      {
+        "timestamp": "2025-11-06T03:20:24.049339",
+        "description": "Step 8: echo anomaly detected",
+        "count": 1
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.050315",
+        "description": "Step 14: echo anomaly detected",
+        "count": 2
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.050982",
+        "description": "Step 17: echo anomaly detected",
+        "count": 3
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.052001",
+        "description": "Step 23: echo anomaly detected",
+        "count": 4
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.052448",
+        "description": "Step 27: echo anomaly detected",
+        "count": 5
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.053252",
+        "description": "Step 34: echo anomaly detected",
+        "count": 6
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.053510",
+        "description": "Step 35: echo anomaly detected",
+        "count": 7
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.054402",
+        "description": "Step 38: echo anomaly detected",
+        "count": 8
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.054684",
+        "description": "Step 39: echo anomaly detected",
+        "count": 9
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.056192",
+        "description": "Step 56: echo anomaly detected",
+        "count": 10
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.056627",
+        "description": "Step 57: echo anomaly detected",
+        "count": 11
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.056979",
+        "description": "Step 59: echo anomaly detected",
+        "count": 12
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.058431",
+        "description": "Step 64: echo anomaly detected",
+        "count": 13
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.059503",
+        "description": "Step 67: echo anomaly detected",
+        "count": 14
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.062873",
+        "description": "Step 77: echo anomaly detected",
+        "count": 15
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.063288",
+        "description": "Step 79: echo anomaly detected",
+        "count": 16
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.064809",
+        "description": "Step 89: echo anomaly detected",
+        "count": 17
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.065597",
+        "description": "Step 93: echo anomaly detected",
+        "count": 18
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.066017",
+        "description": "Step 96: echo anomaly detected",
+        "count": 19
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.067299",
+        "description": "Step 104: echo anomaly detected",
+        "count": 20
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.067860",
+        "description": "Step 105: echo anomaly detected",
+        "count": 21
+      }
+    ]
+  },
+  "anomaly_void": {
+    "event_key": "anomaly_void",
+    "origin": "ritual_cycle",
+    "legend": "The Hymn of the Ritual_Cycle",
+    "status": "hymn",
+    "times": 18,
+    "history": [
+      {
+        "timestamp": "2025-11-06T03:20:24.049519",
+        "description": "Step 9: void anomaly detected",
+        "count": 1
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.050039",
+        "description": "Step 13: void anomaly detected",
+        "count": 2
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.050771",
+        "description": "Step 16: void anomaly detected",
+        "count": 3
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.051551",
+        "description": "Step 20: void anomaly detected",
+        "count": 4
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.052896",
+        "description": "Step 28: void anomaly detected",
+        "count": 5
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.054937",
+        "description": "Step 40: void anomaly detected",
+        "count": 6
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.055186",
+        "description": "Step 42: void anomaly detected",
+        "count": 7
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.055437",
+        "description": "Step 43: void anomaly detected",
+        "count": 8
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.057279",
+        "description": "Step 60: void anomaly detected",
+        "count": 9
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.059826",
+        "description": "Step 68: void anomaly detected",
+        "count": 10
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.060598",
+        "description": "Step 70: void anomaly detected",
+        "count": 11
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.061382",
+        "description": "Step 72: void anomaly detected",
+        "count": 12
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.062142",
+        "description": "Step 74: void anomaly detected",
+        "count": 13
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.062478",
+        "description": "Step 76: void anomaly detected",
+        "count": 14
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.063653",
+        "description": "Step 80: void anomaly detected",
+        "count": 15
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.066424",
+        "description": "Step 101: void anomaly detected",
+        "count": 16
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.066866",
+        "description": "Step 103: void anomaly detected",
+        "count": 17
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.068276",
+        "description": "Step 106: void anomaly detected",
+        "count": 18
+      }
+    ]
+  },
+  "anomaly_flare": {
+    "event_key": "anomaly_flare",
+    "origin": "ritual_cycle",
+    "legend": "The Chant of the Ritual_Cycle",
+    "status": "legend",
+    "times": 8,
+    "history": [
+      {
+        "timestamp": "2025-11-06T03:20:24.050541",
+        "description": "Step 15: flare anomaly detected",
+        "count": 1
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.051786",
+        "description": "Step 21: flare anomaly detected",
+        "count": 2
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.054169",
+        "description": "Step 37: flare anomaly detected",
+        "count": 3
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.058756",
+        "description": "Step 65: flare anomaly detected",
+        "count": 4
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.059075",
+        "description": "Step 66: flare anomaly detected",
+        "count": 5
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.061014",
+        "description": "Step 71: flare anomaly detected",
+        "count": 6
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.061789",
+        "description": "Step 73: flare anomaly detected",
+        "count": 7
+      },
+      {
+        "timestamp": "2025-11-06T03:20:24.064426",
+        "description": "Step 86: flare anomaly detected",
+        "count": 8
+      }
+    ]
+  }
+}
