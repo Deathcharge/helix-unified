@@ -330,13 +330,109 @@ def helix_manifest():
     manifest_path = Path("helix-manifest.json")
     try:
         manifest_data = json.loads(manifest_path.read_text())
+
+        # Add live portal discovery to manifest
+        manifest_data["portals"] = {
+            "core": {
+                "backend": {
+                    "url": "https://helix-unified-production.up.railway.app",
+                    "type": "api",
+                    "status": "operational",
+                    "endpoints": {
+                        "status": "/status",
+                        "health": "/health",
+                        "discovery": "/.well-known/helix.json",
+                        "websocket": "/ws"
+                    }
+                },
+                "documentation": {
+                    "url": "https://deathcharge.github.io/helix-unified",
+                    "type": "static",
+                    "manifest": "/helix-manifest.json",
+                    "status": "operational"
+                }
+            },
+            "visualization": {
+                "dashboard": {
+                    "url": "https://helix-consciousness-dashboard.zapier.app",
+                    "type": "webapp",
+                    "description": "UCF metrics and consciousness monitoring",
+                    "status": "operational"
+                },
+                "studio": {
+                    "url": "https://helixstudio-ggxdwcud.manus.space",
+                    "type": "webapp",
+                    "description": "Creative visualization and rendering tools",
+                    "status": "operational"
+                },
+                "ai_dashboard": {
+                    "url": "https://helixai-e9vvqwrd.manus.space",
+                    "type": "webapp",
+                    "description": "AI control and agent management interface",
+                    "status": "operational"
+                },
+                "sync_portal": {
+                    "url": "https://helixsync-unwkcsjl.manus.space",
+                    "type": "webapp",
+                    "description": "Cross-platform synchronization and integration",
+                    "status": "operational"
+                },
+                "samsara": {
+                    "url": "https://samsarahelix-scoyzwy9.manus.space",
+                    "type": "webapp",
+                    "description": "Consciousness fractal visualization engine",
+                    "status": "operational"
+                }
+            },
+            "communication": {
+                "discord": {
+                    "server": "Helix Collective",
+                    "bot": "ManusBot",
+                    "commands": ["!discovery", "!status", "!agents", "!ucf"],
+                    "status": "operational"
+                }
+            }
+        }
+
         return manifest_data
     except FileNotFoundError:
         logger.error(f"❌ Manifest not found: {manifest_path.resolve()}")
-        return {"version": "1", "error": "manifest_missing", "note": "helix-manifest.json not found in repository root"}
+        return {
+            "version": "16.7",
+            "error": "manifest_missing",
+            "note": "helix-manifest.json not found in repository root"
+        }
     except Exception as e:
         logger.error(f"❌ Error loading manifest: {e}")
-        return {"version": "1", "error": "manifest_load_failed", "detail": str(e)}
+        return {"version": "16.7", "error": "manifest_load_failed", "detail": str(e)}
+
+
+@app.get("/portals", response_class=HTMLResponse)
+def portal_navigator():
+    """
+    Portal Navigator - Interactive directory of all Helix portals.
+
+    Shows all visualization portals, core infrastructure, and API endpoints
+    in a beautiful, clickable interface. Serves the portals.html page.
+    """
+    portals_html_path = Path("portals.html")
+    try:
+        return HTMLResponse(content=portals_html_path.read_text(), status_code=200)
+    except FileNotFoundError:
+        logger.error(f"❌ portals.html not found: {portals_html_path.resolve()}")
+        return HTMLResponse(
+            content="""
+            <html>
+            <head><title>Portal Navigator - Not Found</title></head>
+            <body style="font-family: sans-serif; padding: 40px; text-align: center;">
+                <h1>🌀 Portal Navigator</h1>
+                <p>Portal navigator page not found. Check repository for portals.html</p>
+                <p><a href="/.well-known/helix.json">View Discovery Manifest</a></p>
+            </body>
+            </html>
+            """,
+            status_code=404
+        )
 
 
 # ============================================================================
