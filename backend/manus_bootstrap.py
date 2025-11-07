@@ -7,18 +7,13 @@ import json
 import aiohttp
 from contextlib import asynccontextmanager
 from datetime import datetime
-from pathlib import Path
 from typing import Optional
 
 from fastapi import FastAPI, Depends, HTTPException
-from fastapi.responses import JSONResponse
 
 from services.zapier_client import (
     ZapierClient,
-    validate_zapier_config,
-    EVENT_HOOK,
-    AGENT_HOOK,
-    SYSTEM_HOOK
+    validate_zapier_config
 )
 
 # ============================================================================

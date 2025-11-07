@@ -8,7 +8,7 @@ ritual results, and system status messages.
 
 import discord
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 from backend.ucf_protocol import UCFProtocol
 
 

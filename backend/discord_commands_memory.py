@@ -105,7 +105,7 @@ class MemoryRootCommands(commands.Cog):
             
             # Format response
             embed = discord.Embed(
-                title=f"📸 Session Context",
+                title="📸 Session Context",
                 color=discord.Color.purple()
             )
             

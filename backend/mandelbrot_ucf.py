@@ -11,7 +11,7 @@ Version: 15.5.0
 """
 
 import numpy as np
-from typing import Dict, Tuple, Optional
+from typing import Dict, Tuple
 import logging
 
 logger = logging.getLogger(__name__)

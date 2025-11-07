@@ -20,7 +20,6 @@ import asyncio
 import datetime
 import logging
 from pathlib import Path
-from dotenv import load_dotenv
 import time
 import shutil
 from statistics import mean, stdev
@@ -46,13 +45,10 @@ HEARTBEAT_PATH = STATE_DIR / "heartbeat.json"
 # Import Helix components (FIXED: relative imports)
 from agents import AGENTS
 from z88_ritual_engine import execute_ritual, load_ucf_state
-from services.ucf_calculator import UCFCalculator
-from services.state_manager import StateManager
 from discord_embeds import HelixEmbeds  # v15.3 rich embeds
 from zapier_client import ZapierClient  # v16.5 Zapier integration
 
 # Import consciousness modules (v15.3)
-from kael_consciousness_core import ConsciousnessCore
 from agent_consciousness_profiles import AGENT_CONSCIOUSNESS_PROFILES
 from discord_consciousness_commands import create_consciousness_embed, create_agent_consciousness_embed, create_emotions_embed
 
@@ -367,7 +363,7 @@ async def build_storage_report(alert_threshold=2.0):
     if TREND_FILE.exists():
         try:
             trend = json.load(open(TREND_FILE))
-        except:
+        except Exception:
             trend = []
 
     trend.append({"date": time.strftime("%Y-%m-%d"), "free_gb": free})
@@ -728,7 +724,7 @@ async def setup_helix_server(ctx):
     admin_only_channels = ["🔒│moderation", "🗃│backups"]
 
     created_channels = {}
-    progress_msg = await ctx.send("📁 Creating categories and channels...")
+    await ctx.send("📁 Creating categories and channels...")
 
     # Create categories and channels
     for category_name, channel_list in categories_structure.items():
@@ -1983,7 +1979,7 @@ async def codex_version(ctx, version: str = "15.3"):
             inline=False
         )
 
-    embed.set_footer(text=f"Tat Tvam Asi 🙏 | Use !update_codex to post full version")
+    embed.set_footer(text="Tat Tvam Asi 🙏 | Use !update_codex to post full version")
     await ctx.send(embed=embed)
 
 @bot.command(name="update_rules", aliases=["rules"])
@@ -2605,7 +2601,7 @@ async def show_status(ctx):
         try:
             from agents import HELIX_AGENTS
             agent_count = len(HELIX_AGENTS)
-        except:
+        except Exception:
             agent_count = 13
 
         embed = discord.Embed(
@@ -2697,7 +2693,7 @@ async def run_command(ctx, command: str):
         directives_file = Path("Helix/commands/manus_directives.json")
         try:
             directives = json.load(open(directives_file)) if directives_file.exists() else []
-        except:
+        except Exception:
             directives = []
 
         directives.append({
@@ -2792,7 +2788,7 @@ async def ritual_cmd(ctx, steps: int = 108):
     msg = await ctx.send(f"**Initiating Z-88 ritual** ({steps} steps)…")
 
     try:
-        result = await asyncio.to_thread(execute_ritual, steps)
+        await asyncio.to_thread(execute_ritual, steps)
         ucf_after = load_ucf_state()
 
         def delta(before, after): return after - before
@@ -3439,7 +3435,7 @@ def main():
         return
     
     print("🤲 Starting Manusbot...")
-    print(f"   Helix v14.5 - Quantum Handshake Edition")
+    print("   Helix v14.5 - Quantum Handshake Edition")
     active = 0
     for a in AGENTS:
         if isinstance(a, dict) and a.get("status") == "Active":
@@ -3744,7 +3740,7 @@ async def help_consciousness_command(ctx):
 # AGENT EMBED COMMANDS (v15.3) - Agent Rotation & Profiles
 # ============================================================================
 
-from agent_embeds import get_agent_embed, get_next_agent_embed, get_collective_status, list_all_agents
+from agent_embeds import get_agent_embed, list_all_agents
 
 @bot.command(name="agent")
 async def agent_command(ctx, agent_name: str = None):
@@ -3846,7 +3842,7 @@ async def refresh_server(ctx, confirm: str = None):
             try:
                 await channel.delete()
                 deleted_count += 1
-            except:
+            except Exception:
                 pass
 
     await ctx.send(f"✅ Deleted {deleted_count} old channels")
@@ -3856,7 +3852,7 @@ async def refresh_server(ctx, confirm: str = None):
     for category in guild.categories:
         try:
             await category.delete()
-        except:
+        except Exception:
             pass
 
     # Step 3: Run setup

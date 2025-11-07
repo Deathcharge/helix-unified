@@ -240,7 +240,6 @@ class HelixStorageAdapterAsync:
         """
         import shutil
         import glob
-        import time
 
         # Load threshold from config (default 100 GB)
         config_path = Path("Helix/state/storage_config.json")
@@ -251,7 +250,7 @@ class HelixStorageAdapterAsync:
                     content = await f.read()
                     config = json.loads(content)
                     threshold_gb = config.get("auto_cleanup_threshold_gb", 100)
-            except:
+            except Exception:
                 pass
 
         # Check free space

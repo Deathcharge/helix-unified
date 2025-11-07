@@ -123,7 +123,7 @@ class HelixSyncDaemon:
             else:
                 # Use default config
                 self.config = self.get_default_config()
-                logger.warning(f"Config file not found, using defaults")
+                logger.warning("Config file not found, using defaults")
         except Exception as e:
             logger.error(f"Failed to load config: {e}")
             self.config = self.get_default_config()
@@ -289,7 +289,7 @@ class HelixSyncDaemon:
         """Export to Markdown"""
         # Placeholder - will be implemented in next phase
         with open(path, 'w') as f:
-            f.write(f"# Helix Ecosystem Sync\n\n")
+            f.write("# Helix Ecosystem Sync\n\n")
             f.write(f"**Generated:** {datetime.utcnow().isoformat()}\n\n")
             f.write(f"```json\n{json.dumps(data, indent=2)}\n```\n")
     

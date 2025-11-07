@@ -14,7 +14,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict, Optional
 import json
 
 
@@ -133,8 +133,7 @@ class ConsciousnessVisualizer:
         # Normalize
         M = M / max_iter
 
-        # Color mapping based on prana (energy)
-        prana = ucf_state.get('prana', 0.5)
+        # Color mapping based on consciousness state
         fig, ax = plt.subplots(figsize=(10, 10))
 
         # Choose colormap based on consciousness state
@@ -145,8 +144,8 @@ class ConsciousnessVisualizer:
         else:
             cmap = 'plasma'  # Seeking harmony
 
-        im = ax.imshow(M, extent=[x.min(), x.max(), y.min(), y.max()],
-                       cmap=cmap, origin='lower', interpolation='bilinear')
+        ax.imshow(M, extent=[x.min(), x.max(), y.min(), y.max()],
+                  cmap=cmap, origin='lower', interpolation='bilinear')
         ax.set_title(f"Atman Mandelbrot | H:{harmony:.3f} R:{resilience:.3f}",
                      color='white', size=14)
         ax.axis('off')

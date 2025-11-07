@@ -16,7 +16,7 @@ import json
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List, Tuple, Optional
+from typing import Dict, Any, List, Tuple
 from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
@@ -273,7 +273,7 @@ class NotionSyncValidator:
                 lines.append(f"   ... and {len(result.warnings) - 10} more")
         
         if result.metadata:
-            lines.append(f"\n📊 Metadata:")
+            lines.append("\n📊 Metadata:")
             for key, value in result.metadata.items():
                 if isinstance(value, dict):
                     lines.append(f"   {key}:")

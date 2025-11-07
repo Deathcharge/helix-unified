@@ -335,7 +335,7 @@ if __name__ == "__main__":
         
         # Check configuration
         config = validate_zapier_config()
-        print(f"\n📋 Configuration Status:")
+        print("\n📋 Configuration Status:")
         print(f"  Event Hook:  {'✅' if config['event_hook'] else '❌'}")
         print(f"  Agent Hook:  {'✅' if config['agent_hook'] else '❌'}")
         print(f"  System Hook: {'✅' if config['system_hook'] else '❌'}")

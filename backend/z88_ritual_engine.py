@@ -11,7 +11,7 @@ import os
 import random
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 
 class UCFState:
@@ -311,7 +311,7 @@ class Z88RitualEngine:
                     ucf.adjust(event_result["new_status"])
 
         results["ucf_final"] = ucf.to_dict()
-        self._write_diary(f"=== Ritual Cycle Complete ===")
+        self._write_diary("=== Ritual Cycle Complete ===")
         self._write_diary(f"Final UCF: {results['ucf_final']}")
 
         return results
@@ -470,7 +470,7 @@ if __name__ == "__main__":
     print("\n📖 Running 108-step ritual cycle...")
     result = engine.run_ritual_cycle(108)
 
-    print(f"\n✅ Cycle complete!")
+    print("\n✅ Cycle complete!")
     print(f"   Events recorded: {len(result['events'])}")
     print(f"   Final UCF: {result['ucf_final']}")
 

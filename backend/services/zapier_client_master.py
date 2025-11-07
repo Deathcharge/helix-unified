@@ -422,7 +422,7 @@ if __name__ == "__main__":
         print("=" * 70)
 
         config = validate_config()
-        print(f"\n📋 Configuration:")
+        print("\n📋 Configuration:")
         print(f"  Mode: {config['mode']}")
         print(f"  Master Webhook: {'✅' if config['master_webhook'] else '❌'}")
         print(f"  Individual Webhooks: {'✅' if config['individual_webhooks'] else '❌'}")

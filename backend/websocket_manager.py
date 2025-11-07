@@ -10,7 +10,6 @@ Version: 15.5.0
 """
 
 import asyncio
-import json
 from typing import Dict, Set, Any
 from fastapi import WebSocket, WebSocketDisconnect
 from datetime import datetime

@@ -9,7 +9,7 @@ Version: 1.0
 """
 
 from datetime import datetime
-from typing import Dict, List, Any
+from typing import Dict
 import logging
 
 logger = logging.getLogger('HelixSync.NotionExporter')
@@ -90,7 +90,7 @@ class NotionExporter:
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(notion_data, f, indent=2)
         
-        logger.info(f"Notion JSON export complete")
+        logger.info("Notion JSON export complete")
     
     def export_repos(self, github_data: Dict) -> Dict:
         """Export repository data in Notion format"""

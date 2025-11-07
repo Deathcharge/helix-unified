@@ -146,7 +146,7 @@ class HelixSyncDaemon:
             else:
                 # Use default config
                 self.config = self.get_default_config()
-                logger.warning(f"Config file not found, using defaults")
+                logger.warning("Config file not found, using defaults")
         except Exception as e:
             logger.error(f"Failed to load config: {e}")
             self.config = self.get_default_config()

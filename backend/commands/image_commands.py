@@ -4,11 +4,8 @@ Image Commands for Helix Discord Bot
 !image aion - Generate ouroboros fractal visualizations using PIL
 """
 
-import io
 import json
-import discord
 from discord.ext import commands
-from typing import Optional
 
 # Import PIL-based fractal generation (v16.1 additions to samsara_bridge)
 try:

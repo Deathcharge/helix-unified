@@ -6,7 +6,6 @@ from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconn
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, FileResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 import asyncio
 import os
@@ -14,7 +13,6 @@ import json
 from pathlib import Path
 from datetime import datetime
 from dotenv import load_dotenv
-import logging
 import httpx
 import aiohttp
 from pydantic import BaseModel
@@ -24,11 +22,9 @@ from typing import Dict, Any
 from logging_config import setup_logging
 
 # FIX: Create Crypto → Cryptodome alias BEFORE importing mega
-import sys
 try:
     # pycryptodome installs as 'Crypto', not 'Cryptodome'
     import Crypto
-    from Crypto.Cipher import AES
     print(f"✅ pycryptodome found (version {Crypto.__version__}) - MEGA sync enabled")
 except ImportError:
     print("⚠️ pycryptodome not found - MEGA sync may fail")
@@ -75,7 +71,6 @@ logger.info("🌀 Helix Collective v16.7 - Backend Initialization")
 # ✅ FIXED IMPORTS - Use relative imports instead of absolute
 from discord_bot_manus import bot as discord_bot
 from agents_loop import main_loop as manus_loop
-from agents import AGENTS, get_collective_status
 from websocket_manager import manager as ws_manager
 from mandelbrot_ucf import (
     MandelbrotUCFGenerator,
@@ -83,6 +78,7 @@ from mandelbrot_ucf import (
     generate_ritual_ucf
 )
 from zapier_integration import HelixZapierIntegration, set_zapier, get_zapier
+from agent_embeds import get_collective_status
 
 # ============================================================================
 # WEBSOCKET BROADCAST LOOP
@@ -120,7 +116,7 @@ async def ucf_broadcast_loop():
             if current_state != previous_state:
                 # Broadcast to all connected WebSocket clients
                 await ws_manager.broadcast_ucf_state(current_state)
-                logger.debug(f"📡 UCF state changed and broadcasted")
+                logger.debug("📡 UCF state changed and broadcasted")
                 previous_state = current_state.copy()
 
                 # Send to Zapier every 30 seconds (not every change)
@@ -179,7 +175,7 @@ async def lifespan(app: FastAPI):
         zapier = HelixZapierIntegration(zapier_webhook_url)
         await zapier.__aenter__()  # Initialize session
         set_zapier(zapier)
-        print(f"✅ Zapier integration enabled")
+        print("✅ Zapier integration enabled")
     else:
         print("⚠️ ZAPIER_WEBHOOK_URL not set - integration disabled")
 
@@ -196,23 +192,23 @@ async def lifespan(app: FastAPI):
     discord_token = os.getenv("DISCORD_TOKEN")
     if discord_token:
         try:
-            bot_task = asyncio.create_task(discord_bot.start(discord_token))
+            asyncio.create_task(discord_bot.start(discord_token))  # noqa: F841
             print("🤖 Discord bot task started")
         except Exception as e:
             print(f"⚠ Discord bot start error: {e}")
     else:
         print("⚠ No DISCORD_TOKEN found - bot not started")
-    
+
     # Launch Manus operational loop in background task
     try:
-        manus_task = asyncio.create_task(manus_loop())
+        asyncio.create_task(manus_loop())  # noqa: F841
         print("🤲 Manus operational loop task started")
     except Exception as e:
         print(f"⚠ Manus loop start error: {e}")
 
     # Launch WebSocket UCF broadcaster in background task
     try:
-        ws_broadcast_task = asyncio.create_task(ucf_broadcast_loop())
+        asyncio.create_task(ucf_broadcast_loop())  # noqa: F841
         print("📡 WebSocket UCF broadcast task started")
     except Exception as e:
         print(f"⚠ WebSocket broadcast start error: {e}")
@@ -260,9 +256,6 @@ def find_templates_directory():
     # Strategy 2: Relative to current working directory
     strategy2 = Path.cwd() / "templates"
 
-    # Strategy 3: Sibling to backend directory
-    strategy3 = Path(__file__).parent.parent / "templates"
-
     # Strategy 4: In parent of current working directory
     strategy4 = Path.cwd().parent / "templates"
 
@@ -293,7 +286,7 @@ def find_templates_directory():
             logger.info(f"   ❌ Not found: {path.resolve()}")
 
     # If nothing found, use default and let it fail with good error message
-    logger.error(f"❌ Could not find templates directory! Using fallback.")
+    logger.error("❌ Could not find templates directory! Using fallback.")
     return strategy1
 
 BASE_DIR = Path(__file__).parent.parent
@@ -501,7 +494,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 try:
                     with open("Helix/state/ucf_state.json", "r") as f:
                         ucf_state = json.load(f)
-                except:
+                except Exception:
                     pass
 
                 # Read heartbeat
@@ -509,7 +502,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 try:
                     with open("Helix/state/heartbeat.json", "r") as f:
                         heartbeat = json.load(f)
-                except:
+                except Exception:
                     pass
 
                 # Send update

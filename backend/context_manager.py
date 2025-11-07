@@ -8,7 +8,6 @@ Implements the three-layer architecture routing logic.
 
 from typing import Dict, List, Optional, Tuple
 from enum import Enum
-import re
 
 
 class AgentLayer(Enum):
@@ -268,7 +267,6 @@ class ContextManager:
         Returns:
             List of (agent_name, role) tuples
         """
-        task_lower = task.lower()
         team = []
         
         # Always include one consciousness layer agent for oversight

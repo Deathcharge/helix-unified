@@ -4,7 +4,6 @@ Enhanced Kavach Agent with Memory Injection Detection
 """
 
 import json
-import asyncio
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, List

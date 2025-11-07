@@ -19,9 +19,8 @@ Usage:
 """
 
 import discord
-import asyncio
 from datetime import datetime, timedelta
-from typing import Optional, Dict, List
+from typing import Dict, List
 import json
 from pathlib import Path
 
@@ -104,7 +103,7 @@ class ChannelManager:
         if self.zapier_client:
             try:
                 await self.zapier_client.log_event(
-                    event_title=f"Channel Created: Ritual Space",
+                    event_title="Channel Created: Ritual Space",
                     event_type="channel_lifecycle",
                     agent_name="ChannelManager",
                     description=f"Created ritual space '{ritual_name}' ({channel.mention}) - expires in {duration_hours}h",
@@ -198,7 +197,7 @@ class ChannelManager:
         if self.zapier_client:
             try:
                 await self.zapier_client.log_event(
-                    event_title=f"Channel Created: Agent Workspace",
+                    event_title="Channel Created: Agent Workspace",
                     event_type="channel_lifecycle",
                     agent_name="ChannelManager",
                     description=f"Created {agent_name} workspace ({channel.mention}) - Purpose: {purpose} {'(temporary)' if temporary else ''}",
@@ -258,7 +257,7 @@ class ChannelManager:
         if self.zapier_client:
             try:
                 await self.zapier_client.log_event(
-                    event_title=f"Channel Created: Project",
+                    event_title="Channel Created: Project",
                     event_type="channel_lifecycle",
                     agent_name="ChannelManager",
                     description=f"Created project channel '{project_name}' ({channel.mention}) - {description}",
@@ -303,7 +302,7 @@ class ChannelManager:
         
         # Send welcome message
         embed = discord.Embed(
-            title=f"🧩 Cross-AI Collaboration",
+            title="🧩 Cross-AI Collaboration",
             description=f"**Participants:** {', '.join(ai_names)}\n**Purpose:** {purpose}",
             color=discord.Color.gold(),
             timestamp=datetime.now()
@@ -318,7 +317,7 @@ class ChannelManager:
         if self.zapier_client:
             try:
                 await self.zapier_client.log_event(
-                    event_title=f"Channel Created: Cross-AI Sync",
+                    event_title="Channel Created: Cross-AI Sync",
                     event_type="channel_lifecycle",
                     agent_name="ChannelManager",
                     description=f"Created cross-AI channel ({channel.mention}) - AIs: {', '.join(ai_names)} - Purpose: {purpose}",
@@ -427,7 +426,7 @@ class ChannelManager:
                         if channel.created_at < cutoff:
                             await channel.delete(reason=f"Empty and inactive for {days} days")
                             deleted_count += 1
-                except:
+                except Exception:
                     pass
 
         # Log to webhook

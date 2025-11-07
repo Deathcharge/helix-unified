@@ -34,7 +34,7 @@ class StateManager:
         if self.db_url:
             try:
                 self.db_pool = await asyncpg.create_pool(self.db_url)
-                print(f"✅ PostgreSQL connected")
+                print("✅ PostgreSQL connected")
             except Exception as e:
                 print(f"⚠ PostgreSQL connection failed: {e}")
                 self.db_pool = None
@@ -90,7 +90,7 @@ class StateManager:
             try:
                 with open(state_path) as f:
                     return json.load(f)
-            except:
+            except Exception:
                 pass
         
         # Return default
@@ -261,7 +261,7 @@ class StateManager:
             try:
                 await self.redis.ping()
                 health["redis"] = True
-            except:
+            except Exception:
                 health["redis"] = False
         
         if self.db_pool:
@@ -269,7 +269,7 @@ class StateManager:
                 async with self.db_pool.acquire() as conn:
                     await conn.fetchval('SELECT 1')
                 health["postgres"] = True
-            except:
+            except Exception:
                 health["postgres"] = False
         
         return health

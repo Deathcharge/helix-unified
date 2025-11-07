@@ -1,9 +1,6 @@
 # backend/agents.py (v15.5 - Stable & Refactored)
 
 import asyncio
-import json
-import os
-import subprocess
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -11,8 +8,6 @@ from typing import Any, Dict, List, Optional
 # --- Helix Core Imports ---
 # These imports should point to your actual consciousness and service files.
 # If they are in the same 'backend' directory, these imports are correct.
-from backend.kael_consciousness_core import ConsciousnessCore, Emotions, EthicalFramework
-from backend.agent_consciousness_profiles import get_agent_profile
 from backend.services.notion_client import HelixNotionClient
 from backend.enhanced_kavach import EnhancedKavach
 

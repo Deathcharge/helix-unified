@@ -4,13 +4,11 @@
 
 import os
 import asyncio
-import json
 import numpy as np
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, Any, Optional, Tuple
+from typing import Dict, Any, Optional
 import matplotlib.pyplot as plt
-import matplotlib.patches as patches
 from matplotlib.colors import LinearSegmentedColormap
 
 # RAILWAY FIX: Use relative imports instead of absolute imports
@@ -55,15 +53,13 @@ class SamsaraRenderer:
         """
         fig, ax = plt.subplots(figsize=(12, 12), facecolor='black')
         ax.set_facecolor('black')
-        
+
         # Extract UCF values
         harmony = ucf_state.get('harmony', 0.5)
         resilience = ucf_state.get('resilience', 0.5)
         prana = ucf_state.get('prana', 0.5)
-        drishti = ucf_state.get('drishti', 0.5)
-        klesha = ucf_state.get('klesha', 0.5)
         zoom = ucf_state.get('zoom', 1.0)
-        
+
         # Generate fractal pattern based on UCF state
         x = np.linspace(-2, 2, 800)
         y = np.linspace(-2, 2, 800)
@@ -90,10 +86,10 @@ class SamsaraRenderer:
                  self.color_map['resilience'], self.color_map['drishti']]
         n_bins = 256
         cmap = LinearSegmentedColormap.from_list('ucf', colors, N=n_bins)
-        
+
         # Render fractal
-        im = ax.imshow(escape_count, extent=[-2, 2, -2, 2], cmap=cmap, 
-                      origin='lower', interpolation='bilinear')
+        ax.imshow(escape_count, extent=[-2, 2, -2, 2], cmap=cmap,
+                  origin='lower', interpolation='bilinear')
         
         # Add UCF state overlay
         ax.text(0.02, 0.98, f"Harmony: {harmony:.4f}", transform=ax.transAxes, 
@@ -288,8 +284,6 @@ async def generate_fractal_icon_bytes(ucf_state: Dict[str, Any], size: int = 512
         harmony = ucf_state.get('harmony', 0.5)
         resilience = ucf_state.get('resilience', 0.5)
         prana = ucf_state.get('prana', 0.5)
-        drishti = ucf_state.get('drishti', 0.5)
-        klesha = ucf_state.get('klesha', 0.5)
         zoom = ucf_state.get('zoom', 1.0)
 
         # Generate compact fractal pattern (optimized for small icon size)
@@ -366,7 +360,7 @@ async def test_samsara_generation():
 # Coexists with matplotlib-based system above
 
 try:
-    from PIL import Image, ImageDraw, ImageFont
+    from PIL import Image, ImageDraw
     PIL_AVAILABLE = True
 except ImportError:
     PIL_AVAILABLE = False

@@ -245,7 +245,6 @@ class HealingToneGenerator:
         except ImportError:
             # Fallback to wave module
             import wave
-            import struct
 
             if normalize:
                 audio_samples = audio_samples / np.max(np.abs(audio_samples))

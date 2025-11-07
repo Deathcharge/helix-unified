@@ -7,7 +7,6 @@ import json
 import asyncio
 from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional
-from pathlib import Path
 
 # Import base agent class (refactored to prevent circular imports)
 from backend.agents_base import HelixAgent
@@ -133,7 +132,7 @@ class MemoryRootAgent(HelixAgent):
             print("⚠ Notion client unavailable for Memory Root")
             return False
         
-        await self.log(f"Memory Root initialized. Notion client connected.")
+        await self.log("Memory Root initialized. Notion client connected.")
         return True
     
     async def health_check(self) -> Dict[str, Any]:
@@ -149,7 +148,7 @@ class MemoryRootAgent(HelixAgent):
         if self.openai_client:
             try:
                 # Test OpenAI connection
-                response = await self.openai_client.models.list()
+                await self.openai_client.models.list()
                 health["openai_status"] = "connected"
             except Exception as e:
                 health["openai_status"] = f"error: {str(e)}"

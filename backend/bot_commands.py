@@ -2,14 +2,10 @@
 
 import discord
 from discord.ext import commands
-import os
 
 # Import the 'bot' instance from your main file.
 # This avoids circular dependencies.
 from .main import bot
-
-# Import agent-related functions or objects if needed by commands.
-from .agents import AGENTS
 
 @bot.command(name="setup")
 @commands.has_permissions(manage_channels=True)

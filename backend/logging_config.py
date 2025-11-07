@@ -170,8 +170,8 @@ class JSONFileHandler(logging.Handler):
             # Write to file (append mode)
             with open(self.filename, 'a', encoding='utf-8') as f:
                 f.write(json.dumps(log_entry) + '\n')
-        
-        except Exception as e:
+
+        except Exception:
             self.handleError(record)
     
     def rotate(self):

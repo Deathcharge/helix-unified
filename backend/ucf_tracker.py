@@ -6,7 +6,6 @@ Tracks UCF metrics over time, analyzes trends, and provides predictions
 for harmony evolution. Enables proactive maintenance and ritual scheduling.
 """
 
-import json
 import sqlite3
 from datetime import datetime, timedelta
 from pathlib import Path

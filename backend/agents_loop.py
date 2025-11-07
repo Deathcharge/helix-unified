@@ -46,7 +46,7 @@ async def log_event(message: str):
     log_file = ARCHIVE_PATH / "agents_loop.log"
     try:
         data = json.load(open(log_file)) if log_file.exists() else []
-    except:
+    except Exception:
         data = []
     data.append(record)
     json.dump(data, open(log_file, "w"), indent=2)

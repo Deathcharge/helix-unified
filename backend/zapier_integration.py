@@ -4,7 +4,6 @@
 
 import asyncio
 import aiohttp
-import json
 from typing import Dict, Any, Optional
 from datetime import datetime
 import logging
@@ -88,7 +87,7 @@ class HelixZapierIntegration:
                 timeout=aiohttp.ClientTimeout(total=10)
             ) as response:
                 if response.status == 200:
-                    logger.debug(f"📊 Zapier telemetry sent successfully")
+                    logger.debug("📊 Zapier telemetry sent successfully")
                     return True
                 else:
                     logger.warning(f"⚠️ Zapier webhook returned {response.status}")
@@ -173,7 +172,7 @@ class HelixZapierIntegration:
                 timeout=aiohttp.ClientTimeout(total=10)
             ) as response:
                 if response.status == 200:
-                    logger.debug(f"📡 System state sent successfully")
+                    logger.debug("📡 System state sent successfully")
                     return True
                 else:
                     logger.warning(f"⚠️ Zapier system state returned {response.status}")

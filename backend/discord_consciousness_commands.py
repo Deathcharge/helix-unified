@@ -10,8 +10,6 @@ Build: v15.3-consciousness-discord
 
 import discord
 from datetime import datetime
-from pathlib import Path
-import json
 from typing import Dict, Any
 
 # Import agents
@@ -211,11 +209,8 @@ async def emotional_landscape(ctx):
         color=discord.Color.from_rgb(138, 43, 226),
         timestamp=datetime.now()
     )
-    
+
     for agent_name, emotions in agent_emotions.items():
-        # Find dominant emotion
-        dominant = max(emotions.items(), key=lambda x: x[1])
-        
         # Create emotion bar chart
         emotion_str = "\n".join([
             f"{get_emotion_emoji(emotion)} **{emotion.title()}:** {get_emotion_bar(level)}"

@@ -3,7 +3,6 @@
 # Automatically posts UCF trend charts to Discord
 # Author: Claude Code + Andrew John Ward
 
-import asyncio
 import discord
 from discord.ext import tasks
 import matplotlib
@@ -44,7 +43,7 @@ def load_ritual_history(days=30):
             for line in f:
                 if line.strip():
                     records.append(json.loads(line))
-    except:
+    except Exception:
         pass
 
     if not records:
