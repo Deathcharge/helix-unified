@@ -1,5 +1,6 @@
 # Helix Collective v16.8 - Backend Dockerfile (Helix Hub Production Release)
-FROM python:3.11-slim
+# CACHE BUSTER: Using exact Python version to force complete rebuild
+FROM python:3.11.10-slim
 
 WORKDIR /app
 
