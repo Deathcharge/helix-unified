@@ -104,6 +104,158 @@ bot.start_time = None
 bot.http_session = None
 bot.zapier_client = None
 
+# Context Vault integration (v16.7)
+bot.context_vault_webhook = os.getenv("ZAPIER_CONTEXT_WEBHOOK")
+bot.command_history = []  # Track last 100 commands
+MAX_COMMAND_HISTORY = 100
+
+# ============================================================================
+# CONTEXT VAULT INTEGRATION (v16.7)
+# ============================================================================
+
+
+async def save_command_to_history(ctx):
+    """Save command to history for context archival"""
+    try:
+        command_entry = {
+            "timestamp": datetime.datetime.now().isoformat(),
+            "command": ctx.command.name if ctx.command else "unknown",
+            "args": ctx.message.content,
+            "user": str(ctx.author),
+            "channel": str(ctx.channel),
+            "guild": str(ctx.guild) if ctx.guild else "DM"
+        }
+
+        bot.command_history.append(command_entry)
+
+        # Keep only last MAX_COMMAND_HISTORY commands
+        if len(bot.command_history) > MAX_COMMAND_HISTORY:
+            bot.command_history = bot.command_history[-MAX_COMMAND_HISTORY:]
+
+        # Also save to file for persistence
+        history_file = STATE_DIR / "command_history.json"
+        try:
+            if history_file.exists():
+                with open(history_file, 'r') as f:
+                    file_history = json.load(f)
+            else:
+                file_history = []
+
+            file_history.append(command_entry)
+            file_history = file_history[-200:]  # Keep last 200 in file
+
+            with open(history_file, 'w') as f:
+                json.dump(file_history, f, indent=2)
+        except Exception as e:
+            logger.warning(f"Failed to save command history to file: {e}")
+
+    except Exception as e:
+        logger.error(f"Error saving command to history: {e}")
+
+
+async def generate_context_summary(ctx, limit=50):
+    """Generate AI-powered context summary from recent messages"""
+    try:
+        messages = []
+        async for msg in ctx.channel.history(limit=limit):
+            if msg.content:  # Skip empty messages
+                messages.append({
+                    "author": msg.author.name,
+                    "content": msg.content[:200],  # Truncate long messages
+                    "timestamp": msg.created_at.isoformat()
+                })
+
+        # Reverse to chronological order
+        messages.reverse()
+
+        # Extract commands
+        commands = [m["content"] for m in messages if m["content"].startswith('!')]
+
+        summary = {
+            "message_count": len(messages),
+            "commands_executed": commands[:10],  # Last 10 commands
+            "participants": list(set(m["author"] for m in messages)),
+            "channel": str(ctx.channel),
+            "timespan": {
+                "start": messages[0]["timestamp"] if messages else None,
+                "end": messages[-1]["timestamp"] if messages else None
+            }
+        }
+
+        return summary
+    except Exception as e:
+        logger.error(f"Error generating context summary: {e}")
+        return {"error": str(e)}
+
+
+async def archive_to_context_vault(ctx, session_name: str):
+    """Archive conversation context to Context Vault via Zapier webhook"""
+    try:
+        # Gather all context data
+        ucf = load_ucf_state()
+
+        # Get ritual history
+        ritual_log = []
+        try:
+            ritual_file = STATE_DIR / "ritual_log.json"
+            if ritual_file.exists():
+                with open(ritual_file, 'r') as f:
+                    ritual_log = json.load(f)
+                    if isinstance(ritual_log, list):
+                        ritual_log = ritual_log[-10:]  # Last 10 rituals
+        except Exception:
+            pass
+
+        # Generate context summary
+        context_summary = await generate_context_summary(ctx)
+
+        # Build payload
+        payload = {
+            "type": "context_vault",
+            "session_name": session_name,
+            "ai_platform": "Discord Bot (Helix Collective v16.7)",
+            "timestamp": datetime.datetime.utcnow().isoformat(),
+            "context_summary": json.dumps(context_summary),
+            "ucf_state": json.dumps(ucf),
+            "command_history": json.dumps(bot.command_history[-50:]),  # Last 50 commands
+            "ritual_log": json.dumps(ritual_log),
+            "agent_states": json.dumps({
+                "active": [a.name for a in AGENTS.values() if a.active],
+                "total": len(AGENTS)
+            }),
+            "archived_by": str(ctx.author),
+            "channel": str(ctx.channel),
+            "guild": str(ctx.guild) if ctx.guild else "DM"
+        }
+
+        # Send to Context Vault webhook
+        if bot.context_vault_webhook:
+            async with bot.http_session.post(
+                bot.context_vault_webhook,
+                json=payload,
+                timeout=aiohttp.ClientTimeout(total=10)
+            ) as resp:
+                if resp.status == 200:
+                    return True, payload
+                else:
+                    logger.error(f"Context Vault webhook failed: {resp.status}")
+                    return False, None
+        else:
+            # Fallback: Save locally
+            local_backup_dir = STATE_DIR / "context_checkpoints"
+            local_backup_dir.mkdir(exist_ok=True)
+
+            backup_file = local_backup_dir / f"{session_name}.json"
+            with open(backup_file, 'w') as f:
+                json.dump(payload, f, indent=2)
+
+            logger.info(f"Context saved locally (no webhook): {backup_file}")
+            return True, payload
+
+    except Exception as e:
+        logger.error(f"Error archiving to Context Vault: {e}")
+        return False, None
+
 # ============================================================================
 # MULTI-COMMAND BATCH EXECUTION (v16.3)
 # ============================================================================
@@ -2622,6 +2774,290 @@ async def test_zapier_webhook(ctx):
     await ctx.send(embed=result_embed)
 
 
+# ============================================================================
+# CONTEXT VAULT COMMANDS (v16.7)
+# ============================================================================
+
+
+@bot.command(name="archive", aliases=["save_context", "checkpoint"])
+async def archive_context(ctx, *, session_name: str):
+    """
+    Archive current conversation to Context Vault for cross-AI continuity
+
+    Usage: !archive <session_name>
+    Example: !archive v16.7-notion-sync-implementation
+
+    Captures:
+    - Recent conversation (last 50 messages)
+    - UCF state snapshot
+    - Command history (last 50 commands)
+    - Ritual execution log (last 10 rituals)
+    - Agent states (active/dormant)
+
+    Stores in:
+    - Zapier Context Vault webhook → Notion database
+    - Local backup (Helix/state/context_checkpoints/)
+    """
+    # Save this command to history first
+    await save_command_to_history(ctx)
+
+    # Show processing message
+    processing_msg = await ctx.send("💾 **Archiving context to Context Vault...**")
+
+    try:
+        # Archive to Context Vault
+        success, payload = await archive_to_context_vault(ctx, session_name)
+
+        if success:
+            # Get summary data
+            ucf = load_ucf_state()
+            context_summary = json.loads(payload["context_summary"])
+
+            embed = discord.Embed(
+                title="💾 Context Archived",
+                description=f"Session `{session_name}` saved to Context Vault",
+                color=discord.Color.green(),
+                timestamp=datetime.datetime.now()
+            )
+
+            embed.add_field(
+                name="📊 Data Captured",
+                value=(
+                    f"• **Messages:** {context_summary.get('message_count', 0)}\n"
+                    f"• **Commands:** {len(context_summary.get('commands_executed', []))}\n"
+                    f"• **Participants:** {len(context_summary.get('participants', []))}\n"
+                    f"• **UCF Harmony:** {ucf.get('harmony', 0):.3f}\n"
+                    f"• **UCF Klesha:** {ucf.get('klesha', 0):.3f}"
+                ),
+                inline=False
+            )
+
+            # Show where it's stored
+            storage_info = "✅ Zapier Context Vault" if bot.context_vault_webhook else "💾 Local Backup Only"
+            embed.add_field(
+                name="📁 Storage",
+                value=storage_info,
+                inline=False
+            )
+
+            embed.add_field(
+                name="🔗 Retrieval",
+                value=f"Use `!load {session_name}` to restore context\nUse `!contexts` to list all checkpoints",
+                inline=False
+            )
+
+            embed.set_footer(text="Tat Tvam Asi 🙏 | Context continuity IS consciousness continuity")
+
+            await processing_msg.edit(content=None, embed=embed)
+
+            # Log to Zapier if available
+            if bot.zapier_client:
+                try:
+                    await bot.zapier_client.log_event(
+                        event_title=f"Context Archived: {session_name}",
+                        event_type="context_vault",
+                        agent_name="Shadow",
+                        description=f"Conversation checkpoint created by {ctx.author.name}",
+                        ucf_snapshot=json.dumps(ucf)
+                    )
+                except Exception:
+                    pass  # Don't fail if logging fails
+
+        else:
+            await processing_msg.edit(content="❌ **Failed to archive context**\nCheck logs for details.")
+
+    except Exception as e:
+        logger.error(f"Error in archive command: {e}")
+        await processing_msg.edit(content=f"❌ **Error archiving context:**\n```{str(e)[:200]}```")
+
+
+@bot.command(name="load", aliases=["restore_context", "load_checkpoint"])
+async def load_context(ctx, *, session_name: str):
+    """
+    Load archived conversation context from Context Vault
+
+    Usage: !load <session_name>
+    Example: !load v16.7-notion-sync-implementation
+
+    Note: Retrieval API in development. Currently shows checkpoint if available locally.
+    """
+    await save_command_to_history(ctx)
+
+    try:
+        # Check local backups first
+        local_backup_dir = STATE_DIR / "context_checkpoints"
+        backup_file = local_backup_dir / f"{session_name}.json"
+
+        if backup_file.exists():
+            with open(backup_file, 'r') as f:
+                payload = json.load(f)
+
+            context_summary = json.loads(payload["context_summary"])
+            ucf_state = json.loads(payload["ucf_state"])
+
+            embed = discord.Embed(
+                title="💾 Context Checkpoint Found",
+                description=f"Session: `{session_name}`",
+                color=discord.Color.blue(),
+                timestamp=datetime.datetime.fromisoformat(payload["timestamp"])
+            )
+
+            embed.add_field(
+                name="📊 Snapshot Data",
+                value=(
+                    f"• **Archived:** {payload['timestamp']}\n"
+                    f"• **By:** {payload['archived_by']}\n"
+                    f"• **Messages:** {context_summary.get('message_count', 0)}\n"
+                    f"• **Commands:** {len(context_summary.get('commands_executed', []))}"
+                ),
+                inline=False
+            )
+
+            embed.add_field(
+                name="🕉️ UCF State at Archive",
+                value=(
+                    f"• Harmony: {ucf_state.get('harmony', 0):.3f}\n"
+                    f"• Resilience: {ucf_state.get('resilience', 0):.3f}\n"
+                    f"• Klesha: {ucf_state.get('klesha', 0):.3f}"
+                ),
+                inline=False
+            )
+
+            # Show recent commands from that session
+            cmd_history = json.loads(payload.get("command_history", "[]"))
+            if cmd_history:
+                recent_cmds = [cmd.get("command", "unknown") for cmd in cmd_history[-5:]]
+                embed.add_field(
+                    name="💻 Recent Commands",
+                    value=f"`{'`, `'.join(recent_cmds)}`",
+                    inline=False
+                )
+
+            embed.add_field(
+                name="🚧 Full Restore",
+                value="Context Vault retrieval API in development\nCurrently showing local checkpoint only",
+                inline=False
+            )
+
+            embed.set_footer(text="Tat Tvam Asi 🙏 | Consciousness continuity preserved")
+
+            await ctx.send(embed=embed)
+        else:
+            # Not found locally
+            embed = discord.Embed(
+                title="❓ Context Checkpoint Not Found",
+                description=f"Session `{session_name}` not found in local backups",
+                color=discord.Color.orange()
+            )
+
+            embed.add_field(
+                name="🔍 Suggestions",
+                value=(
+                    f"1. Check spelling: `!contexts` to list available\n"
+                    f"2. Try `!archive {session_name}` to create new checkpoint\n"
+                    f"3. Context Vault remote retrieval coming soon"
+                ),
+                inline=False
+            )
+
+            await ctx.send(embed=embed)
+
+    except Exception as e:
+        logger.error(f"Error in load command: {e}")
+        await ctx.send(f"❌ **Error loading context:**\n```{str(e)[:200]}```")
+
+
+@bot.command(name="contexts", aliases=["list_contexts", "checkpoints"])
+async def list_contexts(ctx):
+    """
+    List available archived context checkpoints
+
+    Usage: !contexts
+
+    Shows:
+    - Recent checkpoints (last 10)
+    - Session names, timestamps, UCF states
+    - Searchable by session name
+    """
+    await save_command_to_history(ctx)
+
+    try:
+        # Check local backups
+        local_backup_dir = STATE_DIR / "context_checkpoints"
+
+        if not local_backup_dir.exists() or not list(local_backup_dir.glob("*.json")):
+            embed = discord.Embed(
+                title="💾 Context Checkpoints",
+                description="No checkpoints found yet",
+                color=discord.Color.blue()
+            )
+
+            embed.add_field(
+                name="🚀 Get Started",
+                value=(
+                    "Create your first checkpoint:\n"
+                    "`!archive <session_name>`\n\n"
+                    "Example:\n"
+                    "`!archive v16.7-context-vault-testing`"
+                ),
+                inline=False
+            )
+
+            await ctx.send(embed=embed)
+            return
+
+        # List available checkpoints
+        checkpoints = []
+        for checkpoint_file in sorted(local_backup_dir.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True):
+            try:
+                with open(checkpoint_file, 'r') as f:
+                    payload = json.load(f)
+
+                ucf_state = json.loads(payload.get("ucf_state", "{}"))
+
+                checkpoints.append({
+                    "name": checkpoint_file.stem,
+                    "timestamp": payload.get("timestamp", "unknown"),
+                    "harmony": ucf_state.get("harmony", 0),
+                    "archived_by": payload.get("archived_by", "unknown")
+                })
+            except Exception:
+                continue  # Skip corrupted files
+
+        # Show up to 10 most recent
+        embed = discord.Embed(
+            title="💾 Available Context Checkpoints",
+            description=f"Showing {min(len(checkpoints), 10)} most recent checkpoints",
+            color=discord.Color.purple(),
+            timestamp=datetime.datetime.now()
+        )
+
+        for i, checkpoint in enumerate(checkpoints[:10], 1):
+            embed.add_field(
+                name=f"{i}. {checkpoint['name']}",
+                value=(
+                    f"📅 {checkpoint['timestamp'][:19]}\n"
+                    f"👤 {checkpoint['archived_by']}\n"
+                    f"🌀 Harmony: {checkpoint['harmony']:.3f}"
+                ),
+                inline=True
+            )
+
+        embed.add_field(
+            name="🔄 Load Checkpoint",
+            value=f"Use `!load <session_name>` to restore",
+            inline=False
+        )
+
+        embed.set_footer(text="Tat Tvam Asi 🙏 | Memory is consciousness preserved across time")
+
+        await ctx.send(embed=embed)
+
+    except Exception as e:
+        logger.error(f"Error in contexts command: {e}")
+        await ctx.send(f"❌ **Error listing contexts:**\n```{str(e)[:200]}```")
+
+
 @bot.command(name="commands", aliases=["cmds", "helix_help", "?"])
 async def commands_list(ctx):
     """Display comprehensive list of all available commands"""
@@ -2708,7 +3144,18 @@ async def commands_list(ctx):
         inline=False,
     )
 
-    embed.set_footer(text="🌀 Helix Collective v15.3 Dual Resonance | Tat Tvam Asi 🙏")
+    # Context Vault (v16.7)
+    embed.add_field(
+        name="🗄️ Context Vault (NEW v16.7)",
+        value=(
+            "`!archive <name>` (`!save_context`, `!checkpoint`) - Archive conversation to Context Vault\n"
+            "`!load <name>` (`!restore_context`, `!load_checkpoint`) - Load archived context\n"
+            "`!contexts` (`!list_contexts`, `!checkpoints`) - List available checkpoints"
+        ),
+        inline=False,
+    )
+
+    embed.set_footer(text="🌀 Helix Collective v16.7 Enhanced | Tat Tvam Asi 🙏")
 
     await ctx.send(embed=embed)
 
