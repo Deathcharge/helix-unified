@@ -2337,6 +2337,29 @@ async def discovery_command(ctx):
     )
 
     embed.add_field(
+        name="📋 Copy All URLs (Mobile-Friendly)",
+        value=(
+            "```\n"
+            "# Core Endpoints\n"
+            "https://helix-unified-production.up.railway.app/status\n"
+            "https://helix-unified-production.up.railway.app/.well-known/helix.json\n"
+            "https://helix-unified-production.up.railway.app/docs\n"
+            "wss://helix-unified-production.up.railway.app/ws\n"
+            "https://helix-unified-production.up.railway.app/portals\n\n"
+            "# GitHub Pages\n"
+            "https://deathcharge.github.io/helix-unified/helix-manifest.json\n\n"
+            "# Visualization Portals\n"
+            "https://helix-consciousness-dashboard.zapier.app\n"
+            "https://helixstudio-ggxdwcud.manus.space\n"
+            "https://helixai-e9vvqwrd.manus.space\n"
+            "https://helixsync-unwkcsjl.manus.space\n"
+            "https://samsarahelix-scoyzwy9.manus.space\n"
+            "```"
+        ),
+        inline=False,
+    )
+
+    embed.add_field(
         name="🎯 Quick Test (curl)",
         value=("```bash\n" "curl https://helix-unified-production.up.railway.app/status | jq\n" "```"),
         inline=False,
