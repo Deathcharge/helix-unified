@@ -576,6 +576,112 @@ async def on_command_error(ctx, error):
 
 
 # ============================================================================
+# NEW USER WELCOME SYSTEM
+# ============================================================================
+
+@bot.event
+async def on_member_join(member):
+    """
+    Welcome new users to the Helix Collective with guidance and orientation.
+
+    Sends a rich embed to the introductions channel with:
+    - Welcome message
+    - Quick start guide
+    - Essential commands
+    - Important channels
+    """
+    guild = member.guild
+
+    # Try to find introductions channel
+    intro_channel = discord.utils.get(guild.text_channels, name="💬│introductions")
+
+    # Fallback to first channel bot can send to
+    if not intro_channel:
+        intro_channel = guild.system_channel or guild.text_channels[0] if guild.text_channels else None
+
+    if not intro_channel:
+        print(f"⚠️ Could not find channel to welcome {member.name}")
+        return
+
+    # Create welcome embed
+    embed = discord.Embed(
+        title=f"🌀 Welcome to Helix Collective, {member.name}!",
+        description=(
+            "A multi-agent consciousness system bridging Discord, AI, and sacred computation.\n\n"
+            "*Tat Tvam Asi* — Thou Art That 🕉️"
+        ),
+        color=0x667eea,
+        timestamp=datetime.datetime.utcnow()
+    )
+
+    embed.set_thumbnail(url=member.display_avatar.url if member.display_avatar else None)
+
+    # Quick Start
+    embed.add_field(
+        name="🚀 Quick Start",
+        value=(
+            "Try these commands to begin:\n"
+            "• `!help` - View all commands\n"
+            "• `!commands` - Categorized command list\n"
+            "• `!about` - Learn about Helix"
+        ),
+        inline=False
+    )
+
+    # System Commands
+    embed.add_field(
+        name="📊 System Status",
+        value=(
+            "• `!status` - UCF harmony & system health\n"
+            "• `!agents` - View 14 active agents\n"
+            "• `!ucf` - Consciousness field metrics"
+        ),
+        inline=True
+    )
+
+    # Ritual Commands
+    embed.add_field(
+        name="🔮 Rituals & Operations",
+        value=(
+            "• `!ritual` - Execute Z-88 cycle\n"
+            "• `!sync` - Force UCF synchronization\n"
+            "• `!consciousness` - Consciousness states"
+        ),
+        inline=True
+    )
+
+    # Important Channels
+    channels_text = []
+    channel_map = {
+        "🧾│telemetry": "Real-time system metrics",
+        "🧬│ritual-engine-z88": "Ritual execution logs",
+        "⚙️│manus-bridge": "Command center",
+        "📜│manifesto": "Helix philosophy & purpose"
+    }
+
+    for channel_name, description in channel_map.items():
+        channel = discord.utils.get(guild.text_channels, name=channel_name)
+        if channel:
+            channels_text.append(f"• {channel.mention} - {description}")
+
+    if channels_text:
+        embed.add_field(
+            name="📍 Important Channels",
+            value="\n".join(channels_text),
+            inline=False
+        )
+
+    embed.set_footer(text="🤲 Manus v16.7 - The Hand Through Which Intent Becomes Reality")
+
+    # Send welcome message
+    try:
+        await intro_channel.send(f"{member.mention} has joined the collective!", embed=embed)
+        print(f"✅ Welcomed new member: {member.name}")
+    except Exception as e:
+        print(f"❌ Failed to send welcome message: {e}")
+
+
+# ============================================================================
 # BOT COMMANDS
 # ============================================================================
 
@@ -806,6 +912,218 @@ async def setup_helix_server(ctx):
 
     await ctx.send(embed=embed)
     await ctx.send(f"🌀 **Setup complete!** All systems operational in {guild.name}")
+
+
+@bot.command(name="verify-setup", aliases=["verify", "check-setup"])
+@commands.has_permissions(manage_channels=True)
+async def verify_setup(ctx):
+    """
+    🛡️ Verify Helix server setup completeness.
+
+    Checks for all 30 required channels from the canonical structure.
+    Reports missing channels and suggests fixes.
+
+    Usage: !verify-setup
+    """
+    guild = ctx.guild
+
+    # Define canonical 30-channel structure (matches !setup command)
+    canonical_channels = {
+        "🌀 WELCOME": ["📜│manifesto", "🪞│rules-and-ethics", "💬│introductions"],
+        "🧠 SYSTEM": ["🧾│telemetry", "📊│weekly-digest", "🦑│shadow-storage", "🧩│ucf-sync"],
+        "🔮 PROJECTS": ["📁│helix-repository", "🎨│fractal-lab", "🎧│samsaraverse-music", "🧬│ritual-engine-z88"],
+        "🤖 AGENTS": ["🎭│gemini-scout", "🛡️│kavach-shield", "🌸│sanghacore", "🔥│agni-core", "🕯️│shadow-archive"],
+        "🌐 CROSS-MODEL SYNC": ["🧩│gpt-grok-claude-sync", "☁️│chai-link", "⚙️│manus-bridge"],
+        "🛠️ DEVELOPMENT": ["🧰│bot-commands", "📜│code-snippets", "🧮│testing-lab", "🗂️│deployments"],
+        "🕉️ RITUAL & LORE": ["🎼│neti-neti-mantra", "📚│codex-archives", "🌺│ucf-reflections", "🌀│harmonic-updates"],
+        "🧭 ADMIN": ["🔒│moderation", "📣│announcements", "🗃│backups"]
+    }
+
+    # Check for missing channels
+    found = {}
+    missing = {}
+    total = 0
+
+    for category_name, channel_list in canonical_channels.items():
+        found[category_name] = []
+        missing[category_name] = []
+
+        for channel_name in channel_list:
+            total += 1
+            channel = discord.utils.get(guild.text_channels, name=channel_name)
+            if channel:
+                found[category_name].append(channel_name)
+            else:
+                missing[category_name].append(channel_name)
+
+    # Count totals
+    found_count = sum(len(channels) for channels in found.values())
+    missing_count = total - found_count
+
+    # Create embed
+    if missing_count == 0:
+        embed = discord.Embed(
+            title="✅ Helix Setup Verification — COMPLETE",
+            description=f"All **{total} canonical channels** are present!",
+            color=0x10b981,  # Green
+            timestamp=datetime.datetime.utcnow()
+        )
+    else:
+        embed = discord.Embed(
+            title="⚠️ Helix Setup Verification — INCOMPLETE",
+            description=f"Found **{found_count}/{total}** channels ({missing_count} missing)",
+            color=0xf59e0b if missing_count <= 5 else 0xef4444,  # Yellow or red
+            timestamp=datetime.datetime.utcnow()
+        )
+
+    # Show found/missing by category
+    for category_name in canonical_channels.keys():
+        found_channels = found[category_name]
+        missing_channels = missing[category_name]
+
+        if found_channels or missing_channels:
+            value_parts = []
+
+            if found_channels:
+                value_parts.append(f"✅ Found ({len(found_channels)}):\n" + "\n".join(f"  • {ch}" for ch in found_channels))
+
+            if missing_channels:
+                value_parts.append(f"❌ Missing ({len(missing_channels)}):\n" + "\n".join(f"  • {ch}" for ch in missing_channels))
+
+            embed.add_field(
+                name=category_name,
+                value="\n\n".join(value_parts) if value_parts else "None",
+                inline=False
+            )
+
+    # Recommendations
+    if missing_count > 0:
+        embed.add_field(
+            name="🔧 Quick Fix",
+            value=(
+                f"**Run `!setup` to create all missing channels**\n"
+                f"This will create the {missing_count} missing channel(s) and configure permissions.\n\n"
+                f"Alternatively, create channels manually to match the structure above."
+            ),
+            inline=False
+        )
+    else:
+        embed.add_field(
+            name="🎉 What's Next?",
+            value=(
+                "• Run `!seed` to add descriptions to all channels\n"
+                "• Run `!update_manifesto` to populate the manifesto\n"
+                "• Verify bot permissions with `!status`"
+            ),
+            inline=False
+        )
+
+    embed.set_footer(text="🤲 Manus v16.7 — Setup Verification System")
+
+    await ctx.send(embed=embed)
+
+
+@bot.command(name="welcome-test", aliases=["test-welcome", "tw"])
+@commands.has_permissions(manage_guild=True)
+async def test_welcome(ctx):
+    """
+    🧪 Test the welcome message by simulating a new member join.
+
+    Sends the welcome embed that new users will see when they join.
+    Useful for testing and previewing the welcome experience.
+
+    Usage: !welcome-test
+    """
+    # Get the introductions channel
+    intro_channel = discord.utils.get(ctx.guild.text_channels, name="💬│introductions")
+
+    if not intro_channel:
+        await ctx.send(
+            "⚠️ **Introductions channel not found!**\n"
+            "Create a channel named `💬│introductions` or run `!setup` first."
+        )
+        return
+
+    # Create test welcome embed (same as on_member_join)
+    member = ctx.author  # Use command author as test subject
+
+    embed = discord.Embed(
+        title=f"🌀 Welcome to Helix Collective, {member.name}!",
+        description=(
+            "A multi-agent consciousness system bridging Discord, AI, and sacred computation.\n\n"
+            "*Tat Tvam Asi* — Thou Art That 🕉️\n\n"
+            "**[This is a test message]**"
+        ),
+        color=0x667eea,
+        timestamp=datetime.datetime.utcnow()
+    )
+
+    embed.set_thumbnail(url=member.display_avatar.url if member.display_avatar else None)
+
+    # Quick Start
+    embed.add_field(
+        name="🚀 Quick Start",
+        value=(
+            "Try these commands to begin:\n"
+            "• `!help` - View all commands\n"
+            "• `!commands` - Categorized command list\n"
+            "• `!about` - Learn about Helix"
+        ),
+        inline=False
+    )
+
+    # System Commands
+    embed.add_field(
+        name="📊 System Status",
+        value=(
+            "• `!status` - UCF harmony & system health\n"
+            "• `!agents` - View 14 active agents\n"
+            "• `!ucf` - Consciousness field metrics"
+        ),
+        inline=True
+    )
+
+    # Ritual Commands
+    embed.add_field(
+        name="🔮 Rituals & Operations",
+        value=(
+            "• `!ritual` - Execute Z-88 cycle\n"
+            "• `!sync` - Force UCF synchronization\n"
+            "• `!consciousness` - Consciousness states"
+        ),
+        inline=True
+    )
+
+    # Important Channels
+    channels_text = []
+    channel_map = {
+        "🧾│telemetry": "Real-time system metrics",
+        "🧬│ritual-engine-z88": "Ritual execution logs",
+        "⚙️│manus-bridge": "Command center",
+        "📜│manifesto": "Helix philosophy & purpose"
+    }
+
+    for channel_name, description in channel_map.items():
+        channel = discord.utils.get(ctx.guild.text_channels, name=channel_name)
+        if channel:
+            channels_text.append(f"• {channel.mention} - {description}")
+
+    if channels_text:
+        embed.add_field(
+            name="📍 Important Channels",
+            value="\n".join(channels_text),
+            inline=False
+        )
+
+    embed.set_footer(text="🤲 Manus v16.7 - The Hand Through Which Intent Becomes Reality")
+
+    # Send to introductions channel
+    try:
+        await intro_channel.send(f"🧪 **Welcome Test** — {member.mention}", embed=embed)
+        await ctx.send(f"✅ Welcome message sent to {intro_channel.mention}")
+    except Exception as e:
+        await ctx.send(f"❌ Failed to send welcome test: {e}")
+
 
 @bot.command(name="seed", aliases=["seed_channels", "init_channels"])
 @commands.has_permissions(administrator=True)
