@@ -510,8 +510,12 @@ async def setup_helix_server(ctx):
     )
 
     embed.add_field(
-        name="⚙️ Railway Environment Variables (ALL 30 Channels)",
-        value=env_block + "\n\n*Note: Too large for one message - check following messages for complete list*",
+        name="⚙️ Railway Environment Variables",
+        value="✅ Complete channel mapping with ALL 30 IDs will be sent in separate messages below.\n\n"
+              "📋 **Instructions:**\n"
+              "• Copy ALL code blocks to Railway → Variables → Save\n"
+              "• Railway auto-parses the format\n"
+              "• Redeploy after saving",
         inline=False
     )
 
