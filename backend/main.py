@@ -308,8 +308,102 @@ templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 @app.get("/health")
 def health_check():
-    """Minimal health check endpoint - always returns 200."""
-    return {"ok": True}
+    """
+    Enhanced health check endpoint with integration status.
+
+    Returns system health and all integration statuses (Zapier, Notion, MEGA, etc.)
+    Always returns 200 OK for Railway health checks.
+    """
+    # Basic health
+    health_data = {
+        "ok": True,
+        "version": "16.8",
+        "timestamp": datetime.now().isoformat()
+    }
+
+    # Integration status
+    integrations = {}
+
+    # Zapier Master Webhook
+    zapier_webhook = os.getenv("ZAPIER_WEBHOOK_URL")
+    integrations["zapier_master"] = {
+        "configured": bool(zapier_webhook),
+        "status": "configured" if zapier_webhook else "not_configured"
+    }
+
+    # Zapier Context Vault Webhook
+    context_webhook = os.getenv("ZAPIER_CONTEXT_WEBHOOK")
+    integrations["zapier_context_vault"] = {
+        "configured": bool(context_webhook),
+        "status": "configured" if context_webhook else "not_configured"
+    }
+
+    # Notion API
+    notion_api_key = os.getenv("NOTION_API_KEY")
+    notion_db_id = os.getenv("NOTION_CONTEXT_DB_ID")
+    notion_sync_enabled = os.getenv("NOTION_SYNC_ENABLED", "false").lower() == "true"
+    integrations["notion"] = {
+        "configured": bool(notion_api_key and notion_db_id),
+        "sync_enabled": notion_sync_enabled,
+        "status": "enabled" if (notion_api_key and notion_db_id and notion_sync_enabled) else (
+            "configured" if (notion_api_key and notion_db_id) else "not_configured"
+        )
+    }
+
+    # MEGA Cloud Storage
+    mega_email = os.getenv("MEGA_EMAIL")
+    mega_pass = os.getenv("MEGA_PASS")
+    integrations["mega_storage"] = {
+        "configured": bool(mega_email and mega_pass),
+        "status": "configured" if (mega_email and mega_pass) else "not_configured"
+    }
+
+    # Discord Bot
+    discord_token = os.getenv("DISCORD_TOKEN")
+    discord_guild_id = os.getenv("DISCORD_GUILD_ID")
+    integrations["discord"] = {
+        "configured": bool(discord_token and discord_guild_id),
+        "status": "configured" if (discord_token and discord_guild_id) else "not_configured"
+    }
+
+    # Discord Webhooks
+    webhook_file = Path("Helix/state/channel_webhooks.json")
+    webhook_count = 0
+    if webhook_file.exists():
+        try:
+            with open(webhook_file, "r") as f:
+                webhook_data = json.load(f)
+            webhook_count = len(webhook_data.get("webhooks", {}))
+        except Exception:
+            pass
+
+    integrations["discord_webhooks"] = {
+        "configured": webhook_count > 0,
+        "count": webhook_count,
+        "status": "configured" if webhook_count > 0 else "not_configured"
+    }
+
+    # ElevenLabs Voice
+    elevenlabs_key = os.getenv("ELEVENLABS_API_KEY")
+    integrations["elevenlabs_voice"] = {
+        "configured": bool(elevenlabs_key),
+        "status": "configured" if elevenlabs_key else "not_configured"
+    }
+
+    health_data["integrations"] = integrations
+
+    # Count configured vs not configured
+    configured_count = len([i for i in integrations.values() if i.get("configured")])
+    total_count = len(integrations)
+
+    health_data["summary"] = {
+        "total_integrations": total_count,
+        "configured": configured_count,
+        "not_configured": total_count - configured_count,
+        "percentage": round((configured_count / total_count) * 100, 1)
+    }
+
+    return health_data
 
 
 # ============================================================================
