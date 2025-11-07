@@ -28,6 +28,10 @@ RUN python3 -c "from Crypto.Cipher import AES; print('✅ AES import works')"
 # Ensure prophet dependency
 RUN pip install cmdstanpy==1.2.2
 
+# CACHE BUSTER: Force rebuild from this point (v16.8 - 2025-11-07)
+ARG REBUILD_TRIGGER=v16.8-20251107
+ENV REBUILD_TRIGGER=${REBUILD_TRIGGER}
+
 # Copy application code for v15.2 structure (MERGED: MemeSync + Main)
 COPY backend ./backend
 COPY bot ./bot
