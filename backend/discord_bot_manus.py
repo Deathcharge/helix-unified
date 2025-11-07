@@ -1201,9 +1201,35 @@ async def setup_helix_server(ctx):
         inline=False
     )
 
+    # Nextcloud storage
+    env_docs_embed.add_field(
+        name="☁️ Nextcloud Storage (Optional - WebDAV sync, 2GB free)",
+        value="```env\n"
+              "NEXTCLOUD_URL=https://use11.thegood.cloud\n"
+              "NEXTCLOUD_USER=*** (your username)\n"
+              "NEXTCLOUD_PASSWORD=*** (app password from Settings→Security)\n"
+              "NEXTCLOUD_BASE_PATH=/Helix (remote folder)\n"
+              "```\n"
+              "📚 Free tier: 2GB storage at nextcloud.com/sign-up",
+        inline=False
+    )
+
+    # Backblaze B2 storage
+    env_docs_embed.add_field(
+        name="☁️ Backblaze B2 (Optional - S3 cold storage, 10GB free)",
+        value="```env\n"
+              "B2_KEY_ID=*** (application key ID)\n"
+              "B2_APPLICATION_KEY=*** (application key)\n"
+              "B2_BUCKET_NAME=helix-unified-backups\n"
+              "B2_ENDPOINT=s3.us-west-004.backblazeb2.com\n"
+              "```\n"
+              "📚 Free tier: 10GB + 1GB/day download at backblaze.com",
+        inline=False
+    )
+
     # MEGA storage
     env_docs_embed.add_field(
-        name="☁️ MEGA Cloud Storage (Optional - for large file backups)",
+        name="☁️ MEGA Cloud Storage (Optional - alternative storage)",
         value="```env\n"
               "MEGA_EMAIL=*** (your MEGA account email)\n"
               "MEGA_PASS=*** (your MEGA account password)\n"
@@ -1766,6 +1792,109 @@ async def test_integrations(ctx):
             inline=True
         )
 
+    # Test Nextcloud
+    nextcloud_url = os.getenv("NEXTCLOUD_URL")
+    nextcloud_user = os.getenv("NEXTCLOUD_USER")
+    nextcloud_pass = os.getenv("NEXTCLOUD_PASSWORD")
+    if nextcloud_url and nextcloud_user and nextcloud_pass:
+        try:
+            import sys
+            sys.path.insert(0, str(Path(__file__).parent.parent))
+            from services.nextcloud_client import get_nextcloud_client
+
+            nc_client = get_nextcloud_client()
+            if nc_client and nc_client.enabled:
+                storage_info = nc_client.get_storage_info()
+                if 'error' not in storage_info:
+                    usage_pct = storage_info.get('usage_percentage', 0)
+                    embed.add_field(
+                        name="☁️ Nextcloud Storage",
+                        value=f"✅ Connected\nUsage: {usage_pct}%",
+                        inline=True
+                    )
+                else:
+                    embed.add_field(
+                        name="☁️ Nextcloud Storage",
+                        value=f"❌ Connection failed\n{storage_info.get('error', 'Unknown error')[:50]}",
+                        inline=True
+                    )
+            else:
+                embed.add_field(
+                    name="☁️ Nextcloud Storage",
+                    value="⚠️ Client initialization failed",
+                    inline=True
+                )
+        except ImportError:
+            embed.add_field(
+                name="☁️ Nextcloud Storage",
+                value="⚠️ webdav3-client not installed",
+                inline=True
+            )
+        except Exception as e:
+            embed.add_field(
+                name="☁️ Nextcloud Storage",
+                value=f"❌ Error\n{str(e)[:100]}",
+                inline=True
+            )
+    else:
+        embed.add_field(
+            name="☁️ Nextcloud Storage",
+            value="⚠️ Not configured\nSet NEXTCLOUD_URL, NEXTCLOUD_USER, NEXTCLOUD_PASSWORD",
+            inline=True
+        )
+
+    # Test Backblaze B2
+    b2_key_id = os.getenv("B2_KEY_ID")
+    b2_app_key = os.getenv("B2_APPLICATION_KEY")
+    b2_bucket = os.getenv("B2_BUCKET_NAME")
+    if b2_key_id and b2_app_key and b2_bucket:
+        try:
+            import sys
+            sys.path.insert(0, str(Path(__file__).parent.parent))
+            from services.backblaze_client import get_backblaze_client
+
+            b2_client = get_backblaze_client()
+            if b2_client and b2_client.enabled:
+                bucket_info = b2_client.get_bucket_size()
+                if 'error' not in bucket_info:
+                    size_gb = bucket_info.get('total_size_gb', 0)
+                    file_count = bucket_info.get('file_count', 0)
+                    embed.add_field(
+                        name="☁️ Backblaze B2",
+                        value=f"✅ Connected\n{file_count} files, {size_gb} GB",
+                        inline=True
+                    )
+                else:
+                    embed.add_field(
+                        name="☁️ Backblaze B2",
+                        value=f"❌ Connection failed\n{bucket_info.get('error', 'Unknown error')[:50]}",
+                        inline=True
+                    )
+            else:
+                embed.add_field(
+                    name="☁️ Backblaze B2",
+                    value="⚠️ Client initialization failed",
+                    inline=True
+                )
+        except ImportError:
+            embed.add_field(
+                name="☁️ Backblaze B2",
+                value="⚠️ boto3 not installed",
+                inline=True
+            )
+        except Exception as e:
+            embed.add_field(
+                name="☁️ Backblaze B2",
+                value=f"❌ Error\n{str(e)[:100]}",
+                inline=True
+            )
+    else:
+        embed.add_field(
+            name="☁️ Backblaze B2",
+            value="⚠️ Not configured\nSet B2_KEY_ID, B2_APPLICATION_KEY, B2_BUCKET_NAME",
+            inline=True
+        )
+
     # Test ElevenLabs
     elevenlabs_key = os.getenv("ELEVENLABS_API_KEY")
     if elevenlabs_key:
@@ -1782,7 +1911,7 @@ async def test_integrations(ctx):
         )
 
     # Summary
-    total_tests = 7
+    total_tests = 9
     passed = len([f for f in embed.fields if f.value.startswith("✅")])
     configured = len([f for f in embed.fields if f.value.startswith("⚠️")])
     failed = len([f for f in embed.fields if f.value.startswith("❌")])
