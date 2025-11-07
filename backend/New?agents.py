@@ -54,7 +54,6 @@ class Manus(HelixAgent):
 
     async def execute_command(self, command: str) -> Dict[str, Any]:
         """Executes a shell command with full ethical and Notion logging."""
-        global notion_client
         scan_result = await self.kavach.ethical_scan({"command": command})
 
         if not scan_result["approved"]:
