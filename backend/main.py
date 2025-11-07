@@ -2,33 +2,41 @@
 # backend/main.py — FastAPI + Discord Bot Launcher (FIXED IMPORTS)
 # Author: Andrew John Ward (Architect)
 
+import asyncio
+import json
+import os
+from contextlib import asynccontextmanager
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict
+
+import aiohttp
+import httpx
+from agent_embeds import get_collective_status
+from agents_loop import main_loop as manus_loop
+from discord_bot_manus import bot as discord_bot
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, FileResponse, StreamingResponse
+from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
-from contextlib import asynccontextmanager
-import asyncio
-import os
-import json
-from pathlib import Path
-from datetime import datetime
-from dotenv import load_dotenv
-import logging
-import httpx
-import aiohttp
-from pydantic import BaseModel
-from typing import Dict, Any
 
 # Import centralized logging configuration
 from logging_config import setup_logging
+from mandelbrot_ucf import (
+    MandelbrotUCFGenerator,
+    generate_ritual_ucf,
+    get_eye_of_consciousness,
+)
+from pydantic import BaseModel
+from websocket_manager import manager as ws_manager
+from zapier_integration import HelixZapierIntegration, get_zapier, set_zapier
 
 # FIX: Create Crypto → Cryptodome alias BEFORE importing mega
-import sys
 try:
     # pycryptodome installs as 'Crypto', not 'Cryptodome'
     import Crypto
-    from Crypto.Cipher import AES
+
     print(f"✅ pycryptodome found (version {Crypto.__version__}) - MEGA sync enabled")
 except ImportError:
     print("⚠️ pycryptodome not found - MEGA sync may fail")
@@ -36,17 +44,15 @@ except ImportError:
 
 from mega import Mega
 
+
 class PersistenceEngine:
     def __init__(self):
         self.mega = Mega()
-        self.m = self.mega.login(
-            os.getenv('MEGA_EMAIL'), 
-            os.getenv('MEGA_PASS')
-        )
-        self.remote_dir = os.getenv('MEGA_REMOTE_DIR')
+        self.m = self.mega.login(os.getenv("MEGA_EMAIL"), os.getenv("MEGA_PASS"))
+        self.remote_dir = os.getenv("MEGA_REMOTE_DIR")
 
     def upload_state(self):
-        local = 'Helix/state/heartbeat.json'
+        local = "Helix/state/heartbeat.json"
         remote = f"{self.remote_dir}/state/heartbeat.json"
         self.m.upload(local, remote)
         print("MEGA: Heartbeat synced.")
@@ -58,35 +64,24 @@ class PersistenceEngine:
 
     def download_state(self):
         remote = f"{self.remote_dir}/state/heartbeat.json"
-        self.m.download(remote, 'Helix/state/heartbeat.json')
+        self.m.download(remote, "Helix/state/heartbeat.json")
         print("MEGA: State restored from cloud.")
+
+
 load_dotenv()
 
 # ============================================================================
 # LOGGING SETUP
 # ============================================================================
-logger = setup_logging(
-    log_dir="Shadow/manus_archive",
-    log_level=os.getenv("LOG_LEVEL", "INFO"),
-    enable_rotation=True
-)
+logger = setup_logging(log_dir="Shadow/manus_archive", log_level=os.getenv("LOG_LEVEL", "INFO"), enable_rotation=True)
 logger.info("🌀 Helix Collective v16.7 - Backend Initialization")
 
 # ✅ FIXED IMPORTS - Use relative imports instead of absolute
-from discord_bot_manus import bot as discord_bot
-from agents_loop import main_loop as manus_loop
-from agents import AGENTS, get_collective_status
-from websocket_manager import manager as ws_manager
-from mandelbrot_ucf import (
-    MandelbrotUCFGenerator,
-    get_eye_of_consciousness,
-    generate_ritual_ucf
-)
-from zapier_integration import HelixZapierIntegration, set_zapier, get_zapier
 
 # ============================================================================
 # WEBSOCKET BROADCAST LOOP
 # ============================================================================
+
 
 async def ucf_broadcast_loop():
     """
@@ -120,11 +115,12 @@ async def ucf_broadcast_loop():
             if current_state != previous_state:
                 # Broadcast to all connected WebSocket clients
                 await ws_manager.broadcast_ucf_state(current_state)
-                logger.debug(f"📡 UCF state changed and broadcasted")
+                logger.debug("📡 UCF state changed and broadcasted")
                 previous_state = current_state.copy()
 
                 # Send to Zapier every 30 seconds (not every change)
                 import time
+
                 current_time = time.time()
                 if current_time - last_zapier_send >= zapier_send_interval:
                     zapier = get_zapier()
@@ -145,8 +141,8 @@ async def ucf_broadcast_loop():
                                     "agents_count": len(agents_status),
                                     "timestamp": datetime.utcnow().isoformat(),
                                     "codename": "Documentation Consolidation & Real-Time Streaming",
-                                    "agents": agent_list
-                                }
+                                    "agents": agent_list,
+                                },
                             )
                             last_zapier_send = current_time
                         except Exception as e:
@@ -158,9 +154,11 @@ async def ucf_broadcast_loop():
             logger.error(f"Error in UCF broadcast loop: {e}")
             await asyncio.sleep(broadcast_interval)
 
+
 # ============================================================================
 # LIFESPAN CONTEXT MANAGER
 # ============================================================================
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -179,7 +177,7 @@ async def lifespan(app: FastAPI):
         zapier = HelixZapierIntegration(zapier_webhook_url)
         await zapier.__aenter__()  # Initialize session
         set_zapier(zapier)
-        print(f"✅ Zapier integration enabled")
+        print("✅ Zapier integration enabled")
     else:
         print("⚠️ ZAPIER_WEBHOOK_URL not set - integration disabled")
 
@@ -191,28 +189,28 @@ async def lifespan(app: FastAPI):
             print(f"   {info['symbol']} {name}: {info['role']}")
     except Exception as e:
         print(f"⚠ Agent initialization warning: {e}")
-    
+
     # Launch Discord bot in background task
     discord_token = os.getenv("DISCORD_TOKEN")
     if discord_token:
         try:
-            bot_task = asyncio.create_task(discord_bot.start(discord_token))
+            asyncio.create_task(discord_bot.start(discord_token))  # noqa: F841
             print("🤖 Discord bot task started")
         except Exception as e:
             print(f"⚠ Discord bot start error: {e}")
     else:
         print("⚠ No DISCORD_TOKEN found - bot not started")
-    
+
     # Launch Manus operational loop in background task
     try:
-        manus_task = asyncio.create_task(manus_loop())
+        asyncio.create_task(manus_loop())  # noqa: F841
         print("🤲 Manus operational loop task started")
     except Exception as e:
         print(f"⚠ Manus loop start error: {e}")
 
     # Launch WebSocket UCF broadcaster in background task
     try:
-        ws_broadcast_task = asyncio.create_task(ucf_broadcast_loop())
+        asyncio.create_task(ucf_broadcast_loop())  # noqa: F841
         print("📡 WebSocket UCF broadcast task started")
     except Exception as e:
         print(f"⚠ WebSocket broadcast start error: {e}")
@@ -230,6 +228,7 @@ async def lifespan(app: FastAPI):
         await zapier.__aexit__(None, None, None)
         print("✅ Zapier integration closed")
 
+
 # ============================================================================
 # FASTAPI APP
 # ============================================================================
@@ -238,7 +237,7 @@ app = FastAPI(
     title="🌀 Helix Collective v16.7",
     description="Documentation Consolidation & Real-Time Streaming",
     version="16.7.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # Add CORS middleware to allow frontend access
@@ -252,6 +251,8 @@ app.add_middleware(
 
 # Setup templates directory (use absolute path for Railway compatibility)
 # Try multiple path resolution strategies for robustness
+
+
 def find_templates_directory():
     """Find templates directory using multiple strategies."""
     # Strategy 1: Relative to this file (backend/main.py)
@@ -259,9 +260,6 @@ def find_templates_directory():
 
     # Strategy 2: Relative to current working directory
     strategy2 = Path.cwd() / "templates"
-
-    # Strategy 3: Sibling to backend directory
-    strategy3 = Path(__file__).parent.parent / "templates"
 
     # Strategy 4: In parent of current working directory
     strategy4 = Path.cwd().parent / "templates"
@@ -293,8 +291,9 @@ def find_templates_directory():
             logger.info(f"   ❌ Not found: {path.resolve()}")
 
     # If nothing found, use default and let it fail with good error message
-    logger.error(f"❌ Could not find templates directory! Using fallback.")
+    logger.error("❌ Could not find templates directory! Using fallback.")
     return strategy1
+
 
 BASE_DIR = Path(__file__).parent.parent
 TEMPLATES_DIR = find_templates_directory()
@@ -306,14 +305,17 @@ templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 # HEALTH CHECK ENDPOINT (REQUIRED FOR RAILWAY)
 # ============================================================================
 
+
 @app.get("/health")
 def health_check():
     """Minimal health check endpoint - always returns 200."""
     return {"ok": True}
 
+
 # ============================================================================
 # DISCOVERY MANIFEST (for external AI agents)
 # ============================================================================
+
 
 @app.get("/.well-known/helix.json")
 def helix_manifest():
@@ -331,32 +333,28 @@ def helix_manifest():
         return manifest_data
     except FileNotFoundError:
         logger.error(f"❌ Manifest not found: {manifest_path.resolve()}")
-        return {
-            "version": "1",
-            "error": "manifest_missing",
-            "note": "helix-manifest.json not found in repository root"
-        }
+        return {"version": "1", "error": "manifest_missing", "note": "helix-manifest.json not found in repository root"}
     except Exception as e:
         logger.error(f"❌ Error loading manifest: {e}")
-        return {
-            "version": "1",
-            "error": "manifest_load_failed",
-            "detail": str(e)
-        }
+        return {"version": "1", "error": "manifest_load_failed", "detail": str(e)}
+
 
 # ============================================================================
 # ROOT ENDPOINT - WEB DASHBOARD
 # ============================================================================
+
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
     """Serve main web dashboard."""
     return templates.TemplateResponse("index.html", {"request": request})
 
+
 @app.get("/gallery", response_class=HTMLResponse)
 async def agent_gallery(request: Request):
     """Serve agent gallery page."""
     return templates.TemplateResponse("agent_gallery.html", {"request": request})
+
 
 @app.get("/api", response_class=HTMLResponse)
 async def api_info():
@@ -375,19 +373,21 @@ async def api_info():
                 "ucf": "/ucf",
                 "ws": "/ws",
                 "dashboard": "/",
-                "docs": "/docs"
-            }
+                "docs": "/docs",
+            },
         }
     except Exception as e:
         return {
             "message": "🌀 Helix Collective v16.7 - Documentation Consolidation & Real-Time Streaming",
             "status": "initializing",
-            "error": str(e)
+            "error": str(e),
         }
+
 
 # ============================================================================
 # AGENT STATUS ENDPOINT (MINIMAL ROBUST VERSION)
 # ============================================================================
+
 
 def read_json(p: Path, default):
     """Read JSON file with fallback to default."""
@@ -396,61 +396,51 @@ def read_json(p: Path, default):
     except Exception:
         return default
 
+
 @app.get("/status")
 @app.get("/api/status")  # Alias for consistency with external agents
 def get_status():
     """Get full system status - minimal robust version."""
     # Read UCF state with defaults
-    ucf = read_json(Path("Helix/state/ucf_state.json"), {
-        "harmony": None,
-        "resilience": None,
-        "prana": None,
-        "drishti": None,
-        "klesha": None,
-        "zoom": None
-    })
+    ucf = read_json(
+        Path("Helix/state/ucf_state.json"),
+        {"harmony": None, "resilience": None, "prana": None, "drishti": None, "klesha": None, "zoom": None},
+    )
 
     # Read agents state with defaults
-    agents = read_json(Path("Helix/state/agents.json"), {
-        "active": [],
-        "count": 0
-    })
+    agents = read_json(Path("Helix/state/agents.json"), {"active": [], "count": 0})
 
     # Read heartbeat with defaults
-    heartbeat = read_json(Path("Helix/state/heartbeat.json"), {
-        "ts": None
-    })
+    heartbeat = read_json(Path("Helix/state/heartbeat.json"), {"ts": None})
 
     return {
-        "system": {
-            "operational": True,
-            "ts": heartbeat.get("ts")
-        },
+        "system": {"operational": True, "ts": heartbeat.get("ts")},
         "ucf": ucf,
         "agents": agents,
         "version": os.getenv("SYSTEM_VERSION", "16.7"),
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.utcnow().isoformat(),
     }
+
 
 # ============================================================================
 # AGENT LIST ENDPOINT
 # ============================================================================
+
 
 @app.get("/agents")
 async def list_agents():
     """Get list of all agents."""
     try:
         status = await get_collective_status()
-        return {
-            "count": len(status),
-            "agents": status
-        }
+        return {"count": len(status), "agents": status}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 # ============================================================================
 # UCF STATE ENDPOINT
 # ============================================================================
+
 
 @app.get("/ucf")
 async def get_ucf_state():
@@ -464,9 +454,11 @@ async def get_ucf_state():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 # ============================================================================
 # WEBSOCKET ENDPOINT - REAL-TIME STREAMING
 # ============================================================================
+
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -501,7 +493,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 try:
                     with open("Helix/state/ucf_state.json", "r") as f:
                         ucf_state = json.load(f)
-                except:
+                except Exception:
                     pass
 
                 # Read heartbeat
@@ -509,24 +501,24 @@ async def websocket_endpoint(websocket: WebSocket):
                 try:
                     with open("Helix/state/heartbeat.json", "r") as f:
                         heartbeat = json.load(f)
-                except:
+                except Exception:
                     pass
 
                 # Send update
-                await websocket.send_json({
-                    "type": "status_update",
-                    "ucf_state": ucf_state,
-                    "agents": agents,
-                    "heartbeat": heartbeat,
-                    "timestamp": datetime.utcnow().isoformat()
-                })
+                await websocket.send_json(
+                    {
+                        "type": "status_update",
+                        "ucf_state": ucf_state,
+                        "agents": agents,
+                        "heartbeat": heartbeat,
+                        "timestamp": datetime.utcnow().isoformat(),
+                    }
+                )
 
             except Exception as e:
-                await websocket.send_json({
-                    "type": "error",
-                    "error": str(e),
-                    "timestamp": datetime.utcnow().isoformat()
-                })
+                await websocket.send_json(
+                    {"type": "error", "error": str(e), "timestamp": datetime.utcnow().isoformat()}
+                )
 
             # Wait 5 seconds before next update
             await asyncio.sleep(5)
@@ -536,9 +528,11 @@ async def websocket_endpoint(websocket: WebSocket):
     except Exception as e:
         logger.error(f"WebSocket error: {e}")
 
+
 # ============================================================================
 # TEMPLATE SERVING ENDPOINTS
 # ============================================================================
+
 
 @app.get("/templates/{file_path:path}")
 async def serve_template(file_path: str):
@@ -556,9 +550,11 @@ async def serve_template(file_path: str):
 
     return FileResponse(template_path)
 
+
 # ============================================================================
 # ELEVENLABS MUSIC GENERATION API PROXY
 # ============================================================================
+
 
 class MusicGenerationRequest(BaseModel):
     model_config = {"protected_namespaces": ()}  # Allow model_id field
@@ -566,6 +562,7 @@ class MusicGenerationRequest(BaseModel):
     prompt: str
     duration: int = 30  # seconds
     model_id: str = "eleven_music_v1"
+
 
 @app.post("/api/music/generate")
 async def generate_music(request: MusicGenerationRequest):
@@ -575,25 +572,15 @@ async def generate_music(request: MusicGenerationRequest):
     """
     elevenlabs_api_key = os.getenv("ELEVENLABS_API_KEY")
     if not elevenlabs_api_key:
-        raise HTTPException(
-            status_code=500,
-            detail="ElevenLabs API key not configured"
-        )
+        raise HTTPException(status_code=500, detail="ElevenLabs API key not configured")
 
     try:
         async with httpx.AsyncClient(timeout=120.0) as client:
             # Call ElevenLabs Music API
             response = await client.post(
                 "https://api.elevenlabs.io/v1/music/generate",
-                headers={
-                    "xi-api-key": elevenlabs_api_key,
-                    "Content-Type": "application/json"
-                },
-                json={
-                    "text": request.prompt,
-                    "duration_seconds": request.duration,
-                    "model_id": request.model_id
-                }
+                headers={"xi-api-key": elevenlabs_api_key, "Content-Type": "application/json"},
+                json={"text": request.prompt, "duration_seconds": request.duration, "model_id": request.model_id},
             )
 
             response.raise_for_status()
@@ -602,26 +589,20 @@ async def generate_music(request: MusicGenerationRequest):
             return StreamingResponse(
                 iter([response.content]),
                 media_type="audio/mpeg",
-                headers={
-                    "Content-Disposition": "attachment; filename=ritual_music.mp3"
-                }
+                headers={"Content-Disposition": "attachment; filename=ritual_music.mp3"},
             )
     except httpx.HTTPStatusError as e:
         logger.error(f"ElevenLabs API error: {e.response.status_code} - {e.response.text}")
-        raise HTTPException(
-            status_code=e.response.status_code,
-            detail=f"ElevenLabs API error: {e.response.text}"
-        )
+        raise HTTPException(status_code=e.response.status_code, detail=f"ElevenLabs API error: {e.response.text}")
     except Exception as e:
         logger.error(f"Music generation error: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Music generation failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Music generation failed: {str(e)}")
+
 
 # ============================================================================
 # WEBSOCKET ENDPOINT
 # ============================================================================
+
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -647,19 +628,13 @@ async def websocket_endpoint(websocket: WebSocket):
 
     try:
         # Start heartbeat task
-        heartbeat = asyncio.create_task(
-            send_heartbeats(websocket)
-        )
+        heartbeat = asyncio.create_task(send_heartbeats(websocket))
 
         # Listen for client messages (optional - mostly for pings)
         while True:
             data = await websocket.receive_text()
             # Echo back for connection test
-            await websocket.send_json({
-                "type": "echo",
-                "message": data,
-                "timestamp": datetime.utcnow().isoformat()
-            })
+            await websocket.send_json({"type": "echo", "message": data, "timestamp": datetime.utcnow().isoformat()})
 
     except WebSocketDisconnect:
         ws_manager.disconnect(websocket)
@@ -677,10 +652,7 @@ async def send_heartbeats(websocket: WebSocket, interval: int = 30):
     try:
         while True:
             await asyncio.sleep(interval)
-            await websocket.send_json({
-                "type": "heartbeat",
-                "timestamp": datetime.utcnow().isoformat()
-            })
+            await websocket.send_json({"type": "heartbeat", "timestamp": datetime.utcnow().isoformat()})
     except Exception:
         pass  # Connection closed
 
@@ -690,14 +662,17 @@ async def websocket_stats():
     """Get WebSocket connection statistics."""
     return ws_manager.get_connection_stats()
 
+
 # ============================================================================
 # MANDELBROT UCF GENERATOR ENDPOINTS
 # ============================================================================
+
 
 class MandelbrotRequest(BaseModel):
     real: float
     imag: float
     context: str = "generic"
+
 
 @app.get("/mandelbrot/eye")
 async def get_eye_ucf(context: str = "generic"):
@@ -716,7 +691,7 @@ async def get_eye_ucf(context: str = "generic"):
             "coordinate": {"real": -0.745, "imag": 0.113},
             "name": "Eye of Consciousness",
             "ucf_state": ucf_state,
-            "context": context
+            "context": context,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -743,7 +718,7 @@ async def generate_ucf_from_coordinate(request: MandelbrotRequest):
         return {
             "coordinate": {"real": request.real, "imag": request.imag},
             "ucf_state": ucf_state,
-            "context": request.context
+            "context": request.context,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -761,13 +736,13 @@ async def list_sacred_points():
         "main_bulb": "Maximum harmony with lower complexity, ideal for grounding",
         "mini_mandelbrot": "Fractal self-similarity, high zoom and recursive depth",
         "dendrite_spiral": "Spiral growth patterns, dynamic transformation",
-        "elephant_valley": "Stability and strength, robust foundation"
+        "elephant_valley": "Stability and strength, robust foundation",
     }
 
     for name, coord in generator.sacred_points.items():
         sacred_points[name] = {
             "coordinate": {"real": coord.real, "imag": coord.imag},
-            "description": descriptions.get(name, "Sacred Mandelbrot coordinate")
+            "description": descriptions.get(name, "Sacred Mandelbrot coordinate"),
         }
 
     return sacred_points
@@ -798,7 +773,7 @@ async def get_sacred_ucf(point_name: str, context: str = "generic"):
             "main_bulb": "Maximum harmony with lower complexity, ideal for grounding",
             "mini_mandelbrot": "Fractal self-similarity, high zoom and recursive depth",
             "dendrite_spiral": "Spiral growth patterns, dynamic transformation",
-            "elephant_valley": "Stability and strength, robust foundation"
+            "elephant_valley": "Stability and strength, robust foundation",
         }
 
         return {
@@ -806,7 +781,7 @@ async def get_sacred_ucf(point_name: str, context: str = "generic"):
             "coordinate": {"real": coord.real, "imag": coord.imag},
             "ucf_state": ucf_state,
             "context": context,
-            "description": descriptions.get(point_name, "Sacred Mandelbrot coordinate")
+            "description": descriptions.get(point_name, "Sacred Mandelbrot coordinate"),
         }
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
@@ -828,10 +803,7 @@ async def get_ritual_step_ucf(step: int, total_steps: int = 108):
     """
     try:
         if step < 0 or step >= total_steps:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Step must be between 0 and {total_steps-1}"
-            )
+            raise HTTPException(status_code=400, detail=f"Step must be between 0 and {total_steps-1}")
 
         ucf_state = generate_ritual_ucf(step, total_steps)
         return ucf_state
@@ -840,9 +812,11 @@ async def get_ritual_step_ucf(step: int, total_steps: int = 108):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 # ============================================================================
 # ZAPIER WEBHOOK ENDPOINTS
 # ============================================================================
+
 
 @app.post("/api/trigger-zapier")
 async def trigger_zapier_webhook(payload: Dict[str, Any]):
@@ -862,8 +836,7 @@ async def trigger_zapier_webhook(payload: Dict[str, Any]):
     zapier = get_zapier()
     if not zapier:
         raise HTTPException(
-            status_code=503,
-            detail="Zapier integration not configured. Set ZAPIER_WEBHOOK_URL environment variable."
+            status_code=503, detail="Zapier integration not configured. Set ZAPIER_WEBHOOK_URL environment variable."
         )
 
     try:
@@ -871,19 +844,18 @@ async def trigger_zapier_webhook(payload: Dict[str, Any]):
         async with zapier.session.post(
             zapier.webhook_url,
             json=payload,
-            headers={'Content-Type': 'application/json'},
-            timeout=aiohttp.ClientTimeout(total=10)
+            headers={"Content-Type": "application/json"},
+            timeout=aiohttp.ClientTimeout(total=10),
         ) as response:
             return {
                 "status": response.status,
                 "success": response.status == 200,
-                "message": "Webhook triggered successfully" if response.status == 200 else "Webhook returned non-200 status"
+                "message": (
+                    "Webhook triggered successfully" if response.status == 200 else "Webhook returned non-200 status"
+                ),
             }
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Webhook trigger failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Webhook trigger failed: {str(e)}")
 
 
 @app.post("/api/zapier/telemetry")
@@ -897,8 +869,7 @@ async def send_zapier_telemetry():
     zapier = get_zapier()
     if not zapier:
         raise HTTPException(
-            status_code=503,
-            detail="Zapier integration not configured. Set ZAPIER_WEBHOOK_URL environment variable."
+            status_code=503, detail="Zapier integration not configured. Set ZAPIER_WEBHOOK_URL environment variable."
         )
 
     try:
@@ -912,8 +883,7 @@ async def send_zapier_telemetry():
         # Get agent status
         agents_status = await get_collective_status()
         agent_list = [
-            {"name": name, "symbol": info["symbol"], "status": "active"}
-            for name, info in agents_status.items()
+            {"name": name, "symbol": info["symbol"], "status": "active"} for name, info in agents_status.items()
         ]
 
         # Send to Zapier
@@ -924,8 +894,8 @@ async def send_zapier_telemetry():
                 "agents_count": len(agents_status),
                 "timestamp": datetime.utcnow().isoformat(),
                 "codename": "Documentation Consolidation & Real-Time Streaming",
-                "agents": agent_list
-            }
+                "agents": agent_list,
+            },
         )
 
         if success:
@@ -933,7 +903,7 @@ async def send_zapier_telemetry():
                 "success": True,
                 "message": "Telemetry sent to Zapier successfully",
                 "ucf": ucf_state,
-                "agents_count": len(agents_status)
+                "agents_count": len(agents_status),
             }
         else:
             raise HTTPException(status_code=500, detail="Failed to send telemetry to Zapier")
@@ -942,6 +912,7 @@ async def send_zapier_telemetry():
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
 
 # ============================================================================
 # MAIN ENTRY POINT
@@ -954,12 +925,12 @@ if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
 
     print(f"🚀 Starting Helix Collective v16.7 on port {port}")
-    
+
     # CRITICAL: Must bind to 0.0.0.0 for Railway
     uvicorn.run(
         app,
         host="0.0.0.0",  # ← CRITICAL for Railway/Docker
-        port=port,        # ← Uses Railway's dynamic PORT
+        port=port,  # ← Uses Railway's dynamic PORT
         log_level="info",
-        access_log=True
+        access_log=True,
     )

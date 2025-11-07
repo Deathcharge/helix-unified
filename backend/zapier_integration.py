@@ -3,13 +3,14 @@
 # Author: Andrew John Ward (Architect)
 
 import asyncio
-import aiohttp
-import json
-from typing import Dict, Any, Optional
-from datetime import datetime
 import logging
+from datetime import datetime
+from typing import Any, Dict, Optional
+
+import aiohttp
 
 logger = logging.getLogger(__name__)
+
 
 class HelixZapierIntegration:
     """
@@ -69,26 +70,26 @@ class HelixZapierIntegration:
                 "prana": ucf_metrics.get("prana", 0.0),
                 "drishti": ucf_metrics.get("drishti", 0.0),
                 "klesha": ucf_metrics.get("klesha", 0.0),
-                "zoom": ucf_metrics.get("zoom", 0.0)
+                "zoom": ucf_metrics.get("zoom", 0.0),
             },
             "system": {
                 "version": system_info.get("version", "16.7"),
                 "agents_active": system_info.get("agents_count", 14),
                 "timestamp": system_info.get("timestamp", datetime.utcnow().isoformat()),
-                "codename": system_info.get("codename", "Documentation Consolidation & Real-Time Streaming")
+                "codename": system_info.get("codename", "Documentation Consolidation & Real-Time Streaming"),
             },
-            "agents": system_info.get("agents", [])
+            "agents": system_info.get("agents", []),
         }
 
         try:
             async with self.session.post(
                 self.webhook_url,
                 json=payload,
-                headers={'Content-Type': 'application/json'},
-                timeout=aiohttp.ClientTimeout(total=10)
+                headers={"Content-Type": "application/json"},
+                timeout=aiohttp.ClientTimeout(total=10),
             ) as response:
                 if response.status == 200:
-                    logger.debug(f"📊 Zapier telemetry sent successfully")
+                    logger.debug("📊 Zapier telemetry sent successfully")
                     return True
                 else:
                     logger.warning(f"⚠️ Zapier webhook returned {response.status}")
@@ -122,18 +123,18 @@ class HelixZapierIntegration:
                 "status": status,
                 "symbol": data.get("symbol", "🔮"),
                 "role": data.get("role", "Unknown"),
-                "data": data
+                "data": data,
             },
             "system_version": "16.7",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
         try:
             async with self.session.post(
                 self.webhook_url,
                 json=payload,
-                headers={'Content-Type': 'application/json'},
-                timeout=aiohttp.ClientTimeout(total=10)
+                headers={"Content-Type": "application/json"},
+                timeout=aiohttp.ClientTimeout(total=10),
             ) as response:
                 if response.status == 200:
                     logger.debug(f"🤖 Agent update sent: {agent_name}")
@@ -162,18 +163,18 @@ class HelixZapierIntegration:
             "type": "system_state",
             "state": state,
             "timestamp": state.get("timestamp", datetime.utcnow().isoformat()),
-            "version": "16.7"
+            "version": "16.7",
         }
 
         try:
             async with self.session.post(
                 self.webhook_url,
                 json=payload,
-                headers={'Content-Type': 'application/json'},
-                timeout=aiohttp.ClientTimeout(total=10)
+                headers={"Content-Type": "application/json"},
+                timeout=aiohttp.ClientTimeout(total=10),
             ) as response:
                 if response.status == 200:
-                    logger.debug(f"📡 System state sent successfully")
+                    logger.debug("📡 System state sent successfully")
                     return True
                 else:
                     logger.warning(f"⚠️ Zapier system state returned {response.status}")
@@ -201,15 +202,15 @@ class HelixZapierIntegration:
             "message_type": message_type,
             "data": data,
             "timestamp": datetime.utcnow().isoformat(),
-            "system_version": "16.7"
+            "system_version": "16.7",
         }
 
         try:
             async with self.session.post(
                 self.webhook_url,
                 json=payload,
-                headers={'Content-Type': 'application/json'},
-                timeout=aiohttp.ClientTimeout(total=10)
+                headers={"Content-Type": "application/json"},
+                timeout=aiohttp.ClientTimeout(total=10),
             ) as response:
                 if response.status == 200:
                     logger.debug(f"💬 Discord notification sent: {message_type}")
@@ -238,15 +239,15 @@ class HelixZapierIntegration:
             "type": "ritual_update",
             "ritual": ritual_data,
             "timestamp": datetime.utcnow().isoformat(),
-            "system_version": "16.7"
+            "system_version": "16.7",
         }
 
         try:
             async with self.session.post(
                 self.webhook_url,
                 json=payload,
-                headers={'Content-Type': 'application/json'},
-                timeout=aiohttp.ClientTimeout(total=10)
+                headers={"Content-Type": "application/json"},
+                timeout=aiohttp.ClientTimeout(total=10),
             ) as response:
                 if response.status == 200:
                     logger.debug(f"🔮 Ritual update sent: step {ritual_data.get('step', '?')}")

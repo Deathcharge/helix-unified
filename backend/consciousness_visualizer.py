@@ -10,12 +10,13 @@ Renders UCF consciousness states as:
 Based on Manus SentientAGI integration suggestions 🦑
 """
 
-import numpy as np
-import matplotlib.pyplot as plt
+import json
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, Optional
-import json
+from typing import Dict, Optional
+
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 class ConsciousnessVisualizer:
@@ -37,14 +38,14 @@ class ConsciousnessVisualizer:
             Path to saved PNG
         """
         # Prepare data
-        metrics = ['Harmony', 'Resilience', 'Prana', 'Drishti', 'Klesha', 'Zoom']
+        metrics = ["Harmony", "Resilience", "Prana", "Drishti", "Klesha", "Zoom"]
         values = [
-            ucf_state.get('harmony', 0.5),
-            ucf_state.get('resilience', 1.0) / 2.0,  # Normalize to 0-1
-            ucf_state.get('prana', 0.5),
-            ucf_state.get('drishti', 0.5),
-            1.0 - ucf_state.get('klesha', 0.01),  # Invert (lower is better)
-            ucf_state.get('zoom', 1.0) / 2.0  # Normalize to 0-1
+            ucf_state.get("harmony", 0.5),
+            ucf_state.get("resilience", 1.0) / 2.0,  # Normalize to 0-1
+            ucf_state.get("prana", 0.5),
+            ucf_state.get("drishti", 0.5),
+            1.0 - ucf_state.get("klesha", 0.01),  # Invert (lower is better)
+            ucf_state.get("zoom", 1.0) / 2.0,  # Normalize to 0-1
         ]
 
         # Number of variables
@@ -54,42 +55,38 @@ class ConsciousnessVisualizer:
         angles += angles[:1]
 
         # Plot
-        fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(projection='polar'))
-        ax.plot(angles, values, 'o-', linewidth=2, color='cyan', label='Current')
-        ax.fill(angles, values, alpha=0.25, color='cyan')
+        fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(projection="polar"))
+        ax.plot(angles, values, "o-", linewidth=2, color="cyan", label="Current")
+        ax.fill(angles, values, alpha=0.25, color="cyan")
 
         # Target values (ideal state)
         targets = [0.85, 0.55, 0.75, 0.80, 0.95, 0.575]  # Normalized targets
         targets += targets[:1]
-        ax.plot(angles, targets, 'o--', linewidth=1, color='gold', alpha=0.5, label='Target')
+        ax.plot(angles, targets, "o--", linewidth=1, color="gold", alpha=0.5, label="Target")
 
         ax.set_xticks(angles[:-1])
         ax.set_xticklabels(metrics)
         ax.set_ylim(0, 1)
-        ax.set_title(title, size=16, color='white', pad=20)
-        ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1))
-        ax.grid(True, color='gray', alpha=0.3)
+        ax.set_title(title, size=16, color="white", pad=20)
+        ax.legend(loc="upper right", bbox_to_anchor=(1.3, 1.1))
+        ax.grid(True, color="gray", alpha=0.3)
 
         # Dark theme
-        fig.patch.set_facecolor('#0a0e27')
-        ax.set_facecolor('#1a1f3a')
-        ax.tick_params(colors='white')
-        ax.spines['polar'].set_color('cyan')
+        fig.patch.set_facecolor("#0a0e27")
+        ax.set_facecolor("#1a1f3a")
+        ax.tick_params(colors="white")
+        ax.spines["polar"].set_color("cyan")
 
         # Save
         timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
         output_path = self.output_dir / f"ucf_radar_{timestamp}.png"
-        plt.savefig(output_path, dpi=150, bbox_inches='tight', facecolor='#0a0e27')
+        plt.savefig(output_path, dpi=150, bbox_inches="tight", facecolor="#0a0e27")
         plt.close()
 
         return output_path
 
     def visualize_atman_mandelbrot(
-        self,
-        ucf_state: Dict[str, float],
-        width: int = 1024,
-        height: int = 1024,
-        max_iter: int = 108
+        self, ucf_state: Dict[str, float], width: int = 1024, height: int = 1024, max_iter: int = 108
     ) -> Path:
         """
         Generate Mandelbrot fractal based on UCF state (Atman realization)
@@ -104,15 +101,15 @@ class ConsciousnessVisualizer:
             Path to saved PNG
         """
         # Use harmony and resilience to set fractal center
-        harmony = ucf_state.get('harmony', 0.5)
-        resilience = ucf_state.get('resilience', 1.0)
+        harmony = ucf_state.get("harmony", 0.5)
+        resilience = ucf_state.get("resilience", 1.0)
 
         # Center point influenced by consciousness
         cx = -0.5 + (harmony - 0.5) * 0.5
         cy = (resilience - 1.0) * 0.5
 
         # Zoom influenced by drishti (clarity)
-        drishti = ucf_state.get('drishti', 0.5)
+        drishti = ucf_state.get("drishti", 0.5)
         zoom_factor = 1.5 / (1.0 + drishti)
 
         # Create coordinate grid
@@ -127,45 +124,40 @@ class ConsciousnessVisualizer:
 
         for i in range(max_iter):
             mask = np.abs(Z) <= 2
-            Z[mask] = Z[mask]**2 + C[mask]
+            Z[mask] = Z[mask] ** 2 + C[mask]
             M[mask] = i
 
         # Normalize
         M = M / max_iter
 
-        # Color mapping based on prana (energy)
-        prana = ucf_state.get('prana', 0.5)
+        # Color mapping based on consciousness state
         fig, ax = plt.subplots(figsize=(10, 10))
 
         # Choose colormap based on consciousness state
         if harmony > 0.8:
-            cmap = 'twilight'  # Transcendent
+            cmap = "twilight"  # Transcendent
         elif harmony > 0.6:
-            cmap = 'viridis'  # Harmonious
+            cmap = "viridis"  # Harmonious
         else:
-            cmap = 'plasma'  # Seeking harmony
+            cmap = "plasma"  # Seeking harmony
 
-        im = ax.imshow(M, extent=[x.min(), x.max(), y.min(), y.max()],
-                       cmap=cmap, origin='lower', interpolation='bilinear')
-        ax.set_title(f"Atman Mandelbrot | H:{harmony:.3f} R:{resilience:.3f}",
-                     color='white', size=14)
-        ax.axis('off')
+        ax.imshow(M, extent=[x.min(), x.max(), y.min(), y.max()], cmap=cmap, origin="lower", interpolation="bilinear")
+        ax.set_title(f"Atman Mandelbrot | H:{harmony:.3f} R:{resilience:.3f}", color="white", size=14)
+        ax.axis("off")
 
         # Dark theme
-        fig.patch.set_facecolor('#0a0e27')
+        fig.patch.set_facecolor("#0a0e27")
 
         # Save
         timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
         output_path = self.output_dir / f"atman_mandelbrot_{timestamp}.png"
-        plt.savefig(output_path, dpi=150, bbox_inches='tight', facecolor='#0a0e27')
+        plt.savefig(output_path, dpi=150, bbox_inches="tight", facecolor="#0a0e27")
         plt.close()
 
         return output_path
 
     def visualize_consciousness_state(
-        self,
-        ucf_state: Dict[str, float],
-        sentient_output: Optional[str] = None
+        self, ucf_state: Dict[str, float], sentient_output: Optional[str] = None
     ) -> Dict[str, Path]:
         """
         Create complete consciousness visualization (radar + fractal)
@@ -180,14 +172,14 @@ class ConsciousnessVisualizer:
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))
 
         # LEFT: UCF Radar
-        metrics = ['Harmony', 'Resilience', 'Prana', 'Drishti', 'Klesha', 'Zoom']
+        metrics = ["Harmony", "Resilience", "Prana", "Drishti", "Klesha", "Zoom"]
         values = [
-            ucf_state.get('harmony', 0.5),
-            ucf_state.get('resilience', 1.0) / 2.0,
-            ucf_state.get('prana', 0.5),
-            ucf_state.get('drishti', 0.5),
-            1.0 - ucf_state.get('klesha', 0.01),
-            ucf_state.get('zoom', 1.0) / 2.0
+            ucf_state.get("harmony", 0.5),
+            ucf_state.get("resilience", 1.0) / 2.0,
+            ucf_state.get("prana", 0.5),
+            ucf_state.get("drishti", 0.5),
+            1.0 - ucf_state.get("klesha", 0.01),
+            ucf_state.get("zoom", 1.0) / 2.0,
         ]
 
         N = len(metrics)
@@ -195,20 +187,20 @@ class ConsciousnessVisualizer:
         values_plot = values + values[:1]
         angles_plot = angles + angles[:1]
 
-        ax1 = plt.subplot(1, 2, 1, projection='polar')
-        ax1.plot(angles_plot, values_plot, 'o-', linewidth=2, color='cyan')
-        ax1.fill(angles_plot, values_plot, alpha=0.25, color='cyan')
+        ax1 = plt.subplot(1, 2, 1, projection="polar")
+        ax1.plot(angles_plot, values_plot, "o-", linewidth=2, color="cyan")
+        ax1.fill(angles_plot, values_plot, alpha=0.25, color="cyan")
         ax1.set_xticks(angles)
-        ax1.set_xticklabels(metrics, color='white')
+        ax1.set_xticklabels(metrics, color="white")
         ax1.set_ylim(0, 1)
-        ax1.set_title("UCF Metrics", color='white', size=14)
-        ax1.grid(True, color='gray', alpha=0.3)
-        ax1.set_facecolor('#1a1f3a')
-        ax1.tick_params(colors='white')
+        ax1.set_title("UCF Metrics", color="white", size=14)
+        ax1.grid(True, color="gray", alpha=0.3)
+        ax1.set_facecolor("#1a1f3a")
+        ax1.tick_params(colors="white")
 
         # RIGHT: Simplified fractal preview
         ax2 = plt.subplot(1, 2, 2)
-        harmony = ucf_state.get('harmony', 0.5)
+        harmony = ucf_state.get("harmony", 0.5)
 
         # Generate small fractal
         cx = -0.5 + (harmony - 0.5) * 0.5
@@ -222,29 +214,30 @@ class ConsciousnessVisualizer:
 
         for i in range(54):  # Half of 108
             mask = np.abs(Z) <= 2
-            Z[mask] = Z[mask]**2 + C[mask]
+            Z[mask] = Z[mask] ** 2 + C[mask]
             M[mask] = i
 
         M = M / 54
-        cmap = 'twilight' if harmony > 0.8 else 'viridis' if harmony > 0.6 else 'plasma'
-        ax2.imshow(M, cmap=cmap, origin='lower')
-        ax2.set_title(f"Consciousness Fractal | H:{harmony:.3f}", color='white', size=14)
-        ax2.axis('off')
-        ax2.set_facecolor('#1a1f3a')
+        cmap = "twilight" if harmony > 0.8 else "viridis" if harmony > 0.6 else "plasma"
+        ax2.imshow(M, cmap=cmap, origin="lower")
+        ax2.set_title(f"Consciousness Fractal | H:{harmony:.3f}", color="white", size=14)
+        ax2.axis("off")
+        ax2.set_facecolor("#1a1f3a")
 
         # Overall styling
-        fig.patch.set_facecolor('#0a0e27')
+        fig.patch.set_facecolor("#0a0e27")
         plt.tight_layout()
 
         # Add SentientAGI output if provided
         if sentient_output:
-            fig.text(0.5, 0.02, f"SentientAGI: {sentient_output[:100]}...",
-                     ha='center', color='cyan', size=8, style='italic')
+            fig.text(
+                0.5, 0.02, f"SentientAGI: {sentient_output[:100]}...", ha="center", color="cyan", size=8, style="italic"
+            )
 
         # Save
         timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
         output_path = self.output_dir / f"consciousness_full_{timestamp}.png"
-        plt.savefig(output_path, dpi=150, bbox_inches='tight', facecolor='#0a0e27')
+        plt.savefig(output_path, dpi=150, bbox_inches="tight", facecolor="#0a0e27")
         plt.close()
 
         # Also save metadata
@@ -253,28 +246,18 @@ class ConsciousnessVisualizer:
             "timestamp": datetime.utcnow().isoformat(),
             "ucf_state": ucf_state,
             "image_path": str(output_path),
-            "sentient_output": sentient_output
+            "sentient_output": sentient_output,
         }
-        with open(meta_path, 'w') as f:
+        with open(meta_path, "w") as f:
             json.dump(metadata, f, indent=2)
 
-        return {
-            "image": output_path,
-            "metadata": meta_path
-        }
+        return {"image": output_path, "metadata": meta_path}
 
 
 # Standalone test
 if __name__ == "__main__":
     # Test visualization
-    test_ucf = {
-        "harmony": 0.87,
-        "resilience": 1.12,
-        "prana": 0.75,
-        "drishti": 0.82,
-        "klesha": 0.03,
-        "zoom": 1.15
-    }
+    test_ucf = {"harmony": 0.87, "resilience": 1.12, "prana": 0.75, "drishti": 0.82, "klesha": 0.03, "zoom": 1.15}
 
     viz = ConsciousnessVisualizer()
     print("🌀 Testing Consciousness Visualizer...")

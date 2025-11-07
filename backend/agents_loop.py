@@ -3,11 +3,13 @@
 # Author: Andrew John Ward (Architect)
 
 import asyncio
+import datetime
 import json
 import os
-import datetime
 from pathlib import Path
+
 from agents import Manus
+
 from backend.enhanced_kavach import EnhancedKavach
 
 # ============================================================================
@@ -25,6 +27,8 @@ for p in [ARCHIVE_PATH, COMMANDS_PATH.parent, STATE_PATH.parent]:
 # ============================================================================
 # HEARTBEAT HELPER
 # ============================================================================
+
+
 def update_heartbeat(status="active", harmony=0.355):
     """Update heartbeat.json with current status."""
     heartbeat_path = Path("Helix/state/heartbeat.json")
@@ -32,13 +36,16 @@ def update_heartbeat(status="active", harmony=0.355):
         "timestamp": datetime.datetime.utcnow().isoformat(),
         "alive": True,
         "status": status,
-        "ucf_state": {"harmony": harmony}
+        "ucf_state": {"harmony": harmony},
     }
     json.dump(data, open(heartbeat_path, "w"), indent=2)
+
 
 # ============================================================================
 # LOGGING
 # ============================================================================
+
+
 async def log_event(message: str):
     """Log loop events with timestamp."""
     now = datetime.datetime.utcnow().isoformat()
@@ -46,15 +53,18 @@ async def log_event(message: str):
     log_file = ARCHIVE_PATH / "agents_loop.log"
     try:
         data = json.load(open(log_file)) if log_file.exists() else []
-    except:
+    except Exception:
         data = []
     data.append(record)
     json.dump(data, open(log_file, "w"), indent=2)
     print(message)
 
+
 # ============================================================================
 # UCF STATE HELPERS
 # ============================================================================
+
+
 async def load_ucf_state():
     """Load UCF state, creating default if missing."""
     if not STATE_PATH.exists():
@@ -64,23 +74,27 @@ async def load_ucf_state():
             "resilience": 1.1191,
             "prana": 0.5175,
             "drishti": 0.5023,
-            "klesha": 0.010
+            "klesha": 0.010,
         }
         json.dump(base, open(STATE_PATH, "w"), indent=2)
     return json.load(open(STATE_PATH))
+
 
 async def save_ucf_state(state):
     """Save UCF state to disk."""
     json.dump(state, open(STATE_PATH, "w"), indent=2)
 
+
 # ============================================================================
 # DIRECTIVE PROCESSING
 # ============================================================================
+
+
 async def process_directives(manus, kavach):
     """Check for directives from Vega or Architect."""
     if not COMMANDS_PATH.exists():
         return
-    
+
     try:
         directive = json.load(open(COMMANDS_PATH))
         # Kavach scan before execution
@@ -96,9 +110,12 @@ async def process_directives(manus, kavach):
     except Exception as e:
         await log_event(f"⚠ Directive processing error: {e}")
 
+
 # ============================================================================
 # MAIN LOOP
 # ============================================================================
+
+
 async def main_loop():
     """Main Manus operational loop."""
     kavach = EnhancedKavach()
@@ -124,6 +141,7 @@ async def main_loop():
             await log_event(f"Error in Manus loop: {e}")
         await asyncio.sleep(30)
 
+
 # ============================================================================
 # ENTRY POINT
 # ============================================================================
@@ -132,4 +150,3 @@ if __name__ == "__main__":
         asyncio.run(main_loop())
     except KeyboardInterrupt:
         print("🛑 Manus loop stopped manually.")
-
