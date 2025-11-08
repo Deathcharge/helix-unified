@@ -36,6 +36,7 @@ async def setup(bot: 'Bot') -> None:
     bot.add_command(setup_helix_server)
     bot.add_command(verify_setup)
     bot.add_command(get_channel_webhooks)
+    bot.add_command(list_webhooks_live)
     bot.add_command(clean_duplicates)
     bot.add_command(refresh_server)
     bot.add_command(seed_channels)
@@ -138,6 +139,121 @@ async def get_channel_webhooks(ctx: commands.Context) -> None:
 
     except Exception as e:
         await ctx.send(f"❌ **Error loading webhooks:**\n```{str(e)[:200]}```")
+
+
+@commands.command(name="list-webhooks-live", aliases=["webhooks-live", "get-webhooks-live"])
+@commands.has_permissions(administrator=True)
+async def list_webhooks_live(ctx: commands.Context) -> None:
+    """
+    🔗 List ALL webhooks in the server by querying Discord API directly.
+
+    This command:
+    - Queries all text channels for webhooks
+    - Sends results to your DMs for security
+    - Provides URLs formatted for Zapier configuration
+    - Works regardless of whether !setup was run
+
+    Usage: !list-webhooks-live
+    """
+    await ctx.send("🔍 Scanning all channels for webhooks... (Check your DMs!)")
+
+    try:
+        # Create DM channel with the user
+        dm_channel = await ctx.author.create_dm()
+
+        # Gather all webhooks from all text channels
+        webhooks_by_channel = {}
+        total_webhooks = 0
+
+        for channel in ctx.guild.text_channels:
+            try:
+                webhooks = await channel.webhooks()
+                if webhooks:
+                    webhooks_by_channel[channel.name] = [
+                        {"name": wh.name, "url": wh.url} for wh in webhooks
+                    ]
+                    total_webhooks += len(webhooks)
+            except discord.Forbidden:
+                # Skip channels we don't have permission to access
+                continue
+            except Exception as e:
+                logger.warning(f"Error fetching webhooks for #{channel.name}: {e}")
+                continue
+
+        if not webhooks_by_channel:
+            await dm_channel.send("❌ **No webhooks found in any channel!**\n"
+                                 "You may need to create webhooks first.")
+            return
+
+        # Send overview
+        await dm_channel.send(
+            f"🔗 **Found {total_webhooks} webhook(s) across {len(webhooks_by_channel)} channel(s)**\n"
+            f"📋 Listing all webhooks below for easy copying to Zapier..."
+        )
+
+        # Send webhooks organized by channel
+        for channel_name, webhooks in webhooks_by_channel.items():
+            embed = discord.Embed(
+                title=f"🔗 #{channel_name}",
+                description=f"Found {len(webhooks)} webhook(s)",
+                color=0x5865F2
+            )
+
+            for wh in webhooks:
+                embed.add_field(
+                    name=f"📌 {wh['name']}",
+                    value=f"```{wh['url']}```",
+                    inline=False
+                )
+
+            await dm_channel.send(embed=embed)
+
+        # Send Railway environment variable format
+        await dm_channel.send("\n📋 **Railway Environment Variable Format:**")
+
+        env_vars = []
+        for channel_name, webhooks in webhooks_by_channel.items():
+            for wh in webhooks:
+                # Create env var name from channel + webhook name
+                clean_channel = channel_name.replace("│", "").replace("-", "_").replace(" ", "_").upper()
+                clean_webhook = wh['name'].replace(" ", "_").replace("-", "_").upper()
+                env_var_name = f"DISCORD_WEBHOOK_{clean_channel}"
+
+                # If multiple webhooks per channel, add webhook name
+                if len(webhooks) > 1:
+                    env_var_name = f"DISCORD_WEBHOOK_{clean_channel}_{clean_webhook}"
+
+                env_vars.append(f"{env_var_name}={wh['url']}")
+
+        # Send in chunks of 10
+        for i in range(0, len(env_vars), 10):
+            chunk = env_vars[i:i + 10]
+            await dm_channel.send("```env\n" + "\n".join(chunk) + "\n```")
+
+        # Send Zapier-specific format for the 9-channel routing
+        await dm_channel.send(
+            "\n🚀 **For Zapier Railway→Discord Integration:**\n"
+            "Copy the webhook URLs above and paste them into your Zapier Paths:\n"
+            "```\n"
+            "Path A (MANUS): DISCORD_WEBHOOK_MANUS_EVENTS\n"
+            "Path B (TELEMETRY): DISCORD_WEBHOOK_TELEMETRY\n"
+            "Path C (STORAGE): DISCORD_WEBHOOK_SHADOW_STORAGE\n"
+            "Path D (RITUAL): DISCORD_WEBHOOK_RITUAL_ENGINE_Z88\n"
+            "Path E (AGENTS): DISCORD_WEBHOOK_[AGENT_CHANNEL]\n"
+            "Path F (CROSS_AI): DISCORD_WEBHOOK_GPT_GROK_CLAUDE_SYNC\n"
+            "Path G (DEVELOPMENT): DISCORD_WEBHOOK_BOT_COMMANDS or DEPLOYMENTS\n"
+            "Path H (LORE): DISCORD_WEBHOOK_CODEX_ARCHIVES\n"
+            "Path I (ADMIN): DISCORD_WEBHOOK_ANNOUNCEMENTS\n"
+            "```"
+        )
+
+        await ctx.send(f"✅ Sent {total_webhooks} webhook URLs to your DMs!")
+
+    except discord.Forbidden:
+        await ctx.send("❌ I don't have permission to DM you! Please enable DMs from server members.")
+    except Exception as e:
+        logger.error(f"Error in list_webhooks_live: {e}", exc_info=True)
+        await ctx.send(f"❌ **Error fetching webhooks:**\n```{str(e)[:200]}```")
 
 
 @commands.command(name="verify-setup", aliases=["verify", "check-setup"])
