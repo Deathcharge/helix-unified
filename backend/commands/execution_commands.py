@@ -24,7 +24,11 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 # Get Architect ID from environment
-ARCHITECT_ID = int(os.getenv("ARCHITECT_ID", 0))
+try:
+    ARCHITECT_ID = int(os.getenv("ARCHITECT_ID", "0"))
+except (ValueError, TypeError):
+    # Handle placeholder values or invalid format
+    ARCHITECT_ID = 0
 
 
 async def setup(bot: 'Bot') -> None:

@@ -1,12 +1,8 @@
 {
-  "zoom": 1.0228,
-  "harmony": 0.96,
-  "resilience": 1.1191,
-  "prana": 0.5363,
-  "drishti": 0.5023,
-  "klesha": 0.0,
-  "last_pulse": "2025-10-26 21:51:41",
-  "phase": "COHERENT - NASA Monitoring Active",
-  "monitoring_level": "NASA",
-  "last_updated": "2025-11-06T07:49:11.517842"
+  "zoom": 1.0,
+  "harmony": 0.5,
+  "resilience": 1.0,
+  "prana": 0.5,
+  "drishti": 0.5,
+  "klesha": 0.1
 }
