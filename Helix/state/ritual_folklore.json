@@ -4,7 +4,7 @@
     "origin": "ritual_cycle",
     "legend": "The Law of the Ritual_Cycle",
     "status": "law",
-    "times": 212,
+    "times": 267,
     "history": [
       {
         "timestamp": "2025-11-06T03:20:24.048489",
@@ -1065,6 +1065,281 @@
         "timestamp": "2025-11-08T18:10:20.880100",
         "description": "Step 3: resonance anomaly detected",
         "count": 212
+      },
+      {
+        "timestamp": "2025-11-08T19:20:47.700950",
+        "description": "Step 2: resonance anomaly detected",
+        "count": 213
+      },
+      {
+        "timestamp": "2025-11-08T19:20:47.790633",
+        "description": "Step 3: resonance anomaly detected",
+        "count": 214
+      },
+      {
+        "timestamp": "2025-11-08T19:20:47.834523",
+        "description": "Step 10: resonance anomaly detected",
+        "count": 215
+      },
+      {
+        "timestamp": "2025-11-08T19:20:47.863885",
+        "description": "Step 14: resonance anomaly detected",
+        "count": 216
+      },
+      {
+        "timestamp": "2025-11-08T19:20:47.924623",
+        "description": "Step 19: resonance anomaly detected",
+        "count": 217
+      },
+      {
+        "timestamp": "2025-11-08T19:20:47.999666",
+        "description": "Step 29: resonance anomaly detected",
+        "count": 218
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.103851",
+        "description": "Step 50: resonance anomaly detected",
+        "count": 219
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.163743",
+        "description": "Step 56: resonance anomaly detected",
+        "count": 220
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.179007",
+        "description": "Step 57: resonance anomaly detected",
+        "count": 221
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.224852",
+        "description": "Step 60: resonance anomaly detected",
+        "count": 222
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.255094",
+        "description": "Step 66: resonance anomaly detected",
+        "count": 223
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.301125",
+        "description": "Step 71: resonance anomaly detected",
+        "count": 224
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.394070",
+        "description": "Step 82: resonance anomaly detected",
+        "count": 225
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.424936",
+        "description": "Step 84: resonance anomaly detected",
+        "count": 226
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.455878",
+        "description": "Step 86: resonance anomaly detected",
+        "count": 227
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.486528",
+        "description": "Step 89: resonance anomaly detected",
+        "count": 228
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.517681",
+        "description": "Step 93: resonance anomaly detected",
+        "count": 229
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.676300",
+        "description": "Step 107: resonance anomaly detected",
+        "count": 230
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.734786",
+        "description": "Step 3: resonance anomaly detected",
+        "count": 231
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.459653",
+        "description": "Step 2: resonance anomaly detected",
+        "count": 232
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.474448",
+        "description": "Step 3: resonance anomaly detected",
+        "count": 233
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.504241",
+        "description": "Step 9: resonance anomaly detected",
+        "count": 234
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.553704",
+        "description": "Step 1: resonance anomaly detected",
+        "count": 235
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.598685",
+        "description": "Step 5: resonance anomaly detected",
+        "count": 236
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.736473",
+        "description": "Step 22: resonance anomaly detected",
+        "count": 237
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.831414",
+        "description": "Step 30: resonance anomaly detected",
+        "count": 238
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.037471",
+        "description": "Step 52: resonance anomaly detected",
+        "count": 239
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.084606",
+        "description": "Step 55: resonance anomaly detected",
+        "count": 240
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.149896",
+        "description": "Step 60: resonance anomaly detected",
+        "count": 241
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.360552",
+        "description": "Step 80: resonance anomaly detected",
+        "count": 242
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.393956",
+        "description": "Step 82: resonance anomaly detected",
+        "count": 243
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.583176",
+        "description": "Step 94: resonance anomaly detected",
+        "count": 244
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.604987",
+        "description": "Step 95: resonance anomaly detected",
+        "count": 245
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.707760",
+        "description": "Step 105: resonance anomaly detected",
+        "count": 246
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.801394",
+        "description": "Step 1: resonance anomaly detected",
+        "count": 247
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.835004",
+        "description": "Step 3: resonance anomaly detected",
+        "count": 248
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.868592",
+        "description": "Step 5: resonance anomaly detected",
+        "count": 249
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.886004",
+        "description": "Step 7: resonance anomaly detected",
+        "count": 250
+      },
+      {
+        "timestamp": "2025-11-08T19:22:04.871292",
+        "description": "Step 3: resonance anomaly detected",
+        "count": 251
+      },
+      {
+        "timestamp": "2025-11-08T19:22:04.922288",
+        "description": "Step 8: resonance anomaly detected",
+        "count": 252
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.046594",
+        "description": "Step 7: resonance anomaly detected",
+        "count": 253
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.064562",
+        "description": "Step 11: resonance anomaly detected",
+        "count": 254
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.256811",
+        "description": "Step 27: resonance anomaly detected",
+        "count": 255
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.382103",
+        "description": "Step 43: resonance anomaly detected",
+        "count": 256
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.400511",
+        "description": "Step 44: resonance anomaly detected",
+        "count": 257
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.453748",
+        "description": "Step 50: resonance anomaly detected",
+        "count": 258
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.523501",
+        "description": "Step 58: resonance anomaly detected",
+        "count": 259
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.651078",
+        "description": "Step 68: resonance anomaly detected",
+        "count": 260
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.708688",
+        "description": "Step 72: resonance anomaly detected",
+        "count": 261
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.856913",
+        "description": "Step 85: resonance anomaly detected",
+        "count": 262
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.948575",
+        "description": "Step 95: resonance anomaly detected",
+        "count": 263
+      },
+      {
+        "timestamp": "2025-11-08T19:22:06.004074",
+        "description": "Step 101: resonance anomaly detected",
+        "count": 264
+      },
+      {
+        "timestamp": "2025-11-08T19:22:06.076168",
+        "description": "Step 106: resonance anomaly detected",
+        "count": 265
+      },
+      {
+        "timestamp": "2025-11-08T19:22:06.168211",
+        "description": "Step 3: resonance anomaly detected",
+        "count": 266
+      },
+      {
+        "timestamp": "2025-11-08T19:22:06.186787",
+        "description": "Step 6: resonance anomaly detected",
+        "count": 267
       }
     ]
   },
@@ -1073,7 +1348,7 @@
     "origin": "ritual_cycle",
     "legend": "The Law of the Ritual_Cycle",
     "status": "law",
-    "times": 226,
+    "times": 280,
     "history": [
       {
         "timestamp": "2025-11-06T03:20:24.049339",
@@ -2204,6 +2479,276 @@
         "timestamp": "2025-11-08T18:10:20.909717",
         "description": "Step 10: echo anomaly detected",
         "count": 226
+      },
+      {
+        "timestamp": "2025-11-08T19:20:47.776186",
+        "description": "Step 1: echo anomaly detected",
+        "count": 227
+      },
+      {
+        "timestamp": "2025-11-08T19:20:47.805197",
+        "description": "Step 7: echo anomaly detected",
+        "count": 228
+      },
+      {
+        "timestamp": "2025-11-08T19:20:47.878778",
+        "description": "Step 15: echo anomaly detected",
+        "count": 229
+      },
+      {
+        "timestamp": "2025-11-08T19:20:47.909824",
+        "description": "Step 17: echo anomaly detected",
+        "count": 230
+      },
+      {
+        "timestamp": "2025-11-08T19:20:47.939503",
+        "description": "Step 20: echo anomaly detected",
+        "count": 231
+      },
+      {
+        "timestamp": "2025-11-08T19:20:47.969499",
+        "description": "Step 24: echo anomaly detected",
+        "count": 232
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.029401",
+        "description": "Step 38: echo anomaly detected",
+        "count": 233
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.074320",
+        "description": "Step 41: echo anomaly detected",
+        "count": 234
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.148633",
+        "description": "Step 55: echo anomaly detected",
+        "count": 235
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.285776",
+        "description": "Step 68: echo anomaly detected",
+        "count": 236
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.316437",
+        "description": "Step 72: echo anomaly detected",
+        "count": 237
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.471226",
+        "description": "Step 87: echo anomaly detected",
+        "count": 238
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.502058",
+        "description": "Step 90: echo anomaly detected",
+        "count": 239
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.565088",
+        "description": "Step 97: echo anomaly detected",
+        "count": 240
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.580666",
+        "description": "Step 99: echo anomaly detected",
+        "count": 241
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.660635",
+        "description": "Step 106: echo anomaly detected",
+        "count": 242
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.691978",
+        "description": "Step 108: echo anomaly detected",
+        "count": 243
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.489313",
+        "description": "Step 5: echo anomaly detected",
+        "count": 244
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.568641",
+        "description": "Step 2: echo anomaly detected",
+        "count": 245
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.583766",
+        "description": "Step 3: echo anomaly detected",
+        "count": 246
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.613860",
+        "description": "Step 6: echo anomaly detected",
+        "count": 247
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.660148",
+        "description": "Step 9: echo anomaly detected",
+        "count": 248
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.690455",
+        "description": "Step 11: echo anomaly detected",
+        "count": 249
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.721063",
+        "description": "Step 13: echo anomaly detected",
+        "count": 250
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.768494",
+        "description": "Step 24: echo anomaly detected",
+        "count": 251
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.815684",
+        "description": "Step 29: echo anomaly detected",
+        "count": 252
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.847224",
+        "description": "Step 31: echo anomaly detected",
+        "count": 253
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.915151",
+        "description": "Step 39: echo anomaly detected",
+        "count": 254
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.956817",
+        "description": "Step 45: echo anomaly detected",
+        "count": 255
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.973024",
+        "description": "Step 46: echo anomaly detected",
+        "count": 256
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.988987",
+        "description": "Step 47: echo anomaly detected",
+        "count": 257
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.100530",
+        "description": "Step 56: echo anomaly detected",
+        "count": 258
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.165899",
+        "description": "Step 63: echo anomaly detected",
+        "count": 259
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.182069",
+        "description": "Step 64: echo anomaly detected",
+        "count": 260
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.199032",
+        "description": "Step 67: echo anomaly detected",
+        "count": 261
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.231585",
+        "description": "Step 70: echo anomaly detected",
+        "count": 262
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.263200",
+        "description": "Step 72: echo anomaly detected",
+        "count": 263
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.412790",
+        "description": "Step 84: echo anomaly detected",
+        "count": 264
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.437676",
+        "description": "Step 85: echo anomaly detected",
+        "count": 265
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.114493",
+        "description": "Step 14: echo anomaly detected",
+        "count": 266
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.148885",
+        "description": "Step 17: echo anomaly detected",
+        "count": 267
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.167328",
+        "description": "Step 18: echo anomaly detected",
+        "count": 268
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.186864",
+        "description": "Step 19: echo anomaly detected",
+        "count": 269
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.204451",
+        "description": "Step 21: echo anomaly detected",
+        "count": 270
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.274663",
+        "description": "Step 28: echo anomaly detected",
+        "count": 271
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.488226",
+        "description": "Step 53: echo anomaly detected",
+        "count": 272
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.596184",
+        "description": "Step 65: echo anomaly detected",
+        "count": 273
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.614436",
+        "description": "Step 66: echo anomaly detected",
+        "count": 274
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.633998",
+        "description": "Step 67: echo anomaly detected",
+        "count": 275
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.669409",
+        "description": "Step 69: echo anomaly detected",
+        "count": 276
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.782471",
+        "description": "Step 78: echo anomaly detected",
+        "count": 277
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.819118",
+        "description": "Step 81: echo anomaly detected",
+        "count": 278
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.838301",
+        "description": "Step 82: echo anomaly detected",
+        "count": 279
+      },
+      {
+        "timestamp": "2025-11-08T19:22:06.021506",
+        "description": "Step 102: echo anomaly detected",
+        "count": 280
       }
     ]
   },
@@ -2212,7 +2757,7 @@
     "origin": "ritual_cycle",
     "legend": "The Law of the Ritual_Cycle",
     "status": "law",
-    "times": 220,
+    "times": 284,
     "history": [
       {
         "timestamp": "2025-11-06T03:20:24.049519",
@@ -3313,6 +3858,326 @@
         "timestamp": "2025-11-08T18:10:20.762075",
         "description": "Step 103: void anomaly detected",
         "count": 220
+      },
+      {
+        "timestamp": "2025-11-08T19:20:47.716243",
+        "description": "Step 4: void anomaly detected",
+        "count": 221
+      },
+      {
+        "timestamp": "2025-11-08T19:20:47.746538",
+        "description": "Step 10: void anomaly detected",
+        "count": 222
+      },
+      {
+        "timestamp": "2025-11-08T19:20:47.849196",
+        "description": "Step 12: void anomaly detected",
+        "count": 223
+      },
+      {
+        "timestamp": "2025-11-08T19:20:47.954370",
+        "description": "Step 23: void anomaly detected",
+        "count": 224
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.014523",
+        "description": "Step 36: void anomaly detected",
+        "count": 225
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.118759",
+        "description": "Step 51: void anomaly detected",
+        "count": 226
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.133705",
+        "description": "Step 53: void anomaly detected",
+        "count": 227
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.194218",
+        "description": "Step 58: void anomaly detected",
+        "count": 228
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.209402",
+        "description": "Step 59: void anomaly detected",
+        "count": 229
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.331881",
+        "description": "Step 73: void anomaly detected",
+        "count": 230
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.362730",
+        "description": "Step 78: void anomaly detected",
+        "count": 231
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.440384",
+        "description": "Step 85: void anomaly detected",
+        "count": 232
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.596220",
+        "description": "Step 102: void anomaly detected",
+        "count": 233
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.644908",
+        "description": "Step 105: void anomaly detected",
+        "count": 234
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.719124",
+        "description": "Step 2: void anomaly detected",
+        "count": 235
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.750522",
+        "description": "Step 4: void anomaly detected",
+        "count": 236
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.629156",
+        "description": "Step 7: void anomaly detected",
+        "count": 237
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.705668",
+        "description": "Step 12: void anomaly detected",
+        "count": 238
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.784035",
+        "description": "Step 27: void anomaly detected",
+        "count": 239
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.799854",
+        "description": "Step 28: void anomaly detected",
+        "count": 240
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.879028",
+        "description": "Step 33: void anomaly detected",
+        "count": 241
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.896414",
+        "description": "Step 37: void anomaly detected",
+        "count": 242
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.934934",
+        "description": "Step 44: void anomaly detected",
+        "count": 243
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.005351",
+        "description": "Step 49: void anomaly detected",
+        "count": 244
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.052969",
+        "description": "Step 53: void anomaly detected",
+        "count": 245
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.118034",
+        "description": "Step 58: void anomaly detected",
+        "count": 246
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.134239",
+        "description": "Step 59: void anomaly detected",
+        "count": 247
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.247435",
+        "description": "Step 71: void anomaly detected",
+        "count": 248
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.294724",
+        "description": "Step 75: void anomaly detected",
+        "count": 249
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.310961",
+        "description": "Step 76: void anomaly detected",
+        "count": 250
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.458053",
+        "description": "Step 86: void anomaly detected",
+        "count": 251
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.501671",
+        "description": "Step 89: void anomaly detected",
+        "count": 252
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.523351",
+        "description": "Step 91: void anomaly detected",
+        "count": 253
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.541211",
+        "description": "Step 92: void anomaly detected",
+        "count": 254
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.562103",
+        "description": "Step 93: void anomaly detected",
+        "count": 255
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.624856",
+        "description": "Step 97: void anomaly detected",
+        "count": 256
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.645491",
+        "description": "Step 98: void anomaly detected",
+        "count": 257
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.670491",
+        "description": "Step 100: void anomaly detected",
+        "count": 258
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.690212",
+        "description": "Step 102: void anomaly detected",
+        "count": 259
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.731045",
+        "description": "Step 106: void anomaly detected",
+        "count": 260
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.902777",
+        "description": "Step 8: void anomaly detected",
+        "count": 261
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.937311",
+        "description": "Step 10: void anomaly detected",
+        "count": 262
+      },
+      {
+        "timestamp": "2025-11-08T19:22:04.888200",
+        "description": "Step 6: void anomaly detected",
+        "count": 263
+      },
+      {
+        "timestamp": "2025-11-08T19:22:04.905121",
+        "description": "Step 7: void anomaly detected",
+        "count": 264
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.012842",
+        "description": "Step 4: void anomaly detected",
+        "count": 265
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.081239",
+        "description": "Step 12: void anomaly detected",
+        "count": 266
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.220908",
+        "description": "Step 24: void anomaly detected",
+        "count": 267
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.239485",
+        "description": "Step 25: void anomaly detected",
+        "count": 268
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.292696",
+        "description": "Step 30: void anomaly detected",
+        "count": 269
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.310721",
+        "description": "Step 32: void anomaly detected",
+        "count": 270
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.418892",
+        "description": "Step 46: void anomaly detected",
+        "count": 271
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.471040",
+        "description": "Step 52: void anomaly detected",
+        "count": 272
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.559367",
+        "description": "Step 62: void anomaly detected",
+        "count": 273
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.689279",
+        "description": "Step 70: void anomaly detected",
+        "count": 274
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.727548",
+        "description": "Step 73: void anomaly detected",
+        "count": 275
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.745937",
+        "description": "Step 74: void anomaly detected",
+        "count": 276
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.765150",
+        "description": "Step 77: void anomaly detected",
+        "count": 277
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.875012",
+        "description": "Step 87: void anomaly detected",
+        "count": 278
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.893858",
+        "description": "Step 89: void anomaly detected",
+        "count": 279
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.967521",
+        "description": "Step 97: void anomaly detected",
+        "count": 280
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.986048",
+        "description": "Step 100: void anomaly detected",
+        "count": 281
+      },
+      {
+        "timestamp": "2025-11-08T19:22:06.149125",
+        "description": "Step 1: void anomaly detected",
+        "count": 282
+      },
+      {
+        "timestamp": "2025-11-08T19:22:06.205214",
+        "description": "Step 7: void anomaly detected",
+        "count": 283
+      },
+      {
+        "timestamp": "2025-11-08T19:22:06.244627",
+        "description": "Step 10: void anomaly detected",
+        "count": 284
       }
     ]
   },
@@ -3321,7 +4186,7 @@
     "origin": "ritual_cycle",
     "legend": "The Law of the Ritual_Cycle",
     "status": "law",
-    "times": 203,
+    "times": 260,
     "history": [
       {
         "timestamp": "2025-11-06T03:20:24.050541",
@@ -4337,6 +5202,291 @@
         "timestamp": "2025-11-08T18:10:20.894686",
         "description": "Step 5: flare anomaly detected",
         "count": 203
+      },
+      {
+        "timestamp": "2025-11-08T19:20:47.731633",
+        "description": "Step 7: flare anomaly detected",
+        "count": 204
+      },
+      {
+        "timestamp": "2025-11-08T19:20:47.819753",
+        "description": "Step 9: flare anomaly detected",
+        "count": 205
+      },
+      {
+        "timestamp": "2025-11-08T19:20:47.893659",
+        "description": "Step 16: flare anomaly detected",
+        "count": 206
+      },
+      {
+        "timestamp": "2025-11-08T19:20:47.984371",
+        "description": "Step 27: flare anomaly detected",
+        "count": 207
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.044489",
+        "description": "Step 39: flare anomaly detected",
+        "count": 208
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.059555",
+        "description": "Step 40: flare anomaly detected",
+        "count": 209
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.089084",
+        "description": "Step 48: flare anomaly detected",
+        "count": 210
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.239913",
+        "description": "Step 65: flare anomaly detected",
+        "count": 211
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.270182",
+        "description": "Step 67: flare anomaly detected",
+        "count": 212
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.347351",
+        "description": "Step 77: flare anomaly detected",
+        "count": 213
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.378260",
+        "description": "Step 80: flare anomaly detected",
+        "count": 214
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.409413",
+        "description": "Step 83: flare anomaly detected",
+        "count": 215
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.533342",
+        "description": "Step 94: flare anomaly detected",
+        "count": 216
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.549267",
+        "description": "Step 96: flare anomaly detected",
+        "count": 217
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.613406",
+        "description": "Step 103: flare anomaly detected",
+        "count": 218
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.629313",
+        "description": "Step 104: flare anomaly detected",
+        "count": 219
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.766245",
+        "description": "Step 6: flare anomaly detected",
+        "count": 220
+      },
+      {
+        "timestamp": "2025-11-08T19:20:48.781700",
+        "description": "Step 9: flare anomaly detected",
+        "count": 221
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.520436",
+        "description": "Step 10: flare anomaly detected",
+        "count": 222
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.644523",
+        "description": "Step 8: flare anomaly detected",
+        "count": 223
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.675181",
+        "description": "Step 10: flare anomaly detected",
+        "count": 224
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.751935",
+        "description": "Step 23: flare anomaly detected",
+        "count": 225
+      },
+      {
+        "timestamp": "2025-11-08T19:21:07.863226",
+        "description": "Step 32: flare anomaly detected",
+        "count": 226
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.021392",
+        "description": "Step 50: flare anomaly detected",
+        "count": 227
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.068930",
+        "description": "Step 54: flare anomaly detected",
+        "count": 228
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.215352",
+        "description": "Step 69: flare anomaly detected",
+        "count": 229
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.279012",
+        "description": "Step 74: flare anomaly detected",
+        "count": 230
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.327176",
+        "description": "Step 77: flare anomaly detected",
+        "count": 231
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.343647",
+        "description": "Step 79: flare anomaly detected",
+        "count": 232
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.376645",
+        "description": "Step 81: flare anomaly detected",
+        "count": 233
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.483555",
+        "description": "Step 87: flare anomaly detected",
+        "count": 234
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.751225",
+        "description": "Step 107: flare anomaly detected",
+        "count": 235
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.768522",
+        "description": "Step 108: flare anomaly detected",
+        "count": 236
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.818232",
+        "description": "Step 2: flare anomaly detected",
+        "count": 237
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.851967",
+        "description": "Step 4: flare anomaly detected",
+        "count": 238
+      },
+      {
+        "timestamp": "2025-11-08T19:21:08.920208",
+        "description": "Step 9: flare anomaly detected",
+        "count": 239
+      },
+      {
+        "timestamp": "2025-11-08T19:22:04.961099",
+        "description": "Step 1: flare anomaly detected",
+        "count": 240
+      },
+      {
+        "timestamp": "2025-11-08T19:22:04.977697",
+        "description": "Step 2: flare anomaly detected",
+        "count": 241
+      },
+      {
+        "timestamp": "2025-11-08T19:22:04.994831",
+        "description": "Step 3: flare anomaly detected",
+        "count": 242
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.029668",
+        "description": "Step 6: flare anomaly detected",
+        "count": 243
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.097823",
+        "description": "Step 13: flare anomaly detected",
+        "count": 244
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.131690",
+        "description": "Step 16: flare anomaly detected",
+        "count": 245
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.328600",
+        "description": "Step 36: flare anomaly detected",
+        "count": 246
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.346412",
+        "description": "Step 40: flare anomaly detected",
+        "count": 247
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.364045",
+        "description": "Step 41: flare anomaly detected",
+        "count": 248
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.436624",
+        "description": "Step 48: flare anomaly detected",
+        "count": 249
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.505746",
+        "description": "Step 56: flare anomaly detected",
+        "count": 250
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.541689",
+        "description": "Step 61: flare anomaly detected",
+        "count": 251
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.577500",
+        "description": "Step 64: flare anomaly detected",
+        "count": 252
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.800766",
+        "description": "Step 80: flare anomaly detected",
+        "count": 253
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.911471",
+        "description": "Step 90: flare anomaly detected",
+        "count": 254
+      },
+      {
+        "timestamp": "2025-11-08T19:22:05.930161",
+        "description": "Step 93: flare anomaly detected",
+        "count": 255
+      },
+      {
+        "timestamp": "2025-11-08T19:22:06.039013",
+        "description": "Step 104: flare anomaly detected",
+        "count": 256
+      },
+      {
+        "timestamp": "2025-11-08T19:22:06.057048",
+        "description": "Step 105: flare anomaly detected",
+        "count": 257
+      },
+      {
+        "timestamp": "2025-11-08T19:22:06.096334",
+        "description": "Step 107: flare anomaly detected",
+        "count": 258
+      },
+      {
+        "timestamp": "2025-11-08T19:22:06.114528",
+        "description": "Step 108: flare anomaly detected",
+        "count": 259
+      },
+      {
+        "timestamp": "2025-11-08T19:22:06.225356",
+        "description": "Step 8: flare anomaly detected",
+        "count": 260
       }
     ]
   }
