@@ -369,7 +369,7 @@ def validate_config() -> Dict[str, Any]:
 
 if __name__ == "__main__":
 
-    async def test():
+    async def test() -> None:
         """Test master webhook client."""
         print("🧪 Testing Master Zapier Client")
         print("=" * 70)

@@ -3,11 +3,15 @@
 # Author: Andrew John Ward (Architect)
 
 import asyncio
+import logging
 import os
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from notion_client import Client
+
+# Configure logger
+logger = logging.getLogger(__name__)
 
 # ============================================================================
 # NOTION CLIENT
@@ -17,7 +21,7 @@ from notion_client import Client
 class HelixNotionClient:
     """Client for Notion integration with Helix Collective databases."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize Notion client with database IDs."""
         notion_token = os.getenv("NOTION_API_KEY")
         if not notion_token:
@@ -53,7 +57,7 @@ class HelixNotionClient:
                 self._agent_cache[agent_name] = page_id
                 return page_id
         except Exception as e:
-            print(f"⚠ Error getting agent page ID for {agent_name}: {e}")
+            logger.warning(f"⚠ Error getting agent page ID for {agent_name}: {e}")
 
         return None
 
@@ -77,10 +81,10 @@ class HelixNotionClient:
 
             page_id = response["id"]
             self._agent_cache[agent_name] = page_id
-            print(f"✅ Created agent {agent_name} in Notion")
+            logger.info(f"✅ Created agent {agent_name} in Notion")
             return page_id
         except Exception as e:
-            print(f"❌ Error creating agent {agent_name}: {e}")
+            logger.error(f"❌ Error creating agent {agent_name}: {e}")
             return None
 
     async def update_agent_status(self, agent_name: str, status: str, last_action: str, health_score: int) -> bool:
@@ -88,7 +92,7 @@ class HelixNotionClient:
         try:
             agent_page_id = await self._get_agent_page_id(agent_name)
             if not agent_page_id:
-                print(f"⚠ Agent {agent_name} not found in Notion")
+                logger.warning(f"⚠ Agent {agent_name} not found in Notion")
                 return False
 
             self.notion.pages.update(
@@ -100,10 +104,10 @@ class HelixNotionClient:
                     "Last Updated": {"date": {"start": datetime.utcnow().isoformat()}},
                 },
             )
-            print(f"✅ Updated agent {agent_name} status to {status}")
+            logger.info(f"✅ Updated agent {agent_name} status to {status}")
             return True
         except Exception as e:
-            print(f"❌ Error updating agent {agent_name}: {e}")
+            logger.error(f"❌ Error updating agent {agent_name}: {e}")
             return False
 
     # ========================================================================
@@ -129,10 +133,10 @@ class HelixNotionClient:
                 },
             )
 
-            print(f"✅ Logged event: {event_title}")
+            logger.info(f"✅ Logged event: {event_title}")
             return response["id"]
         except Exception as e:
-            print(f"❌ Error logging event {event_title}: {e}")
+            logger.error(f"❌ Error logging event {event_title}: {e}")
             return None
 
     # ========================================================================
@@ -161,16 +165,16 @@ class HelixNotionClient:
                 # Update existing
                 page_id = results["results"][0]["id"]
                 self.notion.pages.update(page_id=page_id, properties=properties)
-                print(f"✅ Updated component {component_name}")
+                logger.info(f"✅ Updated component {component_name}")
             else:
                 # Create new
                 properties["Component"] = {"title": [{"text": {"content": component_name}}]}
                 self.notion.pages.create(parent={"database_id": self.system_state_db}, properties=properties)
-                print(f"✅ Created component {component_name}")
+                logger.info(f"✅ Created component {component_name}")
 
             return True
         except Exception as e:
-            print(f"❌ Error updating component {component_name}: {e}")
+            logger.error(f"❌ Error updating component {component_name}: {e}")
             return False
 
     # ========================================================================
@@ -201,10 +205,10 @@ class HelixNotionClient:
                 },
             )
 
-            print(f"✅ Saved context snapshot: {session_id}")
+            logger.info(f"✅ Saved context snapshot: {session_id}")
             return response["id"]
         except Exception as e:
-            print(f"❌ Error saving context snapshot: {e}")
+            logger.error(f"❌ Error saving context snapshot: {e}")
             return None
 
     # ========================================================================
@@ -215,18 +219,18 @@ class HelixNotionClient:
         """Check if Notion connection is working."""
         try:
             self.notion.users.me()
-            print("✅ Notion connection healthy")
+            logger.info("✅ Notion connection healthy")
             return True
         except Exception as e:
-            print(f"❌ Notion connection failed: {e}")
+            logger.error(f"❌ Notion connection failed: {e}")
             return False
 
-    async def clear_agent_cache(self):
+    async def clear_agent_cache(self) -> None:
         """Clear the agent page ID cache."""
         self._agent_cache.clear()
-        print("✅ Agent cache cleared")
+        logger.info("✅ Agent cache cleared")
 
-    async def get_context_snapshot(self, session_id: str):
+    async def get_context_snapshot(self, session_id: str) -> Optional[Dict[str, Any]]:
         """Retrieve a context snapshot by session ID."""
         try:
             results = self.notion.databases.query(
@@ -243,10 +247,10 @@ class HelixNotionClient:
                 "decisions": page["properties"]["Key Decisions"]["rich_text"][0]["text"]["content"],
             }
         except Exception as e:
-            print(f"⚠ Error getting context snapshot: {e}")
+            logger.warning(f"⚠ Error getting context snapshot: {e}")
             return None
 
-    async def query_events_by_agent(self, agent_name: str, limit: int = 10):
+    async def query_events_by_agent(self, agent_name: str, limit: int = 10) -> List[Dict[str, Any]]:
         """Query events for a specific agent."""
         try:
             agent_page_id = await self._get_agent_page_id(agent_name)
@@ -267,10 +271,10 @@ class HelixNotionClient:
                 events.append(event)
             return events
         except Exception as e:
-            print(f"⚠ Error querying events: {e}")
+            logger.warning(f"⚠ Error querying events: {e}")
             return []
 
-    async def get_all_agents(self):
+    async def get_all_agents(self) -> List[Dict[str, Any]]:
         """Get all agents from Agent Registry."""
         try:
             results = self.notion.databases.query(database_id=self.agent_registry_db)
@@ -284,7 +288,7 @@ class HelixNotionClient:
                 agents.append(agent)
             return agents
         except Exception as e:
-            print(f"⚠ Error getting agents: {e}")
+            logger.warning(f"⚠ Error getting agents: {e}")
             return []
 
 
@@ -306,7 +310,7 @@ async def get_notion_client() -> Optional[HelixNotionClient]:
                 _notion_client = None
                 return None
         except Exception as e:
-            print(f"⚠ Notion client initialization failed: {e}")
+            logger.warning(f"⚠ Notion client initialization failed: {e}")
             return None
     return _notion_client
 
@@ -317,10 +321,10 @@ async def get_notion_client() -> Optional[HelixNotionClient]:
 
 if __name__ == "__main__":
 
-    async def main():
+    async def main() -> None:
         client = await get_notion_client()
         if not client:
-            print("❌ Failed to initialize Notion client")
+            logger.error("❌ Failed to initialize Notion client")
             return
 
         # Test creating an agent
@@ -332,6 +336,6 @@ if __name__ == "__main__":
         # Test updating system component
         await client.update_system_component("Test Component", "Ready", 0.355, "", True)
 
-        print("✅ Notion client tests completed")
+        logger.info("✅ Notion client tests completed")
 
     asyncio.run(main())

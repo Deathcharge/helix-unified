@@ -17,17 +17,27 @@ Environment Variables:
 """
 
 import io
+import logging
 import os
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict, List
+
+# Add backend to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
+
+logger = logging.getLogger(__name__)
 
 try:
     from webdav3.client import Client as WebDAVClient
     WEBDAV_AVAILABLE = True
 except ImportError:
     WEBDAV_AVAILABLE = False
-    print("⚠️ webdav3-client not installed. Install with: pip install webdavclient3")
+    logger.warning(
+        "⚠️ webdav3 not installed. Nextcloud storage disabled. "
+        "To enable, run: pip install webdav3"
+    )
 
 
 class HelixNextcloudClient:

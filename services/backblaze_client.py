@@ -18,10 +18,14 @@ Environment Variables:
 Free Tier: 10GB storage + 1GB/day download
 """
 
+import logging
 import os
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict, List
+
+logger = logging.getLogger(__name__)
 
 try:
     import boto3
@@ -29,7 +33,10 @@ try:
     BOTO3_AVAILABLE = True
 except ImportError:
     BOTO3_AVAILABLE = False
-    print("⚠️ boto3 not installed. Install with: pip install boto3")
+    logger.warning(
+        "⚠️ boto3 not installed. Backblaze B2 storage disabled. "
+        "To enable, run: pip install boto3"
+    )
 
 
 class HelixBackblazeClient:
