@@ -306,7 +306,7 @@ async def list_contexts(ctx: commands.Context) -> None:
 
         embed.add_field(
             name="🔄 Load Checkpoint",
-            value=f"Use `!load <session_name>` to restore",
+            value="Use `!load <session_name>` to restore",
             inline=False
         )
 

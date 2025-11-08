@@ -17,15 +17,13 @@ def test_ritual_engine_basic_execution(temp_state_dir):
         result = execute_ritual(steps=10)
 
         assert result is not None
-        # Result has 'ucf_final' key, not 'final_state'
-        assert "ucf_final" in result or "status" in result or "cycle_id" in result
+        assert "ucf_final" in result or "status" in result or "folklore_entries" in result
     except ImportError:
         pytest.skip("Ritual engine not available")
 
 
-@pytest.mark.asyncio
 @pytest.mark.unit
-async def test_ritual_step_validation():
+def test_ritual_step_validation():
     """Test ritual step count validation."""
     try:
         from backend.z88_ritual_engine import execute_ritual

@@ -13,7 +13,6 @@ import datetime
 import glob
 import json
 import logging
-import os
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -24,7 +23,7 @@ from backend.z88_ritual_engine import load_ucf_state
 from backend.agents import AGENTS
 from backend.discord_embeds import HelixEmbeds
 
-from backend.commands.helpers import get_uptime, build_storage_report, log_to_shadow
+from backend.commands.helpers import get_uptime, log_to_shadow
 
 if TYPE_CHECKING:
     from discord.ext.commands import Bot

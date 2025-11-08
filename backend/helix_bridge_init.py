@@ -4,7 +4,6 @@ Helix Bridge Initialization - Connects Discord bot with Web Chat.
 This module initializes the bidirectional bridge between Discord and web chat.
 """
 import logging
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +20,7 @@ async def initialize_helix_bridge(discord_bot, web_connection_manager):
         DiscordWebBridge instance
     """
     try:
-        from backend.discord_web_bridge import DiscordWebBridge, set_bridge, setup_bridge_events
+        from backend.discord_web_bridge import setup_bridge_events
 
         logger.info("🌉 Initializing Helix Bridge (Discord ↔ Web Chat)...")
 

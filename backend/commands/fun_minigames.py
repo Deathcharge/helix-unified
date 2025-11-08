@@ -323,7 +323,7 @@ async def horoscope(ctx: commands.Context, sign: Optional[str] = None) -> None:
 
     # Create embed
     embed = discord.Embed(
-        title=f"🌟 Today's Consciousness Reading",
+        title="🌟 Today's Consciousness Reading",
         description=f"**Your Sign:** {assigned_sign}\n\n**Prediction:** {prediction}",
         color=random.randint(0x000000, 0xFFFFFF)
     )
@@ -619,7 +619,6 @@ async def agent_advice(ctx: commands.Context, *, situation: Optional[str] = None
     """
     # Choose a random agent
     agent_name = random.choice(list(AGENT_WISDOM.keys()))
-    agent_emoji = agent_name.split()[-1] if agent_name.split() else "🤖"
 
     # Generate contextual advice
     if situation:

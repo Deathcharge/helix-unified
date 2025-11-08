@@ -14,7 +14,6 @@ import asyncio
 import datetime
 import json
 import logging
-import os
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -119,7 +118,7 @@ async def setup_helix_server(ctx: commands.Context) -> None:
     # Create summary embed
     embed = discord.Embed(
         title="✅ Helix Webhook Setup Complete!",
-        description=f"Created webhooks for Zapier integration",
+        description="Created webhooks for Zapier integration",
         color=0x00FF00,
         timestamp=datetime.datetime.utcnow()
     )
