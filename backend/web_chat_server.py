@@ -10,14 +10,11 @@ Features:
 - Session management
 """
 import asyncio
-import json
 import logging
 from datetime import datetime
-from typing import Dict, Set, Optional, Any
-from pathlib import Path
+from typing import Dict, Optional, Any
 
-from fastapi import WebSocket, WebSocketDisconnect
-import discord
+from fastapi import WebSocket
 
 logger = logging.getLogger(__name__)
 

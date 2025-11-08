@@ -149,9 +149,10 @@ async def test_integrations(ctx: commands.Context) -> None:
     mega_pass = os.getenv("MEGA_PASS")
     if mega_email and mega_pass:
         try:
-            from mega import Mega
-            mega = Mega()
-            # Just check credentials are valid (don't actually login for test)
+            # Just check if mega.py is available (don't actually instantiate or login for test)
+            import importlib.util
+            if importlib.util.find_spec("mega") is None:
+                raise ImportError("mega module not found")
             embed.add_field(
                 name="☁️ MEGA Cloud Storage",
                 value="✅ Configured\nCredentials set",

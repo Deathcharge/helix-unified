@@ -18,7 +18,6 @@ from z88_ritual_engine import load_ucf_state
 
 if TYPE_CHECKING:
     from discord.ext.commands import Bot
-    from agents import AGENTS
 
 logger = logging.getLogger(__name__)
 

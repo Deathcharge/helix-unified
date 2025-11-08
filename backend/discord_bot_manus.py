@@ -19,10 +19,7 @@ import json
 import io
 import asyncio
 import datetime
-import json
 import logging
-import os
-import re
 import shutil
 import time
 from collections import defaultdict
@@ -33,18 +30,9 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import aiohttp
 import discord
-from backend.agent_consciousness_profiles import AGENT_CONSCIOUSNESS_PROFILES
-from backend.agent_embeds import get_agent_embed, list_all_agents
 from backend.agents import AGENTS
 from discord.ext import commands, tasks
-from backend.discord_consciousness_commands import (
-    create_agent_consciousness_embed,
-    create_consciousness_embed,
-    create_emotions_embed,
-)
-from backend.discord_embeds import HelixEmbeds  # v15.3 rich embeds
-from backend.notion_sync_daemon import trigger_manual_sync
-from backend.z88_ritual_engine import execute_ritual, load_ucf_state
+from backend.z88_ritual_engine import load_ucf_state
 from backend.zapier_client import ZapierClient  # v16.5 Zapier integration
 
 # Configure logger

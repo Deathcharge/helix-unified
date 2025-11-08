@@ -8,7 +8,7 @@ import os
 from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 import aiohttp
 import httpx
@@ -716,80 +716,6 @@ async def get_ucf_state() -> Dict[str, Any]:
         raise HTTPException(status_code=404, detail="UCF state not found")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-
-# ============================================================================
-# WEBSOCKET ENDPOINT - REAL-TIME STREAMING
-# ============================================================================
-
-
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket) -> None:
-    """
-    WebSocket endpoint for real-time UCF and agent status streaming.
-
-    Streams updates every 5 seconds with:
-    - UCF state (harmony, resilience, prana, drishti, klesha, zoom)
-    - Agent statuses
-    - System heartbeat
-    - Timestamp
-
-    Usage:
-        const ws = new WebSocket('wss://helix-unified-production.up.railway.app/ws');
-        ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            console.log('UCF:', data.ucf_state);
-            console.log('Agents:', data.agents);
-        };
-    """
-    await websocket.accept()
-
-    try:
-        while True:
-            # Gather current state
-            try:
-                # Get agent status
-                agents = await get_collective_status()
-
-                # Read UCF state
-                ucf_state = {}
-                try:
-                    with open("Helix/state/ucf_state.json", "r") as f:
-                        ucf_state = json.load(f)
-                except Exception:
-                    pass
-
-                # Read heartbeat
-                heartbeat = {}
-                try:
-                    with open("Helix/state/heartbeat.json", "r") as f:
-                        heartbeat = json.load(f)
-                except Exception:
-                    pass
-
-                # Send update
-                await websocket.send_json(
-                    {
-                        "type": "status_update",
-                        "ucf_state": ucf_state,
-                        "agents": agents,
-                        "heartbeat": heartbeat,
-                        "timestamp": datetime.utcnow().isoformat(),
-                    }
-                )
-
-            except Exception as e:
-                await websocket.send_json(
-                    {"type": "error", "error": str(e), "timestamp": datetime.utcnow().isoformat()}
-                )
-
-            # Wait 5 seconds before next update
-            await asyncio.sleep(5)
-
-    except WebSocketDisconnect:
-        logger.info("WebSocket client disconnected")
-    except Exception as e:
-        logger.error(f"WebSocket error: {e}")
 
 
 # ============================================================================

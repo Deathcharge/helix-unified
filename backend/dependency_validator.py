@@ -5,7 +5,6 @@ Provides graceful handling and helpful error messages when optional
 dependencies are missing.
 """
 import logging
-import sys
 from typing import Optional, Dict, List, Tuple
 from dataclasses import dataclass
 

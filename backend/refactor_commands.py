@@ -150,7 +150,7 @@ ARCHITECT_ID = int(os.getenv("ARCHITECT_ID", 0))
         func_name = name.replace('-', '_')
         cmd_function_names.append(func_name)
 
-    template += f'''
+    template += '''
 
 async def setup(bot: 'Bot') -> None:
     """Register commands with the bot."""

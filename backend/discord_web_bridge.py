@@ -4,7 +4,6 @@ Discord ↔ Web Chat Bridge - Bidirectional message routing.
 Routes messages between Discord channels and web chat interface in real-time.
 Enables unified communication across platforms.
 """
-import asyncio
 import logging
 from datetime import datetime
 from typing import Optional, Dict, Any

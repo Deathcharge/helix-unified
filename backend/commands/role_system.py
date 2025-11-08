@@ -15,7 +15,6 @@ Commands:
 
 This allows users to opt-in to notifications, agent identities, channel access, and community themes.
 """
-import asyncio
 import logging
 from typing import TYPE_CHECKING, List, Dict, Any
 

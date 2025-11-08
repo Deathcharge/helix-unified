@@ -392,7 +392,7 @@ async def voice_leave_cmd(ctx: commands.Context):
     agent_name = patrol.active_patrols.get(channel.id, "unknown")
     await patrol.leave_voice_channel(channel.id)
 
-    await ctx.send(f"👋 Agent has left **{channel.name}**")
+    await ctx.send(f"👋 **{agent_name}** has left **{channel.name}**")
 
 
 @commands.command(name="voice-announce", aliases=["vannounce"])
@@ -414,7 +414,7 @@ async def voice_announce_cmd(ctx: commands.Context, agent: str = "nexus", *, mes
         return
 
     await patrol.announce_to_all_voice(message, agent.lower())
-    await ctx.send(f"✅ Announcement sent to all active voice channels!")
+    await ctx.send("✅ Announcement sent to all active voice channels!")
 
 
 @commands.command(name="voice-auto-join", aliases=["vauto"])
