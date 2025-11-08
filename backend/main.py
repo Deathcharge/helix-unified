@@ -8,7 +8,7 @@ import os
 from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import aiohttp
 import httpx
@@ -47,23 +47,23 @@ from mega import Mega
 
 
 class PersistenceEngine:
-    def __init__(self):
+    def __init__(self) -> None:
         self.mega = Mega()
         self.m = self.mega.login(os.getenv("MEGA_EMAIL"), os.getenv("MEGA_PASS"))
         self.remote_dir = os.getenv("MEGA_REMOTE_DIR")
 
-    def upload_state(self):
+    def upload_state(self) -> None:
         local = "Helix/state/heartbeat.json"
         remote = f"{self.remote_dir}/state/heartbeat.json"
         self.m.upload(local, remote)
         logger.info("MEGA: Heartbeat synced.")
 
-    def upload_archive(self, filepath):
+    def upload_archive(self, filepath: str) -> None:
         remote = f"{self.remote_dir}/manus_archive/{os.path.basename(filepath)}"
         self.m.upload(filepath, remote)
         logger.info(f"MEGA: Archive preserved — {filepath}")
 
-    def download_state(self):
+    def download_state(self) -> None:
         remote = f"{self.remote_dir}/state/heartbeat.json"
         self.m.download(remote, "Helix/state/heartbeat.json")
         logger.info("MEGA: State restored from cloud.")
@@ -90,7 +90,7 @@ else:
 # ============================================================================
 
 
-async def ucf_broadcast_loop():
+async def ucf_broadcast_loop() -> None:
     """
     Background task that monitors UCF state and broadcasts changes.
     Replaces 5-second polling with event-driven updates.
@@ -260,7 +260,7 @@ app.add_middleware(
 # Try multiple path resolution strategies for robustness
 
 
-def find_templates_directory():
+def find_templates_directory() -> Path:
     """Find templates directory using multiple strategies."""
     # Strategy 1: Relative to this file (backend/main.py)
     strategy1 = Path(__file__).parent.parent / "templates"
@@ -314,7 +314,7 @@ templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 
 @app.get("/health")
-def health_check():
+def health_check() -> Dict[str, Any]:
     """
     Enhanced health check endpoint with integration status.
 
@@ -419,7 +419,7 @@ def health_check():
 
 
 @app.get("/.well-known/helix.json")
-def helix_manifest():
+def helix_manifest() -> Dict[str, Any]:
     """
     Machine-readable manifest for external AI agents.
 
@@ -515,7 +515,7 @@ def helix_manifest():
 
 
 @app.get("/portals", response_class=HTMLResponse)
-def portal_navigator():
+def portal_navigator() -> HTMLResponse:
     """
     Portal Navigator - Interactive directory of all Helix portals.
 
@@ -560,7 +560,7 @@ async def agent_gallery(request: Request):
 
 
 @app.get("/api", response_class=HTMLResponse)
-async def api_info():
+async def api_info() -> Dict[str, Any]:
     """API info endpoint (JSON)."""
     try:
         status = await get_collective_status()
@@ -592,7 +592,7 @@ async def api_info():
 # ============================================================================
 
 
-def read_json(p: Path, default):
+def read_json(p: Path, default: Any) -> Any:
     """Read JSON file with fallback to default."""
     try:
         return json.loads(p.read_text())
@@ -602,7 +602,7 @@ def read_json(p: Path, default):
 
 @app.get("/status")
 @app.get("/api/status")  # Alias for consistency with external agents
-def get_status():
+def get_status() -> Dict[str, Any]:
     """Get full system status - minimal robust version."""
     # Read UCF state with defaults
     ucf = read_json(
@@ -631,7 +631,7 @@ def get_status():
 
 
 @app.get("/agents")
-async def list_agents():
+async def list_agents() -> Dict[str, Any]:
     """Get list of all agents."""
     try:
         status = await get_collective_status()
@@ -646,7 +646,7 @@ async def list_agents():
 
 
 @app.get("/ucf")
-async def get_ucf_state():
+async def get_ucf_state() -> Dict[str, Any]:
     """Get Universal Coherence Field state."""
     try:
         with open("Helix/state/ucf_state.json", "r") as f:
@@ -664,7 +664,7 @@ async def get_ucf_state():
 
 
 @app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
+async def websocket_endpoint(websocket: WebSocket) -> None:
     """
     WebSocket endpoint for real-time UCF and agent status streaming.
 
@@ -738,7 +738,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
 
 @app.get("/templates/{file_path:path}")
-async def serve_template(file_path: str):
+async def serve_template(file_path: str) -> FileResponse:
     """Serve HTML templates and assets."""
     template_path = TEMPLATES_DIR / file_path
 
@@ -768,7 +768,7 @@ class MusicGenerationRequest(BaseModel):
 
 
 @app.post("/api/music/generate")
-async def generate_music(request: MusicGenerationRequest):
+async def generate_music(request: MusicGenerationRequest) -> StreamingResponse:
     """
     Proxy endpoint for ElevenLabs Music API.
     Generates music from text prompts using ElevenLabs Music v1.
@@ -850,7 +850,7 @@ async def websocket_endpoint(websocket: WebSocket):
             heartbeat.cancel()
 
 
-async def send_heartbeats(websocket: WebSocket, interval: int = 30):
+async def send_heartbeats(websocket: WebSocket, interval: int = 30) -> None:
     """Send periodic heartbeat pings to keep connection alive."""
     try:
         while True:
@@ -861,7 +861,7 @@ async def send_heartbeats(websocket: WebSocket, interval: int = 30):
 
 
 @app.get("/ws/stats")
-async def websocket_stats():
+async def websocket_stats() -> Dict[str, Any]:
     """Get WebSocket connection statistics."""
     return ws_manager.get_connection_stats()
 
@@ -878,7 +878,7 @@ class MandelbrotRequest(BaseModel):
 
 
 @app.get("/mandelbrot/eye")
-async def get_eye_ucf(context: str = "generic"):
+async def get_eye_ucf(context: str = "generic") -> Dict[str, Any]:
     """
     Get UCF state from the Eye of Consciousness coordinate (-0.745+0.113j).
 
@@ -901,7 +901,7 @@ async def get_eye_ucf(context: str = "generic"):
 
 
 @app.post("/mandelbrot/generate")
-async def generate_ucf_from_coordinate(request: MandelbrotRequest):
+async def generate_ucf_from_coordinate(request: MandelbrotRequest) -> Dict[str, Any]:
     """
     Generate UCF state from arbitrary Mandelbrot coordinate.
 
@@ -928,7 +928,7 @@ async def generate_ucf_from_coordinate(request: MandelbrotRequest):
 
 
 @app.get("/mandelbrot/sacred")
-async def list_sacred_points():
+async def list_sacred_points() -> Dict[str, Any]:
     """List all predefined sacred Mandelbrot coordinates."""
     generator = MandelbrotUCFGenerator()
     sacred_points = {}
@@ -952,7 +952,7 @@ async def list_sacred_points():
 
 
 @app.get("/mandelbrot/sacred/{point_name}")
-async def get_sacred_ucf(point_name: str, context: str = "generic"):
+async def get_sacred_ucf(point_name: str, context: str = "generic") -> Dict[str, Any]:
     """
     Generate UCF state from sacred Mandelbrot point.
 
@@ -993,7 +993,7 @@ async def get_sacred_ucf(point_name: str, context: str = "generic"):
 
 
 @app.get("/mandelbrot/ritual/{step}")
-async def get_ritual_step_ucf(step: int, total_steps: int = 108):
+async def get_ritual_step_ucf(step: int, total_steps: int = 108) -> Dict[str, Any]:
     """
     Generate UCF state for specific ritual step using phi-spiral path.
 
@@ -1022,7 +1022,7 @@ async def get_ritual_step_ucf(step: int, total_steps: int = 108):
 
 
 @app.post("/api/trigger-zapier")
-async def trigger_zapier_webhook(payload: Dict[str, Any]):
+async def trigger_zapier_webhook(payload: Dict[str, Any]) -> Dict[str, Any]:
     """
     Manual webhook trigger for testing Zapier integration.
 
@@ -1062,7 +1062,7 @@ async def trigger_zapier_webhook(payload: Dict[str, Any]):
 
 
 @app.post("/api/zapier/telemetry")
-async def send_zapier_telemetry():
+async def send_zapier_telemetry() -> Dict[str, Any]:
     """
     Send current UCF telemetry to Zapier webhook.
 
@@ -1138,7 +1138,7 @@ class ContextArchiveRequest(BaseModel):
 
 
 @app.post("/context/archive")
-async def archive_context_checkpoint(request: ContextArchiveRequest):
+async def archive_context_checkpoint(request: ContextArchiveRequest) -> Dict[str, Any]:
     """
     Archive a conversation checkpoint to Context Vault.
 
@@ -1225,7 +1225,7 @@ async def archive_context_checkpoint(request: ContextArchiveRequest):
 
 
 @app.get("/context/load/{session_identifier}")
-async def load_context_checkpoint(session_identifier: str, scope: str = "full"):
+async def load_context_checkpoint(session_identifier: str, scope: str = "full") -> Dict[str, Any]:
     """
     Load a conversation checkpoint from Context Vault.
 
@@ -1306,7 +1306,7 @@ async def load_context_checkpoint(session_identifier: str, scope: str = "full"):
 
 
 @app.get("/context/status")
-async def get_context_vault_status():
+async def get_context_vault_status() -> Dict[str, Any]:
     """
     Get Context Vault sync status and statistics.
 

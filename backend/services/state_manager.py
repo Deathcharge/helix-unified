@@ -18,13 +18,13 @@ import redis.asyncio as redis
 class StateManager:
     """Manages UCF state with Redis caching and PostgreSQL persistence."""
 
-    def __init__(self, redis_url: str = None, db_url: str = None):
+    def __init__(self, redis_url: Optional[str] = None, db_url: Optional[str] = None) -> None:
         self.redis_url = redis_url or "redis://localhost:6379"
         self.db_url = db_url
         self.redis = None
         self.db_pool = None
 
-    async def connect(self):
+    async def connect(self) -> None:
         """Initialize Redis and PostgreSQL connections."""
         try:
             self.redis = await redis.from_url(self.redis_url, decode_responses=True)
@@ -41,7 +41,7 @@ class StateManager:
                 print(f"⚠ PostgreSQL connection failed: {e}")
                 self.db_pool = None
 
-    async def disconnect(self):
+    async def disconnect(self) -> None:
         """Close connections."""
         if self.redis:
             await self.redis.close()
@@ -52,7 +52,7 @@ class StateManager:
     # UCF STATE OPERATIONS
     # ========================================================================
 
-    async def set_ucf_state(self, state: Dict[str, Any], ttl: int = 3600):
+    async def set_ucf_state(self, state: Dict[str, Any], ttl: int = 3600) -> bool:
         """Cache UCF state in Redis with TTL."""
         if not self.redis:
             return False
@@ -101,7 +101,7 @@ class StateManager:
             "klesha": 0.010,
         }
 
-    async def publish_ucf_update(self, metrics: Dict[str, Any]):
+    async def publish_ucf_update(self, metrics: Dict[str, Any]) -> bool:
         """Broadcast UCF updates to all subscribers."""
         if not self.redis:
             return False
@@ -115,7 +115,7 @@ class StateManager:
             print(f"⚠ Error publishing UCF update: {e}")
             return False
 
-    async def subscribe_ucf_events(self):
+    async def subscribe_ucf_events(self) -> Any:
         """Subscribe to UCF update events."""
         if not self.redis:
             return None
@@ -132,7 +132,7 @@ class StateManager:
     # DIRECTIVE OPERATIONS
     # ========================================================================
 
-    async def queue_directive(self, directive: Dict[str, Any]):
+    async def queue_directive(self, directive: Dict[str, Any]) -> bool:
         """Queue a directive for Manus execution."""
         if not self.redis:
             return False
@@ -162,7 +162,7 @@ class StateManager:
             print(f"⚠ Error getting directive: {e}")
             return None
 
-    async def update_directive_status(self, directive_id: str, status: str, result: Dict[str, Any] = None):
+    async def update_directive_status(self, directive_id: str, status: str, result: Optional[Dict[str, Any]] = None) -> bool:
         """Update directive execution status."""
         if not self.redis:
             return False
@@ -179,7 +179,7 @@ class StateManager:
     # MEMORY & LOGGING
     # ========================================================================
 
-    async def log_event(self, event_type: str, data: Dict[str, Any]):
+    async def log_event(self, event_type: str, data: Dict[str, Any]) -> bool:
         """Log event to Redis stream."""
         if not self.redis:
             return False
@@ -194,7 +194,7 @@ class StateManager:
             print(f"⚠ Error logging event: {e}")
             return False
 
-    async def get_recent_events(self, count: int = 20) -> list:
+    async def get_recent_events(self, count: int = 20) -> list[Any]:
         """Get recent events from Redis stream."""
         if not self.redis:
             return []
@@ -210,7 +210,7 @@ class StateManager:
     # AGENT MEMORY
     # ========================================================================
 
-    async def save_agent_memory(self, agent_name: str, memory: list):
+    async def save_agent_memory(self, agent_name: str, memory: list[str]) -> bool:
         """Save agent memory to Redis."""
         if not self.redis:
             return False
@@ -222,7 +222,7 @@ class StateManager:
             print(f"⚠ Error saving agent memory: {e}")
             return False
 
-    async def get_agent_memory(self, agent_name: str) -> list:
+    async def get_agent_memory(self, agent_name: str) -> list[str]:
         """Retrieve agent memory from Redis."""
         if not self.redis:
             return []
@@ -268,7 +268,7 @@ class StateManager:
 _state_manager = None
 
 
-async def get_state_manager(redis_url: str = None, db_url: str = None) -> StateManager:
+async def get_state_manager(redis_url: Optional[str] = None, db_url: Optional[str] = None) -> StateManager:
     """Get or create state manager instance."""
     global _state_manager
     if _state_manager is None:
@@ -284,7 +284,7 @@ async def get_state_manager(redis_url: str = None, db_url: str = None) -> StateM
 if __name__ == "__main__":
     import asyncio
 
-    async def main():
+    async def main() -> None:
         manager = await get_state_manager()
 
         # Test operations

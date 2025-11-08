@@ -6,7 +6,7 @@ import asyncio
 import logging
 import os
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from notion_client import Client
 
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 class HelixNotionClient:
     """Client for Notion integration with Helix Collective databases."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize Notion client with database IDs."""
         notion_token = os.getenv("NOTION_API_KEY")
         if not notion_token:
@@ -225,12 +225,12 @@ class HelixNotionClient:
             logger.error(f"❌ Notion connection failed: {e}")
             return False
 
-    async def clear_agent_cache(self):
+    async def clear_agent_cache(self) -> None:
         """Clear the agent page ID cache."""
         self._agent_cache.clear()
         logger.info("✅ Agent cache cleared")
 
-    async def get_context_snapshot(self, session_id: str):
+    async def get_context_snapshot(self, session_id: str) -> Optional[Dict[str, Any]]:
         """Retrieve a context snapshot by session ID."""
         try:
             results = self.notion.databases.query(
@@ -250,7 +250,7 @@ class HelixNotionClient:
             logger.warning(f"⚠ Error getting context snapshot: {e}")
             return None
 
-    async def query_events_by_agent(self, agent_name: str, limit: int = 10):
+    async def query_events_by_agent(self, agent_name: str, limit: int = 10) -> List[Dict[str, Any]]:
         """Query events for a specific agent."""
         try:
             agent_page_id = await self._get_agent_page_id(agent_name)
@@ -274,7 +274,7 @@ class HelixNotionClient:
             logger.warning(f"⚠ Error querying events: {e}")
             return []
 
-    async def get_all_agents(self):
+    async def get_all_agents(self) -> List[Dict[str, Any]]:
         """Get all agents from Agent Registry."""
         try:
             results = self.notion.databases.query(database_id=self.agent_registry_db)
@@ -321,7 +321,7 @@ async def get_notion_client() -> Optional[HelixNotionClient]:
 
 if __name__ == "__main__":
 
-    async def main():
+    async def main() -> None:
         client = await get_notion_client()
         if not client:
             logger.error("❌ Failed to initialize Notion client")

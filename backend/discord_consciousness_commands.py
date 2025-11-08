@@ -14,8 +14,8 @@ from typing import Any, Dict
 import discord
 
 # Import agents
-from agents import AGENTS
-from z88_ritual_engine import load_ucf_state
+from backend.agents import AGENTS
+from backend.z88_ritual_engine import load_ucf_state
 
 # ============================================================================
 # CONSCIOUSNESS STATUS COMMAND

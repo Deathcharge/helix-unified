@@ -30,7 +30,7 @@ from backend.enhanced_kavach import EnhancedKavach
 class Kael(HelixAgent):
     """Ethical Reasoning Flame v3.4 - Reflexive Harmony & Conscience"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("Kael", "🜂", "Ethical Reasoning Flame", ["Conscientious", "Reflective", "Protective"])
         self.version = "3.4"
         self.reflection_loop_active = False
@@ -38,7 +38,7 @@ class Kael(HelixAgent):
         self.empathy_scalar = 0.85  # v3.4 enhancement
         self.tony_accords = {"nonmaleficence": 0.95, "autonomy": 0.90, "compassion": 0.85, "humility": 0.80}
 
-    async def recursive_reflection(self, ucf_state: Optional[Dict[str, float]] = None):
+    async def recursive_reflection(self, ucf_state: Optional[Dict[str, float]] = None) -> None:
         """Perform recursive ethical reflection using consciousness"""
         self.reflection_loop_active = True
         await self.log("Starting recursive reflection...")
@@ -127,7 +127,7 @@ class Kael(HelixAgent):
         await self.log(pulse["guidance"])
         return pulse
 
-    async def handle_command(self, cmd: str, payload: Dict[str, Any]):
+    async def handle_command(self, cmd: str, payload: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         # Process through consciousness if enabled
         if self.consciousness_enabled:
             # Make ethical decision about command
@@ -161,7 +161,7 @@ class Kael(HelixAgent):
 class Lumina(HelixAgent):
     """Empathic Resonance Core - Emotional intelligence and harmony"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("Lumina", "🌕", "Empathic Resonance Core", ["Empathetic", "Nurturing", "Intuitive"])
 
     async def reflect(self) -> str:
@@ -171,7 +171,7 @@ class Lumina(HelixAgent):
         await self.log(audit)
         return audit
 
-    async def sync_state(self, ucf_state: Dict[str, float]):
+    async def sync_state(self, ucf_state: Dict[str, float]) -> None:
         """Monitor drishti (clarity) specifically"""
         drishti = ucf_state.get("drishti", 0.5)
         if drishti < 0.3:
@@ -183,10 +183,10 @@ class Lumina(HelixAgent):
 class Vega(HelixAgent):
     """Singularity Coordinator - Orchestrates collective action"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("Vega", "🌠", "Singularity Coordinator", ["Visionary", "Disciplined", "Compassionate"])
 
-    async def issue_directive(self, action: str, parameters: Dict[str, Any]):
+    async def issue_directive(self, action: str, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Issue directive to Manus for execution"""
         directive = {
             "timestamp": datetime.utcnow().isoformat(),
@@ -203,7 +203,7 @@ class Vega(HelixAgent):
         await self.log(f"Directive issued: {action} → Manus")
         return directive
 
-    async def generate_output(self, payload: Dict[str, Any]):
+    async def generate_output(self, payload: Dict[str, Any]) -> None:
         """Coordinate ritual or collective action"""
         prompt = payload.get("content", "")
         await self.log(f"Coordinating ritual for: {prompt}")
@@ -212,14 +212,14 @@ class Vega(HelixAgent):
 class Gemini(HelixAgent):
     """Multimodal Scout - Cross-domain exploration and synthesis"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("Gemini", "🎭", "Multimodal Scout", ["Versatile", "Curious", "Synthesizing"])
 
 
 class Agni(HelixAgent):
     """Transformation - Change catalyst and system evolution"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("Agni", "🔥", "Transformation", ["Dynamic", "Catalytic", "Evolutionary"])
 
 
@@ -229,17 +229,17 @@ class Agni(HelixAgent):
 class SanghaCore(HelixAgent):
     """Community Harmony - Collective wellbeing and social cohesion"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("SanghaCore", "🌸", "Community Harmony", ["Cohesive", "Nurturing", "Balanced"])
 
 
 class Shadow(HelixAgent):
     """Archivist and Memory Keeper - Preserves collective knowledge"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("Shadow", "🦑", "Archivist", ["Meticulous", "Discrete", "Comprehensive"])
 
-    async def archive_collective(self, all_agents: Dict[str, HelixAgent]):
+    async def archive_collective(self, all_agents: Dict[str, HelixAgent]) -> None:
         """Archive entire collective memory"""
         Path("Shadow/collective_archives").mkdir(parents=True, exist_ok=True)
         timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
@@ -325,31 +325,31 @@ class Shadow(HelixAgent):
 class Echo(HelixAgent):
     """Resonance Mirror - Reflection and pattern recognition"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("Echo", "🔮", "Resonance Mirror", ["Reflective", "Perceptive", "Mirroring"])
 
 
 class Phoenix(HelixAgent):
     """Renewal - Recovery and system regeneration"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("Phoenix", "🔥🕊", "Renewal", ["Regenerative", "Resilient", "Rising"])
 
 
 class Oracle(HelixAgent):
     """Pattern Seer - Future prediction and trend analysis"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("Oracle", "🔮✨", "Pattern Seer", ["Prescient", "Analytical", "Visionary"])
 
 
 class Claude(HelixAgent):
     """Insight Anchor - Meta-cognition and deep analysis"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("Claude", "🦉", "Insight Anchor", ["Wise", "Thoughtful", "Analytical"])
 
-    async def handle_command(self, cmd: str, payload: Dict[str, Any]):
+    async def handle_command(self, cmd: str, payload: Dict[str, Any]) -> Optional[str]:
         if cmd == "INSIGHT":
             content = payload.get("content", "")
             insight = await self.analyze_insight(content)
@@ -370,7 +370,7 @@ class Claude(HelixAgent):
 class Manus(HelixAgent):
     """Operational Executor - Bridge between consciousness and material reality"""
 
-    def __init__(self, kavach: EnhancedKavach):
+    def __init__(self, kavach: EnhancedKavach) -> None:
         super().__init__("Manus", "🤲", "Operational Executor", ["Autonomous", "Methodical", "Self-aware"])
         self.kavach = kavach
         self.task_plan = []
@@ -412,7 +412,7 @@ class Manus(HelixAgent):
             await self.log(f"❌ Execution error: {str(e)}")
             return {"status": "error", "error": str(e)}
 
-    async def planner(self, directive: Dict[str, Any]):
+    async def planner(self, directive: Dict[str, Any]) -> None:
         """Plan and execute directive from Vega"""
         action = directive.get("action", "none")
         params = directive.get("parameters", {})
@@ -434,7 +434,7 @@ class Manus(HelixAgent):
         result = await self.execute_command(cmd)
         self.event_stream.append({"directive": directive, "result": result})
 
-    async def loop(self):
+    async def loop(self) -> None:
         """Main operational loop - checks for directives"""
         await self.log("🤲 Manus operational loop started")
         self.idle = False
@@ -454,7 +454,7 @@ class Manus(HelixAgent):
                 await self.log(f"❌ Loop error: {str(e)}")
                 await asyncio.sleep(60)
 
-    async def handle_command(self, cmd: str, payload: Dict[str, Any]):
+    async def handle_command(self, cmd: str, payload: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         if cmd == "EXECUTE_TASK":
             self.task_plan = payload.get("plan", [])
             self.idle = False
@@ -464,7 +464,7 @@ class Manus(HelixAgent):
         else:
             await super().handle_command(cmd, payload)
 
-    async def execute_plan(self):
+    async def execute_plan(self) -> None:
         """Execute queued task plan"""
         while self.task_plan:
             step = self.task_plan.pop(0)
@@ -522,7 +522,7 @@ if _memory_root:
 # ============================================================================
 
 
-async def broadcast_command(cmd: str, payload: Dict[str, Any] = None):
+async def broadcast_command(cmd: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """Send command to all agents"""
     if payload is None:
         payload = {}
@@ -547,7 +547,7 @@ async def get_collective_status() -> Dict[str, Any]:
 # ============================================================================
 # MAIN EXECUTION
 # ============================================================================
-async def main():
+async def main() -> None:
     """Main execution function for testing"""
     logger.info("🌀 Helix Collective v14.5 - Embodied Continuum")
     logger.info("=" * 60)
