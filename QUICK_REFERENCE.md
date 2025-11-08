@@ -41,12 +41,19 @@
 !backup          Backup all state
 ```
 
-### **🩺 Monitoring**
+### **🩺 Monitoring & Testing**
 ```
-!heartbeat       Service health check
-!webhooks        List all webhooks
-!test-integrations  Test all integrations
-!zapier_test     Test Zapier webhook
+!heartbeat          Service health check
+!webhooks           List all webhooks
+!test-integrations  Test all integrations (basic)
+!zapier_test        Test Zapier webhook
+
+# NEW: Comprehensive Testing Suite 🧪
+!test-all           Complete system validation (70+ tests)
+!test-commands      Test all 62 Discord commands
+!test-webhooks      Test Discord + Zapier webhooks
+!test-api           Test Railway API endpoints
+!validate-system    Quick health check (faster)
 ```
 
 ### **🎲 Fun Commands**
