@@ -188,6 +188,17 @@ async def lifespan(app: FastAPI):
     else:
         logger.warning("⚠️ ZAPIER_WEBHOOK_URL not set - integration disabled")
 
+    # Initialize LLM Agent Engine for intelligent agent responses
+    try:
+        from backend.llm_agent_engine import initialize_llm_engine
+
+        llm_provider = os.getenv("HELIX_LLM_PROVIDER", "ollama")  # Default to Ollama (local)
+        await initialize_llm_engine(provider=llm_provider)
+        logger.info(f"✅ LLM Agent Engine initialized (provider={llm_provider})")
+    except Exception as e:
+        logger.warning(f"⚠️ LLM Agent Engine initialization failed: {e}")
+        logger.warning("⚠️ Agent responses will use static fallback mode")
+
     # Initialize agents
     try:
         status = await get_collective_status()
@@ -228,6 +239,13 @@ async def lifespan(app: FastAPI):
 
     # Cleanup on shutdown
     logger.info("🌙 Helix Collective v16.8 - Shutdown Sequence")
+
+    # Shutdown LLM Agent Engine
+    try:
+        from backend.llm_agent_engine import shutdown_llm_engine
+        await shutdown_llm_engine()
+    except Exception as e:
+        logger.warning(f"⚠️ LLM engine shutdown error: {e}")
 
     # Close Zapier session
     zapier = get_zapier()
@@ -576,6 +594,18 @@ async def web_chat():
     else:
         logger.error(f"Web chat HTML not found at: {html_path}")
         raise HTTPException(status_code=404, detail="Web chat interface not found")
+
+
+@app.get("/hub", response_class=HTMLResponse)
+@app.get("/", response_class=HTMLResponse)
+async def portal_hub():
+    """Serve Helix Portal Hub - Master navigation page."""
+    html_path = Path(__file__).parent.parent / "frontend" / "helix-hub-portal.html"
+    if html_path.exists():
+        return FileResponse(html_path)
+    else:
+        logger.error(f"Portal hub HTML not found at: {html_path}")
+        raise HTTPException(status_code=404, detail="Portal hub not found")
 
 
 @app.get("/api", response_class=HTMLResponse)
