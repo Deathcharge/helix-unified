@@ -20,6 +20,7 @@ import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+import backoff
 
 # Import publishers
 from backend.sync.discord_publisher import DiscordPublisher
@@ -312,7 +313,8 @@ class HelixSyncDaemon:
             logger.info("=" * 60)
             return False
 
-    async def run(self):
+    @backoff.on_exception(backoff.expo, Exception, max_tries=5, max_time=300)
+    async def run_sync(self):
         """Main daemon loop"""
         self.running = True
         interval = self.config["sync_schedule"]["interval_seconds"]
