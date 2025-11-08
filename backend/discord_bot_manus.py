@@ -618,6 +618,7 @@ async def on_ready() -> None:
     # Load modular command modules (v16.3 - Helix Hub Integration)
     command_modules = [
         ('commands.testing_commands', 'Testing commands (test-integrations, welcome-test, zapier_test, seed)'),
+        ('commands.comprehensive_testing', 'Comprehensive testing (test-all, test-commands, test-webhooks, test-api, validate-system)'),
         ('commands.visualization_commands', 'Visualization commands (visualize, icon)'),
         ('commands.context_commands', 'Context commands (backup, load, contexts)'),
         ('commands.help_commands', 'Help commands (commands, agents)'),
