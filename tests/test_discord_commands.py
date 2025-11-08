@@ -28,17 +28,17 @@ async def test_manus_run_with_cooldown(mock_discord_context, mock_kavach_scan):
     """Test !run command respects cooldown."""
     # This would test the actual cooldown decorator
     # For now, verify the decorator exists
-    from backend.discord_bot_manus import manus_run
+    from backend.commands.execution_commands import manus_run
 
-    # Check cooldown is applied
-    assert hasattr(manus_run, "__commands_checks__") or hasattr(manus_run, "cooldown")
+    # Check cooldown is applied (cooldown decorator adds __commands_checks__)
+    assert hasattr(manus_run, "__commands_checks__") or hasattr(manus_run, "_buckets")
 
 
 @pytest.mark.asyncio
 @pytest.mark.discord
 async def test_kavach_blocks_dangerous_command(mock_discord_context):
     """Test Kavach blocks dangerous commands."""
-    with patch("backend.enhanced_kavach.kavach_ethical_scan") as mock_scan:
+    with patch("backend.commands.helpers.kavach_ethical_scan") as mock_scan:
         mock_scan.return_value = {
             "approved": False,
             "reasoning": "Dangerous command detected",
