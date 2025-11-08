@@ -164,7 +164,7 @@ def temp_state_dir(tmp_path):
 @pytest.fixture
 def mock_kavach_scan():
     """Mock Kavach ethical scanning."""
-    with patch("backend.enhanced_kavach.kavach_ethical_scan") as mock_scan:
+    with patch("backend.commands.helpers.kavach_ethical_scan") as mock_scan:
         mock_scan.return_value = {
             "approved": True,
             "reasoning": "Command appears safe",

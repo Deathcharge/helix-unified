@@ -67,13 +67,23 @@ HEARTBEAT_PATH = STATE_DIR / "heartbeat.json"
 # CONFIGURATION
 # ============================================================================
 
+def _parse_int_env(key: str, default: int = 0) -> int:
+    """Parse integer from environment variable with error handling."""
+    try:
+        value = os.getenv(key, str(default))
+        return int(value)
+    except (ValueError, TypeError):
+        logger.warning(f"Invalid {key} value, using default: {default}")
+        return default
+
+
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
-DISCORD_GUILD_ID = int(os.getenv("DISCORD_GUILD_ID", 0))
-STATUS_CHANNEL_ID = int(os.getenv("DISCORD_STATUS_CHANNEL_ID", 0))
-TELEMETRY_CHANNEL_ID = int(os.getenv("DISCORD_TELEMETRY_CHANNEL_ID", 0))
-STORAGE_CHANNEL_ID = int(os.getenv("STORAGE_CHANNEL_ID", STATUS_CHANNEL_ID))  # Defaults to status channel
-FRACTAL_LAB_CHANNEL_ID = int(os.getenv("DISCORD_FRACTAL_LAB_CHANNEL_ID", 0))
-ARCHITECT_ID = int(os.getenv("ARCHITECT_ID", 0))
+DISCORD_GUILD_ID = _parse_int_env("DISCORD_GUILD_ID", 0)
+STATUS_CHANNEL_ID = _parse_int_env("DISCORD_STATUS_CHANNEL_ID", 0)
+TELEMETRY_CHANNEL_ID = _parse_int_env("DISCORD_TELEMETRY_CHANNEL_ID", 0)
+STORAGE_CHANNEL_ID = _parse_int_env("STORAGE_CHANNEL_ID", STATUS_CHANNEL_ID)
+FRACTAL_LAB_CHANNEL_ID = _parse_int_env("DISCORD_FRACTAL_LAB_CHANNEL_ID", 0)
+ARCHITECT_ID = _parse_int_env("ARCHITECT_ID", 0)
 
 # Track bot start time for uptime
 BOT_START_TIME = time.time()
