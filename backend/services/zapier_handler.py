@@ -3,6 +3,7 @@
 # Author: Andrew John Ward (Architect)
 
 import json
+import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict
@@ -11,6 +12,9 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from backend.services.notion_client import get_notion_client
+
+# Configure logger
+logger = logging.getLogger(__name__)
 
 # ============================================================================
 # PYDANTIC MODELS
@@ -109,7 +113,7 @@ async def webhook_log_event(payload: EventPayload):
 
         return {"status": "success", "message": f"Event logged: {payload.event_title}", "notion_page_id": page_id}
     except Exception as e:
-        print(f"❌ Error in webhook_log_event: {e}")
+        logger.error(f"❌ Error in webhook_log_event: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -156,7 +160,7 @@ async def webhook_update_agent_status(payload: AgentStatusPayload):
             "agent_name": payload.agent_name,
         }
     except Exception as e:
-        print(f"❌ Error in webhook_update_agent_status: {e}")
+        logger.error(f"❌ Error in webhook_update_agent_status: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -204,7 +208,7 @@ async def webhook_update_component_status(payload: ComponentStatusPayload):
             "component_name": payload.component_name,
         }
     except Exception as e:
-        print(f"❌ Error in webhook_update_component_status: {e}")
+        logger.error(f"❌ Error in webhook_update_component_status: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -253,7 +257,7 @@ async def webhook_save_context_snapshot(payload: ContextSnapshotPayload):
             "notion_page_id": page_id,
         }
     except Exception as e:
-        print(f"❌ Error in webhook_save_context_snapshot: {e}")
+        logger.error(f"❌ Error in webhook_save_context_snapshot: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

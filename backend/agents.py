@@ -2,12 +2,16 @@
 # Complete multi-agent system with Manus (Executor) and all consciousness layer agents
 import asyncio
 import json
+import logging
 import os
 import subprocess
 import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+# Configure logger
+logger = logging.getLogger(__name__)
 
 # Import base agent class (refactored to prevent circular imports)
 from backend.agents_base import HelixAgent
@@ -488,9 +492,9 @@ try:
     from backend.agents.memory_root import MemoryRootAgent
 
     _memory_root = MemoryRootAgent()
-    print("✅ MemoryRoot initialized")
+    logger.info("✅ MemoryRoot initialized")
 except Exception as e:
-    print(f"⚠️ MemoryRoot not available: {e}")
+    logger.warning(f"⚠️ MemoryRoot not available: {e}")
     _memory_root = None
 
 AGENTS = {
@@ -545,19 +549,19 @@ async def get_collective_status() -> Dict[str, Any]:
 # ============================================================================
 async def main():
     """Main execution function for testing"""
-    print("🌀 Helix Collective v14.5 - Embodied Continuum")
-    print("=" * 60)
+    logger.info("🌀 Helix Collective v14.5 - Embodied Continuum")
+    logger.info("=" * 60)
     # Test collective
-    print("\n📊 Collective Status:")
+    logger.info("\n📊 Collective Status:")
     status = await get_collective_status()
     for name, info in status.items():
-        print(f" {info['symbol']} {name}: {info['role']}")
+        logger.info(f" {info['symbol']} {name}: {info['role']}")
     # Test Vega → Manus directive
-    print("\n🌠 Testing Vega → Manus pipeline...")
+    logger.info("\n🌠 Testing Vega → Manus pipeline...")
     vega = AGENTS["Vega"]
     await vega.issue_directive("execute_ritual", {"steps": 10})
     # Start Manus loop (would run indefinitely in production)
-    print("\n🤲 Manus operational loop ready...")
+    logger.info("\n🤲 Manus operational loop ready...")
 
 
 if __name__ == "__main__":

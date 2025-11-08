@@ -36,11 +36,12 @@ from zapier_integration import HelixZapierIntegration, get_zapier, set_zapier
 try:
     # pycryptodome installs as 'Crypto', not 'Cryptodome'
     import Crypto
-
-    print(f"✅ pycryptodome found (version {Crypto.__version__}) - MEGA sync enabled")
+    _crypto_version = Crypto.__version__
+    _crypto_found = True
 except ImportError:
-    print("⚠️ pycryptodome not found - MEGA sync may fail")
     Crypto = None
+    _crypto_version = None
+    _crypto_found = False
 
 from mega import Mega
 
@@ -55,17 +56,17 @@ class PersistenceEngine:
         local = "Helix/state/heartbeat.json"
         remote = f"{self.remote_dir}/state/heartbeat.json"
         self.m.upload(local, remote)
-        print("MEGA: Heartbeat synced.")
+        logger.info("MEGA: Heartbeat synced.")
 
     def upload_archive(self, filepath):
         remote = f"{self.remote_dir}/manus_archive/{os.path.basename(filepath)}"
         self.m.upload(filepath, remote)
-        print(f"MEGA: Archive preserved — {filepath}")
+        logger.info(f"MEGA: Archive preserved — {filepath}")
 
     def download_state(self):
         remote = f"{self.remote_dir}/state/heartbeat.json"
         self.m.download(remote, "Helix/state/heartbeat.json")
-        print("MEGA: State restored from cloud.")
+        logger.info("MEGA: State restored from cloud.")
 
 
 load_dotenv()
@@ -75,6 +76,12 @@ load_dotenv()
 # ============================================================================
 logger = setup_logging(log_dir="Shadow/manus_archive", log_level=os.getenv("LOG_LEVEL", "INFO"), enable_rotation=True)
 logger.info("🌀 Helix Collective v16.8 - Backend Initialization")
+
+# Log Crypto availability (from earlier import check)
+if _crypto_found:
+    logger.info(f"✅ pycryptodome found (version {_crypto_version}) - MEGA sync enabled")
+else:
+    logger.warning("⚠️ pycryptodome not found - MEGA sync may fail")
 
 # ✅ FIXED IMPORTS - Use relative imports instead of absolute
 
@@ -163,7 +170,7 @@ async def ucf_broadcast_loop():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Start Discord bot and Manus loop on startup."""
-    print("🌀 Helix Collective v16.8 - Startup Sequence")
+    logger.info("🌀 Helix Collective v16.8 - Startup Sequence")
 
     # Initialize directories
     Path("Helix/state").mkdir(parents=True, exist_ok=True)
@@ -177,56 +184,56 @@ async def lifespan(app: FastAPI):
         zapier = HelixZapierIntegration(zapier_webhook_url)
         await zapier.__aenter__()  # Initialize session
         set_zapier(zapier)
-        print("✅ Zapier integration enabled")
+        logger.info("✅ Zapier integration enabled")
     else:
-        print("⚠️ ZAPIER_WEBHOOK_URL not set - integration disabled")
+        logger.warning("⚠️ ZAPIER_WEBHOOK_URL not set - integration disabled")
 
     # Initialize agents
     try:
         status = await get_collective_status()
-        print(f"✅ {len(status)} agents initialized")
+        logger.info(f"✅ {len(status)} agents initialized")
         for name, info in status.items():
-            print(f"   {info['symbol']} {name}: {info['role']}")
+            logger.info(f"   {info['symbol']} {name}: {info['role']}")
     except Exception as e:
-        print(f"⚠ Agent initialization warning: {e}")
+        logger.warning(f"⚠ Agent initialization warning: {e}")
 
     # Launch Discord bot in background task
     discord_token = os.getenv("DISCORD_TOKEN")
     if discord_token:
         try:
             asyncio.create_task(discord_bot.start(discord_token))  # noqa: F841
-            print("🤖 Discord bot task started")
+            logger.info("🤖 Discord bot task started")
         except Exception as e:
-            print(f"⚠ Discord bot start error: {e}")
+            logger.warning(f"⚠ Discord bot start error: {e}")
     else:
-        print("⚠ No DISCORD_TOKEN found - bot not started")
+        logger.warning("⚠ No DISCORD_TOKEN found - bot not started")
 
     # Launch Manus operational loop in background task
     try:
         asyncio.create_task(manus_loop())  # noqa: F841
-        print("🤲 Manus operational loop task started")
+        logger.info("🤲 Manus operational loop task started")
     except Exception as e:
-        print(f"⚠ Manus loop start error: {e}")
+        logger.warning(f"⚠ Manus loop start error: {e}")
 
     # Launch WebSocket UCF broadcaster in background task
     try:
         asyncio.create_task(ucf_broadcast_loop())  # noqa: F841
-        print("📡 WebSocket UCF broadcast task started")
+        logger.info("📡 WebSocket UCF broadcast task started")
     except Exception as e:
-        print(f"⚠ WebSocket broadcast start error: {e}")
+        logger.warning(f"⚠ WebSocket broadcast start error: {e}")
 
-    print("✅ Helix Collective v16.8 - Ready for Operations")
+    logger.info("✅ Helix Collective v16.8 - Ready for Operations")
 
     yield  # Application runs
 
     # Cleanup on shutdown
-    print("🌙 Helix Collective v16.8 - Shutdown Sequence")
+    logger.info("🌙 Helix Collective v16.8 - Shutdown Sequence")
 
     # Close Zapier session
     zapier = get_zapier()
     if zapier:
         await zapier.__aexit__(None, None, None)
-        print("✅ Zapier integration closed")
+        logger.info("✅ Zapier integration closed")
 
 
 # ============================================================================
@@ -1392,7 +1399,7 @@ if __name__ == "__main__":
     # Get port from Railway environment
     port = int(os.getenv("PORT", 8000))
 
-    print(f"🚀 Starting Helix Collective v16.8 on port {port}")
+    logger.info(f"🚀 Starting Helix Collective v16.8 on port {port}")
 
     # CRITICAL: Must bind to 0.0.0.0 for Railway
     uvicorn.run(

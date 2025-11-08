@@ -547,17 +547,17 @@ async def on_ready():
     """Called when bot successfully connects to Discord"""
     bot.start_time = datetime.datetime.now()
 
-    print(f"✅ Manusbot connected as {bot.user}")
-    print(f"   Guild ID: {DISCORD_GUILD_ID}")
-    print(f"   Status Channel: {STATUS_CHANNEL_ID}")
-    print(f"   Telemetry Channel: {TELEMETRY_CHANNEL_ID}")
-    print(f"   Storage Channel: {STORAGE_CHANNEL_ID}")
+    logger.info(f"✅ Manusbot connected as {bot.user}")
+    logger.info(f"   Guild ID: {DISCORD_GUILD_ID}")
+    logger.info(f"   Status Channel: {STATUS_CHANNEL_ID}")
+    logger.info(f"   Telemetry Channel: {TELEMETRY_CHANNEL_ID}")
+    logger.info(f"   Storage Channel: {STORAGE_CHANNEL_ID}")
 
     # Initialize Zapier client for monitoring
     if not bot.http_session:
         bot.http_session = aiohttp.ClientSession()
         bot.zapier_client = ZapierClient(bot.http_session)
-        print("✅ Zapier monitoring client initialized")
+        logger.info("✅ Zapier monitoring client initialized")
 
         # Log bot startup event
         try:
@@ -590,34 +590,34 @@ async def on_ready():
                 component="Discord Bot", status="Operational", harmony=harmony, error_log="", verified=True
             )
         except Exception as e:
-            print(f"⚠️ Zapier logging failed: {e}")
+            logger.warning(f"⚠️ Zapier logging failed: {e}")
 
     # Load Memory Root commands (GPT4o long-term memory)
     try:
         from discord_commands_memory import MemoryRootCommands
 
         await bot.add_cog(MemoryRootCommands(bot))
-        print("✅ Memory Root commands loaded")
+        logger.info("✅ Memory Root commands loaded")
     except Exception as e:
-        print(f"⚠️ Memory Root commands not available: {e}")
+        logger.warning(f"⚠️ Memory Root commands not available: {e}")
 
     # Load Image commands (v16.1 - Aion fractal generation via PIL)
     try:
         from commands.image_commands import ImageCommands
 
         await bot.add_cog(ImageCommands(bot))
-        print("✅ Image commands loaded (!image, !aion, !fractal)")
+        logger.info("✅ Image commands loaded (!image, !aion, !fractal)")
     except Exception as e:
-        print(f"⚠️ Image commands not available: {e}")
+        logger.warning(f"⚠️ Image commands not available: {e}")
 
     # Load Harmony Ritual commands (v16.2 - Neti-Neti Harmony)
     try:
         from commands import ritual_commands
 
         bot.add_command(ritual_commands.harmony_command)
-        print("✅ Harmony ritual command loaded (!harmony)")
+        logger.info("✅ Harmony ritual command loaded (!harmony)")
     except Exception as e:
-        print(f"⚠️ Harmony ritual command not available: {e}")
+        logger.warning(f"⚠️ Harmony ritual command not available: {e}")
 
     # Send startup message to status channel
     if STATUS_CHANNEL_ID:
@@ -639,23 +639,23 @@ async def on_ready():
     # Start all background tasks
     if not telemetry_loop.is_running():
         telemetry_loop.start()
-        print("✅ Telemetry loop started (10 min)")
+        logger.info("✅ Telemetry loop started (10 min)")
 
     if not storage_heartbeat.is_running():
         storage_heartbeat.start()
-        print("✅ Storage heartbeat started (24h)")
+        logger.info("✅ Storage heartbeat started (24h)")
 
     if not claude_diag.is_running():
         claude_diag.start()
-        print("✅ Claude diagnostic agent started (6h)")
+        logger.info("✅ Claude diagnostic agent started (6h)")
 
     if not weekly_storage_digest.is_running():
         weekly_storage_digest.start()
-        print("✅ Weekly storage digest started (168h)")
+        logger.info("✅ Weekly storage digest started (168h)")
 
     if not fractal_auto_post.is_running():
         fractal_auto_post.start()
-        print("✅ Fractal auto-post started (6h) - Grok Enhanced v2.0")
+        logger.info("✅ Fractal auto-post started (6h) - Grok Enhanced v2.0")
 
 
 @bot.event
@@ -696,6 +696,12 @@ async def on_command_error(ctx, error):
         )
     elif isinstance(error, commands.MissingPermissions):
         await ctx.send("🛡️ **Insufficient permissions** to execute this command")
+    elif isinstance(error, commands.CommandOnCooldown):
+        minutes, seconds = divmod(int(error.retry_after), 60)
+        if minutes > 0:
+            await ctx.send(f"⏳ **Rate limit exceeded.** Please wait {minutes}m {seconds}s before using this command again.")
+        else:
+            await ctx.send(f"⏳ **Rate limit exceeded.** Please wait {seconds}s before using this command again.")
     else:
         # Log unknown errors to Shadow
         error_data = {
@@ -720,7 +726,7 @@ async def on_command_error(ctx, error):
                     },
                 )
             except Exception as e:
-                print(f"⚠️ Zapier error alert failed: {e}")
+                logger.warning(f"⚠️ Zapier error alert failed: {e}")
 
         await ctx.send(
             "🦑 **System error detected**\n" f"```{str(error)[:200]}```\n" "Error has been archived by Shadow"
@@ -753,7 +759,7 @@ async def on_member_join(member):
         intro_channel = guild.system_channel or guild.text_channels[0] if guild.text_channels else None
 
     if not intro_channel:
-        print(f"⚠️ Could not find channel to welcome {member.name}")
+        logger.warning(f"⚠️ Could not find channel to welcome {member.name}")
         return
 
     # Create welcome embed
@@ -825,9 +831,9 @@ async def on_member_join(member):
     # Send welcome message
     try:
         await intro_channel.send(f"{member.mention} has joined the collective!", embed=embed)
-        print(f"✅ Welcomed new member: {member.name}")
+        logger.info(f"✅ Welcomed new member: {member.name}")
     except Exception as e:
-        print(f"❌ Failed to send welcome message: {e}")
+        logger.error(f"❌ Failed to send welcome message: {e}")
 
 
 # ============================================================================
@@ -3294,7 +3300,7 @@ async def discovery_command(ctx):
                     else:
                         health_emoji = "❌"
     except Exception as e:
-        print(f"Discovery command: Failed to fetch live status: {e}")
+        logger.warning(f"Discovery command: Failed to fetch live status: {e}")
 
     # Create embed
     embed = discord.Embed(
@@ -4141,6 +4147,7 @@ async def run_command(ctx, command: str):
 
 
 @bot.command(name="run")
+@commands.cooldown(1, 60, commands.BucketType.user)  # 1 use per 60 seconds per user
 async def manus_run(ctx, *, command: str):
     """Execute a command through Manus with Kavach ethical scanning"""
 
@@ -4325,7 +4332,7 @@ async def storage_command(ctx, action: str = "status"):
                             ),
                         )
                     except Exception as webhook_error:
-                        print(f"⚠️ Zapier webhook error: {webhook_error}")
+                        logger.warning(f"⚠️ Zapier webhook error: {webhook_error}")
 
             asyncio.create_task(force_sync())
 
@@ -4348,7 +4355,7 @@ async def storage_command(ctx, action: str = "status"):
                             metadata={"kept": 20, "removed": removed, "executor": str(ctx.author)},
                         )
                     except Exception as webhook_error:
-                        print(f"⚠️ Zapier webhook error: {webhook_error}")
+                        logger.warning(f"⚠️ Zapier webhook error: {webhook_error}")
             else:
                 await ctx.send("✅ **No cleanup needed** - Archive count within limits")
 
@@ -4357,7 +4364,7 @@ async def storage_command(ctx, action: str = "status"):
 
     except Exception as e:
         await ctx.send(f"❌ **Storage error:** {str(e)}")
-        print(f"Storage command error: {e}")
+        logger.error(f"Storage command error: {e}")
 
 
 @bot.command(name="visualize", aliases=["visual", "render"])
@@ -4403,7 +4410,7 @@ async def visualize_command(ctx):
 
     except Exception as e:
         await ctx.send(f"❌ **Visualization error:** {str(e)}")
-        print(f"Visualization command error: {e}")
+        logger.error(f"Visualization command error: {e}")
         import traceback
 
         traceback.print_exc()
@@ -4582,7 +4589,7 @@ async def health_check(ctx):
                 },
             )
         except Exception as webhook_error:
-            print(f"⚠️ Zapier webhook error: {webhook_error}")
+            logger.warning(f"⚠️ Zapier webhook error: {webhook_error}")
 
 
 # ============================================================================
@@ -4616,7 +4623,7 @@ async def telemetry_loop():
                 telemetry_channel = discord.utils.get(guild.channels, name="ucf-telemetry")
 
         if not telemetry_channel:
-            print("⚠ Telemetry channel not found")
+            logger.warning("⚠ Telemetry channel not found")
             return
 
         ucf = load_ucf_state()
@@ -4647,11 +4654,11 @@ async def telemetry_loop():
         embed.set_footer(text="Tat Tvam Asi 🙏")
 
         await telemetry_channel.send(embed=embed)
-        print(f"✅ Telemetry posted to #{telemetry_channel.name}")
+        logger.info(f"✅ Telemetry posted to #{telemetry_channel.name}")
         log_event("telemetry_posted", {"ucf_state": ucf, "channel": telemetry_channel.name})
 
     except Exception as e:
-        print(f"⚠️ Telemetry error: {e}")
+        logger.warning(f"⚠️ Telemetry error: {e}")
         log_event("telemetry_error", {"error": str(e)})
 
 
@@ -4672,7 +4679,7 @@ async def storage_heartbeat():
     await asyncio.sleep(10)  # Wait for bot to fully initialize
     ch = bot.get_channel(STORAGE_CHANNEL_ID)
     if not ch:
-        print("⚠️ Storage heartbeat: channel not found")
+        logger.warning("⚠️ Storage heartbeat: channel not found")
         return
 
     data = await build_storage_report()
@@ -4694,7 +4701,7 @@ async def storage_heartbeat():
     if data["alert"]:
         await ch.send("@here ⚠️ Low storage space — manual cleanup recommended 🧹")
 
-    print(f"[{datetime.datetime.utcnow().isoformat()}] 🦑 Storage heartbeat sent ({data['free']} GB)")
+    logger.info(f"[{datetime.datetime.utcnow().isoformat()}] 🦑 Storage heartbeat sent ({data['free']} GB)")
 
 
 @tasks.loop(hours=6)
@@ -4711,7 +4718,7 @@ async def claude_diag():
         f"Free {data['free']} GB | Trend `{data['trend']}` | State {mood}"
     )
     await ch.send(msg)
-    print(f"[{datetime.datetime.utcnow().isoformat()}] 🤖 Claude diag posted")
+    logger.info(f"[{datetime.datetime.utcnow().isoformat()}] 🤖 Claude diag posted")
 
 
 @storage_heartbeat.before_loop
@@ -4735,7 +4742,7 @@ async def fractal_auto_post():
     """Auto-post UCF-driven fractal to #fractal-lab every 6 hours."""
     channel = bot.get_channel(FRACTAL_LAB_CHANNEL_ID)
     if not channel:
-        print("⚠️ Fractal Lab channel not found - skipping auto-post")
+        logger.warning("⚠️ Fractal Lab channel not found - skipping auto-post")
         return
 
     try:
@@ -4784,10 +4791,10 @@ async def fractal_auto_post():
         embed.set_image(url="attachment://helix_fractal.png")
 
         await channel.send(embed=embed, file=file)
-        print(f"[{datetime.datetime.utcnow().isoformat()}] 🎨 Fractal auto-posted to #fractal-lab")
+        logger.info(f"[{datetime.datetime.utcnow().isoformat()}] 🎨 Fractal auto-posted to #fractal-lab")
 
     except Exception as e:
-        print(f"❌ Fractal auto-post failed: {e}")
+        logger.error(f"❌ Fractal auto-post failed: {e}")
 
 
 @fractal_auto_post.before_loop
@@ -4807,7 +4814,7 @@ async def weekly_storage_digest():
     await asyncio.sleep(15)
     channel = bot.get_channel(STORAGE_CHANNEL_ID)
     if not channel:
-        print("⚠️  weekly digest: channel not found.")
+        logger.warning("⚠️  weekly digest: channel not found.")
         return
 
     # Load 7-day trend data
@@ -4948,7 +4955,7 @@ async def weekly_storage_digest():
     embed.set_footer(text="Weekly Digest • Shadow Storage Analytics")
 
     await channel.send(embed=embed)
-    print(f"[{datetime.datetime.utcnow().isoformat()}] 📊 Weekly storage digest posted.")
+    logger.info(f"[{datetime.datetime.utcnow().isoformat()}] 📊 Weekly storage digest posted.")
 
 
 @weekly_storage_digest.before_loop
@@ -4965,17 +4972,17 @@ async def before_weekly_digest():
 def main():
     """Start the Manusbot"""
     if not DISCORD_TOKEN:
-        print("❌ DISCORD_TOKEN not found in environment variables")
-        print("   Set DISCORD_TOKEN in Railway or .env file")
+        logger.error("❌ DISCORD_TOKEN not found in environment variables")
+        logger.error("   Set DISCORD_TOKEN in Railway or .env file")
         return
 
-    print("🤲 Starting Manusbot...")
-    print("   Helix v14.5 - Quantum Handshake Edition")
+    logger.info("🤲 Starting Manusbot...")
+    logger.info("   Helix v14.5 - Quantum Handshake Edition")
     active = 0
     for a in AGENTS:
         if isinstance(a, dict) and a.get("status") == "Active":
             active += 1
-    print(f"   Active Agents: {active}/14")
+    logger.info(f"   Active Agents: {active}/14")
 
     bot.run(DISCORD_TOKEN)
 
@@ -5043,7 +5050,7 @@ async def consciousness_command(ctx, agent_name: str = None):
 
     except Exception as e:
         await ctx.send(f"❌ **Consciousness error:** {str(e)}")
-        print(f"Consciousness command error: {e}")
+        logger.error(f"Consciousness command error: {e}")
         import traceback
 
         traceback.print_exc()
@@ -5070,7 +5077,7 @@ async def emotions_command(ctx):
 
     except Exception as e:
         await ctx.send(f"❌ **Emotions error:** {str(e)}")
-        print(f"Emotions command error: {e}")
+        logger.error(f"Emotions command error: {e}")
         import traceback
 
         traceback.print_exc()
@@ -5167,7 +5174,7 @@ async def ethics_command(ctx):
 
     except Exception as e:
         await ctx.send(f"❌ **Ethics error:** {str(e)}")
-        print(f"Ethics command error: {e}")
+        logger.error(f"Ethics command error: {e}")
         import traceback
 
         traceback.print_exc()
@@ -5221,7 +5228,7 @@ async def sync_command(ctx):
 
     except Exception as e:
         await ctx.send(f"❌ **Sync error:** {str(e)}")
-        print(f"Sync command error: {e}")
+        logger.error(f"Sync command error: {e}")
         import traceback
 
         traceback.print_exc()
@@ -5517,7 +5524,7 @@ async def clean_duplicates(ctx):
                 },
             )
         except Exception as webhook_error:
-            print(f"⚠️ Zapier webhook error: {webhook_error}")
+            logger.warning(f"⚠️ Zapier webhook error: {webhook_error}")
 
 
 @bot.command(name="icon")
@@ -5620,8 +5627,8 @@ async def set_server_icon(ctx, mode: str = "info"):
 
 if __name__ == "__main__":
     if not DISCORD_TOKEN:
-        print("❌ DISCORD_TOKEN not set in environment")
+        logger.error("❌ DISCORD_TOKEN not set in environment")
         exit(1)
 
-    print("🌀 Starting Manusbot v15.3...")
+    logger.info("🌀 Starting Manusbot v15.3...")
     bot.run(DISCORD_TOKEN)
