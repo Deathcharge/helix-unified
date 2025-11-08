@@ -41,6 +41,7 @@ async def setup(bot: 'Bot') -> None:
     """Setup function to register commands with the bot."""
     bot.add_command(manus_status)
     bot.add_command(health_check)
+    bot.add_command(heartbeat_command)
     bot.add_command(discovery_command)
     bot.add_command(storage_command)
     bot.add_command(sync_command)
@@ -316,6 +317,144 @@ async def health_check(ctx: commands.Context) -> None:
             )
         except Exception as webhook_error:
             logger.warning(f"⚠️ Zapier webhook error: {webhook_error}")
+
+
+@commands.command(name="heartbeat", aliases=["pulse", "services"])
+async def heartbeat_command(ctx: commands.Context) -> None:
+    """
+    Run heartbeat checks across all Helix services and post results.
+
+    Monitors 7 external service endpoints:
+    - Railway Core API
+    - GitHub Pages Manifest
+    - Zapier Dashboard
+    - Creative Studio (Manus.space)
+    - AI Dashboard (Manus.space)
+    - Sync Portal (Manus.space)
+    - Samsara Visualizer (Manus.space)
+
+    Usage:
+        !heartbeat
+    """
+    # Send initial message
+    msg = await ctx.send("🩺 Running Helix service heartbeat… please wait.")
+
+    try:
+        # Import and run heartbeat checker
+        from backend.heartbeat_checker import heartbeat
+        from backend.heartbeat_checker import load_services_manifest
+
+        # Run heartbeat check
+        results = heartbeat()
+        services_manifest = load_services_manifest()
+        services = services_manifest["services"]
+
+        # Calculate summary
+        ok_count = results["summary"]["ok"]
+        total = results["summary"]["total"]
+        failed = results["summary"]["failed"]
+
+        # Determine embed color based on health
+        if ok_count == total:
+            color = discord.Color.green()
+        elif ok_count > total / 2:
+            color = discord.Color.orange()
+        else:
+            color = discord.Color.red()
+
+        # Create embed
+        embed = discord.Embed(
+            title="🩺 Helix Collective — Service Heartbeat",
+            description=f"**{ok_count}/{total}** services responding",
+            color=color,
+            timestamp=datetime.datetime.utcnow()
+        )
+
+        # Add service status fields
+        for service_key, result in results["results"].items():
+            service_info = services[service_key]
+            service_name = service_info["name"]
+
+            status_icon = "✅" if result["ok"] else "❌"
+            status_code = result.get("status", "N/A")
+            response_time = result.get("response_time_ms")
+
+            if response_time is not None:
+                time_str = f"{response_time}ms"
+            else:
+                time_str = "N/A"
+
+            value = f"{status_icon} **Status:** `{status_code}`\n⏱️ **Response:** `{time_str}`"
+
+            if result["error"]:
+                error_short = result["error"][:50] + "..." if len(result["error"]) > 50 else result["error"]
+                value += f"\n⚠️ `{error_short}`"
+
+            embed.add_field(
+                name=service_name,
+                value=value,
+                inline=True
+            )
+
+        # Add health summary
+        if failed > 0:
+            health_text = f"⚠️ **{failed}** service(s) down - monitoring required"
+        else:
+            health_text = "✅ All systems operational"
+
+        embed.add_field(
+            name="🌀 Collective Health",
+            value=health_text,
+            inline=False
+        )
+
+        # Add footer with timestamp
+        embed.set_footer(text="Helix Service Monitor v16.2 | Logs saved to heartbeat_log.json | Tat Tvam Asi 🕉️")
+
+        # Update message with embed
+        await msg.edit(content=None, embed=embed)
+
+        # Log heartbeat check
+        log_to_shadow(
+            "heartbeat_checks",
+            {
+                "timestamp": datetime.datetime.now().isoformat(),
+                "user": str(ctx.author),
+                "ok_count": ok_count,
+                "total": total,
+                "failed": failed,
+                "results": results["results"]
+            }
+        )
+
+        # Send webhook alert if services are down
+        if failed > 0 and hasattr(ctx.bot, "zapier_client") and ctx.bot.zapier_client:
+            try:
+                failed_services = [
+                    services[k]["name"]
+                    for k, r in results["results"].items()
+                    if not r["ok"]
+                ]
+
+                await ctx.bot.zapier_client.send_error_alert(
+                    error_message=f"Service heartbeat alert: {failed} service(s) down",
+                    component="Heartbeat_Monitor",
+                    severity="high" if failed > 2 else "medium",
+                    context={
+                        "failed_count": failed,
+                        "total_count": total,
+                        "failed_services": failed_services,
+                        "executor": str(ctx.author),
+                    }
+                )
+            except Exception as webhook_error:
+                logger.warning(f"⚠️ Zapier webhook error: {webhook_error}")
+
+    except Exception as e:
+        await msg.edit(content=f"❌ **Heartbeat check failed:** {str(e)}")
+        logger.error(f"Heartbeat command error: {e}")
+        import traceback
+        traceback.print_exc()
 
 
 @commands.command(name="discovery", aliases=["endpoints", "portals", "discover"])
