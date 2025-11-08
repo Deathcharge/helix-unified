@@ -64,6 +64,6 @@ httpx==0.28.0  # For testing async HTTP (already listed above)
 # Database Migrations
 alembic==1.13.1
 
-# Optional Storage Dependencies
-webdav3
-boto3
+# Optional Storage Dependencies (install separately if needed)
+# webdav3  # Not available for Python 3.11+ - install manually if using Nextcloud
+# boto3    # Optional - install if using Backblaze B2 storage
