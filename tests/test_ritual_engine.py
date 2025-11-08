@@ -7,25 +7,23 @@ from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 
-@pytest.mark.asyncio
 @pytest.mark.unit
-async def test_ritual_engine_basic_execution(temp_state_dir):
+def test_ritual_engine_basic_execution(temp_state_dir):
     """Test basic ritual execution."""
     try:
         from backend.z88_ritual_engine import execute_ritual
 
         # Execute small ritual (10 steps)
-        result = await execute_ritual(steps=10)
+        result = execute_ritual(steps=10)
 
         assert result is not None
-        assert "final_state" in result or "status" in result
+        assert "ucf_final" in result or "status" in result or "folklore_entries" in result
     except ImportError:
         pytest.skip("Ritual engine not available")
 
 
-@pytest.mark.asyncio
 @pytest.mark.unit
-async def test_ritual_step_validation():
+def test_ritual_step_validation():
     """Test ritual step count validation."""
     try:
         from backend.z88_ritual_engine import execute_ritual
@@ -65,15 +63,14 @@ def test_ucf_state_loading(sample_ucf_state, temp_state_dir):
         pytest.skip("Ritual engine not available")
 
 
-@pytest.mark.asyncio
 @pytest.mark.integration
-async def test_ritual_phi_recursion():
+def test_ritual_phi_recursion():
     """Test Phi-based recursion in ritual."""
     try:
         from backend.z88_ritual_engine import execute_ritual
 
         # Execute ritual with default 108 steps (Phi-significant)
-        result = await execute_ritual(steps=108)
+        result = execute_ritual(steps=108)
 
         # Should complete successfully
         assert result is not None
@@ -92,9 +89,8 @@ def test_ritual_anomaly_tracking():
         assert anomaly_type in anomaly_types
 
 
-@pytest.mark.asyncio
 @pytest.mark.unit
-async def test_ritual_state_persistence(temp_state_dir):
+def test_ritual_state_persistence(temp_state_dir):
     """Test ritual persists state changes."""
     state_file = temp_state_dir["state"] / "ucf_state.json"
 
@@ -116,7 +112,7 @@ async def test_ritual_state_persistence(temp_state_dir):
         from backend.z88_ritual_engine import execute_ritual
 
         # Execute ritual
-        await execute_ritual(steps=10)
+        execute_ritual(steps=10)
 
         # State should have been modified
         # (actual assertion would check state file changed)
