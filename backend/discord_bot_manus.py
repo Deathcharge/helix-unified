@@ -642,6 +642,7 @@ async def on_ready() -> None:
         ('commands.consciousness_commands_ext', 'Consciousness commands (consciousness, emotions, ethics, agent)'),
         ('commands.role_system', 'Role-based notifications (roles, subscribe, unsubscribe, my-roles, setup-roles, all-roles, agent-roles, channel-roles, setup-all-roles, setup-welcome-roles)'),
         ('commands.fun_minigames', 'Fun & Mini-Games (8ball, horoscope, funfact, coinflip, roll, wisdom, vibe-check, reality-check, fortune, agent-advice)'),
+        ('discord_web_bridge', 'Discord↔Web Bridge (bridge-channel, unbridge-channel, list-bridges)'),
     ]
 
     for module_name, description in command_modules:

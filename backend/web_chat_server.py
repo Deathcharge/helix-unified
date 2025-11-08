@@ -303,25 +303,42 @@ class WebChatConnectionManager:
 
     async def handle_discord_bridge(self, session_id: str, session: dict, data: dict, websocket: WebSocket):
         """Bridge message to Discord."""
-        if not self.discord_bot:
+        # Import here to avoid circular dependency
+        from backend.discord_web_bridge import get_bridge
+
+        bridge = get_bridge()
+        if not bridge:
             await self.send_personal_message(
-                {"type": "error", "message": "Discord bot not connected"},
+                {"type": "error", "message": "Discord bridge not initialized"},
                 websocket
             )
             return
 
         message = data.get("message", "").strip()
         channel_name = data.get("channel", "general")
+        username = session["username"]
 
-        # TODO: Send to Discord channel via bot
-        await self.send_personal_message(
-            {
-                "type": "system",
-                "message": f"📡 Message bridged to Discord #{channel_name}: {message}",
-                "timestamp": datetime.utcnow().isoformat(),
-            },
-            websocket
-        )
+        # Send to Discord via bridge
+        success = await bridge.send_to_discord(channel_name, username, message)
+
+        if success:
+            await self.send_personal_message(
+                {
+                    "type": "system",
+                    "message": f"📡 Message sent to Discord #{channel_name}",
+                    "timestamp": datetime.utcnow().isoformat(),
+                },
+                websocket
+            )
+        else:
+            await self.send_personal_message(
+                {
+                    "type": "error",
+                    "message": f"Failed to send to Discord #{channel_name}. Channel may not exist or bot lacks permissions.",
+                    "timestamp": datetime.utcnow().isoformat(),
+                },
+                websocket
+            )
 
     async def handle_ritual_trigger(self, session_id: str, session: dict, data: dict, websocket: WebSocket):
         """Trigger a ritual from web interface."""
