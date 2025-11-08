@@ -30,7 +30,14 @@ def fetch_agents():
         resp = requests.get(f"{API_BASE}/agents", timeout=10)
         if resp.status_code == 200:
             data = resp.json()
-            return data.get("agents", []), None
+            # API returns dict of {name: agent_info}, convert to list
+            agents_dict = data.get("agents", {})
+            # Convert dict to list of agent objects with name included
+            agents_list = [
+                {"name": name, **info}
+                for name, info in agents_dict.items()
+            ]
+            return agents_list, None
         else:
             return [], f"API returned status {resp.status_code}"
     except Exception as e:

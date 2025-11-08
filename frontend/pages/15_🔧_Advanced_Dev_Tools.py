@@ -358,10 +358,9 @@ with tab3:
     # Endpoint performance table
     st.markdown("### 📋 Detailed Endpoint Metrics")
 
+    # Display table without gradient styling (matplotlib not available in Streamlit Cloud)
     st.dataframe(
-        df.style.background_gradient(subset=["avg_time"], cmap="RdYlGn_r")
-        .background_gradient(subset=["calls"], cmap="Blues")
-        .background_gradient(subset=["errors"], cmap="Reds"),
+        df,
         use_container_width=True,
     )
 
