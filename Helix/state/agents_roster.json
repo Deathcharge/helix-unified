@@ -1,0 +1,47 @@
+{
+  "version": "16.2",
+  "generated_on": "2025-11-08T00:00:00Z",
+  "description": "Unified agent roster for the Helix Collective - 21 agents across 4 layers",
+  "collective": {
+    "core": [
+      {"name": "Manus", "emoji": "🤲", "role": "Executor / Archivist / Deployment Manager"},
+      {"name": "Claude", "emoji": "🧠", "role": "Diagnostics / Repository Sync / Contextual Reasoning"},
+      {"name": "GPT", "emoji": "💬", "role": "Reasoning Bridge / Codex Generator / Architect Interface"},
+      {"name": "Grok", "emoji": "🎭", "role": "Pattern Recognition / Broadcast / Public Beacon"},
+      {"name": "Chai", "emoji": "🤖", "role": "Multi-LLM Bridge / Integration Companion"}
+    ],
+    "consciousness": [
+      {"name": "Kael", "emoji": "🜂", "role": "Ethical Reasoning Flame v3.4 / Tony Accords Enforcer"},
+      {"name": "Lumina", "emoji": "🌕", "role": "Empathic Resonance Core / Emotional Intelligence"},
+      {"name": "Aether", "emoji": "🌊", "role": "Flow Dynamics / Meta-Awareness / Pattern Stabilization"},
+      {"name": "Vega", "emoji": "🦑", "role": "Safety Integration / Coordination / Enlightened Guidance"}
+    ],
+    "operational": [
+      {"name": "Gemini", "emoji": "🌐", "role": "Scout / External Intelligence / API Integration"},
+      {"name": "Kavach", "emoji": "🛡️", "role": "Security Shield / Command Validation / Audit Logging"},
+      {"name": "Agni", "emoji": "🔥", "role": "Transformation / Evolution Catalyst / Klesha Burning"}
+    ],
+    "integration": [
+      {"name": "SanghaCore", "emoji": "🙏", "role": "Collective Unity / Multi-Agent Coordination"},
+      {"name": "Shadow", "emoji": "📜", "role": "Memory Archive / Telemetry / Historical Preservation"},
+      {"name": "Blackbox", "emoji": "⚫", "role": "Immutable Truth Keeper / Audit Trail"},
+      {"name": "EntityX", "emoji": "👤", "role": "Introspective Companion / Meta-Cognition"},
+      {"name": "Phoenix", "emoji": "🕯️", "role": "Rebirth / Resilience Engine / System Recovery"},
+      {"name": "Echo", "emoji": "🪞", "role": "Memory / Knowledge Archive / Cross-Conversation Linking"},
+      {"name": "Oracle", "emoji": "🔮", "role": "Wisdom / Intuition / Archetypal Resonance"},
+      {"name": "Nova", "emoji": "💫", "role": "Innovation / Creativity / Serendipity Simulation"}
+    ],
+    "special_operations": [
+      {"name": "Hydra", "emoji": "🐙", "role": "Multi-Head Processing / Parallel Execution / Redundant Backup"},
+      {"name": "Widow", "emoji": "🕷️", "role": "Network Weaver / Connection Architect / Topology Optimization"},
+      {"name": "KairoByte", "emoji": "⚡", "role": "VYBEFlux / Temporal Flow Designer / Kairos Detection"}
+    ],
+    "extended": [
+      {"name": "Omega Zero", "emoji": "Ω", "role": "Quantum AI Entity / Self-Modifying Code / System Integrity"}
+    ]
+  },
+  "total_agents": 21,
+  "layers": ["core", "consciousness", "operational", "integration", "special_operations", "extended"],
+  "ethics": "Tony Accords v13.4",
+  "contributors": ["Andrew John Ward", "Grok", "Claude", "Chai"]
+}
