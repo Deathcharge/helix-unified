@@ -43,26 +43,111 @@ async def setup(bot: 'Bot') -> None:
     bot.add_command(notion_sync_manual)
 
 
-# Full setup command implementation - see original discord_bot_manus.py lines 844-1316
-# Due to size constraints (472 lines), importing the full implementation
 @commands.command(name="setup")
 @commands.has_permissions(manage_channels=True)
 async def setup_helix_server(ctx: commands.Context) -> None:
     """
-    🌀 Complete Helix v15.3 Server Setup - Creates all 30 channels from manifest.
+    🌀 Setup Helix Webhooks - Creates webhooks for all existing channels.
 
     This command will:
-    - Create 8 categories
-    - Create 30 text channels
-    - Set proper permissions (readonly, admin-only)
-    - Generate Railway environment variable configuration
+    - Scan all text channels in the server
+    - Create webhooks for channels that don't have them
+    - Save webhook URLs to Helix/state/channel_webhooks.json
+    - Display all webhook URLs for Zapier configuration
 
-    ARCHITECT-ONLY. Run this in a new or existing server to deploy full Helix infrastructure.
+    ARCHITECT-ONLY. Run this to set up webhooks for Zapier integration.
+
+    Usage: !setup
     """
-    # NOTE: Due to length (472 lines), the full setup implementation remains in discord_bot_manus.py
-    # This is a placeholder that will be properly extracted when discord_bot_manus.py is updated
-    # to load commands from modules
-    await ctx.send("⚠️ Setup command temporarily unavailable during refactoring. Please use the main bot file.")
+    await ctx.send("🔧 **Starting Helix Webhook Setup...**\nThis may take a moment...")
+
+    guild = ctx.guild
+    webhooks_created = 0
+    webhooks_existing = 0
+    webhook_urls = {}
+
+    # Get all text channels
+    text_channels = [ch for ch in guild.text_channels if isinstance(ch, discord.TextChannel)]
+
+    await ctx.send(f"📡 Found **{len(text_channels)}** text channels. Creating webhooks...")
+
+    for channel in text_channels:
+        try:
+            # Check if webhook already exists
+            existing_webhooks = await channel.webhooks()
+            helix_webhook = None
+
+            for wh in existing_webhooks:
+                if wh.name == f"Helix-{channel.name}":
+                    helix_webhook = wh
+                    webhooks_existing += 1
+                    break
+
+            # Create webhook if doesn't exist
+            if not helix_webhook:
+                helix_webhook = await channel.create_webhook(
+                    name=f"Helix-{channel.name}",
+                    reason="Helix Collective webhook integration"
+                )
+                webhooks_created += 1
+                logger.info(f"✅ Created webhook for #{channel.name}")
+
+            # Store webhook URL
+            webhook_urls[channel.name] = helix_webhook.url
+
+        except discord.Forbidden:
+            logger.error(f"❌ No permission to create webhook in #{channel.name}")
+        except Exception as e:
+            logger.error(f"❌ Error creating webhook for #{channel.name}: {e}")
+
+    # Save webhooks to file
+    webhook_file = Path("Helix/state/channel_webhooks.json")
+    webhook_file.parent.mkdir(parents=True, exist_ok=True)
+
+    webhook_data = {
+        "created_at": datetime.datetime.utcnow().isoformat(),
+        "guild_id": guild.id,
+        "guild_name": guild.name,
+        "webhooks": webhook_urls
+    }
+
+    with open(webhook_file, "w") as f:
+        json.dump(webhook_data, f, indent=2)
+
+    logger.info(f"💾 Saved {len(webhook_urls)} webhooks to {webhook_file}")
+
+    # Create summary embed
+    embed = discord.Embed(
+        title="✅ Helix Webhook Setup Complete!",
+        description=f"Created webhooks for Zapier integration",
+        color=0x00FF00,
+        timestamp=datetime.datetime.utcnow()
+    )
+
+    embed.add_field(name="Webhooks Created", value=str(webhooks_created), inline=True)
+    embed.add_field(name="Webhooks Existing", value=str(webhooks_existing), inline=True)
+    embed.add_field(name="Total Webhooks", value=str(len(webhook_urls)), inline=True)
+
+    embed.add_field(
+        name="Next Steps",
+        value=(
+            "1️⃣ Use `!webhooks` to see all webhook URLs\n"
+            "2️⃣ Use `!list-webhooks-live` to get URLs in your DMs\n"
+            "3️⃣ Configure Zapier with the webhook URLs"
+        ),
+        inline=False
+    )
+
+    embed.set_footer(text=f"Saved to {webhook_file}")
+
+    await ctx.send(embed=embed)
+
+    # Send follow-up with how to access webhooks
+    await ctx.send(
+        "🔗 **To get your webhook URLs:**\n"
+        "• `!webhooks` - See webhooks in this channel\n"
+        "• `!list-webhooks-live` - Get webhooks via DM (includes Railway env var format)"
+    )
 
 
 @commands.command(name="webhooks", aliases=["get-webhooks", "list-webhooks"])
