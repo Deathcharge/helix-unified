@@ -643,6 +643,7 @@ async def on_ready() -> None:
         ('commands.role_system', 'Role-based notifications (roles, subscribe, unsubscribe, my-roles, setup-roles, all-roles, agent-roles, channel-roles, setup-all-roles, setup-welcome-roles)'),
         ('commands.fun_minigames', 'Fun & Mini-Games (8ball, horoscope, funfact, coinflip, roll, wisdom, vibe-check, reality-check, fortune, agent-advice)'),
         ('discord_web_bridge', 'Discord↔Web Bridge (bridge-channel, unbridge-channel, list-bridges)'),
+        ('voice_patrol_system', 'Voice Patrol (voice-join, voice-leave, voice-announce, voice-auto-join, voice-status)'),
     ]
 
     for module_name, description in command_modules:
@@ -654,6 +655,17 @@ async def on_ready() -> None:
             logger.info(f"✅ Loaded {module_name}")
         except Exception as e:
             logger.error(f"❌ Failed to load {module_name}: {e}")
+
+    # Initialize Voice Patrol System
+    try:
+        from backend.voice_patrol_system import VoicePatrolSystem, set_voice_patrol
+
+        voice_patrol = VoicePatrolSystem(bot)
+        set_voice_patrol(voice_patrol)
+        await voice_patrol.start_patrol()
+        logger.info("✅ Voice patrol system initialized and started")
+    except Exception as e:
+        logger.error(f"❌ Failed to initialize voice patrol: {e}")
 
     # Send startup message to status channel
     if STATUS_CHANNEL_ID:
@@ -714,6 +726,19 @@ async def on_message(message: discord.Message) -> None:
 
     # Process commands normally (CRITICAL: must call this or commands won't work!)
     await bot.process_commands(message)
+
+
+@bot.event
+async def on_voice_state_update(member: discord.Member, before: discord.VoiceState, after: discord.VoiceState) -> None:
+    """Handle voice state updates for voice patrol system."""
+    try:
+        from backend.voice_patrol_system import get_voice_patrol
+
+        voice_patrol = get_voice_patrol()
+        if voice_patrol:
+            await voice_patrol.on_voice_state_update(member, before, after)
+    except Exception as e:
+        logger.error(f"Error in voice state update handler: {e}", exc_info=True)
 
 
 @bot.event
