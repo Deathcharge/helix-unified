@@ -16,7 +16,7 @@
     const PORTALS = [
         { id: 'hub', name: 'Hub', icon: '🌀', url: '/', description: 'Portal Directory' },
         { id: 'chat', name: 'Chat', icon: '💬', url: '/chat', description: 'Agent Chat' },
-        { id: 'forum', name: 'Forum', icon: '🗣️', url: '#', description: 'Community' },
+        { id: 'forum', name: 'Forum', icon: '🗣️', url: '/forum', description: 'Community' },
         { id: 'music', name: 'Music', icon: '🎵', url: '#', description: 'KAIRO Studio' },
         { id: 'agents', name: 'Agents', icon: '🤖', url: '/chat', description: 'Agent Hub' },
         { id: 'rituals', name: 'Rituals', icon: '🔮', url: '#', description: 'Z-88 Engine' },

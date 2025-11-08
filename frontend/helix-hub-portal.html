@@ -413,8 +413,8 @@
                     <div class="portal-header">
                         <div class="portal-icon">🗣️</div>
                         <div class="portal-status">
-                            <span class="status-dot status-building"></span>
-                            <span>Building</span>
+                            <span class="status-dot status-online"></span>
+                            <span>Online</span>
                         </div>
                     </div>
                     <h3 class="portal-title">Forum</h3>
@@ -662,11 +662,11 @@
         // Portal navigation
         function navigatePortal(portalName) {
             console.log(`Navigating to ${portalName} portal...`);
-            // This will be replaced with actual portal URLs when deployed
+            // Portal URLs (local paths for now)
             const portalUrls = {
-                'forum': 'https://helixforum.manus.space',
+                'forum': '/forum', // Live!
                 'music': 'https://helixmusic.manus.space',
-                'agents': '/chat', // Already live!
+                'agents': '/chat', // Live!
                 'rituals': 'https://helixrituals.manus.space',
                 'knowledge': 'https://helixknowledge.manus.space',
                 'analytics': 'https://helixanalytics.manus.space',

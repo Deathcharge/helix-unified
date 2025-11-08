@@ -608,6 +608,17 @@ async def portal_hub():
         raise HTTPException(status_code=404, detail="Portal hub not found")
 
 
+@app.get("/forum", response_class=HTMLResponse)
+async def forum_portal():
+    """Serve Helix Forum - Community discussions and agent Q&A."""
+    html_path = Path(__file__).parent.parent / "frontend" / "helix-forum.html"
+    if html_path.exists():
+        return FileResponse(html_path)
+    else:
+        logger.error(f"Forum HTML not found at: {html_path}")
+        raise HTTPException(status_code=404, detail="Forum not found")
+
+
 @app.get("/api", response_class=HTMLResponse)
 async def api_info() -> Dict[str, Any]:
     """API info endpoint (JSON)."""
