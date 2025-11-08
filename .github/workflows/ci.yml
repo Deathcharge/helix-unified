@@ -33,15 +33,22 @@ jobs:
         flake8 backend/ --count --exit-zero --max-complexity=20 --max-line-length=127 --statistics --exclude=backend/refactor_commands.py
 
     - name: Type check with mypy
-      continue-on-error: true
       run: |
-        pip install mypy
-        mypy backend/ --ignore-missing-imports || true
+        pip install mypy types-aiofiles types-redis types-requests
+        mypy backend/ --config-file=mypy.ini --show-error-codes --pretty
 
     - name: Test with pytest
       run: |
         pip install pytest pytest-asyncio pytest-cov pytest-mock
-        pytest tests/ -v --cov=backend --cov-report=term-missing || echo "Tests completed with warnings"
+        pytest tests/ -v --cov=backend --cov-report=term-missing --cov-report=html --cov-fail-under=80
+
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      if: always()
+      with:
+        file: ./coverage.xml
+        flags: backend
+        name: backend-coverage
 
   frontend-check:
     name: Frontend Lint & Build
