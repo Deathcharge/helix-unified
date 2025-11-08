@@ -596,6 +596,18 @@ async def web_chat():
         raise HTTPException(status_code=404, detail="Web chat interface not found")
 
 
+@app.get("/hub", response_class=HTMLResponse)
+@app.get("/", response_class=HTMLResponse)
+async def portal_hub():
+    """Serve Helix Portal Hub - Master navigation page."""
+    html_path = Path(__file__).parent.parent / "frontend" / "helix-hub-portal.html"
+    if html_path.exists():
+        return FileResponse(html_path)
+    else:
+        logger.error(f"Portal hub HTML not found at: {html_path}")
+        raise HTTPException(status_code=404, detail="Portal hub not found")
+
+
 @app.get("/api", response_class=HTMLResponse)
 async def api_info() -> Dict[str, Any]:
     """API info endpoint (JSON)."""
