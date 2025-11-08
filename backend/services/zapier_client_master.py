@@ -222,6 +222,9 @@ class MasterZapierClient:
             "helix_version": os.getenv("HELIX_VERSION", "16.9"),
             "railway_environment": os.getenv("RAILWAY_ENVIRONMENT", "production"),
             "timestamp": datetime.utcnow().isoformat(),
+            # Signal to Zapier to @mention role subscribers in Discord
+            # Zapier will look up the role ID based on channel and include it
+            "mention_subscribers": True,
         }
 
         # Send directly to Railway Discord webhook
