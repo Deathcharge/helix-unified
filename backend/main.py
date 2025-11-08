@@ -256,6 +256,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Include Web Chat routes
+try:
+    from backend.web_chat_routes import router as web_chat_router
+    app.include_router(web_chat_router, tags=["Web Chat"])
+    logger.info("✅ Web Chat routes loaded")
+except Exception as e:
+    logger.warning(f"⚠️ Failed to load Web Chat routes: {e}")
+
 # Setup templates directory (use absolute path for Railway compatibility)
 # Try multiple path resolution strategies for robustness
 
@@ -557,6 +565,17 @@ async def root(request: Request):
 async def agent_gallery(request: Request):
     """Serve agent gallery page."""
     return templates.TemplateResponse("agent_gallery.html", {"request": request})
+
+
+@app.get("/chat", response_class=HTMLResponse)
+async def web_chat():
+    """Serve Helix Web Chat interface."""
+    html_path = Path(__file__).parent.parent / "frontend" / "helix-chat.html"
+    if html_path.exists():
+        return FileResponse(html_path)
+    else:
+        logger.error(f"Web chat HTML not found at: {html_path}")
+        raise HTTPException(status_code=404, detail="Web chat interface not found")
 
 
 @app.get("/api", response_class=HTMLResponse)
