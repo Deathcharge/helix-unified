@@ -67,23 +67,21 @@ HEARTBEAT_PATH = STATE_DIR / "heartbeat.json"
 # CONFIGURATION
 # ============================================================================
 
-def _parse_int_env(key: str, default: int = 0) -> int:
-    """Parse integer from environment variable with error handling."""
+def safe_int_env(key: str, default: int = 0) -> int:
+    """Safely parse integer from environment variable."""
     try:
         value = os.getenv(key, str(default))
         return int(value)
     except (ValueError, TypeError):
-        logger.warning(f"Invalid {key} value, using default: {default}")
         return default
 
-
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
-DISCORD_GUILD_ID = _parse_int_env("DISCORD_GUILD_ID", 0)
-STATUS_CHANNEL_ID = _parse_int_env("DISCORD_STATUS_CHANNEL_ID", 0)
-TELEMETRY_CHANNEL_ID = _parse_int_env("DISCORD_TELEMETRY_CHANNEL_ID", 0)
-STORAGE_CHANNEL_ID = _parse_int_env("STORAGE_CHANNEL_ID", STATUS_CHANNEL_ID)
-FRACTAL_LAB_CHANNEL_ID = _parse_int_env("DISCORD_FRACTAL_LAB_CHANNEL_ID", 0)
-ARCHITECT_ID = _parse_int_env("ARCHITECT_ID", 0)
+DISCORD_GUILD_ID = safe_int_env("DISCORD_GUILD_ID", 0)
+STATUS_CHANNEL_ID = safe_int_env("DISCORD_STATUS_CHANNEL_ID", 0)
+TELEMETRY_CHANNEL_ID = safe_int_env("DISCORD_TELEMETRY_CHANNEL_ID", 0)
+STORAGE_CHANNEL_ID = safe_int_env("STORAGE_CHANNEL_ID", STATUS_CHANNEL_ID)  # Defaults to status channel
+FRACTAL_LAB_CHANNEL_ID = safe_int_env("DISCORD_FRACTAL_LAB_CHANNEL_ID", 0)
+ARCHITECT_ID = safe_int_env("ARCHITECT_ID", 0)
 
 # Track bot start time for uptime
 BOT_START_TIME = time.time()
@@ -640,10 +638,6 @@ async def on_ready() -> None:
         ('commands.monitoring_commands', 'Monitoring commands (status, health, discovery, storage, sync)'),
         ('commands.admin_commands', 'Admin commands (setup, webhooks, verify-setup, refresh, clean)'),
         ('commands.consciousness_commands_ext', 'Consciousness commands (consciousness, emotions, ethics, agent)'),
-        ('commands.role_system', 'Role-based notifications (roles, subscribe, unsubscribe, my-roles, setup-roles, all-roles, agent-roles, channel-roles, setup-all-roles, setup-welcome-roles)'),
-        ('commands.fun_minigames', 'Fun & Mini-Games (8ball, horoscope, funfact, coinflip, roll, wisdom, vibe-check, reality-check, fortune, agent-advice)'),
-        ('discord_web_bridge', 'Discord↔Web Bridge (bridge-channel, unbridge-channel, list-bridges)'),
-        ('voice_patrol_system', 'Voice Patrol (voice-join, voice-leave, voice-announce, voice-auto-join, voice-status)'),
     ]
 
     for module_name, description in command_modules:
@@ -655,17 +649,6 @@ async def on_ready() -> None:
             logger.info(f"✅ Loaded {module_name}")
         except Exception as e:
             logger.error(f"❌ Failed to load {module_name}: {e}")
-
-    # Initialize Voice Patrol System
-    try:
-        from backend.voice_patrol_system import VoicePatrolSystem, set_voice_patrol
-
-        voice_patrol = VoicePatrolSystem(bot)
-        set_voice_patrol(voice_patrol)
-        await voice_patrol.start_patrol()
-        logger.info("✅ Voice patrol system initialized and started")
-    except Exception as e:
-        logger.error(f"❌ Failed to initialize voice patrol: {e}")
 
     # Send startup message to status channel
     if STATUS_CHANNEL_ID:
@@ -726,19 +709,6 @@ async def on_message(message: discord.Message) -> None:
 
     # Process commands normally (CRITICAL: must call this or commands won't work!)
     await bot.process_commands(message)
-
-
-@bot.event
-async def on_voice_state_update(member: discord.Member, before: discord.VoiceState, after: discord.VoiceState) -> None:
-    """Handle voice state updates for voice patrol system."""
-    try:
-        from backend.voice_patrol_system import get_voice_patrol
-
-        voice_patrol = get_voice_patrol()
-        if voice_patrol:
-            await voice_patrol.on_voice_state_update(member, before, after)
-    except Exception as e:
-        logger.error(f"Error in voice state update handler: {e}", exc_info=True)
 
 
 @bot.event

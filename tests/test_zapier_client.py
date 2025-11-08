@@ -12,8 +12,8 @@ def test_zapier_client_initialization(mock_env_vars):
     # Import after env vars are set
     from backend.services.zapier_client_master import MasterZapierClient
 
-    # MasterZapierClient doesn't take master_hook_url in __init__
     client = MasterZapierClient()
+    # Verify client was initialized (master hook URL is read from env)
     assert client is not None
 
 
@@ -31,7 +31,6 @@ async def test_log_event(mock_env_vars):
         mock_response.text = AsyncMock(return_value="success")
         mock_post.return_value.__aenter__.return_value = mock_response
 
-        # log_event(event_title, event_type, agent_name, description, ucf_snapshot)
         result = await client.log_event(
             event_title="Test Event",
             event_type="test_event",
@@ -40,8 +39,8 @@ async def test_log_event(mock_env_vars):
             ucf_snapshot={"harmony": 0.5}
         )
 
-        # Returns bool, not dict
-        assert isinstance(result, bool)
+        assert result is True or isinstance(result, bool)
+        mock_post.assert_called_once()
 
 
 @pytest.mark.asyncio
@@ -58,15 +57,13 @@ async def test_send_error_alert(mock_env_vars):
         mock_response.text = AsyncMock(return_value="success")
         mock_post.return_value.__aenter__.return_value = mock_response
 
-        # send_error_alert(error_message, component, severity, stack_trace)
         result = await client.send_error_alert(
             error_message="Test error",
             component="test_function",
             severity="high"
         )
 
-        # Returns bool, not dict
-        assert isinstance(result, bool)
+        assert result is True or isinstance(result, bool)
 
 
 @pytest.mark.asyncio
@@ -126,6 +123,6 @@ async def test_rate_limiting(mock_env_vars):
 
         results = await asyncio.gather(*tasks)
 
-        # All should succeed (returns bool)
+        # All should succeed (return True or be boolean)
         assert len(results) == 10
         assert all(isinstance(r, bool) for r in results)
