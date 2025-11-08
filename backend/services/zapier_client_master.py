@@ -169,6 +169,95 @@ class MasterZapierClient:
 
         return await self._send(payload)
 
+    async def send_railway_discord_event(
+        self,
+        discord_channel: str,
+        event_type: str,
+        title: str,
+        description: str,
+        metadata: Optional[Dict[str, Any]] = None,
+        priority: str = "normal",
+    ) -> bool:
+        """
+        Send event to Railway→Discord Zap with intelligent channel routing.
+
+        This method sends to the Zapier webhook which routes to specific
+        Discord webhook channels based on the discord_channel field.
+
+        Args:
+            discord_channel: Target channel (MANUS | TELEMETRY | STORAGE | RITUAL |
+                           AGENTS | CROSS_AI | DEVELOPMENT | LORE | ADMIN)
+            event_type: Event type (e.g., "bot_started", "ritual_complete", "ucf_anomaly")
+            title: Event title
+            description: Event description
+            metadata: Optional metadata dict (UCF state, agent info, etc.)
+            priority: Priority level (low | normal | high | critical)
+
+        Returns:
+            True if successful
+
+        Example:
+            await client.send_railway_discord_event(
+                discord_channel="MANUS",
+                event_type="bot_started",
+                title="Manus Bot Deployed",
+                description="Successfully deployed to Railway",
+                metadata={"ucf_harmony": 0.355, "version": "16.9"}
+            )
+        """
+        # Use Railway Discord Zap webhook (configured separately from master)
+        railway_discord_webhook = os.getenv(
+            "ZAPIER_RAILWAY_DISCORD_WEBHOOK",
+            "https://hooks.zapier.com/hooks/catch/25075191/us0ibsh/"
+        )
+
+        payload = {
+            "type": "railway_discord_event",
+            "discord_channel": discord_channel.upper(),  # MANUS, TELEMETRY, etc.
+            "event_type": event_type,
+            "title": title,
+            "description": description,
+            "metadata": metadata or {},
+            "priority": priority,
+            "helix_version": os.getenv("HELIX_VERSION", "16.9"),
+            "railway_environment": os.getenv("RAILWAY_ENVIRONMENT", "production"),
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+
+        # Send directly to Railway Discord webhook
+        session = self._session
+        if session is None:
+            session = aiohttp.ClientSession()
+
+        try:
+            async with session.post(
+                railway_discord_webhook,
+                json=payload,
+                timeout=aiohttp.ClientTimeout(total=10)
+            ) as resp:
+                success = resp.status == 200
+
+                if not success:
+                    await self._log_failure(
+                        payload,
+                        f"HTTP {resp.status}",
+                        f"railway_discord_{discord_channel}"
+                    )
+
+                return success
+
+        except asyncio.TimeoutError:
+            await self._log_failure(payload, "Timeout", f"railway_discord_{discord_channel}")
+            return False
+
+        except Exception as e:
+            await self._log_failure(payload, str(e), f"railway_discord_{discord_channel}")
+            return False
+
+        finally:
+            if self._owns_session and session:
+                await session.close()
+
     async def log_telemetry(self, metric_name: str, value: float, component: str = "system", unit: str = "") -> bool:
         """
         Log telemetry data to Google Sheets/Tables.
@@ -400,6 +489,16 @@ if __name__ == "__main__":
                 (
                     "Discord Notification",
                     client.send_discord_notification("testing", "🧪 Master webhook test", "normal"),
+                ),
+                (
+                    "Railway→Discord (MANUS)",
+                    client.send_railway_discord_event(
+                        discord_channel="MANUS",
+                        event_type="test_event",
+                        title="🧪 Test Event",
+                        description="Testing Railway→Discord integration",
+                        metadata={"ucf_harmony": 0.355, "test": True}
+                    ),
                 ),
                 ("Telemetry", client.log_telemetry("test_metric", 42.0, "test_component", "units")),
                 ("Error Alert", client.send_error_alert("Test error", "test_component", "low")),
