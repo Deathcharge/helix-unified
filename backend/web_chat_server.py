@@ -145,6 +145,7 @@ class WebChatConnectionManager:
         await websocket.accept()
         self.active_connections[session_id] = websocket
         self.user_sessions[session_id] = {
+            "session_id": session_id,
             "username": username,
             "connected_at": datetime.utcnow().isoformat(),
             "selected_agent": None,
@@ -395,7 +396,35 @@ class WebChatConnectionManager:
         personality = agent["personality"]
         name = agent["name"]
 
-        # Simple personality-based responses (can be enhanced with LLM later)
+        # Try to use LLM engine if available
+        try:
+            from backend.llm_agent_engine import get_llm_engine
+
+            llm_engine = get_llm_engine()
+            if llm_engine:
+                # Get session ID from session dict
+                session_id = session.get("session_id", "unknown")
+
+                # Build context for LLM
+                context = {
+                    "username": session.get("username", "Anonymous"),
+                    "message_count": session.get("message_count", 0),
+                    "agent_personality": personality,
+                }
+
+                # Generate intelligent response
+                response = await llm_engine.generate_agent_response(
+                    agent_id=agent_id,
+                    user_message=user_message,
+                    session_id=session_id,
+                    context=context
+                )
+                return response
+
+        except Exception as e:
+            logger.warning(f"LLM engine unavailable, using fallback responses: {e}")
+
+        # Fallback to static personality-based responses
         responses = {
             "nexus": f"Analyzing strategic options... {user_message} requires coordinated action across agents 3, 7, and 11.",
             "oracle": f"I see the pattern in '{user_message}'. The path reveals itself through iteration and reflection.",

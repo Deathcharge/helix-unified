@@ -188,6 +188,17 @@ async def lifespan(app: FastAPI):
     else:
         logger.warning("⚠️ ZAPIER_WEBHOOK_URL not set - integration disabled")
 
+    # Initialize LLM Agent Engine for intelligent agent responses
+    try:
+        from backend.llm_agent_engine import initialize_llm_engine
+
+        llm_provider = os.getenv("HELIX_LLM_PROVIDER", "ollama")  # Default to Ollama (local)
+        await initialize_llm_engine(provider=llm_provider)
+        logger.info(f"✅ LLM Agent Engine initialized (provider={llm_provider})")
+    except Exception as e:
+        logger.warning(f"⚠️ LLM Agent Engine initialization failed: {e}")
+        logger.warning("⚠️ Agent responses will use static fallback mode")
+
     # Initialize agents
     try:
         status = await get_collective_status()
@@ -228,6 +239,13 @@ async def lifespan(app: FastAPI):
 
     # Cleanup on shutdown
     logger.info("🌙 Helix Collective v16.8 - Shutdown Sequence")
+
+    # Shutdown LLM Agent Engine
+    try:
+        from backend.llm_agent_engine import shutdown_llm_engine
+        await shutdown_llm_engine()
+    except Exception as e:
+        logger.warning(f"⚠️ LLM engine shutdown error: {e}")
 
     # Close Zapier session
     zapier = get_zapier()
