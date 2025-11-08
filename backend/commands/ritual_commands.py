@@ -4,6 +4,13 @@ import json
 import discord
 from discord.ext import commands
 
+# Import Discord webhook sender
+try:
+    from backend.discord_webhook_sender_hybrid import get_discord_sender
+    DISCORD_WEBHOOKS_AVAILABLE = True
+except ImportError:
+    DISCORD_WEBHOOKS_AVAILABLE = False
+
 
 @commands.command(name="harmony")
 async def harmony_command(ctx):
@@ -35,6 +42,23 @@ async def harmony_command(ctx):
             json.dump(ucf, f, indent=2)
 
         await ctx.send(f"**HARMONY RESTORED** → `harmony={ucf['harmony']:.3f}`")
+
+        # 🌀 DISCORD WEBHOOK: Send ritual completion to #ritual-engine-z88
+        if DISCORD_WEBHOOKS_AVAILABLE:
+            try:
+                discord_sender = await get_discord_sender()
+                await discord_sender.send_ritual_completion(
+                    ritual_name="Neti-Neti Harmony Ritual",
+                    steps=4,
+                    ucf_changes={
+                        "harmony_before": current_harmony,
+                        "harmony_after": ucf["harmony"],
+                        "delta": ucf["harmony"] - current_harmony,
+                        "executor": str(ctx.author)
+                    }
+                )
+            except Exception as webhook_error:
+                print(f"⚠️ Discord webhook error: {webhook_error}")
 
         # 🌀 ZAPIER WEBHOOK: Log ritual completion to Notion Event Log
         if hasattr(ctx.bot, "zapier_client") and ctx.bot.zapier_client:
