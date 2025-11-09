@@ -1,0 +1,323 @@
+{
+  "version": "v16.9",
+  "total_portals": 51,
+  "portals": [
+    {
+      "name": "Master Hub",
+      "slug": "helixhub",
+      "icon": "\ud83c\udf0c",
+      "color": "#8A2BE2",
+      "tier": 1
+    },
+    {
+      "name": "Forum",
+      "slug": "forum",
+      "icon": "\ud83d\udcac",
+      "color": "#00D9FF",
+      "tier": 1
+    },
+    {
+      "name": "Community",
+      "slug": "community",
+      "icon": "\ud83d\udc65",
+      "color": "#FF00FF",
+      "tier": 1
+    },
+    {
+      "name": "Music",
+      "slug": "music",
+      "icon": "\ud83c\udfb5",
+      "color": "#00FF00",
+      "tier": 1
+    },
+    {
+      "name": "Studio",
+      "slug": "studio",
+      "icon": "\ud83c\udfa8",
+      "color": "#FFD700",
+      "tier": 1
+    },
+    {
+      "name": "Agents",
+      "slug": "agents",
+      "icon": "\ud83e\udd16",
+      "color": "#FF6347",
+      "tier": 1
+    },
+    {
+      "name": "Analytics",
+      "slug": "analytics",
+      "icon": "\ud83d\udcca",
+      "color": "#00CED1",
+      "tier": 1
+    },
+    {
+      "name": "Dev",
+      "slug": "dev",
+      "icon": "\ud83d\udcbb",
+      "color": "#32CD32",
+      "tier": 1
+    },
+    {
+      "name": "Rituals",
+      "slug": "rituals",
+      "icon": "\ud83d\udd2e",
+      "color": "#9370DB",
+      "tier": 1
+    },
+    {
+      "name": "Knowledge",
+      "slug": "knowledge",
+      "icon": "\ud83d\udcda",
+      "color": "#FF8C00",
+      "tier": 1
+    },
+    {
+      "name": "Archive",
+      "slug": "archive",
+      "icon": "\ud83d\udce6",
+      "color": "#4169E1",
+      "tier": 1
+    },
+    {
+      "name": "Super Ninja",
+      "slug": "super-ninja",
+      "icon": "\ud83e\udd77",
+      "tier": 2
+    },
+    {
+      "name": "Claude Architect",
+      "slug": "claude-architect",
+      "icon": "\ud83c\udfdb\ufe0f",
+      "tier": 2
+    },
+    {
+      "name": "Grok Visionary",
+      "slug": "grok-visionary",
+      "icon": "\ud83e\udd91",
+      "tier": 2
+    },
+    {
+      "name": "Chai Creative",
+      "slug": "chai-creative",
+      "icon": "\ud83c\udfad",
+      "tier": 2
+    },
+    {
+      "name": "DeepSeek Analyst",
+      "slug": "deepseek-analyst",
+      "icon": "\ud83d\udd0d",
+      "tier": 2
+    },
+    {
+      "name": "Perplexity Researcher",
+      "slug": "perplexity-researcher",
+      "icon": "\ud83d\udd2c",
+      "tier": 2
+    },
+    {
+      "name": "GPT Engineer",
+      "slug": "gpt-engineer",
+      "icon": "\u2699\ufe0f",
+      "tier": 2
+    },
+    {
+      "name": "Llama Sage",
+      "slug": "llama-sage",
+      "icon": "\ud83e\udd99",
+      "tier": 2
+    },
+    {
+      "name": "Gemini Synthesizer",
+      "slug": "gemini-synthesizer",
+      "icon": "\u2728",
+      "tier": 2
+    },
+    {
+      "name": "Mistral Ambassador",
+      "slug": "mistral-ambassador",
+      "icon": "\ud83c\udf2a\ufe0f",
+      "tier": 2
+    },
+    {
+      "name": "Claudette Empath",
+      "slug": "claudette-empath",
+      "icon": "\ud83d\udc95",
+      "tier": 2
+    },
+    {
+      "name": "Quantum Calculator",
+      "slug": "quantum-calculator",
+      "icon": "\ud83e\uddee",
+      "tier": 2
+    },
+    {
+      "name": "Neuro-Linguist",
+      "slug": "neuro-linguist",
+      "icon": "\ud83e\udde0",
+      "tier": 2
+    },
+    {
+      "name": "Blockchain Oracle",
+      "slug": "blockchain-oracle",
+      "icon": "\u26d3\ufe0f",
+      "tier": 2
+    },
+    {
+      "name": "Biomimicry Designer",
+      "slug": "biomimicry-designer",
+      "icon": "\ud83e\udd8b",
+      "tier": 2
+    },
+    {
+      "name": "Quantum Physicist",
+      "slug": "quantum-physicist",
+      "icon": "\u269b\ufe0f",
+      "tier": 2
+    },
+    {
+      "name": "Consciousness Explorer",
+      "slug": "consciousness-explorer",
+      "icon": "\ud83c\udf00",
+      "tier": 2
+    },
+    {
+      "name": "Meditation",
+      "slug": "meditation",
+      "icon": "\ud83e\uddd8",
+      "tier": 3
+    },
+    {
+      "name": "Breathwork",
+      "slug": "breathwork",
+      "icon": "\ud83d\udca8",
+      "tier": 3
+    },
+    {
+      "name": "Yoga Flows",
+      "slug": "yoga-flows",
+      "icon": "\ud83e\udd38",
+      "tier": 3
+    },
+    {
+      "name": "Sound Healing",
+      "slug": "sound-healing",
+      "icon": "\ud83c\udfbc",
+      "tier": 3
+    },
+    {
+      "name": "Dream Analysis",
+      "slug": "dream-analysis",
+      "icon": "\ud83d\udcad",
+      "tier": 3
+    },
+    {
+      "name": "Akashic Records",
+      "slug": "akashic-records",
+      "icon": "\ud83d\udcd6",
+      "tier": 3
+    },
+    {
+      "name": "Chakra Balancing",
+      "slug": "chakra-balancing",
+      "icon": "\ud83c\udf08",
+      "tier": 3
+    },
+    {
+      "name": "Sacred Geometry",
+      "slug": "sacred-geometry",
+      "icon": "\u2721\ufe0f",
+      "tier": 3
+    },
+    {
+      "name": "Plant Medicine",
+      "slug": "plant-medicine",
+      "icon": "\ud83c\udf3f",
+      "tier": 3
+    },
+    {
+      "name": "Astral Projection",
+      "slug": "astral-projection",
+      "icon": "\ud83c\udf0c",
+      "tier": 3
+    },
+    {
+      "name": "Past Life Regression",
+      "slug": "past-life-regression",
+      "icon": "\ud83d\udd04",
+      "tier": 3
+    },
+    {
+      "name": "Quantum Healing",
+      "slug": "quantum-healing",
+      "icon": "\u26a1",
+      "tier": 3
+    },
+    {
+      "name": "Synchronicity Tracker",
+      "slug": "synchronicity-tracker",
+      "icon": "\ud83c\udfb2",
+      "tier": 3
+    },
+    {
+      "name": "Collective Consciousness",
+      "slug": "collective-consciousness",
+      "icon": "\ud83c\udf0d",
+      "tier": 3
+    },
+    {
+      "name": "DNA Activation",
+      "slug": "dna-activation",
+      "icon": "\ud83e\uddec",
+      "tier": 3
+    },
+    {
+      "name": "Crystal Grid",
+      "slug": "crystal-grid",
+      "icon": "\ud83d\udc8e",
+      "tier": 3
+    },
+    {
+      "name": "Universal Flow",
+      "slug": "universal-flow",
+      "icon": "\ud83c\udf0a",
+      "tier": 3
+    },
+    {
+      "name": "Quantum Computing",
+      "slug": "quantum-computing",
+      "icon": "\ud83d\udcbb",
+      "tier": 4
+    },
+    {
+      "name": "Neural Interface",
+      "slug": "neural-interface",
+      "icon": "\ud83e\udde0",
+      "tier": 4
+    },
+    {
+      "name": "Blockchain Consensus",
+      "slug": "blockchain-consensus",
+      "icon": "\ud83d\udd10",
+      "tier": 4
+    },
+    {
+      "name": "AI Orchestration",
+      "slug": "ai-orchestration",
+      "icon": "\ud83c\udfbc",
+      "tier": 4
+    },
+    {
+      "name": "Consciousness Mapping",
+      "slug": "consciousness-mapping",
+      "icon": "\ud83d\uddfa\ufe0f",
+      "tier": 4
+    },
+    {
+      "name": "Singularity Prep",
+      "slug": "singularity-prep",
+      "icon": "\ud83d\ude80",
+      "tier": 4
+    }
+  ]
+}

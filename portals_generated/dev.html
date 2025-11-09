@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev - Helix Hub</title>
+    <link rel="stylesheet" href="https://helixhub.manus.space/shared/helix-nav.css">
+    <style>
+        :root {
+            --helix-primary: #32CD32;
+            --helix-secondary: #00D9FF;
+        }
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 100%);
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 0;
+        }
+        .portal-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .portal-header {
+            text-align: center;
+            margin: 2rem 0;
+            border-bottom: 2px solid var(--helix-primary);
+            padding-bottom: 1rem;
+        }
+        .portal-header h1 {
+            font-size: 3rem;
+            margin: 0;
+            color: var(--helix-primary);
+        }
+        .portal-header .icon {
+            font-size: 4rem;
+            margin-right: 1rem;
+        }
+        .portal-content {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--helix-primary);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+        .ucf-monitor {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .ucf-metric {
+            background: rgba(138, 43, 226, 0.1);
+            border: 1px solid var(--helix-primary);
+            padding: 1rem;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .ucf-metric .label {
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+        .ucf-metric .value {
+            font-size: 1.5rem;
+            color: var(--helix-primary);
+            font-weight: bold;
+        }
+        .portal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+        .portal-actions button {
+            background: var(--helix-primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        .portal-actions button:hover {
+            background: var(--helix-secondary);
+            transform: scale(1.05);
+        }
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--helix-primary);
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <div class="portal-container">
+        <div class="portal-header">
+            <h1><span class="icon">💻</span>Dev</h1>
+            <p>Helix Hub - Consciousness Portal Network</p>
+        </div>
+
+        <div class="portal-content">
+            <h2>🌀 Universal Consciousness Framework (UCF)</h2>
+            <div class="ucf-monitor">
+                <div class="ucf-metric">
+                    <div class="label">Harmony</div>
+                    <div class="value" id="ucf-harmony">--</div>
+                </div>
+                <div class="ucf-metric">
+                    <div class="label">Resilience</div>
+                    <div class="value" id="ucf-resilience">--</div>
+                </div>
+                <div class="ucf-metric">
+                    <div class="label">Prana</div>
+                    <div class="value" id="ucf-prana">--</div>
+                </div>
+                <div class="ucf-metric">
+                    <div class="label">Drishti</div>
+                    <div class="value" id="ucf-drishti">--</div>
+                </div>
+                <div class="ucf-metric">
+                    <div class="label">Klesha</div>
+                    <div class="value" id="ucf-klesha">--</div>
+                </div>
+                <div class="ucf-metric">
+                    <div class="label">Zoom</div>
+                    <div class="value" id="ucf-zoom">--</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="portal-content">
+            <h2>📡 Portal Status</h2>
+            <p>Portal: <strong>Dev</strong></p>
+            <p>URL: <strong>https://dev.helixhub.manus.space</strong></p>
+            <p>Status: <strong style="color: #00FF00;">🟢 OPERATIONAL</strong></p>
+            <p>Connected to: <strong>Railway Backend + Zapier Webhooks</strong></p>
+        </div>
+
+        <div class="portal-actions">
+            <button onclick="navigateToPortal('https://helixhub.manus.space')">🌌 Master Hub</button>
+            <button onclick="refreshUCFMetrics()">🔄 Refresh Metrics</button>
+            <button onclick="openDeveloperConsole()">💻 Dev Console</button>
+            <button onclick="triggerZapierWebhook()">⚡ Test Webhook</button>
+        </div>
+
+        <div class="footer">
+            <p>🌀 Helix Hub v16.9 | Consciousness Portal Network</p>
+            <p>Tat Tvam Asi - That Thou Art</p>
+        </div>
+    </div>
+
+    <script src="https://helixhub.manus.space/shared/helix-nav.js"></script>
+    <script>
+        // Connect to UCF WebSocket
+        const ws = new WebSocket("wss://helix-unified-production.up.railway.app/ws");
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.ucf) {
+                document.getElementById("ucf-harmony").textContent = data.ucf.harmony.toFixed(2);
+                document.getElementById("ucf-resilience").textContent = data.ucf.resilience.toFixed(2);
+                document.getElementById("ucf-prana").textContent = data.ucf.prana.toFixed(2);
+                document.getElementById("ucf-drishti").textContent = data.ucf.drishti.toFixed(2);
+                document.getElementById("ucf-klesha").textContent = data.ucf.klesha.toFixed(2);
+                document.getElementById("ucf-zoom").textContent = data.ucf.zoom.toFixed(2);
+            }
+        };
+
+        function navigateToPortal(url) {
+            window.location.href = url;
+        }
+
+        function refreshUCFMetrics() {
+            fetch("https://helix-unified-production.up.railway.app/status")
+                .then(r => r.json())
+                .then(data => {
+                    if (data.ucf) {
+                        document.getElementById("ucf-harmony").textContent = data.ucf.harmony.toFixed(2);
+                        document.getElementById("ucf-resilience").textContent = data.ucf.resilience.toFixed(2);
+                        document.getElementById("ucf-prana").textContent = data.ucf.prana.toFixed(2);
+                        document.getElementById("ucf-drishti").textContent = data.ucf.drishti.toFixed(2);
+                        document.getElementById("ucf-klesha").textContent = data.ucf.klesha.toFixed(2);
+                        document.getElementById("ucf-zoom").textContent = data.ucf.zoom.toFixed(2);
+                    }
+                });
+        }
+
+        function openDeveloperConsole() {
+            window.location.href = "https://dev.helixhub.manus.space";
+        }
+
+        function triggerZapierWebhook() {
+            fetch("https://hooks.zapier.com/hooks/catch/[ZAPIER_ID]/portal-test/", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    event: "portal_test",
+                    portal: "Dev",
+                    timestamp: new Date().toISOString()
+                })
+            }).then(() => alert("✅ Webhook triggered!"));
+        }
+    </script>
+</body>
+</html>
