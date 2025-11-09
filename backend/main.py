@@ -83,8 +83,24 @@ if _crypto_found:
 else:
     logger.warning("⚠️ pycryptodome not found - MEGA sync may fail")
 
-# ✅ FIXED IMPORTS - Music generation service
-from music_generator import MusicRequest, MusicResponse, generate_music_service
+# ✅ FIXED IMPORTS - Music generation service (optional, requires torch)
+try:
+    from music_generator import MusicRequest, MusicResponse, generate_music_service
+    MUSIC_GENERATION_AVAILABLE = True
+    logger.info("✅ Music generation API enabled (torch available)")
+except ImportError as e:
+    MUSIC_GENERATION_AVAILABLE = False
+    logger.warning(f"⚠️ Music generation API disabled: {e}")
+    logger.info("💡 Install torch and transformers to enable music generation")
+    # Create dummy classes for type hints
+    class MusicRequest(BaseModel):
+        prompt: str = ""
+        duration: int = 5
+    class MusicResponse(BaseModel):
+        success: bool = False
+        message: str = "Music generation not available"
+    def generate_music_service(request):
+        return MusicResponse(success=False, message="Music generation requires PyTorch (not installed)")
 
 # ============================================================================
 # WEBSOCKET BROADCAST LOOP
@@ -623,17 +639,19 @@ async def forum_portal():
 # ============================================================================
 
 
-@app.post("/api/music/generate", response_model=MusicResponse, tags=["API"])
-async def generate_music(request: MusicRequest, background_tasks: BackgroundTasks):
-    """
-    Generates a music track based on a text prompt using the MusicGen model.
-    The actual generation is run in a background task to prevent timeout.
-    """
-    # The actual generation is synchronous and long-running, so we use a background task
-    # to return a response immediately and process the generation asynchronously.
-    # For this sandbox environment, we will run it synchronously for simplicity
-    # and assume the user will handle the long-running nature.
-    return generate_music_service(request)
+# MusicGen endpoint (torch-based) - Disabled due to ElevenLabs conflict
+# This endpoint requires PyTorch which is too heavy for Railway
+# Use /api/music/generate (ElevenLabs) instead
+if MUSIC_GENERATION_AVAILABLE:
+    @app.post("/api/music/generate-musicgen", response_model=MusicResponse, tags=["API"])
+    async def generate_music_musicgen(request: MusicRequest, background_tasks: BackgroundTasks):
+        """
+        Generates a music track based on a text prompt using the MusicGen model (PyTorch).
+
+        Note: This endpoint is only available if PyTorch is installed.
+        For production use, consider /api/music/generate (ElevenLabs) instead.
+        """
+        return generate_music_service(request)
 
 
 @app.get("/api")
