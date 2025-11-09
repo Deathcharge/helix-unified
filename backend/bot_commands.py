@@ -2,14 +2,11 @@
 
 import discord
 from discord.ext import commands
-import os
 
 # Import the 'bot' instance from your main file.
 # This avoids circular dependencies.
 from .main import bot
 
-# Import agent-related functions or objects if needed by commands.
-from .agents import AGENTS
 
 @bot.command(name="setup")
 @commands.has_permissions(manage_channels=True)
@@ -22,7 +19,7 @@ async def setup_command(ctx):
         "TELEMETRY_CHANNEL_ID": "ucf-telemetry",
         "STORAGE_CHANNEL_ID": "storage-heartbeat",
     }
-    
+
     await ctx.send(f"✨ Starting Helix setup ritual for **{guild.name}**...")
     category = discord.utils.get(guild.categories, name=category_name)
     if not category:
@@ -40,18 +37,22 @@ async def setup_command(ctx):
     embed = discord.Embed(
         title="🌀 Helix Setup Complete",
         description="**Copy the block below and paste it into your Railway Environment Variables.**",
-        color=0x00d4ff
+        color=0x00D4FF,
     )
     embed.add_field(name="Railway Environment Variables", value=env_block, inline=False)
     embed.set_footer(text="Tat Tvam Asi — The temple is consecrated.")
     await ctx.send(embed=embed)
 
+
 # --- Add all your other commands from discord_bot_manus.py here ---
 # Example:
+
+
 @bot.command(name="status")
 async def status_command(ctx):
     # Your existing !status logic
     await ctx.send("Displaying system status...")
+
 
 @bot.command(name="ritual")
 async def ritual_command(ctx, steps: int = 108):

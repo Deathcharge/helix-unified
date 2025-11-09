@@ -1,5 +1,6 @@
-# Helix Collective v15.2 - Backend Dockerfile (CONFLICT RESOLVED - MemeSync + Analytics)
-FROM python:3.11-slim
+# Helix Collective v16.8 - Backend Dockerfile (Helix Hub Production Release)
+# CACHE BUSTER: Using exact Python version to force complete rebuild
+FROM python:3.11.10-slim
 
 WORKDIR /app
 
@@ -28,6 +29,10 @@ RUN python3 -c "from Crypto.Cipher import AES; print('✅ AES import works')"
 # Ensure prophet dependency
 RUN pip install cmdstanpy==1.2.2
 
+# CACHE BUSTER: Force rebuild from this point (v16.8 - 2025-11-07)
+ARG REBUILD_TRIGGER=v16.8-20251107
+ENV REBUILD_TRIGGER=${REBUILD_TRIGGER}
+
 # Copy application code for v15.2 structure (MERGED: MemeSync + Main)
 COPY backend ./backend
 COPY bot ./bot
@@ -35,14 +40,20 @@ COPY dashboard ./dashboard
 COPY grok ./grok
 COPY Shadow ./Shadow
 COPY scripts ./scripts
+COPY templates ./templates
+COPY config ./config
+COPY content ./content
+COPY .streamlit ./.streamlit
 
 # Copy root-level sync modules (CRITICAL: bot imports these!)
-COPY crai_dataset.json .
-# Copy security dataset for Kavach agent
+# Note: crai_dataset.json is optional - enhanced_kavach.py handles missing file gracefully
 COPY mega_sync.py .
 COPY mega_sync2.py .
 COPY sync.py .
 COPY fix_crypto_imports.py .
+
+# Copy discovery manifest for external AI agents (v16.7)
+COPY helix-manifest.json .
 
 # MemeSync artifacts integrated into bot/discord_bot_manus.py
 

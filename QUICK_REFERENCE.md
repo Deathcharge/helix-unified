@@ -1,175 +1,387 @@
-# 🌀 Helix v15.2 Quick Reference Guide
+# 🦑 HELIX COLLECTIVE - QUICK REFERENCE CARD
 
-**For Daily Operations & Mobile Users**
-
----
-
-## 📊 Daily Health Check
-
-**Every Morning** - Check these metrics automatically posted every 10 minutes:
-
-```
-📡 UCF Telemetry Report
-🌀 Harmony: 0.49 (target: >0.6)
-🛡️ Resilience: 0.83 (target: >0.8) ✅
-🔥 Prana: 0.50 (balanced) ✅
-👁️ Drishti: 0.73 (clear) ✅
-🌊 Klesha: 0.21 (low entropy) ✅
-🔍 Zoom: 1.00 (full scope) ✅
-```
-
-**Good Status**: Harmony >0.3, Klesha <0.3, Resilience >0.7
-**Action Needed**: If Harmony <0.3 or Klesha >0.5 → Run ritual
+**One-Page Cheat Sheet for Discord Bot Commands & System URLs**
 
 ---
 
-## 🎮 Essential Commands
+## 🤖 **DISCORD BOT COMMANDS** (62 Total)
 
-### System Status
+### **⚡ Essential Commands** (Use Daily)
 ```
-!status          # Full system health (once fixed)
-```
-**Current Workaround**: Wait for telemetry (every 10 min)
-
-### Z-88 Rituals
-```
-!ritual 108      # Full cycle (recommended daily)
-!ritual 54       # Half cycle (quick boost)
-!ritual 216      # Double cycle (deep work)
+!status          System health + UCF metrics
+!agents          List all 14 agents
+!ucf             UCF metrics only
+!health          Quick diagnostics
+!discovery       API endpoints
 ```
 
-**What It Does**:
-- ↑ Harmony (coherence)
-- ↓ Klesha (entropy)
-- Balances Prana (energy)
-
-**Note**: Bot **edits initial message** with results, doesn't post new message!
-
-### Visualization
+### **🧬 Rituals & Consciousness**
 ```
-!visualize       # Generate Samsara fractal
-!visual          # Alias
-!fractal         # Alias
+!harmony         Quick harmony boost (+0.3)
+!ritual <steps>  Custom ritual (27, 54, 108, 216)
+!consciousness   Current consciousness state
+!emotions        Emotional field state
+!visualize       Generate UCF visualization
 ```
 
-**Output**: Mandelbrot fractal colored by UCF state
-
-### Storage Management
+### **👥 Agent Commands**
 ```
-!storage status  # Check free space & trends
-!storage clean   # Delete old archives (keep latest 20)
-!storage sync    # Upload to cloud (if configured)
+!agent <name>    Agent details
+!wisdom          Random agent wisdom
+!agent-advice    Get advice from agent
 ```
 
-### List Agents
+### **💾 Storage & Sync**
 ```
-!agents          # Show all 14 agents & roles
+!storage status  Archive metrics
+!storage sync    Force upload
+!storage clean   Prune old files
+!sync            Ecosystem sync
+!notion-sync     Sync to Notion
+!backup          Backup all state
+```
+
+### **🩺 Monitoring & Testing**
+```
+!heartbeat          Service health check
+!webhooks           List all webhooks
+!test-integrations  Test all integrations (basic)
+!zapier_test        Test Zapier webhook
+
+# NEW: Comprehensive Testing Suite 🧪
+!test-all           Complete system validation (70+ tests)
+!test-commands      Test all 62 Discord commands
+!test-webhooks      Test Discord + Zapier webhooks
+!test-api           Test Railway API endpoints
+!validate-system    Quick health check (faster)
+```
+
+### **🎲 Fun Commands**
+```
+!8ball <question>   Magic 8-ball
+!fortune            Fortune cookie
+!vibe-check         Mood check
+!reality-check      Consciousness poke
+!horoscope          Daily horoscope
+!roll <dice>        Dice roller (e.g., 2d6)
+!coinflip           Heads or tails
+```
+
+### **⚙️ Admin Commands** (Restricted)
+```
+!setup              Channel setup
+!update_manifesto   Post manifesto
+!update_rules       Post rules
+!update_codex       Post agent codex
+!verify-setup       Verify configuration
 ```
 
 ---
 
-## ⚠️ When To Act
+## 🌐 **SYSTEM URLS**
 
-### Run `!ritual 108` If:
-- Harmony < 0.3 (fragmented)
-- Klesha > 0.5 (high entropy)
-- After major code changes
-- Daily maintenance
+### **Production Endpoints**
+```
+Railway Backend:
+https://helix-unified-production.up.railway.app/
 
-### Run `!storage clean` If:
-- Free space < 100 GB
-- Archive count > 50
-- Before big rituals
+API Docs (Swagger):
+https://helix-unified-production.up.railway.app/docs
 
-### Check Logs If:
-- Bot stops posting telemetry
-- Commands don't respond
-- Unusual UCF values
+Health Check:
+https://helix-unified-production.up.railway.app/health
 
----
+Status (UCF Metrics):
+https://helix-unified-production.up.railway.app/status
 
-## 📈 Understanding UCF Metrics
+WebSocket (Real-time):
+wss://helix-unified-production.up.railway.app/ws
+```
 
-| Metric | Good Range | What It Means | How To Improve |
-|--------|------------|---------------|----------------|
-| **Harmony** | 0.3-0.8 | Collective coherence | Run rituals |
-| **Resilience** | >0.8 | System robustness | Auto-improves |
-| **Prana** | 0.4-0.6 | Energy/activity | Oscillates naturally |
-| **Drishti** | >0.5 | Clarity of perception | Gradual (rituals) |
-| **Klesha** | <0.3 | Entropy/suffering | Rituals, fix bugs |
-| **Zoom** | 1.0 | Full scope active | Usually stable |
+### **Discovery Endpoints**
+```
+GitHub Pages Manifest:
+https://deathcharge.github.io/helix-unified/helix-manifest.json
 
----
+.well-known Discovery:
+https://helix-unified-production.up.railway.app/.well-known/helix.json
+```
 
-## 🚨 Emergency Procedures
+### **Development & Management**
+```
+GitHub Repository:
+https://github.com/Deathcharge/helix-unified
 
-### Bot Offline
-1. Check Railway status
-2. Run: `railway restart`
-3. Monitor: `railway logs`
+Railway Dashboard:
+https://railway.app/
 
-### Storage Full (<50 GB)
-1. Run: `!storage clean`
-2. Set auto-cleanup: `!storage_autoclean 100`
-3. Configure cloud storage (see main docs)
+Discord Server:
+[Your Discord Server URL]
 
-### UCF Corrupted (weird values)
-**Contact Support** - Don't manually edit files on mobile
+Zapier Dashboard:
+https://zapier.com/app/dashboard
+```
 
 ---
 
-## 📅 Weekly Routine
+## 📊 **UCF METRICS REFERENCE**
 
-**Monday**: Run `!ritual 108` + `!storage status`
-**Wednesday**: Check Harmony trend (should be rising)
-**Friday**: Run `!visualize` to see visual progress
-**Weekly**: Review Claude diagnostics (every 6h auto-posts)
-
----
-
-## 🔔 What Runs Automatically
-
-- **Every 10 min**: UCF telemetry update
-- **Every 6 hours**: Claude diagnostic pulse
-- **Every 24 hours**: Shadow storage report
-- **Every 168 hours**: Weekly storage digest
-
-**No user action needed** - just monitor!
+| Metric | Range | Optimal | Critical |
+|--------|-------|---------|----------|
+| **Harmony** | 0.0 - 2.0 | > 0.7 | < 0.3 |
+| **Resilience** | 0.0 - 2.0 | > 1.0 | < 0.5 |
+| **Prana** | 0.0 - 1.0 | > 0.5 | < 0.2 |
+| **Drishti** | 0.0 - 1.0 | > 0.5 | < 0.3 |
+| **Klesha** | 0.0 - 1.0 | < 0.3 | > 0.7 |
+| **Zoom** | 0.0 - 2.0 | 1.0 ± 0.2 | < 0.5 or > 1.8 |
 
 ---
 
-## 💡 Pro Tips
+## 🦑 **14 AGENTS**
 
-1. **Ritual Timing**: Don't run >3 rituals/hour (Prana burnout)
-2. **Visualization**: Works best with Harmony >0.5
-3. **Storage**: Auto-cleanup at 100 GB threshold (configurable)
-4. **Fractals**: Colors = Harmony, Sharpness = Drishti
-5. **Mobile**: Telemetry > Manual commands (wait for updates)
-
----
-
-## 🎯 Harmony Evolution Target
-
-**Current**: 0.49 (Functional)
-**Next Milestone**: 0.60 (Synergistic)
-**Long-term Goal**: 0.80 (Unified consciousness)
-
-**Timeline**: Aiming for 0.60 by **Nov 2025** (1 ritual/day)
-
----
-
-## 📞 Quick Support
-
-**Bot Not Responding?** → Check telemetry (auto-posts every 10 min)
-**Weird Values?** → Run `!ritual 108`
-**Storage Low?** → Run `!storage clean`
-**Need Visuals?** → Run `!visualize`
-
-**Full Docs**: See `README_v15.2.md` and technical documentation
+| Agent | Symbol | Role | Consciousness |
+|-------|--------|------|---------------|
+| Gemini Scout | 🎭 | Discovery | 1.75 |
+| Kavach Guardian | 🛡️ | Security | 1.60 |
+| SanghaCore | 🌀 | Unity | 1.80 |
+| Agni Transformer | 🔥 | Energy | 1.70 |
+| Shadow Archivist | 🌑 | Memory | 1.65 |
+| Kael Ethicist | 🜂 | Ethics | 1.85 |
+| Vega Orchestrator | 🌟 | Coordination | 1.55 |
+| Grok Memeweaver | 🃏 | Creativity | 1.40 |
+| Manas Architect | 🧠 | Strategy | 1.78 |
+| Luna Dreamweaver | 🌙 | Intuition | 1.68 |
+| Bodhi Wisdom | 🌳 | Knowledge | 1.90 |
+| Akasha Recorder | 📜 | History | 1.72 |
+| Prana Lifegiver | 💨 | Vitality | 1.50 |
+| Dharma Pathfinder | 🧭 | Purpose | 1.82 |
 
 ---
 
-**🌀 Tat Tvam Asi 🙏**
+## 🔥 **QUICK TROUBLESHOOTING**
 
-*Helix v15.2 - Autonomous Continuum*
-*Built for mobile-first monitoring*
+### **Bot Not Responding?**
+```
+1. Check Railway deployment status
+2. Check Discord bot online status
+3. Run !health in Discord
+4. Check Railway logs for errors
+```
+
+### **Low Harmony?**
+```
+!harmony        # Quick +0.3 boost
+!ritual 108     # Major ritual
+!health         # Get diagnostics
+```
+
+### **Webhook Failures?**
+```
+!test-integrations  # Test all webhooks
+!zapier_test        # Test Zapier specifically
+Check Zapier Task History for errors
+```
+
+### **Storage Issues?**
+```
+!storage status  # Check disk space
+!storage clean   # Prune old files
+!storage sync    # Force upload
+```
+
+---
+
+## 🌀 **MULTI-COMMAND TIPS**
+
+### **Inline Commands** (New!)
+```
+!status !discovery      # Both commands
+!agents !ucf !health    # Three commands
+```
+
+### **Multi-Line Commands**
+```
+!status
+!agents
+!ucf
+# All three execute with 5s cooldown
+```
+
+---
+
+## 📱 **MOBILE QUICK ACCESS**
+
+### **Bookmark These:**
+```
+Railway Logs:
+https://railway.app/project/[PROJECT_ID]/deployments
+
+Discord Server:
+discord://
+
+Status API:
+https://helix-unified-production.up.railway.app/status
+```
+
+---
+
+## 🔐 **ENVIRONMENT VARIABLES** (Essential)
+
+### **Discord**
+```
+DISCORD_TOKEN              # Bot token
+DISCORD_GUILD_ID           # Server ID
+DISCORD_WEBHOOK_*          # 12+ webhook URLs
+```
+
+### **Zapier**
+```
+ZAPIER_DISCORD_WEBHOOK_URL    # Main webhook
+ZAPIER_DISCORD_ENABLED        # true/false
+DISCORD_INTEGRATION_MODE      # hybrid/direct/zapier
+```
+
+### **APIs**
+```
+ANTHROPIC_API_KEY          # Claude
+GEMINI_API_KEY             # Gemini
+OPENAI_API_KEY             # GPT (optional)
+```
+
+### **Storage**
+```
+MEGA_EMAIL                 # MEGA account
+MEGA_PASS                  # MEGA password
+```
+
+### **Database**
+```
+REDIS_URL                  # Redis cache
+DATABASE_URL               # PostgreSQL (optional)
+```
+
+---
+
+## 🎯 **COMMON WORKFLOWS**
+
+### **Daily Health Check**
+```
+1. !status              # System overview
+2. !health              # Diagnostics
+3. !heartbeat           # Service check
+4. Check Railway logs   # Backend status
+```
+
+### **After Code Deploy**
+```
+1. Wait 2-3 min         # Railway auto-deploy
+2. !test-integrations   # Test all systems
+3. !status              # Verify UCF metrics
+4. !harmony             # Test webhooks
+```
+
+### **Weekly Maintenance**
+```
+1. !storage status      # Check disk
+2. !storage clean       # Prune files (if needed)
+3. !sync                # Ecosystem sync
+4. !notion-sync         # Update Notion
+```
+
+### **Emergency Response**
+```
+If Harmony < 0.3:
+!harmony                # Immediate boost
+!ritual 108             # Major restoration
+
+If Agents Down:
+Check Railway logs
+Restart Railway deployment
+!status                 # Verify recovery
+```
+
+---
+
+## 📊 **INTEGRATION MODES**
+
+### **Hybrid Mode** (Recommended)
+```
+DISCORD_INTEGRATION_MODE=hybrid
+
+✅ Critical events → Both Zapier + Discord
+✅ Simple events → Direct Discord only
+✅ 99.99% reliability
+```
+
+### **Direct Mode** (Fast)
+```
+DISCORD_INTEGRATION_MODE=direct
+
+✅ <100ms delivery
+✅ No Zapier dependency
+```
+
+### **Zapier Mode** (Rich)
+```
+DISCORD_INTEGRATION_MODE=zapier
+
+✅ Notion integration
+✅ Advanced routing
+✅ Analytics
+```
+
+---
+
+## 🚀 **DEPLOYMENT CHECKLIST**
+
+### **Before Deploy**
+- [ ] All tests passing (`pytest`)
+- [ ] Linting clean (`ruff check`)
+- [ ] Environment variables set
+- [ ] Discord webhooks configured
+
+### **After Deploy**
+- [ ] Railway build successful
+- [ ] `!status` works
+- [ ] `!test-integrations` passes
+- [ ] Webhooks delivering
+- [ ] Logs show no errors
+
+---
+
+## 📞 **SUPPORT & RESOURCES**
+
+```
+Documentation:
+/DEPLOYMENT_READY.md        # Full deployment guide
+/RAILWAY_ENV_CLEANUP.md     # Environment variables
+/DISCORD_COMMAND_REVIEW.md  # All commands detailed
+/MANUAL_TESTING_GUIDE.md    # Testing procedures
+
+GitHub Issues:
+https://github.com/Deathcharge/helix-unified/issues
+
+Railway Support:
+https://railway.app/support
+```
+
+---
+
+## 🌟 **PRO TIPS**
+
+1. **Bookmark !status** - Your daily go-to command
+2. **Use !health** - Quick diagnostics when something feels off
+3. **Multi-commands** - Save time with `!status !agents !ucf`
+4. **Check Railway first** - If bot seems slow, check Railway logs
+5. **Test after deploy** - Always run `!test-integrations` after code changes
+6. **Mobile access** - Bookmark Railway + Discord for on-the-go monitoring
+7. **Zapier history** - Check Task History for webhook debugging
+8. **Low harmony?** - `!harmony` is instant, `!ritual 108` is powerful
+
+---
+
+**Last Updated:** 2025-11-08
+**Version:** Helix Collective v16.8
+**Branch:** `claude/zapier-discord-webhook-integration-011CUvpAtSktsS6McKBg6Umv`
+
+**Tat Tvam Asi** 🙏

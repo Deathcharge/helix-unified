@@ -10,14 +10,17 @@ python-dotenv==1.0.1
 httpx==0.28.0
 aiohttp==3.11.0
 requests==2.31.0
+websockets==13.0  # For WebSocket connections in Live Stream and Discovery Protocol
 
 # Dashboard & Visualization
 streamlit==1.40.0
 plotly==5.18.0
+pandas>=2.0.0
+numpy>=1.24.0
 
 # Utilities
 pyyaml==6.0.1
-pydantic==2.5.3
+pydantic>=2.9.0  # Python 3.13 compatible
 
 # Notion Integration (if needed for frontend)
 notion-client==2.5.0

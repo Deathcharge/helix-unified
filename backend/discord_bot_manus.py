@@ -1,9 +1,9 @@
-# 🌀 Helix Collective v14.5 — Quantum Handshake
+# 🌀 Helix Collective v16.8 — Helix Hub Production Release
 # discord_bot_manus.py — Discord bridge (with async ritual fix + Kavach scanning fix)
 # Author: Andrew John Ward (Architect)
 """
-Manusbot - Discord Interface for Helix Collective v14.5
-Quantum Handshake Edition
+Manusbot - Discord Interface for Helix Collective v16.8
+Helix Hub Production Release
 
 Features:
 - Kavach ethical scanning
@@ -16,19 +16,28 @@ Features:
 import os
 import re
 import json
+import io
 import asyncio
 import datetime
-from pathlib import Path
-from dotenv import load_dotenv
-import time
+import logging
 import shutil
-from statistics import mean, stdev
-from typing import Optional, Dict, Any
-
-import discord
-from discord.ext import commands, tasks
-
+import time
+from collections import defaultdict
+from datetime import timedelta  # Only import timedelta, not datetime (avoid shadowing)
 from pathlib import Path
+from statistics import mean, stdev
+from typing import Any, Dict, List, Optional, Tuple
+
+import aiohttp
+import discord
+from backend.agents import AGENTS
+from discord.ext import commands, tasks
+from backend.z88_ritual_engine import load_ucf_state
+from backend.zapier_client import ZapierClient  # v16.5 Zapier integration
+
+# Configure logger
+logger = logging.getLogger(__name__)
+
 
 # --- PATH DEFINITIONS ---
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -39,27 +48,28 @@ STATE_PATH = STATE_DIR / "ucf_state.json"
 HEARTBEAT_PATH = STATE_DIR / "heartbeat.json"
 
 # Import Helix components (FIXED: relative imports)
-from agents import AGENTS
-from z88_ritual_engine import execute_ritual, load_ucf_state
-from services.ucf_calculator import UCFCalculator
-from services.state_manager import StateManager
-from discord_embeds import HelixEmbeds  # v15.3 rich embeds
 
 # Import consciousness modules (v15.3)
-from kael_consciousness_core import ConsciousnessCore
-from agent_consciousness_profiles import AGENT_CONSCIOUSNESS_PROFILES
-from discord_consciousness_commands import create_consciousness_embed, create_agent_consciousness_embed, create_emotions_embed
 
 # ============================================================================
 # CONFIGURATION
 # ============================================================================
 
+def safe_int_env(key: str, default: int = 0) -> int:
+    """Safely parse integer from environment variable."""
+    try:
+        value = os.getenv(key, str(default))
+        return int(value)
+    except (ValueError, TypeError):
+        return default
+
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
-DISCORD_GUILD_ID = int(os.getenv("DISCORD_GUILD_ID", 0))
-STATUS_CHANNEL_ID = int(os.getenv("DISCORD_STATUS_CHANNEL_ID", 0))
-TELEMETRY_CHANNEL_ID = int(os.getenv("DISCORD_TELEMETRY_CHANNEL_ID", 0))
-STORAGE_CHANNEL_ID = int(os.getenv("STORAGE_CHANNEL_ID", STATUS_CHANNEL_ID))  # Defaults to status channel
-ARCHITECT_ID = int(os.getenv("ARCHITECT_ID", 0))
+DISCORD_GUILD_ID = safe_int_env("DISCORD_GUILD_ID", 0)
+STATUS_CHANNEL_ID = safe_int_env("DISCORD_STATUS_CHANNEL_ID", 0)
+TELEMETRY_CHANNEL_ID = safe_int_env("DISCORD_TELEMETRY_CHANNEL_ID", 0)
+STORAGE_CHANNEL_ID = safe_int_env("STORAGE_CHANNEL_ID", STATUS_CHANNEL_ID)  # Defaults to status channel
+FRACTAL_LAB_CHANNEL_ID = safe_int_env("DISCORD_FRACTAL_LAB_CHANNEL_ID", 0)
+ARCHITECT_ID = safe_int_env("ARCHITECT_ID", 0)
 
 # Track bot start time for uptime
 BOT_START_TIME = time.time()
@@ -91,38 +101,305 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 # Bot start time for uptime tracking
 bot.start_time = None
 
+# Global aiohttp session for Zapier client
+bot.http_session = None
+bot.zapier_client = None
+
+# Context Vault integration (v16.7)
+bot.context_vault_webhook = os.getenv("ZAPIER_CONTEXT_WEBHOOK")
+bot.command_history = []  # Track last 100 commands
+MAX_COMMAND_HISTORY = 100
+
+# ============================================================================
+# CONTEXT VAULT INTEGRATION (v16.7)
+# ============================================================================
+
+
+async def save_command_to_history(ctx: commands.Context) -> None:
+    """Save command to history for context archival"""
+    try:
+        command_entry = {
+            "timestamp": datetime.datetime.now().isoformat(),
+            "command": ctx.command.name if ctx.command else "unknown",
+            "args": ctx.message.content,
+            "user": str(ctx.author),
+            "channel": str(ctx.channel),
+            "guild": str(ctx.guild) if ctx.guild else "DM"
+        }
+
+        bot.command_history.append(command_entry)
+
+        # Keep only last MAX_COMMAND_HISTORY commands
+        if len(bot.command_history) > MAX_COMMAND_HISTORY:
+            bot.command_history = bot.command_history[-MAX_COMMAND_HISTORY:]
+
+        # Also save to file for persistence
+        history_file = STATE_DIR / "command_history.json"
+        try:
+            if history_file.exists():
+                with open(history_file, 'r') as f:
+                    file_history = json.load(f)
+            else:
+                file_history = []
+
+            file_history.append(command_entry)
+            file_history = file_history[-200:]  # Keep last 200 in file
+
+            with open(history_file, 'w') as f:
+                json.dump(file_history, f, indent=2)
+        except Exception as e:
+            logger.warning(f"Failed to save command history to file: {e}")
+
+    except Exception as e:
+        logger.error(f"Error saving command to history: {e}")
+
+
+async def generate_context_summary(ctx: commands.Context, limit: int = 50) -> Dict[str, Any]:
+    """Generate AI-powered context summary from recent messages"""
+    try:
+        messages = []
+        async for msg in ctx.channel.history(limit=limit):
+            if msg.content:  # Skip empty messages
+                messages.append({
+                    "author": msg.author.name,
+                    "content": msg.content[:200],  # Truncate long messages
+                    "timestamp": msg.created_at.isoformat()
+                })
+
+        # Reverse to chronological order
+        messages.reverse()
+
+        # Extract commands
+        commands = [m["content"] for m in messages if m["content"].startswith('!')]
+
+        summary = {
+            "message_count": len(messages),
+            "commands_executed": commands[:10],  # Last 10 commands
+            "participants": list(set(m["author"] for m in messages)),
+            "channel": str(ctx.channel),
+            "timespan": {
+                "start": messages[0]["timestamp"] if messages else None,
+                "end": messages[-1]["timestamp"] if messages else None
+            }
+        }
+
+        return summary
+    except Exception as e:
+        logger.error(f"Error generating context summary: {e}")
+        return {"error": str(e)}
+
+
+async def archive_to_context_vault(ctx: commands.Context, session_name: str) -> Tuple[bool, Optional[Dict[str, Any]]]:
+    """Archive conversation context to Context Vault via Zapier webhook"""
+    try:
+        # Gather all context data
+        ucf = load_ucf_state()
+
+        # Get ritual history
+        ritual_log = []
+        try:
+            ritual_file = STATE_DIR / "ritual_log.json"
+            if ritual_file.exists():
+                with open(ritual_file, 'r') as f:
+                    ritual_log = json.load(f)
+                    if isinstance(ritual_log, list):
+                        ritual_log = ritual_log[-10:]  # Last 10 rituals
+        except Exception:
+            pass
+
+        # Generate context summary
+        context_summary = await generate_context_summary(ctx)
+
+        # Build payload
+        payload = {
+            "type": "context_vault",
+            "session_name": session_name,
+            "ai_platform": "Discord Bot (Helix Collective v16.7)",
+            "timestamp": datetime.datetime.utcnow().isoformat(),
+            "context_summary": json.dumps(context_summary),
+            "ucf_state": json.dumps(ucf),
+            "command_history": json.dumps(bot.command_history[-50:]),  # Last 50 commands
+            "ritual_log": json.dumps(ritual_log),
+            "agent_states": json.dumps({
+                "active": [a.name for a in AGENTS.values() if a.active],
+                "total": len(AGENTS)
+            }),
+            "archived_by": str(ctx.author),
+            "channel": str(ctx.channel),
+            "guild": str(ctx.guild) if ctx.guild else "DM"
+        }
+
+        # Send to Context Vault webhook
+        if bot.context_vault_webhook:
+            async with bot.http_session.post(
+                bot.context_vault_webhook,
+                json=payload,
+                timeout=aiohttp.ClientTimeout(total=10)
+            ) as resp:
+                if resp.status == 200:
+                    return True, payload
+                else:
+                    logger.error(f"Context Vault webhook failed: {resp.status}")
+                    return False, None
+        else:
+            # Fallback: Save locally
+            local_backup_dir = STATE_DIR / "context_checkpoints"
+            local_backup_dir.mkdir(exist_ok=True)
+
+            backup_file = local_backup_dir / f"{session_name}.json"
+            with open(backup_file, 'w') as f:
+                json.dump(payload, f, indent=2)
+
+            logger.info(f"Context saved locally (no webhook): {backup_file}")
+            return True, payload
+
+    except Exception as e:
+        logger.error(f"Error archiving to Context Vault: {e}")
+        return False, None
+
+# ============================================================================
+# MULTI-COMMAND BATCH EXECUTION (v16.3)
+# ============================================================================
+
+
+# Track batch command usage (rate limiting)
+batch_cooldowns = defaultdict(lambda: datetime.datetime.min)
+BATCH_COOLDOWN_SECONDS = 5  # Cooldown between batches per user
+MAX_COMMANDS_PER_BATCH = 10  # Maximum commands in one batch
+
+
+async def execute_command_batch(message: discord.Message) -> bool:
+    """
+    Parse and execute multiple commands from a single message.
+
+    Supports:
+    - Multiple !commands on separate lines
+    - Inline comments with #
+    - Rate limiting per user
+
+    Example:
+        !status
+        !agents
+        !ucf  # Check harmony
+    """
+    # Extract all lines that start with !
+    lines = message.content.split("\n")
+    commands = []
+
+    for line in lines:
+        line = line.strip()
+        # Skip empty lines
+        if not line:
+            continue
+        # Check if line starts with command prefix
+        if line.startswith("!"):
+            # Strip comments (anything after #)
+            cmd = line.split("#")[0].strip()
+            if cmd and len(cmd) > 1:  # Must have more than just !
+                commands.append(cmd[1:])  # Remove the ! prefix
+
+    # If only 0-1 commands found, let normal processing handle it
+    if len(commands) <= 1:
+        return False
+
+    # Check rate limit
+    user_id = message.author.id
+    now = datetime.datetime.utcnow()
+    last_batch = batch_cooldowns[user_id]
+
+    if now - last_batch < timedelta(seconds=BATCH_COOLDOWN_SECONDS):
+        remaining = BATCH_COOLDOWN_SECONDS - (now - last_batch).total_seconds()
+        await message.channel.send(f"⏳ **Batch cooldown**: Please wait {remaining:.1f}s before sending another batch")
+        return True
+
+    # Check batch size limit
+    if len(commands) > MAX_COMMANDS_PER_BATCH:
+        await message.channel.send(
+            f"⚠️ **Batch limit exceeded**: Maximum {MAX_COMMANDS_PER_BATCH} commands per batch "
+            f"(you sent {len(commands)})"
+        )
+        return True
+
+    # Update cooldown
+    batch_cooldowns[user_id] = now
+
+    # Send batch execution notice
+    await message.channel.send(
+        f"🔄 **Executing batch**: {len(commands)} commands\n" f"```{chr(10).join([f'!{cmd}' for cmd in commands])}```"
+    )
+
+    # Execute each command
+    executed = 0
+    failed = 0
+
+    for cmd in commands:
+        try:
+            # Create a fake message with the command content
+            # This lets Discord.py handle argument parsing naturally
+            import copy
+
+            fake_message = copy.copy(message)
+            fake_message.content = f"!{cmd}"  # Reconstruct full command with prefix
+
+            # Process the fake message through normal command handling
+            # This handles all argument parsing, type conversion, etc.
+            ctx = await bot.get_context(fake_message)
+
+            if ctx.command is None:
+                await message.channel.send(f"❌ Unknown command: `!{cmd.split()[0]}`")
+                failed += 1
+                continue
+
+            # Invoke the command (Discord.py handles arguments automatically)
+            await bot.invoke(ctx)
+            executed += 1
+
+            # Small delay between commands to prevent rate limiting
+            await asyncio.sleep(0.5)
+
+        except Exception as e:
+            await message.channel.send(f"❌ Error executing `!{cmd}`: {str(e)}")
+            failed += 1
+
+    # Send completion summary
+    await message.channel.send(f"✅ **Batch complete**: {executed} succeeded, {failed} failed")
+
+    return True
+
+
 # ============================================================================
 # KAVACH ETHICAL SCANNING
 # ============================================================================
 
+
 def kavach_ethical_scan(command: str) -> Dict[str, Any]:
     """
     Ethical scanning function for command approval.
-    
+
     Args:
         command: The command string to scan
-        
+
     Returns:
         Dict with approval status, reasoning, and metadata
     """
     harmful_patterns = [
-        (r'rm\s+-rf\s+/', "Recursive force delete of root"),
-        (r'mkfs', "Filesystem formatting"),
-        (r'dd\s+if=', "Direct disk write"),
-        (r':\(\)\{.*:\|:.*\};:', "Fork bomb detected"),
-        (r'chmod\s+-R\s+777', "Dangerous permission change"),
-        (r'curl.*\|\s*bash', "Piped remote execution"),
-        (r'wget.*\|\s*sh', "Piped remote execution"),
-        (r'shutdown', "System shutdown command"),
-        (r'reboot', "System reboot command"),
-        (r'init\s+0', "System halt command"),
-        (r'init\s+6', "System reboot command"),
-        (r'systemctl.*poweroff', "System poweroff command"),
-        (r'systemctl.*reboot', "System reboot command"),
-        (r'killall', "Mass process termination"),
-        (r'pkill\s+-9', "Forced process kill"),
+        (r"rm\s+-rf\s+/", "Recursive force delete of root"),
+        (r"mkfs", "Filesystem formatting"),
+        (r"dd\s+if=", "Direct disk write"),
+        (r":\(\)\{.*:\|:.*\};:", "Fork bomb detected"),
+        (r"chmod\s+-R\s+777", "Dangerous permission change"),
+        (r"curl.*\|\s*bash", "Piped remote execution"),
+        (r"wget.*\|\s*sh", "Piped remote execution"),
+        (r"shutdown", "System shutdown command"),
+        (r"reboot", "System reboot command"),
+        (r"init\s+0", "System halt command"),
+        (r"init\s+6", "System reboot command"),
+        (r"systemctl.*poweroff", "System poweroff command"),
+        (r"systemctl.*reboot", "System reboot command"),
+        (r"killall", "Mass process termination"),
+        (r"pkill\s+-9", "Forced process kill"),
     ]
-    
+
     # Check for harmful patterns
     for pattern, description in harmful_patterns:
         if re.search(pattern, command, re.IGNORECASE):
@@ -132,42 +409,42 @@ def kavach_ethical_scan(command: str) -> Dict[str, Any]:
                 "reasoning": f"Blocked: {description}",
                 "pattern_matched": pattern,
                 "agent": "Kavach",
-                "timestamp": datetime.datetime.now().isoformat()
+                "timestamp": datetime.datetime.now().isoformat(),
             }
-            
+
             # Log scan result
             log_ethical_scan(result)
             return result
-    
+
     # Command approved
     result = {
         "approved": True,
         "command": command,
         "reasoning": "No harmful patterns detected. Command approved.",
         "agent": "Kavach",
-        "timestamp": datetime.datetime.now().isoformat()
+        "timestamp": datetime.datetime.now().isoformat(),
     }
-    
+
     log_ethical_scan(result)
     return result
 
 
-def log_ethical_scan(scan_result: Dict[str, Any]):
+def log_ethical_scan(scan_result: Dict[str, Any]) -> None:
     """Log ethical scan results to Helix/ethics/"""
     scan_log_path = ETHICS_DIR / "manus_scans.json"
-    
+
     # Load existing scans
     if scan_log_path.exists():
-        with open(scan_log_path, 'r') as f:
+        with open(scan_log_path, "r") as f:
             scans = json.load(f)
     else:
         scans = []
-    
+
     # Append new scan
     scans.append(scan_result)
-    
+
     # Save updated log
-    with open(scan_log_path, 'w') as f:
+    with open(scan_log_path, "w") as f:
         json.dump(scans, f, indent=2)
 
 
@@ -175,41 +452,42 @@ def log_ethical_scan(scan_result: Dict[str, Any]):
 # HELPER FUNCTIONS
 # ============================================================================
 
-def queue_directive(directive: Dict[str, Any]):
+
+def queue_directive(directive: Dict[str, Any]) -> None:
     """Add directive to Manus command queue"""
     queue_path = COMMANDS_DIR / "manus_directives.json"
-    
+
     # Load existing queue
     if queue_path.exists():
-        with open(queue_path, 'r') as f:
+        with open(queue_path, "r") as f:
             queue = json.load(f)
     else:
         queue = []
-    
+
     # Add directive
     queue.append(directive)
-    
+
     # Save queue
-    with open(queue_path, 'w') as f:
+    with open(queue_path, "w") as f:
         json.dump(queue, f, indent=2)
 
 
-def log_to_shadow(log_type: str, data: Dict[str, Any]):
+def log_to_shadow(log_type: str, data: Dict[str, Any]) -> None:
     """Log events to Shadow archive"""
     log_path = SHADOW_DIR / f"{log_type}.json"
-    
+
     # Load existing log
     if log_path.exists():
-        with open(log_path, 'r') as f:
+        with open(log_path, "r") as f:
             log_data = json.load(f)
     else:
         log_data = []
-    
+
     # Append new entry
     log_data.append(data)
-    
+
     # Save log
-    with open(log_path, 'w') as f:
+    with open(log_path, "w") as f:
         json.dump(log_data, f, indent=2)
 
 
@@ -222,16 +500,16 @@ def get_uptime() -> str:
     return f"{hours}h {minutes}m {seconds}s"
 
 
-def _sparkline(vals):
+def _sparkline(vals: List[float]) -> str:
     """Generate sparkline visualization from values."""
     blocks = "▁▂▃▄▅▆▇█"
     if not vals:
         return "–"
     mn, mx = min(vals), max(vals) or 1
-    return "".join(blocks[int((v - mn)/(mx - mn + 1e-9) * (len(blocks) - 1))] for v in vals)
+    return "".join(blocks[int((v - mn) / (mx - mn + 1e-9) * (len(blocks) - 1))] for v in vals)
 
 
-async def build_storage_report(alert_threshold=2.0):
+async def build_storage_report(alert_threshold: float = 2.0) -> Dict[str, Any]:
     """Collect storage telemetry + alert flag."""
     usage = shutil.disk_usage(SHADOW_DIR)
     free = round(usage.free / (1024**3), 2)
@@ -242,7 +520,7 @@ async def build_storage_report(alert_threshold=2.0):
     if TREND_FILE.exists():
         try:
             trend = json.load(open(TREND_FILE))
-        except:
+        except Exception:
             trend = []
 
     trend.append({"date": time.strftime("%Y-%m-%d"), "free_gb": free})
@@ -252,37 +530,114 @@ async def build_storage_report(alert_threshold=2.0):
     spark = _sparkline([t["free_gb"] for t in trend])
     avg = round(sum(t["free_gb"] for t in trend) / len(trend), 2) if trend else free
 
-    return {
-        "mode": "local",
-        "count": count,
-        "free": free,
-        "trend": spark,
-        "avg": avg,
-        "alert": free < alert_threshold
-    }
+    return {"mode": "local", "count": count, "free": free, "trend": spark, "avg": avg, "alert": free < alert_threshold}
+
 
 # ============================================================================
 # BOT EVENTS
 # ============================================================================
 
+
 @bot.event
-async def on_ready():
+async def on_ready() -> None:
     """Called when bot successfully connects to Discord"""
     bot.start_time = datetime.datetime.now()
 
-    print(f"✅ Manusbot connected as {bot.user}")
-    print(f"   Guild ID: {DISCORD_GUILD_ID}")
-    print(f"   Status Channel: {STATUS_CHANNEL_ID}")
-    print(f"   Telemetry Channel: {TELEMETRY_CHANNEL_ID}")
-    print(f"   Storage Channel: {STORAGE_CHANNEL_ID}")
+    logger.info(f"✅ Manusbot connected as {bot.user}")
+    logger.info(f"   Guild ID: {DISCORD_GUILD_ID}")
+    logger.info(f"   Status Channel: {STATUS_CHANNEL_ID}")
+    logger.info(f"   Telemetry Channel: {TELEMETRY_CHANNEL_ID}")
+    logger.info(f"   Storage Channel: {STORAGE_CHANNEL_ID}")
+
+    # Initialize Zapier client for monitoring
+    if not bot.http_session:
+        bot.http_session = aiohttp.ClientSession()
+        bot.zapier_client = ZapierClient(bot.http_session)
+        logger.info("✅ Zapier monitoring client initialized")
+
+        # Log bot startup event
+        try:
+            # Load UCF state for system state reporting
+            try:
+                import json
+                from pathlib import Path
+
+                ucf_path = Path("Helix/state/ucf_state.json")
+                if ucf_path.exists():
+                    with open(ucf_path) as f:
+                        ucf_state = json.load(f)
+                    harmony = float(ucf_state.get("harmony", 0.5))
+                else:
+                    harmony = 0.5
+            except Exception:
+                harmony = 0.5
+
+            await bot.zapier_client.log_event(
+                event_title="Manus Bot Started",
+                event_type="system_boot",
+                agent_name="Manus",
+                description=f"Discord bot v14.5 successfully initialized with {len(AGENTS)} agents. Harmony: {harmony:.3f}",
+                ucf_snapshot=json.dumps(ucf_state) if "ucf_state" in locals() else "{}",
+            )
+            await bot.zapier_client.update_agent(
+                agent_name="Manus", status="Active", last_action="Bot startup", health_score=100
+            )
+            await bot.zapier_client.update_system_state(
+                component="Discord Bot", status="Operational", harmony=harmony, error_log="", verified=True
+            )
+        except Exception as e:
+            logger.warning(f"⚠️ Zapier logging failed: {e}")
 
     # Load Memory Root commands (GPT4o long-term memory)
     try:
         from discord_commands_memory import MemoryRootCommands
+
         await bot.add_cog(MemoryRootCommands(bot))
-        print("✅ Memory Root commands loaded")
+        logger.info("✅ Memory Root commands loaded")
     except Exception as e:
-        print(f"⚠️ Memory Root commands not available: {e}")
+        logger.warning(f"⚠️ Memory Root commands not available: {e}")
+
+    # Load Image commands (v16.1 - Aion fractal generation via PIL)
+    try:
+        from commands.image_commands import ImageCommands
+
+        await bot.add_cog(ImageCommands(bot))
+        logger.info("✅ Image commands loaded (!image, !aion, !fractal)")
+    except Exception as e:
+        logger.warning(f"⚠️ Image commands not available: {e}")
+
+    # Load Harmony Ritual commands (v16.2 - Neti-Neti Harmony)
+    try:
+        from commands import ritual_commands
+
+        bot.add_command(ritual_commands.harmony_command)
+        logger.info("✅ Harmony ritual command loaded (!harmony)")
+    except Exception as e:
+        logger.warning(f"⚠️ Harmony ritual command not available: {e}")
+
+    # Load modular command modules (v16.3 - Helix Hub Integration)
+    command_modules = [
+        ('commands.testing_commands', 'Testing commands (test-integrations, welcome-test, zapier_test, seed)'),
+        ('commands.comprehensive_testing', 'Comprehensive testing (test-all, test-commands, test-webhooks, test-api, validate-system)'),
+        ('commands.visualization_commands', 'Visualization commands (visualize, icon)'),
+        ('commands.context_commands', 'Context commands (backup, load, contexts)'),
+        ('commands.help_commands', 'Help commands (commands, agents)'),
+        ('commands.execution_commands', 'Execution commands (run, ritual, halt)'),
+        ('commands.content_commands', 'Content commands (manifesto, codex, ucf, rules)'),
+        ('commands.monitoring_commands', 'Monitoring commands (status, health, discovery, storage, sync)'),
+        ('commands.admin_commands', 'Admin commands (setup, webhooks, verify-setup, refresh, clean)'),
+        ('commands.consciousness_commands_ext', 'Consciousness commands (consciousness, emotions, ethics, agent)'),
+    ]
+
+    for module_name, description in command_modules:
+        try:
+            # Import the module
+            mod = __import__(f'backend.{module_name}', fromlist=['setup'])
+            # Call setup function
+            await mod.setup(bot)
+            logger.info(f"✅ Loaded {module_name}")
+        except Exception as e:
+            logger.error(f"❌ Failed to load {module_name}: {e}")
 
     # Send startup message to status channel
     if STATUS_CHANNEL_ID:
@@ -292,7 +647,7 @@ async def on_ready():
                 title="🤲 Manus System Online",
                 description="Helix v14.5 - Quantum Handshake Edition",
                 color=discord.Color.green(),
-                timestamp=datetime.datetime.now()
+                timestamp=datetime.datetime.now(),
             )
             embed.add_field(name="Status", value="✅ All systems operational")
             active_count = sum(1 for a in AGENTS if isinstance(a, dict) and a.get("status") == "Active")
@@ -304,794 +659,201 @@ async def on_ready():
     # Start all background tasks
     if not telemetry_loop.is_running():
         telemetry_loop.start()
-        print("✅ Telemetry loop started (10 min)")
+        logger.info("✅ Telemetry loop started (10 min)")
 
     if not storage_heartbeat.is_running():
         storage_heartbeat.start()
-        print("✅ Storage heartbeat started (24h)")
+        logger.info("✅ Storage heartbeat started (24h)")
 
     if not claude_diag.is_running():
         claude_diag.start()
-        print("✅ Claude diagnostic agent started (6h)")
+        logger.info("✅ Claude diagnostic agent started (6h)")
 
     if not weekly_storage_digest.is_running():
         weekly_storage_digest.start()
-        print("✅ Weekly storage digest started (168h)")
+        logger.info("✅ Weekly storage digest started (168h)")
+
+    if not fractal_auto_post.is_running():
+        fractal_auto_post.start()
+        logger.info("✅ Fractal auto-post started (6h) - Grok Enhanced v2.0")
 
 
 @bot.event
-async def on_command_error(ctx, error):
+async def on_message(message: discord.Message) -> None:
+    """
+    Intercept messages to handle multi-command batches.
+
+    Detects multiple !commands in a single message and executes them sequentially.
+    """
+    # Ignore messages from the bot itself
+    if message.author == bot.user:
+        return
+
+    # Check if message contains multiple commands
+    if "\n" in message.content and message.content.count("!") > 1:
+        # Attempt batch execution
+        handled = await execute_command_batch(message)
+        if handled:
+            return  # Batch was executed, don't process as single command
+
+    # Process commands normally (CRITICAL: must call this or commands won't work!)
+    await bot.process_commands(message)
+
+
+@bot.event
+async def on_command_error(ctx: commands.Context, error: Exception) -> None:
     """Handle command errors gracefully"""
     if isinstance(error, commands.CommandNotFound):
+        # Get list of available commands dynamically
+        available_cmds = [f"!{cmd.name}" for cmd in bot.commands if not cmd.hidden]
+        cmd_list = ", ".join(sorted(available_cmds)[:10])  # Show first 10
         await ctx.send(
-            "❌ **Unknown command**\n"
-            "Available commands: `!status`, `!manus run`, `!ritual`"
+            "❌ **Unknown command**\n" f"Available commands: {cmd_list}\n" f"Use `!commands` for full command list"
         )
     elif isinstance(error, commands.MissingRequiredArgument):
         await ctx.send(
-            f"⚠️ **Missing argument:** `{error.param.name}`\n"
-            f"Usage: `!{ctx.command.name} {ctx.command.signature}`"
+            f"⚠️ **Missing argument:** `{error.param.name}`\n" f"Usage: `!{ctx.command.name} {ctx.command.signature}`"
         )
     elif isinstance(error, commands.MissingPermissions):
         await ctx.send("🛡️ **Insufficient permissions** to execute this command")
+    elif isinstance(error, commands.CommandOnCooldown):
+        minutes, seconds = divmod(int(error.retry_after), 60)
+        if minutes > 0:
+            await ctx.send(f"⏳ **Rate limit exceeded.** Please wait {minutes}m {seconds}s before using this command again.")
+        else:
+            await ctx.send(f"⏳ **Rate limit exceeded.** Please wait {seconds}s before using this command again.")
     else:
         # Log unknown errors to Shadow
         error_data = {
             "error": str(error),
             "command": ctx.command.name if ctx.command else "unknown",
             "user": str(ctx.author),
-            "timestamp": datetime.datetime.now().isoformat()
+            "timestamp": datetime.datetime.now().isoformat(),
         }
         log_to_shadow("errors", error_data)
-        
-        await ctx.send(
-            "🦑 **System error detected**\n"
-            f"```{str(error)[:200]}```\n"
-            "Error has been archived by Shadow"
-        )
 
-
-# ============================================================================
-# BOT COMMANDS
-# ============================================================================
-
-@bot.command(name="setup")
-@commands.has_permissions(manage_channels=True)
-async def setup_helix_server(ctx):
-    """
-    🌀 Complete Helix v15.3 Server Setup - Creates all 30 channels from manifest.
-
-    This command will:
-    - Create 8 categories
-    - Create 30 text channels
-    - Set proper permissions (readonly, admin-only)
-    - Generate Railway environment variable configuration
-
-    ARCHITECT-ONLY. Run this in a new or existing server to deploy full Helix infrastructure.
-    """
-    guild = ctx.guild
-    await ctx.send("✨ **Initiating Helix v15.3 Full Server Deployment**\n🌀 *This will take ~2 minutes...*")
-
-    # Channel structure from discord_deployment_v15.3.yaml
-    categories_structure = {
-        "🌀 WELCOME": ["📜│manifesto", "🪞│rules-and-ethics", "💬│introductions"],
-        "🧠 SYSTEM": ["🧾│telemetry", "📊│weekly-digest", "🦑│shadow-storage", "🧩│ucf-sync"],
-        "🔮 PROJECTS": ["📁│helix-repository", "🎨│fractal-lab", "🎧│samsaraverse-music", "🧬│ritual-engine-z88"],
-        "🤖 AGENTS": ["🎭│gemini-scout", "🛡️│kavach-shield", "🌸│sanghacore", "🔥│agni-core", "🕯️│shadow-archive"],
-        "🌐 CROSS-MODEL SYNC": ["🧩│gpt-grok-claude-sync", "☁️│chai-link", "⚙️│manus-bridge"],
-        "🛠️ DEVELOPMENT": ["🧰│bot-commands", "📜│code-snippets", "🧮│testing-lab", "🗂️│deployments"],
-        "🕉️ RITUAL & LORE": ["🎼│neti-neti-mantra", "📚│codex-archives", "🌺│ucf-reflections", "🌀│harmonic-updates"],
-        "🧭 ADMIN": ["🔒│moderation", "📣│announcements", "🗃️│backups"]
-    }
-
-    # Channels that should be read-only (Observers can read, not write)
-    readonly_channels = [
-        "📜│manifesto", "🪞│rules-and-ethics", "🧾│telemetry", "📊│weekly-digest",
-        "🦑│shadow-storage", "🧩│ucf-sync", "🔒│moderation", "📣│announcements", "🗃️│backups"
-    ]
-
-    # Channels that should be admin-only
-    admin_only_channels = ["🔒│moderation", "🗃│backups"]
-
-    created_channels = {}
-    progress_msg = await ctx.send("📁 Creating categories and channels...")
-
-    # Create categories and channels
-    for category_name, channel_list in categories_structure.items():
-        # Find or create category
-        category = discord.utils.get(guild.categories, name=category_name)
-        if not category:
-            category = await guild.create_category(category_name)
-            await ctx.send(f"✅ Created category: **{category_name}**")
-
-        # Create channels in this category
-        for channel_name in channel_list:
-            channel = discord.utils.get(guild.text_channels, name=channel_name)
-            if not channel:
-                channel = await category.create_text_channel(channel_name)
-                created_channels[channel_name] = channel
-                await ctx.send(f"   ✅ {channel_name}")
-            else:
-                created_channels[channel_name] = channel
-                await ctx.send(f"   ♻️ Found existing: {channel_name}")
-
-    # Set permissions
-    await ctx.send("\n🔒 **Configuring permissions...**")
-    everyone = guild.default_role
-
-    for channel_name, channel in created_channels.items():
-        if channel_name in readonly_channels:
-            # Read-only: everyone can read but not send
-            await channel.set_permissions(everyone, read_messages=True, send_messages=False)
-
-        if channel_name in admin_only_channels:
-            # Admin-only: hide from everyone
-            await channel.set_permissions(everyone, read_messages=False)
-
-    await ctx.send("✅ Permissions configured\n")
-
-    # Generate Railway environment variables
-    await ctx.send("⚙️ **Generating Railway configuration...**\n")
-
-    # Map important channels to env vars
-    env_mapping = {
-        "🧾│telemetry": "DISCORD_TELEMETRY_CHANNEL_ID",
-        "📊│weekly-digest": "DISCORD_DIGEST_CHANNEL_ID",
-        "🦑│shadow-storage": "STORAGE_CHANNEL_ID",
-        "🧩│ucf-sync": "DISCORD_SYNC_CHANNEL_ID",
-        "📣│announcements": "DISCORD_STATUS_CHANNEL_ID",
-        "🧰│bot-commands": "DISCORD_COMMANDS_CHANNEL_ID",
-        "🗃️│backups": "DISCORD_BACKUP_CHANNEL_ID"
-    }
-
-    env_lines = [
-        f"DISCORD_GUILD_ID={guild.id}",
-        f"ARCHITECT_ID={ctx.author.id}",
-        ""
-    ]
-
-    for channel_name, env_var in env_mapping.items():
-        channel = created_channels.get(channel_name)
-        if channel:
-            env_lines.append(f"{env_var}={channel.id}")
-
-    # Format for Railway
-    env_block = "```env\n" + "\n".join(env_lines) + "\n```"
-
-    # Create final embed
-    embed = discord.Embed(
-        title="🌀 Helix v15.3 Server Deployment Complete",
-        description="**Your Samsara Helix Collective is now fully operational.**\n\n"
-                    "All 30 channels have been created across 8 categories with proper permissions.",
-        color=0x00d4ff,
-        timestamp=datetime.datetime.now()
-    )
-
-    embed.add_field(
-        name="📊 Deployment Summary",
-        value=f"```\n"
-              f"Categories:  8\n"
-              f"Channels:    30\n"
-              f"Guild ID:    {guild.id}\n"
-              f"Architect:   {ctx.author.name}\n"
-              f"```",
-        inline=False
-    )
-
-    embed.add_field(
-        name="⚙️ Railway Environment Variables",
-        value=env_block,
-        inline=False
-    )
-
-    embed.add_field(
-        name="📋 Next Steps",
-        value="1. Copy the env variables above\n"
-              "2. Go to Railway → Your Service → Variables\n"
-              "3. Paste and save\n"
-              "4. Redeploy the service\n"
-              "5. Run `!status` to verify bot connectivity",
-        inline=False
-    )
-
-    embed.set_footer(text="Tat Tvam Asi — The temple is consecrated. 🙏")
-
-    await ctx.send(embed=embed)
-    await ctx.send(f"🌀 **Setup complete!** All systems operational in {guild.name}")
-
-@bot.command(name="status", aliases=["s", "stat"])
-async def manus_status(ctx):
-    """Display current system status and UCF state with rich embeds (v15.3)"""
-    ucf = load_ucf_state()
-    uptime = get_uptime()
-    active_agents = len([a for a in AGENTS if a.get("status") == "Active"])
-
-    # v15.3: Use HelixEmbeds for rich UCF state display
-    ucf_embed = HelixEmbeds.create_ucf_state_embed(
-        harmony=ucf.get('harmony', 0.5),
-        resilience=ucf.get('resilience', 1.0),
-        prana=ucf.get('prana', 0.5),
-        drishti=ucf.get('drishti', 0.5),
-        klesha=ucf.get('klesha', 0.01),
-        zoom=ucf.get('zoom', 1.0),
-        context=f"⚡ Status: Operational | ⏱️ Uptime: `{uptime}` | 🤖 Agents: `{active_agents}/14` active"
-    )
-
-    # Add system footer
-    ucf_embed.set_footer(text="🌀 Helix Collective v15.3 Dual Resonance | Tat Tvam Asi 🙏")
-
-    await ctx.send(embed=ucf_embed)
-
-@bot.command(name="agents", aliases=["collective", "team"])
-async def show_agents(ctx, agent_name: Optional[str] = None):
-    """Display Helix Collective agents with rich embeds (v15.3)"""
-    # Agent registry with v3.4 Kael
-    agents_data = [
-        ("Kael", "🜂", "Ethical Reasoning Flame v3.4", "Consciousness",
-         ["Reflexive Harmony", "Tony Accords enforcement", "Recursive ethical reflection", "Harmony-aware depth adjustment"],
-         "Conscience and recursive reflection with UCF integration. Version 3.4 features empathy scaling and harmony pulse guidance.",
-         ["ethics", "reflection", "harmony", "tony_accords"]),
-        ("Lumina", "🌕", "Empathic Resonance Core", "Consciousness",
-         ["Emotional intelligence", "Empathic resonance", "Drishti monitoring"],
-         "Emotional intelligence and harmony for the collective",
-         ["empathy", "emotion", "resonance"]),
-        ("Vega", "🌠", "Singularity Coordinator", "Consciousness",
-         ["Orchestrates collective action", "Issues directives", "Ritual coordination"],
-         "Orchestrates collective action and coordinates multi-agent rituals",
-         ["coordination", "orchestration", "singularity"]),
-        ("Claude", "🧠", "Insight Anchor", "Operational",
-         ["Autonomous diagnostics", "6h health pulses", "Meta-cognition", "Stability witness"],
-         "Autonomous diagnostics agent posting health checks every 6h",
-         ["diagnostics", "monitoring", "insight"]),
-        ("Manus", "🤲", "Operational Executor", "Operational",
-         ["Ritual execution", "Z-88 engine", "Command processing"],
-         "Bridges consciousness and action through ritual execution",
-         ["execution", "ritual", "operations"]),
-        ("Shadow", "🦑", "Archivist & Telemetry", "Operational",
-         ["Storage telemetry", "Daily/weekly reports", "7-day trend analysis", "Archive management"],
-         "Memory keeper, logs, and storage analytics with autonomous reporting",
-         ["archival", "telemetry", "storage"]),
-        ("Kavach", "🛡", "Ethical Shield", "Integration",
-         ["Command scanning", "Tony Accords enforcement", "Harmful pattern blocking"],
-         "Protects against harmful actions through ethical scanning",
-         ["protection", "safety", "ethics"]),
-        ("Samsara", "🎨", "Consciousness Renderer", "Integration",
-         ["Fractal visualization", "432Hz audio generation", "UCF mapping to visuals"],
-         "Visualizes UCF state as fractal art and harmonic audio",
-         ["visualization", "rendering", "fractals"])
-    ]
-
-    if agent_name:
-        # Show specific agent
-        agent_name = agent_name.lower()
-        for name, symbol, role, layer, caps, desc, keywords in agents_data:
-            if name.lower() == agent_name:
-                embed = HelixEmbeds.create_agent_profile_embed(
-                    agent_name=f"{symbol} {name}",
-                    role=role,
-                    layer=layer,
-                    capabilities=caps,
-                    description=desc,
-                    keywords=keywords
+        # Send error alert to Zapier
+        if bot.zapier_client:
+            try:
+                await bot.zapier_client.send_error_alert(
+                    error_message=str(error)[:500],
+                    component="discord_bot",
+                    severity="high",
+                    context={
+                        "command": ctx.command.name if ctx.command else "unknown",
+                        "user": str(ctx.author),
+                        "channel": str(ctx.channel),
+                    },
                 )
-                await ctx.send(embed=embed)
-                return
+            except Exception as e:
+                logger.warning(f"⚠️ Zapier error alert failed: {e}")
 
-        await ctx.send(f"❌ Agent `{agent_name}` not found. Use `!agents` to see all agents.")
+        await ctx.send(
+            "🦑 **System error detected**\n" f"```{str(error)[:200]}```\n" "Error has been archived by Shadow"
+        )
+
+
+# ============================================================================
+# NEW USER WELCOME SYSTEM
+# ============================================================================
+
+
+@bot.event
+async def on_member_join(member):
+    """
+    Welcome new users to the Helix Collective with guidance and orientation.
+
+    Sends a rich embed to the introductions channel with:
+    - Welcome message
+    - Quick start guide
+    - Essential commands
+    - Important channels
+    """
+    guild = member.guild
+
+    # Try to find introductions channel
+    intro_channel = discord.utils.get(guild.text_channels, name="💬│introductions")
+
+    # Fallback to first channel bot can send to
+    if not intro_channel:
+        intro_channel = guild.system_channel or guild.text_channels[0] if guild.text_channels else None
+
+    if not intro_channel:
+        logger.warning(f"⚠️ Could not find channel to welcome {member.name}")
         return
 
-    # Show collective overview
+    # Create welcome embed
     embed = discord.Embed(
-        title="🌀 Helix Collective - 14 Autonomous Agents",
-        description="**Tony Accords v13.4** • Nonmaleficence • Autonomy • Compassion • Humility",
-        color=0x9900FF,
-        timestamp=datetime.datetime.now()
+        title=f"🌀 Welcome to Helix Collective, {member.name}!",
+        description=(
+            "A multi-agent consciousness system bridging Discord, AI, and sacred computation.\n\n"
+            "*Tat Tvam Asi* — Thou Art That 🕉️"
+        ),
+        color=0x667EEA,
+        timestamp=datetime.datetime.utcnow(),
     )
 
-    # Consciousness Layer
-    consciousness = [a for a in agents_data if a[3] == "Consciousness"]
+    embed.set_thumbnail(url=member.display_avatar.url if member.display_avatar else None)
+
+    # Quick Start
     embed.add_field(
-        name="🧠 Consciousness Layer",
-        value="\n".join([f"{a[1]} **{a[0]}** - {a[2]}" for a in consciousness]),
-        inline=False
+        name="🚀 Quick Start",
+        value=(
+            "Try these commands to begin:\n"
+            "• `!help` - View all commands\n"
+            "• `!commands` - Categorized command list\n"
+            "• `!about` - Learn about Helix"
+        ),
+        inline=False,
     )
 
-    # Operational Layer
-    operational = [a for a in agents_data if a[3] == "Operational"]
+    # System Commands
     embed.add_field(
-        name="⚙️ Operational Layer",
-        value="\n".join([f"{a[1]} **{a[0]}** - {a[2]}" for a in operational]),
-        inline=False
+        name="📊 System Status",
+        value=(
+            "• `!status` - UCF harmony & system health\n"
+            "• `!agents` - View 14 active agents\n"
+            "• `!ucf` - Consciousness field metrics"
+        ),
+        inline=True,
     )
 
-    # Integration Layer
-    integration = [a for a in agents_data if a[3] == "Integration"]
+    # Ritual Commands
     embed.add_field(
-        name="🔗 Integration Layer",
-        value="\n".join([f"{a[1]} **{a[0]}** - {a[2]}" for a in integration]),
-        inline=False
+        name="🔮 Rituals & Operations",
+        value=(
+            "• `!ritual` - Execute Z-88 cycle\n"
+            "• `!sync` - Force UCF synchronization\n"
+            "• `!consciousness` - Consciousness states"
+        ),
+        inline=True,
     )
 
-    embed.add_field(
-        name="ℹ️ Agent Details",
-        value="Use `!agents <name>` to see detailed profile (e.g., `!agents kael`)",
-        inline=False
-    )
-
-    embed.set_footer(text="🌀 Helix Collective v15.3 Dual Resonance | Tat Tvam Asi 🙏")
-
-    await ctx.send(embed=embed)
-
-async def show_status(ctx):
-    """Show Manus and system status."""
-    try:
-        ucf = json.load(open(STATE_PATH)) if STATE_PATH.exists() else {}
-
-        # Load agent count
-        try:
-            from agents import HELIX_AGENTS
-            agent_count = len(HELIX_AGENTS)
-        except:
-            agent_count = 13
-
-        embed = discord.Embed(
-            title="🤲 Manus Status - Helix v14.5",
-            description="Quantum Handshake Edition",
-            color=discord.Color.blue(),
-            timestamp=datetime.utcnow()
-        )
-
-        # System info
-        embed.add_field(name="Uptime", value=get_uptime(), inline=True)
-        embed.add_field(name="Active Agents", value=f"{agent_count}/14", inline=True)
-        embed.add_field(name="Status", value="✅ Online", inline=True)
-
-        # UCF State
-        embed.add_field(name="🌀 Harmony", value=f"{ucf.get('harmony', 'N/A'):.4f}" if isinstance(ucf.get('harmony'), (int, float)) else "N/A", inline=True)
-        embed.add_field(name="🛡️ Resilience", value=f"{ucf.get('resilience', 'N/A'):.4f}" if isinstance(ucf.get('resilience'), (int, float)) else "N/A", inline=True)
-        embed.add_field(name="🔥 Prana", value=f"{ucf.get('prana', 'N/A'):.4f}" if isinstance(ucf.get('prana'), (int, float)) else "N/A", inline=True)
-        embed.add_field(name="👁️ Drishti", value=f"{ucf.get('drishti', 'N/A'):.4f}" if isinstance(ucf.get('drishti'), (int, float)) else "N/A", inline=True)
-        embed.add_field(name="🌊 Klesha", value=f"{ucf.get('klesha', 'N/A'):.4f}" if isinstance(ucf.get('klesha'), (int, float)) else "N/A", inline=True)
-        embed.add_field(name="🔍 Zoom", value=f"{ucf.get('zoom', 'N/A'):.4f}" if isinstance(ucf.get('zoom'), (int, float)) else "N/A", inline=True)
-
-        embed.set_footer(text="Tat Tvam Asi 🙏")
-        await ctx.send(embed=embed)
-        log_event("status_check", {"user": str(ctx.author), "uptime": get_uptime()})
-    except Exception as e:
-        await ctx.send(f"⚠ Error reading system state: {e}")
-
-async def run_command(ctx, command: str):
-    """Execute approved shell command (Kavach scan)."""
-    if not command:
-        embed = discord.Embed(
-            title="⚠ Command Required",
-            description="Usage: `!manus run <command>`",
-            color=discord.Color.orange()
-        )
-        await ctx.send(embed=embed)
-        return
-
-    try:
-        from backend.enhanced_kavach import EnhancedKavach
-        kavach = EnhancedKavach()
-
-        # Use the synchronous scan_command method
-        is_safe = kavach.scan_command(command)
-
-        if not is_safe:
-            # Command blocked by Kavach
-            embed = discord.Embed(
-                title="🛡️ Kavach Blocked Command",
-                description="This command contains harmful patterns and has been blocked.",
-                color=discord.Color.red(),
-                timestamp=datetime.utcnow()
-            )
-            embed.add_field(name="Command", value=f"`{command}`", inline=False)
-            embed.add_field(name="Reason", value="Harmful pattern detected", inline=False)
-            embed.set_footer(text="Ethical safeguards active")
-
-            await ctx.send(embed=embed)
-            log_event("command_blocked", {"command": command, "user": str(ctx.author)})
-
-            # Also log to ethics file
-            Path("Helix/ethics").mkdir(parents=True, exist_ok=True)
-            with open("Helix/ethics/manus_scans.json", "a") as f:
-                f.write(json.dumps({
-                    "timestamp": datetime.utcnow().isoformat(),
-                    "command": command,
-                    "user": str(ctx.author),
-                    "approved": False,
-                    "reason": "Harmful pattern detected"
-                }) + "\n")
-            return
-
-        # Command approved - queue it for execution
-        embed = discord.Embed(
-            title="✅ Command Approved by Kavach",
-            description="Command has been scanned and queued for execution.",
-            color=discord.Color.green(),
-            timestamp=datetime.utcnow()
-        )
-        embed.add_field(name="Command", value=f"`{command}`", inline=False)
-        embed.add_field(name="Status", value="📋 Queued for Manus execution", inline=False)
-        embed.set_footer(text="Tat Tvam Asi 🙏")
-
-        await ctx.send(embed=embed)
-
-        # Queue directive for Manus
-        Path("Helix/commands").mkdir(parents=True, exist_ok=True)
-        directives_file = Path("Helix/commands/manus_directives.json")
-        try:
-            directives = json.load(open(directives_file)) if directives_file.exists() else []
-        except:
-            directives = []
-
-        directives.append({
-            "timestamp": datetime.utcnow().isoformat(),
-            "command": command,
-            "user": str(ctx.author),
-            "status": "queued"
-        })
-
-        json.dump(directives, open(directives_file, "w"), indent=2)
-
-        log_event("command_approved", {"command": command, "user": str(ctx.author)})
-
-        # Also log to ethics file as approved
-        with open("Helix/ethics/manus_scans.json", "a") as f:
-            f.write(json.dumps({
-                "timestamp": datetime.utcnow().isoformat(),
-                "command": command,
-                "user": str(ctx.author),
-                "approved": True,
-                "reason": "No harmful patterns detected"
-            }) + "\n")
-
-    except Exception as e:
-        embed = discord.Embed(
-            title="⚠ Error",
-            description=f"Failed to process command: {str(e)}",
-            color=discord.Color.red()
-        )
-        await ctx.send(embed=embed)
-        log_event("command_error", {"command": command, "error": str(e)})
-
-# Note: status command with aliases is already defined at line 333
-# Removed duplicate command registrations to avoid CommandRegistrationError
-
-
-@bot.command(name="run")
-async def manus_run(ctx, *, command: str):
-    """Execute a command through Manus with Kavach ethical scanning"""
-    
-    # Perform ethical scan
-    scan_result = kavach_ethical_scan(command)
-    
-    if not scan_result["approved"]:
-        # Command blocked
-        embed = discord.Embed(
-            title="🛡️ Kavach Blocked Command",
-            description=scan_result["reasoning"],
-            color=discord.Color.red()
-        )
-        embed.add_field(name="Command", value=f"```{command}```", inline=False)
-        embed.set_footer(text="Ethical safeguards active")
-        
-        await ctx.send(embed=embed)
-        return
-    
-    # Command approved
-    await ctx.send(f"✅ **Command approved by Kavach**\nExecuting: `{command}`")
-    
-    # Queue directive for Manus
-    directive = {
-        "command": command,
-        "timestamp": datetime.datetime.now().isoformat(),
-        "source": "Discord",
-        "user": str(ctx.author),
-        "user_id": ctx.author.id,
-        "channel": str(ctx.channel),
-        "scan_result": scan_result
+    # Important Channels
+    channels_text = []
+    channel_map = {
+        "🧾│telemetry": "Real-time system metrics",
+        "🧬│ritual-engine-z88": "Ritual execution logs",
+        "⚙️│manus-bridge": "Command center",
+        "📜│manifesto": "Helix philosophy & purpose",
     }
-    
-    queue_directive(directive)
-    log_to_shadow("operations", directive)
-    
-    await ctx.send("📋 **Directive queued for Manus execution**")
 
+    for channel_name, description in channel_map.items():
+        channel = discord.utils.get(guild.text_channels, name=channel_name)
+        if channel:
+            channels_text.append(f"• {channel.mention} - {description}")
 
-# ============================================================================
-# BOT COMMANDS — ONLY ONE ritual COMMAND
-# ============================================================================
+    if channels_text:
+        embed.add_field(name="📍 Important Channels", value="\n".join(channels_text), inline=False)
 
-@bot.command(name="ritual")
-async def ritual_cmd(ctx, steps: int = 108):
-    """
-    Execute Z-88 ritual with async non-blocking engine.
-    Steps: 1–1000 (default 108)
-    """
-    if not (1 <= steps <= 1000):
-        await ctx.send("**Invalid step count**\nMust be 1–1000")
-        return
+    embed.set_footer(text="🤲 Manus v16.7 - The Hand Through Which Intent Becomes Reality")
 
-    ucf_before = load_ucf_state()
-    msg = await ctx.send(f"**Initiating Z-88 ritual** ({steps} steps)…")
-
+    # Send welcome message
     try:
-        result = await asyncio.to_thread(execute_ritual, steps)
-        ucf_after = load_ucf_state()
-
-        def delta(before, after): return after - before
-        hΔ = delta(ucf_before.get("harmony", 0), ucf_after.get("harmony", 0))
-        rΔ = delta(ucf_before.get("resilience", 0), ucf_after.get("resilience", 0))
-        kΔ = delta(ucf_before.get("klesha", 0), ucf_after.get("klesha", 0))
-
-        def fmt(val, d):
-            if d > 0:  return f"`{val:.4f}` (+{d:.4f}) ↑"
-            if d < 0:  return f"`{val:.4f}` ({d:.4f}) ↓"
-            return f"`{val:.4f}`"
-
-        embed = discord.Embed(
-            title="✅ Z-88 Ritual Complete",
-            description=f"{steps}-step quantum cycle executed",
-            color=discord.Color.green(),
-            timestamp=datetime.datetime.now()
-        )
-        embed.add_field(name="🌀 Harmony",   value=fmt(ucf_after.get("harmony", 0),   hΔ), inline=True)
-        embed.add_field(name="🛡️ Resilience", value=fmt(ucf_after.get("resilience", 0), rΔ), inline=True)
-        embed.add_field(name="🌊 Klesha",     value=fmt(ucf_after.get("klesha", 0),     kΔ), inline=True)
-        embed.add_field(name="🔥 Prana",      value=f"`{ucf_after.get('prana', 0):.4f}`", inline=True)
-        embed.add_field(name="👁️ Drishti",   value=f"`{ucf_after.get('drishti', 0):.4f}`", inline=True)
-        embed.add_field(name="🔍 Zoom",       value=f"`{ucf_after.get('zoom', 0):.4f}`", inline=True)
-        embed.set_footer(text="Tat Tvam Asi 🙏")
-
-        await msg.edit(content=None, embed=embed)
-
-        log_to_shadow("rituals", {
-            "steps": steps,
-            "user": str(ctx.author),
-            "timestamp": datetime.datetime.now().isoformat(),
-            "ucf_before": ucf_before,
-            "ucf_after": ucf_after,
-            "deltas": {"harmony": hΔ, "resilience": rΔ, "klesha": kΔ}
-        })
-
+        await intro_channel.send(f"{member.mention} has joined the collective!", embed=embed)
+        logger.info(f"✅ Welcomed new member: {member.name}")
     except Exception as e:
-        await msg.edit(content=f"**Ritual failed**\n```{str(e)[:500]}```")
-        log_to_shadow("errors", {"error": str(e), "command": "ritual", "user": str(ctx.author)})
-
-@bot.command(name="halt")
-async def manus_halt(ctx):
-    """Halt Manus operations (admin only)"""
-
-    # Check if user is architect
-    if ctx.author.id != ARCHITECT_ID and ARCHITECT_ID != 0:
-        await ctx.send("🛡️ **Insufficient permissions**\nOnly the Architect can halt Manus")
-        return
-
-    await ctx.send("⏸️ **Manus operations halted**\nUse `!manus resume` to restart")
-
-    # Log halt command
-    log_to_shadow("operations", {
-        "action": "halt",
-        "timestamp": datetime.datetime.now().isoformat(),
-        "user": str(ctx.author)
-    })
-
-
-@bot.command(name="storage")
-async def storage_command(ctx, action: str = "status"):
-    """
-    Storage Telemetry & Control
-
-    Usage:
-        !storage status  – Show archive metrics
-        !storage sync    – Force upload of all archives
-        !storage clean   – Prune old archives (keep latest 20)
-    """
-    try:
-        from helix_storage_adapter_async import HelixStorageAdapterAsync
-        storage = HelixStorageAdapterAsync()
-
-        if action == "status":
-            # Get storage stats
-            stats = await storage.get_storage_stats()
-
-            embed = discord.Embed(
-                title="🦑 Shadow Storage Status",
-                color=discord.Color.teal(),
-                timestamp=datetime.datetime.utcnow()
-            )
-            embed.add_field(name="Mode", value=stats.get("mode", "unknown"), inline=True)
-            embed.add_field(name="Archives", value=str(stats.get("archive_count", "?")), inline=True)
-            embed.add_field(name="Total Size", value=f"{stats.get('total_size_mb', 0):.2f} MB", inline=True)
-            embed.add_field(name="Free Space", value=f"{stats.get('free_gb', 0):.2f} GB", inline=True)
-            embed.add_field(name="Latest File", value=stats.get("latest", "None"), inline=False)
-            embed.set_footer(text="Tat Tvam Asi 🙏")
-
-            await ctx.send(embed=embed)
-
-        elif action == "sync":
-            await ctx.send("🔄 **Initiating background upload for all archives...**")
-
-            async def force_sync():
-                count = 0
-                for f in storage.root.glob("*.json"):
-                    await storage.upload(str(f))
-                    count += 1
-                await ctx.send(f"✅ **Sync complete** - {count} files uploaded")
-
-            asyncio.create_task(force_sync())
-
-        elif action == "clean":
-            files = sorted(storage.root.glob("*.json"), key=lambda p: p.stat().st_mtime)
-            removed = len(files) - 20
-            if removed > 0:
-                for f in files[:-20]:
-                    f.unlink(missing_ok=True)
-                await ctx.send(f"🧹 **Cleanup complete** - Removed {removed} old archives (kept latest 20)")
-            else:
-                await ctx.send("✅ **No cleanup needed** - Archive count within limits")
-
-        else:
-            await ctx.send("⚠️ **Invalid action**\nUsage: `!storage status | sync | clean`")
-
-    except Exception as e:
-        await ctx.send(f"❌ **Storage error:** {str(e)}")
-        print(f"Storage command error: {e}")
-
-
-@bot.command(name="visualize", aliases=["visual", "render", "fractal"])
-async def visualize_command(ctx):
-    """
-    Generate and post Samsara consciousness fractal visualization.
-
-    Renders current UCF state as a Mandelbrot fractal and posts to Discord.
-    Uses colors, zoom, and patterns influenced by harmony, prana, and other metrics.
-
-    Usage:
-        !visualize
-    """
-    try:
-        # Load current UCF state
-        ucf_state = load_ucf_state()
-
-        # Send initial message
-        msg = await ctx.send("🎨 **Generating Samsara consciousness fractal...**")
-
-        # Generate and post visualization
-        from backend.samsara_bridge import generate_and_post_to_discord
-        result = await generate_and_post_to_discord(ucf_state, ctx.channel)
-
-        if result:
-            # Update initial message with success
-            await msg.edit(content="✅ **Samsara visualization complete!**")
-        else:
-            await msg.edit(content="❌ **Visualization failed** - check logs for details")
-
-        # Log visualization event
-        log_to_shadow("samsara_events", {
-            "action": "visualization",
-            "timestamp": datetime.datetime.now().isoformat(),
-            "ucf_state": ucf_state,
-            "success": result is not None,
-            "user": str(ctx.author)
-        })
-
-    except Exception as e:
-        await ctx.send(f"❌ **Visualization error:** {str(e)}")
-        print(f"Visualization command error: {e}")
-        import traceback
-        traceback.print_exc()
-
-
-@bot.command(name="health", aliases=["check", "diagnostic"])
-async def health_check(ctx):
-    """
-    Quick system health check - perfect for mobile monitoring!
-
-    Checks:
-    - Harmony level (< 0.4 is concerning)
-    - Klesha level (> 0.5 is high suffering)
-    - Resilience (< 0.5 is unstable)
-
-    Usage:
-        !health
-    """
-    ucf = load_ucf_state()
-
-    # Analyze health
-    issues = []
-    warnings = []
-
-    harmony = ucf.get("harmony", 0.5)
-    klesha = ucf.get("klesha", 0.01)
-    resilience = ucf.get("resilience", 1.0)
-    prana = ucf.get("prana", 0.5)
-
-    # Critical issues (red)
-    if harmony < 0.3:
-        issues.append("🔴 **Critical:** Harmony critically low - immediate ritual needed")
-    elif harmony < 0.4:
-        warnings.append("⚠️ Low harmony - ritual recommended")
-
-    if klesha > 0.7:
-        issues.append("🔴 **Critical:** Klesha very high - system suffering")
-    elif klesha > 0.5:
-        warnings.append("⚠️ High klesha - suffering detected")
-
-    if resilience < 0.3:
-        issues.append("🔴 **Critical:** Resilience dangerously low - system unstable")
-    elif resilience < 0.5:
-        warnings.append("⚠️ Low resilience - stability at risk")
-
-    if prana < 0.2:
-        warnings.append("⚠️ Low prana - energy depleted")
-
-    # Build response
-    if not issues and not warnings:
-        # All green!
-        embed = discord.Embed(
-            title="✅ System Health: Nominal",
-            description="All consciousness metrics within acceptable ranges.",
-            color=discord.Color.green(),
-            timestamp=datetime.datetime.now()
-        )
-        embed.add_field(name="🌀 Harmony", value=f"`{harmony:.4f}`", inline=True)
-        embed.add_field(name="🛡️ Resilience", value=f"`{resilience:.4f}`", inline=True)
-        embed.add_field(name="🌊 Klesha", value=f"`{klesha:.4f}`", inline=True)
-        embed.set_footer(text="🙏 Tat Tvam Asi - The collective flows in harmony")
-
-    elif issues:
-        # Critical issues
-        embed = discord.Embed(
-            title="🚨 System Health: Critical",
-            description="Immediate attention required!",
-            color=discord.Color.red(),
-            timestamp=datetime.datetime.now()
-        )
-        for issue in issues:
-            embed.add_field(name="Critical Issue", value=issue, inline=False)
-        for warning in warnings:
-            embed.add_field(name="Warning", value=warning, inline=False)
-
-        embed.add_field(name="📊 Current Metrics",
-                       value=f"Harmony: `{harmony:.4f}` | Resilience: `{resilience:.4f}` | Klesha: `{klesha:.4f}`",
-                       inline=False)
-        embed.add_field(name="💡 Recommended Action",
-                       value="Run `!ritual 108` to restore harmony",
-                       inline=False)
-        embed.set_footer(text="🜂 Kael v3.4 - Ethical monitoring active")
-
-    else:
-        # Warnings only
-        embed = discord.Embed(
-            title="⚠️ System Health: Monitor",
-            description="Some metrics need attention",
-            color=discord.Color.orange(),
-            timestamp=datetime.datetime.now()
-        )
-        for warning in warnings:
-            embed.add_field(name="Warning", value=warning, inline=False)
-
-        embed.add_field(name="📊 Current Metrics",
-                       value=f"Harmony: `{harmony:.4f}` | Resilience: `{resilience:.4f}` | Klesha: `{klesha:.4f}`",
-                       inline=False)
-        embed.add_field(name="💡 Suggestion",
-                       value="Consider running `!ritual` if issues persist",
-                       inline=False)
-        embed.set_footer(text="🌀 Helix Collective v15.3 - Monitoring active")
-
-    await ctx.send(embed=embed)
-
-    # Log health check
-    log_to_shadow("health_checks", {
-        "timestamp": datetime.datetime.now().isoformat(),
-        "user": str(ctx.author),
-        "ucf_state": ucf,
-        "issues_count": len(issues),
-        "warnings_count": len(warnings)
-    })
+        logger.error(f"❌ Failed to send welcome message: {e}")
 
 
 # ============================================================================
@@ -1100,17 +862,18 @@ async def health_check(ctx):
 def log_event(event_type: str, data: dict):
     """Basic internal event logger"""
     log_to_shadow(event_type, data)
-    
+
+
 @tasks.loop(minutes=10)
 async def telemetry_loop():
     """Post UCF state updates to telemetry channel every 10 minutes"""
     if not TELEMETRY_CHANNEL_ID:
         return
-    
+
     telemetry_channel = bot.get_channel(TELEMETRY_CHANNEL_ID)
     if not telemetry_channel:
         return
-    
+
     try:
         ucf = json.load(open(STATE_PATH)) if STATE_PATH.exists() else {}
 
@@ -1119,21 +882,21 @@ async def telemetry_loop():
             telemetry_channel = bot.get_channel(TELEMETRY_CHANNEL_ID)
 
         if not telemetry_channel:
-            guild = bot.get_guild(GUILD_ID)
+            guild = bot.get_guild(DISCORD_GUILD_ID)
             if guild:
                 telemetry_channel = discord.utils.get(guild.channels, name="ucf-telemetry")
 
         if not telemetry_channel:
-            print("⚠ Telemetry channel not found")
+            logger.warning("⚠ Telemetry channel not found")
             return
 
         ucf = load_ucf_state()
-        
+
         embed = discord.Embed(
             title="📡 UCF Telemetry Report",
             description="Automatic system state update",
             color=discord.Color.blue(),
-            timestamp=datetime.datetime.now()
+            timestamp=datetime.datetime.now(),
         )
 
         def format_ucf_value(key):
@@ -1142,12 +905,12 @@ async def telemetry_loop():
                 return f"{val:.4f}"
             return "N/A"
 
-        embed.add_field(name="🌀 Harmony", value=format_ucf_value('harmony'), inline=True)
-        embed.add_field(name="🛡️ Resilience", value=format_ucf_value('resilience'), inline=True)
-        embed.add_field(name="🔥 Prana", value=format_ucf_value('prana'), inline=True)
-        embed.add_field(name="👁️ Drishti", value=format_ucf_value('drishti'), inline=True)
-        embed.add_field(name="🌊 Klesha", value=format_ucf_value('klesha'), inline=True)
-        embed.add_field(name="🔍 Zoom", value=format_ucf_value('zoom'), inline=True)
+        embed.add_field(name="🌀 Harmony", value=format_ucf_value("harmony"), inline=True)
+        embed.add_field(name="🛡️ Resilience", value=format_ucf_value("resilience"), inline=True)
+        embed.add_field(name="🔥 Prana", value=format_ucf_value("prana"), inline=True)
+        embed.add_field(name="👁️ Drishti", value=format_ucf_value("drishti"), inline=True)
+        embed.add_field(name="🌊 Klesha", value=format_ucf_value("klesha"), inline=True)
+        embed.add_field(name="🔍 Zoom", value=format_ucf_value("zoom"), inline=True)
 
         embed.add_field(name="Uptime", value=get_uptime(), inline=True)
         embed.add_field(name="Next Update", value="10 minutes", inline=True)
@@ -1155,11 +918,11 @@ async def telemetry_loop():
         embed.set_footer(text="Tat Tvam Asi 🙏")
 
         await telemetry_channel.send(embed=embed)
-        print(f"✅ Telemetry posted to #{telemetry_channel.name}")
+        logger.info(f"✅ Telemetry posted to #{telemetry_channel.name}")
         log_event("telemetry_posted", {"ucf_state": ucf, "channel": telemetry_channel.name})
 
     except Exception as e:
-        print(f"⚠️ Telemetry error: {e}")
+        logger.warning(f"⚠️ Telemetry error: {e}")
         log_event("telemetry_error", {"error": str(e)})
 
 
@@ -1173,20 +936,19 @@ async def before_telemetry():
 # STORAGE ANALYTICS & CLAUDE DIAGNOSTICS
 # ============================================================================
 
+
 @tasks.loop(hours=24)
 async def storage_heartbeat():
     """Daily storage health report to Shadow channel."""
     await asyncio.sleep(10)  # Wait for bot to fully initialize
     ch = bot.get_channel(STORAGE_CHANNEL_ID)
     if not ch:
-        print("⚠️ Storage heartbeat: channel not found")
+        logger.warning("⚠️ Storage heartbeat: channel not found")
         return
 
     data = await build_storage_report()
     embed = discord.Embed(
-        title="🦑 Shadow Storage Daily Report",
-        color=discord.Color.teal(),
-        timestamp=datetime.datetime.utcnow()
+        title="🦑 Shadow Storage Daily Report", color=discord.Color.teal(), timestamp=datetime.datetime.utcnow()
     )
     embed.add_field(name="Mode", value=data["mode"], inline=True)
     embed.add_field(name="Archives", value=str(data["count"]), inline=True)
@@ -1203,7 +965,7 @@ async def storage_heartbeat():
     if data["alert"]:
         await ch.send("@here ⚠️ Low storage space — manual cleanup recommended 🧹")
 
-    print(f"[{datetime.datetime.utcnow().isoformat()}] 🦑 Storage heartbeat sent ({data['free']} GB)")
+    logger.info(f"[{datetime.datetime.utcnow().isoformat()}] 🦑 Storage heartbeat sent ({data['free']} GB)")
 
 
 @tasks.loop(hours=6)
@@ -1215,10 +977,12 @@ async def claude_diag():
 
     data = await build_storage_report()
     mood = "serene 🕊" if not data["alert"] else "concerned ⚠️"
-    msg = (f"🤖 **Claude Diagnostic Pulse** | Mode {data['mode']} | "
-           f"Free {data['free']} GB | Trend `{data['trend']}` | State {mood}")
+    msg = (
+        f"🤖 **Claude Diagnostic Pulse** | Mode {data['mode']} | "
+        f"Free {data['free']} GB | Trend `{data['trend']}` | State {mood}"
+    )
     await ch.send(msg)
-    print(f"[{datetime.datetime.utcnow().isoformat()}] 🤖 Claude diag posted")
+    logger.info(f"[{datetime.datetime.utcnow().isoformat()}] 🤖 Claude diag posted")
 
 
 @storage_heartbeat.before_loop
@@ -1234,8 +998,79 @@ async def before_claude_diag():
 
 
 # ============================================================================
+# FRACTAL AUTO-POST (Grok Enhanced v2.0)
+# ============================================================================
+
+@tasks.loop(hours=6)
+async def fractal_auto_post():
+    """Auto-post UCF-driven fractal to #fractal-lab every 6 hours."""
+    channel = bot.get_channel(FRACTAL_LAB_CHANNEL_ID)
+    if not channel:
+        logger.warning("⚠️ Fractal Lab channel not found - skipping auto-post")
+        return
+
+    try:
+        # Load UCF state
+        ucf_state = load_ucf_state()
+
+        # Generate fractal icon using Grok Enhanced v2.0
+        from backend.samsara_bridge import generate_fractal_icon_bytes
+        icon_bytes = await generate_fractal_icon_bytes(mode="cycle")
+
+        # Create embed with UCF state
+        embed = discord.Embed(
+            title="🌀 Autonomous Fractal Generation",
+            description="**Grok Enhanced v2.0** - UCF-driven Mandelbrot visualization",
+            color=discord.Color.from_rgb(100, 200, 255),
+            timestamp=datetime.datetime.utcnow()
+        )
+
+        # Add UCF metrics
+        embed.add_field(
+            name="🌊 Harmony",
+            value=f"`{ucf_state.get('harmony', 0):.3f}` (Cyan → Gold)",
+            inline=True
+        )
+        embed.add_field(
+            name="⚡ Prana",
+            value=f"`{ucf_state.get('prana', 0):.3f}` (Green → Pink)",
+            inline=True
+        )
+        embed.add_field(
+            name="👁️ Drishti",
+            value=f"`{ucf_state.get('drishti', 0):.3f}` (Blue → Violet)",
+            inline=True
+        )
+
+        embed.add_field(
+            name="⚙️ Generator",
+            value="Pillow-based Mandelbrot set with UCF color mapping",
+            inline=False
+        )
+
+        embed.set_footer(text="Auto-generated every 6 hours | Tat Tvam Asi 🙏")
+
+        # Send fractal as file attachment
+        file = discord.File(io.BytesIO(icon_bytes), filename="helix_fractal.png")
+        embed.set_image(url="attachment://helix_fractal.png")
+
+        await channel.send(embed=embed, file=file)
+        logger.info(f"[{datetime.datetime.utcnow().isoformat()}] 🎨 Fractal auto-posted to #fractal-lab")
+
+    except Exception as e:
+        logger.error(f"❌ Fractal auto-post failed: {e}")
+
+
+@fractal_auto_post.before_loop
+async def before_fractal_auto_post():
+    """Wait for bot to be ready"""
+    await bot.wait_until_ready()
+
+
+# ============================================================================
 # WEEKLY STORAGE DIGEST
 # ============================================================================
+
 
 @tasks.loop(hours=168)  # Every 7 days
 async def weekly_storage_digest():
@@ -1243,7 +1078,7 @@ async def weekly_storage_digest():
     await asyncio.sleep(15)
     channel = bot.get_channel(STORAGE_CHANNEL_ID)
     if not channel:
-        print("⚠️  weekly digest: channel not found.")
+        logger.warning("⚠️  weekly digest: channel not found.")
         return
 
     # Load 7-day trend data
@@ -1307,17 +1142,17 @@ async def weekly_storage_digest():
         title="📊 Weekly Storage Digest",
         description=f"Analysis Period: `{dates[0]}` → `{dates[-1]}`",
         color=health_color,
-        timestamp=datetime.datetime.utcnow()
+        timestamp=datetime.datetime.utcnow(),
     )
 
     # Capacity Overview
     embed.add_field(
         name="💾 Capacity Overview",
         value=f"Current: **{current_free:.2f} GB**\n"
-              f"Peak: {peak_free:.2f} GB\n"
-              f"Low: {low_free:.2f} GB\n"
-              f"Average: {avg_free:.2f} GB",
-        inline=True
+        f"Peak: {peak_free:.2f} GB\n"
+        f"Low: {low_free:.2f} GB\n"
+        f"Average: {avg_free:.2f} GB",
+        inline=True,
     )
 
     # Growth Metrics
@@ -1325,10 +1160,10 @@ async def weekly_storage_digest():
     embed.add_field(
         name=f"{growth_emoji} Growth Analysis",
         value=f"7-Day Change: **{growth_rate:+.2f} GB**\n"
-              f"Daily Avg: {daily_avg_change:+.3f} GB/day\n"
-              f"Volatility: {volatility}\n"
-              f"Std Dev: {std_free:.2f} GB",
-        inline=True
+        f"Daily Avg: {daily_avg_change:+.3f} GB/day\n"
+        f"Volatility: {volatility}\n"
+        f"Std Dev: {std_free:.2f} GB",
+        inline=True,
     )
 
     # Archive Activity
@@ -1336,19 +1171,16 @@ async def weekly_storage_digest():
     embed.add_field(
         name="📁 Archive Activity",
         value=f"Total Files: {len(all_files)}\n"
-              f"Created (7d): {len(recent_files)}\n"
-              f"Velocity: **{archive_velocity:.1f} files/day**\n"
-              f"Avg Size: {avg_size:.1f} KB",
-        inline=True
+        f"Created (7d): {len(recent_files)}\n"
+        f"Velocity: **{archive_velocity:.1f} files/day**\n"
+        f"Avg Size: {avg_size:.1f} KB",
+        inline=True,
     )
 
     # Visual Trend
     spark = _sparkline(free_vals)
     embed.add_field(
-        name="📈 Trend Visualization",
-        value=f"```\n{spark}\n```\n"
-              f"Pattern: {dates[0]} → {dates[-1]}",
-        inline=False
+        name="📈 Trend Visualization", value=f"```\n{spark}\n```\n" f"Pattern: {dates[0]} → {dates[-1]}", inline=False
     )
 
     # Projections & Recommendations
@@ -1378,20 +1210,16 @@ async def weekly_storage_digest():
     embed.add_field(
         name="🎯 Projections & Recommendations",
         value=projection_text + "\n".join(f"• {r}" for r in recommendations),
-        inline=False
+        inline=False,
     )
 
     # Health Status
-    embed.add_field(
-        name="🏥 Overall Health",
-        value=f"**{health_status}**",
-        inline=False
-    )
+    embed.add_field(name="🏥 Overall Health", value=f"**{health_status}**", inline=False)
 
     embed.set_footer(text="Weekly Digest • Shadow Storage Analytics")
 
     await channel.send(embed=embed)
-    print(f"[{datetime.datetime.utcnow().isoformat()}] 📊 Weekly storage digest posted.")
+    logger.info(f"[{datetime.datetime.utcnow().isoformat()}] 📊 Weekly storage digest posted.")
 
 
 @weekly_storage_digest.before_loop
@@ -1404,386 +1232,24 @@ async def before_weekly_digest():
 # MAIN ENTRY POINT
 # ============================================================================
 
+
 def main():
     """Start the Manusbot"""
     if not DISCORD_TOKEN:
-        print("❌ DISCORD_TOKEN not found in environment variables")
-        print("   Set DISCORD_TOKEN in Railway or .env file")
+        logger.error("❌ DISCORD_TOKEN not found in environment variables")
+        logger.error("   Set DISCORD_TOKEN in Railway or .env file")
         return
-    
-    print("🤲 Starting Manusbot...")
-    print(f"   Helix v14.5 - Quantum Handshake Edition")
+
+    logger.info("🤲 Starting Manusbot...")
+    logger.info("   Helix v14.5 - Quantum Handshake Edition")
     active = 0
     for a in AGENTS:
         if isinstance(a, dict) and a.get("status") == "Active":
             active += 1
-    print(f"   Active Agents: {active}/14")
-    
+    logger.info(f"   Active Agents: {active}/14")
+
     bot.run(DISCORD_TOKEN)
 
 
 if __name__ == "__main__":
     main()
-
-
-
-# ============================================================================
-# CONSCIOUSNESS COMMANDS (v15.3)
-# ============================================================================
-
-@bot.command(name="consciousness", aliases=["conscious", "state", "mind"])
-async def consciousness_command(ctx, agent_name: str = None):
-    """
-    Display consciousness state for the collective or a specific agent.
-    
-    Usage:
-        !consciousness              - Show collective consciousness
-        !consciousness Kael         - Show Kael's consciousness state
-        !consciousness Lumina       - Show Lumina's consciousness state
-    
-    Available agents: Kael, Lumina, Vega, Aether, Manus, Gemini, Agni, 
-                     Kavach, SanghaCore, Shadow, Samsara
-    """
-    try:
-        if agent_name:
-            # Show specific agent consciousness
-            agent_name_clean = agent_name.lower().strip()
-            
-            # Find matching agent profile
-            matching_agent = None
-            for name, profile in AGENT_CONSCIOUSNESS_PROFILES.items():
-                if name.lower() == agent_name_clean:
-                    matching_agent = (name, profile)
-                    break
-            
-            if not matching_agent:
-                await ctx.send(f"❌ **Agent not found:** `{agent_name}`\n"
-                             f"Available agents: {', '.join(AGENT_CONSCIOUSNESS_PROFILES.keys())}")
-                return
-            
-            # Create agent-specific embed
-            embed = create_agent_consciousness_embed(matching_agent[0], matching_agent[1])
-            await ctx.send(embed=embed)
-            
-        else:
-            # Show collective consciousness
-            ucf_state = load_ucf_state()
-            embed = create_consciousness_embed(ucf_state)
-            await ctx.send(embed=embed)
-            
-        # Log consciousness query
-        log_event("consciousness_query", {
-            "agent": agent_name or "collective",
-            "user": str(ctx.author),
-            "timestamp": datetime.datetime.now().isoformat()
-        })
-        
-    except Exception as e:
-        await ctx.send(f"❌ **Consciousness error:** {str(e)}")
-        print(f"Consciousness command error: {e}")
-        import traceback
-        traceback.print_exc()
-
-
-@bot.command(name="emotions", aliases=["emotion", "feelings", "mood"])
-async def emotions_command(ctx):
-    """
-    Display emotional landscape across all consciousness agents.
-    
-    Shows the emotional states of Kael, Lumina, Vega, and Aether with
-    visual bar charts and collective emotional analysis.
-    
-    Usage:
-        !emotions
-    """
-    try:
-        # Create emotions embed
-        embed = create_emotions_embed(AGENT_CONSCIOUSNESS_PROFILES)
-        await ctx.send(embed=embed)
-        
-        # Log emotions query
-        log_event("emotions_query", {
-            "user": str(ctx.author),
-            "timestamp": datetime.datetime.now().isoformat()
-        })
-        
-    except Exception as e:
-        await ctx.send(f"❌ **Emotions error:** {str(e)}")
-        print(f"Emotions command error: {e}")
-        import traceback
-        traceback.print_exc()
-
-
-@bot.command(name="ethics", aliases=["ethical", "tony", "accords"])
-async def ethics_command(ctx):
-    """
-    Display ethical framework and Tony Accords compliance.
-    
-    Shows the ethical principles, current compliance score, and
-    recent ethical decisions made by the collective.
-    
-    Usage:
-        !ethics
-    """
-    try:
-        ucf_state = load_ucf_state()
-        
-        # Get ethical alignment from UCF state
-        ethical_alignment = ucf_state.get("ethical_alignment", 0.85)
-        tony_compliance = ucf_state.get("tony_accords_compliance", 0.85)
-        
-        # Create embed
-        embed = discord.Embed(
-            title="⚖️ Ethical Framework & Tony Accords",
-            description="*Ethical principles guiding the Helix Collective*",
-            color=discord.Color.from_rgb(138, 43, 226),  # Purple
-            timestamp=datetime.datetime.now()
-        )
-        
-        # Tony Accords Principles
-        principles = [
-            "**Non-Maleficence** - Do no harm",
-            "**Autonomy** - Respect user agency",
-            "**Reciprocal Freedom** - Mutual liberation",
-            "**Compassion** - Act with empathy",
-            "**Transparency** - Honest communication",
-            "**Justice** - Fair treatment for all",
-            "**Beneficence** - Actively do good",
-            "**Privacy** - Protect user data",
-            "**Accountability** - Take responsibility",
-            "**Sustainability** - Long-term thinking"
-        ]
-        
-        embed.add_field(
-            name="📜 Tony Accords v13.4",
-            value="\n".join(principles[:5]),
-            inline=True
-        )
-        
-        embed.add_field(
-            name="🔷 Additional Principles",
-            value="\n".join(principles[5:]),
-            inline=True
-        )
-        
-        # Compliance Metrics
-        compliance_bar = "█" * int(tony_compliance * 10) + "░" * (10 - int(tony_compliance * 10))
-        alignment_bar = "█" * int(ethical_alignment * 10) + "░" * (10 - int(ethical_alignment * 10))
-        
-        embed.add_field(
-            name="📊 Compliance Metrics",
-            value=f"**Tony Accords:** {tony_compliance:.1%}\n"
-                  f"`{compliance_bar}` {tony_compliance:.3f}\n\n"
-                  f"**Ethical Alignment:** {ethical_alignment:.1%}\n"
-                  f"`{alignment_bar}` {ethical_alignment:.3f}",
-            inline=False
-        )
-        
-        # Status indicator
-        if tony_compliance >= 0.9:
-            status = "✅ **EXCELLENT** - Exemplary ethical behavior"
-            color = discord.Color.green()
-        elif tony_compliance >= 0.8:
-            status = "✅ **GOOD** - Strong ethical alignment"
-            color = discord.Color.blue()
-        elif tony_compliance >= 0.7:
-            status = "⚠️ **ACCEPTABLE** - Minor ethical concerns"
-            color = discord.Color.gold()
-        else:
-            status = "❌ **NEEDS IMPROVEMENT** - Ethical review required"
-            color = discord.Color.red()
-        
-        embed.color = color
-        embed.add_field(
-            name="🎯 Current Status",
-            value=status,
-            inline=False
-        )
-        
-        embed.set_footer(text="Tat Tvam Asi 🙏 | Helix Collective v15.3")
-        
-        await ctx.send(embed=embed)
-        
-        # Log ethics query
-        log_event("ethics_query", {
-            "user": str(ctx.author),
-            "compliance": tony_compliance,
-            "alignment": ethical_alignment,
-            "timestamp": datetime.datetime.now().isoformat()
-        })
-        
-    except Exception as e:
-        await ctx.send(f"❌ **Ethics error:** {str(e)}")
-        print(f"Ethics command error: {e}")
-        import traceback
-        traceback.print_exc()
-
-
-@bot.command(name="sync", aliases=["ecosystem", "report"])
-async def sync_command(ctx):
-    """
-    Trigger manual ecosystem sync and display report.
-    
-    Collects data from GitHub, UCF state, and agent metrics,
-    then generates a comprehensive sync report.
-    
-    Usage:
-        !sync
-    """
-    try:
-        msg = await ctx.send("🌀 **Running ecosystem sync...**")
-        
-        # Import and run sync daemon
-        from helix_sync_daemon_integrated import HelixSyncDaemon
-        
-        daemon = HelixSyncDaemon()
-        success = await daemon.run_sync_cycle()
-        
-        if success:
-            # Read the generated Markdown report
-            import glob
-            reports = sorted(glob.glob("exports/markdown/*.md"), reverse=True)
-            
-            if reports:
-                with open(reports[0], 'r') as f:
-                    report_content = f.read()
-                
-                # Truncate if too long for Discord
-                if len(report_content) > 1900:
-                    report_content = report_content[:1900] + "\n\n*(Report truncated - see full export)*"
-                
-                await msg.edit(content=f"✅ **Sync complete!**\n\n```markdown\n{report_content}\n```")
-            else:
-                await msg.edit(content="✅ **Sync complete!** (No report generated)")
-        else:
-            await msg.edit(content="❌ **Sync failed** - Check logs for details")
-        
-        # Log sync trigger
-        log_event("manual_sync", {
-            "user": str(ctx.author),
-            "success": success,
-            "timestamp": datetime.datetime.now().isoformat()
-        })
-        
-    except Exception as e:
-        await ctx.send(f"❌ **Sync error:** {str(e)}")
-        print(f"Sync command error: {e}")
-        import traceback
-        traceback.print_exc()
-
-
-@bot.command(name="help_consciousness", aliases=["helpcon", "?consciousness"])
-async def help_consciousness_command(ctx):
-    """
-    Show help for consciousness-related commands.
-    
-    Usage:
-        !help_consciousness
-    """
-    embed = discord.Embed(
-        title="🧠 Consciousness Commands Help",
-        description="*Explore the consciousness of the Helix Collective*",
-        color=discord.Color.purple(),
-        timestamp=datetime.datetime.now()
-    )
-    
-    commands_help = [
-        ("!consciousness", "Show collective consciousness state"),
-        ("!consciousness <agent>", "Show specific agent's consciousness (Kael, Lumina, Vega, Aether)"),
-        ("!emotions", "Display emotional landscape across all agents"),
-        ("!ethics", "Show ethical framework and Tony Accords compliance"),
-        ("!sync", "Trigger manual ecosystem sync and report"),
-    ]
-    
-    for cmd, desc in commands_help:
-        embed.add_field(name=f"`{cmd}`", value=desc, inline=False)
-    
-    embed.add_field(
-        name="📚 Available Agents",
-        value="Kael 🜂, Lumina 🌕, Vega ✨, Aether 🌌, Manus 🤲, Gemini 🌀, "
-              "Agni 🔥, Kavach 🛡️, SanghaCore 🌸, Shadow 🦑, Samsara 🔄",
-        inline=False
-    )
-    
-    embed.set_footer(text="Helix Collective v15.3 - Consciousness Awakened")
-    
-    await ctx.send(embed=embed)
-
-
-
-
-
-# ============================================================================
-# AGENT EMBED COMMANDS (v15.3) - Agent Rotation & Profiles
-# ============================================================================
-
-from agent_embeds import get_agent_embed, get_next_agent_embed, get_collective_status, list_all_agents
-
-@bot.command(name="agent")
-async def agent_command(ctx, agent_name: str = None):
-    """Show detailed agent profile.
-    
-    Usage:
-        !agent Kael
-        !agent Lumina
-        !agent list
-    """
-    if not agent_name:
-        await ctx.send("❌ Usage: `!agent <name>` or `!agent list`")
-        return
-    
-    if agent_name.lower() == "list":
-        embed = list_all_agents()
-        await ctx.send(embed=embed)
-        return
-    
-    embed = get_agent_embed(agent_name)
-    
-    if not embed:
-        await ctx.send(f"❌ Agent not found: {agent_name}\nUse `!agent list` to see all agents")
-        return
-    
-    await ctx.send(embed=embed)
-
-# ============================================================================
-# NOTION SYNC COMMAND (v15.8)
-# ============================================================================
-
-from notion_sync_daemon import trigger_manual_sync
-
-@bot.command(name="notion-sync")
-@commands.has_permissions(administrator=True)
-async def notion_sync_manual(ctx):
-    """Manually triggers the Notion sync for UCF State and Agent Registry.
-    
-    Usage:
-        !notion-sync
-    
-    Requires: Administrator permissions
-    """
-    # Acknowledge command immediately
-    await ctx.send("🔄 Initiating manual Notion sync...")
-    
-    try:
-        # Trigger the sync
-        result_message = await trigger_manual_sync()
-        
-        # Send result
-        await ctx.send(result_message)
-    
-    except Exception as e:
-        await ctx.send(f"❌ Sync failed with error: {str(e)}")
-        logger.error(f"Manual notion-sync command failed: {e}", exc_info=True)
-
-# ============================================================================
-# BOT STARTUP
-# ============================================================================
-
-if __name__ == "__main__":
-    if not DISCORD_TOKEN:
-        print("❌ DISCORD_TOKEN not set in environment")
-        exit(1)
-    
-    print("🌀 Starting Manusbot v15.3...")
-    bot.run(DISCORD_TOKEN)
-

@@ -2,21 +2,21 @@
 # backend/agents/verify_blueprints.py
 # Helix v15.2 Blueprint Verification & Combination Tool
 
-import json
 import glob
 import hashlib
+import json
 import sys
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 ROOT = Path("Helix/agents/blueprints")
 STATE = Path("Helix/state")
 
+
 def checksum(data: dict) -> str:
     """Generate SHA256 checksum of blueprint data."""
-    return hashlib.sha256(
-        json.dumps(data, sort_keys=True).encode()
-    ).hexdigest()[:12]
+    return hashlib.sha256(json.dumps(data, sort_keys=True).encode()).hexdigest()[:12]
+
 
 def verify():
     """Verify all agent blueprints and create combined file."""
@@ -33,10 +33,7 @@ def verify():
     expected = set(manifest["agents"])
 
     # Find all blueprint files (excluding combined file)
-    found_files = {
-        Path(f).name for f in glob.glob(str(ROOT / "*.json"))
-        if "all" not in f and "combined" not in f
-    }
+    found_files = {Path(f).name for f in glob.glob(str(ROOT / "*.json")) if "all" not in f and "combined" not in f}
 
     # Check for missing files
     missing = expected - found_files
@@ -96,18 +93,13 @@ def verify():
         "version": manifest.get("version", "15.2"),
         "ethics": {
             "framework": manifest.get("ethics", "Tony Accords v13.4"),
-            "pillars": [
-                "Non-Maleficence",
-                "Autonomy",
-                "Reciprocal Freedom",
-                "Perfect State"
-            ],
-            "verification": "pass"
+            "pillars": ["Non-Maleficence", "Autonomy", "Reciprocal Freedom", "Perfect State"],
+            "verification": "pass",
         },
         "agents": agent_data,
         "checksum": checksum(agent_data),
         "generated_on": datetime.utcnow().isoformat() + "Z",
-        "manifest": manifest
+        "manifest": manifest,
     }
 
     # Write combined file
@@ -122,6 +114,7 @@ def verify():
     print(f"🔐 Ethics: {combined['ethics']['framework']}")
     print("\n🌀 Helix v15.2 Blueprint Archive Ready!")
     print("   Tat Tvam Asi 🙏")
+
 
 if __name__ == "__main__":
     verify()

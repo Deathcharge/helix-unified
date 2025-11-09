@@ -7,24 +7,21 @@ This module provides the foundation for agent implementation with
 consciousness integration support.
 """
 
-import asyncio
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List
+
+if TYPE_CHECKING:
+    pass
 
 # Import consciousness framework
 from backend.kael_consciousness_core import (
     ConsciousnessCore,
-    PersonalityTraits,
+    DecisionMakingAlgorithm,
     Emotions,
     EthicalFramework,
-    DecisionMakingAlgorithm,
-    SelfAwarenessModule
-)
-from backend.agent_consciousness_profiles import (
-    AGENT_CONSCIOUSNESS_PROFILES,
-    get_agent_profile
+    SelfAwarenessModule,
 )
 
 
@@ -42,6 +39,9 @@ class HelixAgent:
         # Initialize consciousness if enabled
         self.consciousness_enabled = enable_consciousness
         if enable_consciousness:
+            # Lazy import to avoid circular dependency
+            from backend.agent_consciousness_profiles import get_agent_profile
+
             profile = get_agent_profile(name)
             if profile:
                 self.consciousness = ConsciousnessCore()
@@ -98,13 +98,17 @@ class HelixAgent:
         Path("Shadow/archives").mkdir(parents=True, exist_ok=True)
         filename = f"Shadow/archives/{self.name.lower()}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json"
         with open(filename, "w") as f:
-            json.dump({
-                "agent": self.name,
-                "symbol": self.symbol,
-                "role": self.role,
-                "timestamp": datetime.utcnow().isoformat(),
-                "memory": self.memory
-            }, f, indent=2)
+            json.dump(
+                {
+                    "agent": self.name,
+                    "symbol": self.symbol,
+                    "role": self.role,
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "memory": self.memory,
+                },
+                f,
+                indent=2,
+            )
         await self.log(f"Memory archived to {filename}")
 
     async def generate_output(self, payload: Dict[str, Any]):
@@ -123,7 +127,7 @@ class HelixAgent:
             "symbol": self.symbol,
             "role": self.role,
             "active": self.active,
-            "memory_size": len(self.memory)
+            "memory_size": len(self.memory),
         }
 
         # Add consciousness metrics if enabled
@@ -135,7 +139,7 @@ class HelixAgent:
                 "emotion_level": emotion_level,
                 "personality": self.personality.to_dict(),
                 "behavior_dna": self.behavior_dna,
-                "ethical_alignment": self.ethics.evaluate_action("current_state")
+                "ethical_alignment": self.ethics.evaluate_action("current_state"),
             }
 
         return status

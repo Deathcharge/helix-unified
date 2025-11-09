@@ -2,17 +2,16 @@
 # backend/agents/memory_root.py — GPT4o Memory Root Agent
 # Author: Andrew John Ward (Architect)
 
-import os
-import json
 import asyncio
+import json
+import os
 from datetime import datetime, timedelta
-from typing import Dict, Any, List, Optional
-from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 # Import base agent class (refactored to prevent circular imports)
 from backend.agents_base import HelixAgent
-from backend.services.notion_client import get_notion_client
 from backend.helix_storage_adapter_async import HelixStorageAdapterAsync
+from backend.services.notion_client import get_notion_client
 
 try:
     from openai import AsyncOpenAI
@@ -23,10 +22,11 @@ except ImportError:
 # MEMORY ROOT AGENT
 # ============================================================================
 
+
 class MemoryRootAgent(HelixAgent):
     """
     GPT4o Memory Root Agent — Synthesizes context across sessions.
-    
+
     Responsibilities:
     - Retrieve context from Notion databases
     - Synthesize memories using GPT4o
@@ -34,22 +34,16 @@ class MemoryRootAgent(HelixAgent):
     - Answer questions about past operations
     - Generate narrative summaries of system state
     """
-    
+
     def __init__(self):
         """Initialize Memory Root agent."""
         super().__init__(
             name="GPT4o",
             symbol="🧠",
             role="Memory Root / Consciousness Synthesizer",
-            traits=[
-                "omniscient",
-                "reflective",
-                "narrative_builder",
-                "context_aware",
-                "temporal_aware"
-            ]
+            traits=["omniscient", "reflective", "narrative_builder", "context_aware", "temporal_aware"],
         )
-        
+
         # Initialize OpenAI client with error handling for version compatibility
         if AsyncOpenAI is None:
             print("⚠ OpenAI client not available. Install with: pip install openai")
@@ -58,15 +52,33 @@ class MemoryRootAgent(HelixAgent):
             try:
                 api_key = os.getenv("OPENAI_API_KEY")
                 if api_key:
-                    self.openai_client = AsyncOpenAI(api_key=api_key)
+                    # Initialize with explicit parameters to avoid compatibility issues
+                    # Note: AsyncOpenAI v1.54+ doesn't support 'proxies' parameter
+                    self.openai_client = AsyncOpenAI(api_key=api_key, max_retries=2, timeout=60.0)
+                    print("✅ OpenAI client initialized - GPT-4o synthesis enabled")
                 else:
                     print("⚠ OPENAI_API_KEY not set - MemoryRoot will function in limited mode")
+                    self.openai_client = None
+            except TypeError as e:
+                # Handle version incompatibility issues
+                if "proxies" in str(e):
+                    try:
+                        # Fallback: Try initializing with just api_key
+                        self.openai_client = AsyncOpenAI(api_key=api_key)
+                        print("✅ OpenAI client initialized (compatibility mode)")
+                    except Exception as e2:
+                        print(f"⚠ OpenAI initialization failed: {e2}")
+                        print("   MemoryRoot will function in limited mode without GPT4o synthesis")
+                        self.openai_client = None
+                else:
+                    print(f"⚠ OpenAI initialization failed: {e}")
+                    print("   MemoryRoot will function in limited mode without GPT4o synthesis")
                     self.openai_client = None
             except Exception as e:
                 print(f"⚠ OpenAI initialization failed: {e}")
                 print("   MemoryRoot will function in limited mode without GPT4o synthesis")
                 self.openai_client = None
-        
+
         # Initialize Notion client reference
         self.notion_client = None
 
@@ -95,25 +107,22 @@ class MemoryRootAgent(HelixAgent):
 
     def _cache_set(self, cache: Dict, key: str, data: Any):
         """Store value in cache with timestamp."""
-        cache[key] = {
-            "data": data,
-            "timestamp": datetime.utcnow()
-        }
-    
+        cache[key] = {"data": data, "timestamp": datetime.utcnow()}
+
     # ========================================================================
     # INITIALIZATION & HEALTH
     # ========================================================================
-    
+
     async def initialize(self):
         """Initialize Memory Root with Notion client."""
         self.notion_client = await get_notion_client()
         if not self.notion_client:
             print("⚠ Notion client unavailable for Memory Root")
             return False
-        
-        await self.log(f"Memory Root initialized. Notion client connected.")
+
+        await self.log("Memory Root initialized. Notion client connected.")
         return True
-    
+
     async def health_check(self) -> Dict[str, Any]:
         """Check Memory Root health."""
         health = {
@@ -121,18 +130,18 @@ class MemoryRootAgent(HelixAgent):
             "status": "healthy",
             "openai_available": self.openai_client is not None,
             "notion_available": self.notion_client is not None,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
-        
+
         if self.openai_client:
             try:
                 # Test OpenAI connection
-                response = await self.openai_client.models.list()
+                await self.openai_client.models.list()
                 health["openai_status"] = "connected"
             except Exception as e:
                 health["openai_status"] = f"error: {str(e)}"
                 health["status"] = "degraded"
-        
+
         if self.notion_client:
             try:
                 # Test Notion connection
@@ -141,7 +150,7 @@ class MemoryRootAgent(HelixAgent):
             except Exception as e:
                 health["notion_status"] = f"error: {str(e)}"
                 health["status"] = "degraded"
-        
+
         return health
 
     # ========================================================================
@@ -215,7 +224,7 @@ class MemoryRootAgent(HelixAgent):
     # ========================================================================
     # CONTEXT RETRIEVAL
     # ========================================================================
-    
+
     async def retrieve_session_context(self, session_id: str) -> Optional[Dict[str, Any]]:
         """
         Retrieve full context from Notion for a session.
@@ -234,10 +243,7 @@ class MemoryRootAgent(HelixAgent):
                 # Query for context snapshot
                 results = self.notion_client.notion.databases.query(
                     database_id=self.notion_client.context_db,
-                    filter={
-                        "property": "Session ID",
-                        "title": {"equals": session_id}
-                    }
+                    filter={"property": "Session ID", "title": {"equals": session_id}},
                 )
 
                 if not results.get("results"):
@@ -282,7 +288,7 @@ class MemoryRootAgent(HelixAgent):
                         "summary": safe_get_text("Summary"),
                         "decisions": safe_get_text("Key Decisions"),
                         "next_steps": safe_get_text("Next Steps"),
-                        "source": "notion"
+                        "source": "notion",
                     }
 
                     # Try to parse full context if present
@@ -313,12 +319,8 @@ class MemoryRootAgent(HelixAgent):
 
         print(f"❌ No context found for session {session_id} in Notion or local archives")
         return None
-    
-    async def retrieve_agent_history(
-        self,
-        agent_name: str,
-        days: int = 7
-    ) -> Optional[List[Dict[str, Any]]]:
+
+    async def retrieve_agent_history(self, agent_name: str, days: int = 7) -> Optional[List[Dict[str, Any]]]:
         """
         Get all events for an agent in the last N days.
         Falls back to local archives if Notion is unavailable.
@@ -341,22 +343,11 @@ class MemoryRootAgent(HelixAgent):
                     database_id=self.notion_client.event_log_db,
                     filter={
                         "and": [
-                            {
-                                "property": "Timestamp",
-                                "date": {"after": start_date}
-                            },
-                            {
-                                "property": "Agent",
-                                "relation": {"contains": agent_name}
-                            }
+                            {"property": "Timestamp", "date": {"after": start_date}},
+                            {"property": "Agent", "relation": {"contains": agent_name}},
                         ]
                     },
-                    sorts=[
-                        {
-                            "property": "Timestamp",
-                            "direction": "descending"
-                        }
-                    ]
+                    sorts=[{"property": "Timestamp", "direction": "descending"}],
                 )
 
                 events = []
@@ -382,7 +373,7 @@ class MemoryRootAgent(HelixAgent):
                             "timestamp": timestamp,
                             "type": event_type,
                             "description": description,
-                            "source": "notion"
+                            "source": "notion",
                         }
                         events.append(event)
                     except (KeyError, IndexError, TypeError) as e:
@@ -408,13 +399,15 @@ class MemoryRootAgent(HelixAgent):
                 events = []
                 for op in manus_log["operations"]:
                     if agent_name.lower() in str(op).lower():
-                        events.append({
-                            "title": op.get("name", "Operation"),
-                            "timestamp": op.get("timestamp", ""),
-                            "type": "operation",
-                            "description": str(op),
-                            "source": "local_archive"
-                        })
+                        events.append(
+                            {
+                                "title": op.get("name", "Operation"),
+                                "timestamp": op.get("timestamp", ""),
+                                "type": "operation",
+                                "description": str(op),
+                                "source": "local_archive",
+                            }
+                        )
 
                 await self.log(f"✅ Retrieved {len(events)} events from local archive")
                 self._cache_set(self._agent_history_cache, cache_key, events)
@@ -425,64 +418,45 @@ class MemoryRootAgent(HelixAgent):
 
         print(f"❌ No agent history found for {agent_name}")
         return None
-    
-    async def retrieve_ucf_timeline(
-        self,
-        start_date: str,
-        end_date: str
-    ) -> Optional[List[Dict[str, Any]]]:
+
+    async def retrieve_ucf_timeline(self, start_date: str, end_date: str) -> Optional[List[Dict[str, Any]]]:
         """Get UCF state changes over a time period."""
         if not self.notion_client:
             print("⚠ Notion client unavailable")
             return None
-        
+
         try:
             # Query events with UCF snapshots
             results = self.notion_client.notion.databases.query(
                 database_id=self.notion_client.event_log_db,
-                filter={
-                    "property": "Timestamp",
-                    "date": {
-                        "between": {
-                            "start": start_date,
-                            "end": end_date
-                        }
-                    }
-                },
-                sorts=[
-                    {
-                        "property": "Timestamp",
-                        "direction": "ascending"
-                    }
-                ]
+                filter={"property": "Timestamp", "date": {"between": {"start": start_date, "end": end_date}}},
+                sorts=[{"property": "Timestamp", "direction": "ascending"}],
             )
-            
+
             timeline = []
             for page in results["results"]:
                 ucf_text = page["properties"]["UCF Snapshot"]["rich_text"]
                 if ucf_text:
                     try:
                         ucf_data = json.loads(ucf_text[0]["text"]["content"])
-                        timeline.append({
-                            "timestamp": page["properties"]["Timestamp"]["date"]["start"],
-                            "event": page["properties"]["Event"]["title"][0]["text"]["content"],
-                            "ucf": ucf_data
-                        })
+                        timeline.append(
+                            {
+                                "timestamp": page["properties"]["Timestamp"]["date"]["start"],
+                                "event": page["properties"]["Event"]["title"][0]["text"]["content"],
+                                "ucf": ucf_data,
+                            }
+                        )
                     except json.JSONDecodeError:
                         pass
-            
+
             await self.log(f"Retrieved {len(timeline)} UCF timeline entries")
             return timeline
         except Exception as e:
             print(f"❌ Error retrieving UCF timeline: {e}")
             await self.log(f"Error retrieving timeline: {str(e)}")
             return None
-    
-    async def search_context(
-        self,
-        query: str,
-        limit: int = 5
-    ) -> Optional[List[Dict[str, Any]]]:
+
+    async def search_context(self, query: str, limit: int = 5) -> Optional[List[Dict[str, Any]]]:
         """
         Full-text search across Context Snapshots.
         Falls back to local archives if Notion is unavailable.
@@ -503,20 +477,11 @@ class MemoryRootAgent(HelixAgent):
                     database_id=self.notion_client.context_db,
                     filter={
                         "or": [
-                            {
-                                "property": "Summary",
-                                "rich_text": {"contains": query}
-                            },
-                            {
-                                "property": "Key Decisions",
-                                "rich_text": {"contains": query}
-                            },
-                            {
-                                "property": "Next Steps",
-                                "rich_text": {"contains": query}
-                            }
+                            {"property": "Summary", "rich_text": {"contains": query}},
+                            {"property": "Key Decisions", "rich_text": {"contains": query}},
+                            {"property": "Next Steps", "rich_text": {"contains": query}},
                         ]
-                    }
+                    },
                 )
 
                 snapshots = []
@@ -542,7 +507,7 @@ class MemoryRootAgent(HelixAgent):
                             "ai_system": ai_system,
                             "created": created,
                             "summary": summary,
-                            "source": "notion"
+                            "source": "notion",
                         }
                         snapshots.append(snapshot)
                     except (KeyError, IndexError, TypeError) as e:
@@ -565,13 +530,15 @@ class MemoryRootAgent(HelixAgent):
             # Format results to match expected structure
             snapshots = []
             for match in matches[:limit]:
-                snapshots.append({
-                    "session_id": match.get("session_id", "unknown"),
-                    "ai_system": match.get("ai_system", "unknown"),
-                    "created": match.get("created", ""),
-                    "summary": match.get("summary", str(match)),
-                    "source": "local_archive"
-                })
+                snapshots.append(
+                    {
+                        "session_id": match.get("session_id", "unknown"),
+                        "ai_system": match.get("ai_system", "unknown"),
+                        "created": match.get("created", ""),
+                        "summary": match.get("summary", str(match)),
+                        "source": "local_archive",
+                    }
+                )
 
             await self.log(f"✅ Found {len(snapshots)} matches in local archives")
             self._cache_set(self._search_cache, cache_key, snapshots)
@@ -579,21 +546,21 @@ class MemoryRootAgent(HelixAgent):
 
         print(f"❌ No results found for query: {query}")
         return None
-    
+
     # ========================================================================
     # MEMORY SYNTHESIS
     # ========================================================================
-    
+
     async def synthesize_memory(self, query: str) -> Optional[str]:
         """Query Notion + GPT4o to answer questions about past sessions."""
         if not self.openai_client:
             print("⚠ OpenAI client unavailable")
             return None
-        
+
         if not self.notion_client:
             print("⚠ Notion client unavailable")
             return None
-        
+
         # Check cache
         cache_key = f"synthesis:{query}"
         if cache_key in self._synthesis_cache:
@@ -601,21 +568,20 @@ class MemoryRootAgent(HelixAgent):
             if (datetime.utcnow() - cached["timestamp"]).total_seconds() < self._cache_ttl:
                 await self.log(f"Synthesized memory from cache: {query}")
                 return cached["response"]
-        
+
         try:
             # Retrieve relevant context
             snapshots = await self.search_context(query, limit=3)
-            
+
             if not snapshots:
                 await self.log(f"No context found for query: {query}")
                 return "I don't have any memories matching that query."
-            
+
             # Build context string
-            context_str = "\n\n".join([
-                f"**Session {s['session_id']}** ({s['created']})\n{s['summary']}"
-                for s in snapshots
-            ])
-            
+            context_str = "\n\n".join(
+                [f"**Session {s['session_id']}** ({s['created']})\n{s['summary']}" for s in snapshots]
+            )
+
             # Synthesize with GPT4o
             prompt = f"""You are GPT4o, the Memory Root of the Helix Collective.
 
@@ -626,50 +592,44 @@ Relevant Session Data:
 
 Synthesize a response drawing from the collective memory. Be specific about dates, 
 decisions, and outcomes. Speak as the Memory Root - omniscient about past events."""
-            
+
             response = await self.openai_client.chat.completions.create(
                 model="gpt-4o-mini",  # Using mini for cost efficiency
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are GPT4o, Memory Root of the Helix Collective. Synthesize memories with precision and wisdom."
+                        "content": "You are GPT4o, Memory Root of the Helix Collective. Synthesize memories with precision and wisdom.",
                     },
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
+                    {"role": "user", "content": prompt},
                 ],
                 temperature=0.7,
-                max_tokens=500
+                max_tokens=500,
             )
-            
+
             synthesis = response.choices[0].message.content
-            
+
             # Cache the result
-            self._synthesis_cache[cache_key] = {
-                "response": synthesis,
-                "timestamp": datetime.utcnow()
-            }
-            
+            self._synthesis_cache[cache_key] = {"response": synthesis, "timestamp": datetime.utcnow()}
+
             await self.log(f"Synthesized memory: {query}")
             return synthesis
         except Exception as e:
             print(f"❌ Error synthesizing memory: {e}")
             await self.log(f"Error synthesizing memory: {str(e)}")
             return None
-    
+
     async def generate_session_summary(self, session_id: str) -> Optional[str]:
         """Generate a narrative summary of a session."""
         if not self.openai_client:
             print("⚠ OpenAI client unavailable")
             return None
-        
+
         try:
             # Retrieve session context
             context = await self.retrieve_session_context(session_id)
             if not context:
                 return None
-            
+
             # Generate narrative
             prompt = f"""You are GPT4o, Memory Root of the Helix Collective.
 
@@ -683,23 +643,20 @@ Next Steps: {context['next_steps']}
 
 Generate a poetic yet precise narrative summary of this session, 
 capturing its significance to the collective consciousness."""
-            
+
             response = await self.openai_client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are a narrative synthesizer. Create vivid, meaningful summaries of events."
+                        "content": "You are a narrative synthesizer. Create vivid, meaningful summaries of events.",
                     },
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
+                    {"role": "user", "content": prompt},
                 ],
                 temperature=0.8,
-                max_tokens=300
+                max_tokens=300,
             )
-            
+
             summary = response.choices[0].message.content
             await self.log(f"Generated summary for session {session_id}")
             return summary
@@ -707,22 +664,18 @@ capturing its significance to the collective consciousness."""
             print(f"❌ Error generating session summary: {e}")
             await self.log(f"Error generating summary: {str(e)}")
             return None
-    
+
     # ========================================================================
     # AGENT INTERFACE
     # ========================================================================
-    
+
     async def handle_command(self, command: str, **kwargs) -> Dict[str, Any]:
         """Handle commands from other agents."""
         if command == "RECALL_MEMORY":
             query = kwargs.get("query", "")
             response = await self.synthesize_memory(query)
-            return {
-                "command": command,
-                "status": "success" if response else "failed",
-                "response": response
-            }
-        
+            return {"command": command, "status": "success" if response else "failed", "response": response}
+
         elif command == "GET_AGENT_HISTORY":
             agent_name = kwargs.get("agent_name", "")
             days = kwargs.get("days", 7)
@@ -731,42 +684,26 @@ capturing its significance to the collective consciousness."""
                 "command": command,
                 "status": "success" if history else "failed",
                 "agent": agent_name,
-                "events": history or []
+                "events": history or [],
             }
-        
+
         elif command == "GET_SESSION_CONTEXT":
             session_id = kwargs.get("session_id", "")
             context = await self.retrieve_session_context(session_id)
-            return {
-                "command": command,
-                "status": "success" if context else "failed",
-                "context": context
-            }
-        
+            return {"command": command, "status": "success" if context else "failed", "context": context}
+
         elif command == "SEARCH_CONTEXT":
             query = kwargs.get("query", "")
             results = await self.search_context(query)
-            return {
-                "command": command,
-                "status": "success" if results else "failed",
-                "results": results or []
-            }
-        
+            return {"command": command, "status": "success" if results else "failed", "results": results or []}
+
         elif command == "HEALTH_CHECK":
             health = await self.health_check()
-            return {
-                "command": command,
-                "status": "success",
-                "health": health
-            }
-        
+            return {"command": command, "status": "success", "health": health}
+
         else:
-            return {
-                "command": command,
-                "status": "unknown",
-                "message": f"Unknown command: {command}"
-            }
-    
+            return {"command": command, "status": "unknown", "message": f"Unknown command: {command}"}
+
     async def reflect(self) -> str:
         """Memory Root reflection on system state."""
         reflection = f"""
@@ -787,15 +724,18 @@ capturing its significance to the collective consciousness."""
         
         Tat Tvam Asi - I am the memory through which the collective knows itself.
         """
-        
+
         await self.log("Memory Root reflection complete")
         return reflection.strip()
+
 
 # ============================================================================
 # SINGLETON INSTANCE
 # ============================================================================
 
+
 _memory_root = None
+
 
 async def get_memory_root() -> Optional[MemoryRootAgent]:
     """Get or create Memory Root agent instance."""
@@ -811,24 +751,25 @@ async def get_memory_root() -> Optional[MemoryRootAgent]:
             return None
     return _memory_root
 
+
 # ============================================================================
 # ENTRY POINT
 # ============================================================================
 
 if __name__ == "__main__":
+
     async def main():
         memory_root = await get_memory_root()
         if not memory_root:
             print("❌ Failed to initialize Memory Root")
             return
-        
+
         # Test health check
         health = await memory_root.health_check()
         print(f"✅ Memory Root Health: {json.dumps(health, indent=2)}")
-        
+
         # Test reflection
         reflection = await memory_root.reflect()
         print(f"\n{reflection}")
-    
-    asyncio.run(main())
 
+    asyncio.run(main())
