@@ -98,7 +98,7 @@ async def ucf_broadcast_loop() -> None:
     """
     previous_state = None
     broadcast_interval = 2  # Check every 2 seconds
-    zapier_send_interval = 30  # Send to Zapier every 30 seconds
+    zapier_send_interval = 3600  # Send to Zapier every 1 hour (24/day = 720/month)
     last_zapier_send = 0
 
     logger.info("📡 UCF broadcast loop started")
