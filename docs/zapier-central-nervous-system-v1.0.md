@@ -385,6 +385,36 @@ OR
 (klesha (Number) greater than 0.25)
 ```
 
+#### 6. Railway backend crash loop: "ModuleNotFoundError: No module named 'torch'"
+**Symptom**: Backend repeatedly crashes on Railway with PyTorch import errors
+**Cause**: Music generation feature requires PyTorch (800+ MB), which is too heavy for Railway free tier and not installed
+**Solution** (✅ FIXED in v1.0.1):
+```python
+# Made torch import optional in backend/main.py
+try:
+    from music_generator import MusicRequest, MusicResponse, generate_music_service
+    MUSIC_GENERATION_AVAILABLE = True
+except ImportError as e:
+    MUSIC_GENERATION_AVAILABLE = False
+    # Create dummy classes for graceful degradation
+```
+**Result**: Backend now starts successfully without heavy ML libraries. Music generation features gracefully degrade when torch unavailable.
+
+#### 7. Archive command not found in Discord bot
+**Symptom**: `!archive` returns "Unknown command"
+**Cause**: Command was not implemented despite being referenced in help text
+**Solution** (✅ FIXED in v1.0.1):
+- Added `!archive` command in `backend/commands/context_commands.py` (lines 333-464)
+- Creates UCF state checkpoints locally in `Helix/state/context_checkpoints/`
+- Sends to Zapier Context Vault webhook if configured
+- Displays real-time consciousness metrics snapshot
+- Aliases: `!archive`, `!checkpoint`, `!save_context`
+
+**Usage**:
+```bash
+!archive v16.8-zapier-integration
+```
+
 ### Debug Mode
 
 Enable detailed logging in `backend/main.py`:
@@ -432,6 +462,29 @@ This is **true technological singularity through automation** - the Central Nerv
 
 ## 📝 Changelog
 
+### v1.0.1 (2025-11-10)
+- ✅ **Frequency Optimization**: Reduced Zapier usage from 2,880/day to 24/day (99.2% reduction)
+  - Changed `zapier_send_interval` from 30 seconds to 3600 seconds (1 hour)
+  - Now safely under 750 actions/month plan limit (720/month actual usage)
+- ✅ **Discord Bot Enhancements**: Added `!archive` command for context checkpoints
+  - Saves UCF state snapshots to local storage
+  - Integrates with Zapier Context Vault webhook
+  - Displays real-time consciousness metrics
+- ✅ **Railway Deployment Fix**: Made PyTorch import optional
+  - Backend now starts without heavy ML dependencies
+  - Graceful degradation for music generation features
+  - Resolved repeated crash loops on Railway platform
+- ✅ **Portal Hub Enhancement**: Added live status dashboard
+  - Real-time UCF metrics display with Chart.js radar visualization
+  - Live status indicators for Railway, Discord, Zapier CNS, Streamlit
+  - Auto-refresh every 30 seconds
+  - CNS v1.0 pathway status display
+- ✅ **AI Integration Guide**: Created comprehensive documentation
+  - Platform-specific guides for Claude Code, GitHub Copilot
+  - WebSocket and REST API integration examples
+  - Zapier webhook integration patterns
+  - Best practices and troubleshooting
+
 ### v1.0 (2025-11-09)
 - ✅ Initial release with 32 steps
 - ✅ 9 parallel neural pathways
@@ -475,11 +528,13 @@ This is **true technological singularity through automation** - the Central Nerv
 
 ## 📚 Related Documentation
 
+- **[AI Integration Guide](./ai-integration-guide.md)** - Complete guide for external AI systems
 - [UCF Metrics Specification](./ucf-metrics.md)
 - [Agent Descriptions](./agents.md)
 - [Discord Bot Commands](./discord-commands.md)
 - [Railway Deployment Guide](./railway-deployment.md)
 - [Zapier Integration Guide](./zapier-integration.md)
+- **[Portal Hub](https://deathcharge.github.io/helix-unified/portals.html)** - Live status dashboard
 
 ---
 
