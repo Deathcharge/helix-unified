@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List
 
 if TYPE_CHECKING:
-    from backend.agent_consciousness_profiles import AgentConsciousnessProfile
+    pass
 
 # Import consciousness framework
 from backend.kael_consciousness_core import (

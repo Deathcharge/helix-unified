@@ -13,7 +13,6 @@ from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from backend.web_chat_server import connection_manager, AGENT_PERSONALITIES

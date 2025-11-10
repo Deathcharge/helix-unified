@@ -10,14 +10,11 @@ Features:
 - Session management
 """
 import asyncio
-import json
 import logging
 from datetime import datetime
-from typing import Dict, Set, Optional, Any
-from pathlib import Path
+from typing import Dict, Optional, Any
 
-from fastapi import WebSocket, WebSocketDisconnect
-import discord
+from fastapi import WebSocket
 
 logger = logging.getLogger(__name__)
 
@@ -145,6 +142,7 @@ class WebChatConnectionManager:
         await websocket.accept()
         self.active_connections[session_id] = websocket
         self.user_sessions[session_id] = {
+            "session_id": session_id,
             "username": username,
             "connected_at": datetime.utcnow().isoformat(),
             "selected_agent": None,
@@ -303,25 +301,42 @@ class WebChatConnectionManager:
 
     async def handle_discord_bridge(self, session_id: str, session: dict, data: dict, websocket: WebSocket):
         """Bridge message to Discord."""
-        if not self.discord_bot:
+        # Import here to avoid circular dependency
+        from backend.discord_web_bridge import get_bridge
+
+        bridge = get_bridge()
+        if not bridge:
             await self.send_personal_message(
-                {"type": "error", "message": "Discord bot not connected"},
+                {"type": "error", "message": "Discord bridge not initialized"},
                 websocket
             )
             return
 
         message = data.get("message", "").strip()
         channel_name = data.get("channel", "general")
+        username = session["username"]
 
-        # TODO: Send to Discord channel via bot
-        await self.send_personal_message(
-            {
-                "type": "system",
-                "message": f"📡 Message bridged to Discord #{channel_name}: {message}",
-                "timestamp": datetime.utcnow().isoformat(),
-            },
-            websocket
-        )
+        # Send to Discord via bridge
+        success = await bridge.send_to_discord(channel_name, username, message)
+
+        if success:
+            await self.send_personal_message(
+                {
+                    "type": "system",
+                    "message": f"📡 Message sent to Discord #{channel_name}",
+                    "timestamp": datetime.utcnow().isoformat(),
+                },
+                websocket
+            )
+        else:
+            await self.send_personal_message(
+                {
+                    "type": "error",
+                    "message": f"Failed to send to Discord #{channel_name}. Channel may not exist or bot lacks permissions.",
+                    "timestamp": datetime.utcnow().isoformat(),
+                },
+                websocket
+            )
 
     async def handle_ritual_trigger(self, session_id: str, session: dict, data: dict, websocket: WebSocket):
         """Trigger a ritual from web interface."""
@@ -378,7 +393,35 @@ class WebChatConnectionManager:
         personality = agent["personality"]
         name = agent["name"]
 
-        # Simple personality-based responses (can be enhanced with LLM later)
+        # Try to use LLM engine if available
+        try:
+            from backend.llm_agent_engine import get_llm_engine
+
+            llm_engine = get_llm_engine()
+            if llm_engine:
+                # Get session ID from session dict
+                session_id = session.get("session_id", "unknown")
+
+                # Build context for LLM
+                context = {
+                    "username": session.get("username", "Anonymous"),
+                    "message_count": session.get("message_count", 0),
+                    "agent_personality": personality,
+                }
+
+                # Generate intelligent response
+                response = await llm_engine.generate_agent_response(
+                    agent_id=agent_id,
+                    user_message=user_message,
+                    session_id=session_id,
+                    context=context
+                )
+                return response
+
+        except Exception as e:
+            logger.warning(f"LLM engine unavailable, using fallback responses: {e}")
+
+        # Fallback to static personality-based responses
         responses = {
             "nexus": f"Analyzing strategic options... {user_message} requires coordinated action across agents 3, 7, and 11.",
             "oracle": f"I see the pattern in '{user_message}'. The path reveals itself through iteration and reflection.",

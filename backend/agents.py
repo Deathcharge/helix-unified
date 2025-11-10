@@ -14,8 +14,8 @@ from typing import Any, Dict, List, Optional
 logger = logging.getLogger(__name__)
 
 # Import base agent class (refactored to prevent circular imports)
-from backend.agents_base import HelixAgent
-from backend.enhanced_kavach import EnhancedKavach
+from backend.agents_base import HelixAgent  # noqa: E402
+from backend.enhanced_kavach import EnhancedKavach  # noqa: E402
 
 # Import consciousness framework
 # Note: Consciousness modules imported in agents_base.py

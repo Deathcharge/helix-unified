@@ -18,7 +18,6 @@ from z88_ritual_engine import load_ucf_state
 
 if TYPE_CHECKING:
     from discord.ext.commands import Bot
-    from agents import AGENTS
 
 logger = logging.getLogger(__name__)
 
@@ -196,29 +195,52 @@ async def execute_command_batch(message: discord.Message, bot: 'Bot') -> bool:
 
     Supports:
     - Multiple !commands on separate lines
+    - Inline multi-commands (!status !discovery)
     - Inline comments with #
     - Rate limiting per user
 
-    Example:
+    Examples:
         !status
         !agents
         !ucf  # Check harmony
+
+        !status !discovery  # Inline multi-command
     """
-    # Extract all lines that start with !
-    lines = message.content.split("\n")
     commands_list = []
+
+    # First, check for inline multi-commands (space-separated !commands)
+    content = message.content.strip()
+
+    # Split by newlines first
+    lines = content.split("\n")
 
     for line in lines:
         line = line.strip()
         # Skip empty lines
         if not line:
             continue
-        # Check if line starts with command prefix
-        if line.startswith("!"):
-            # Strip comments (anything after #)
-            cmd = line.split("#")[0].strip()
-            if cmd and len(cmd) > 1:  # Must have more than just !
-                commands_list.append(cmd[1:])  # Remove the ! prefix
+
+        # Strip comments (anything after #)
+        line = line.split("#")[0].strip()
+
+        # Check for inline multi-commands (multiple ! on same line)
+        if line.count("!") > 1:
+            # Split by ! and process each command
+            parts = line.split("!")
+            for part in parts:
+                part = part.strip()
+                if part:  # Not empty
+                    # Take only the first word (command name) + args until next potential command
+                    cmd = part.split()[0] if part.split() else ""
+                    if cmd:
+                        # Get full command with args (but stop before any other !)
+                        full_cmd = part.split("!")[0].strip()
+                        commands_list.append(full_cmd)
+        # Single command on this line
+        elif line.startswith("!"):
+            cmd = line[1:].strip()  # Remove the ! prefix
+            if cmd:
+                commands_list.append(cmd)
 
     # If only 0-1 commands found, let normal processing handle it
     if len(commands_list) <= 1:
@@ -404,9 +426,14 @@ def log_to_shadow(log_type: str, data: Dict[str, Any]) -> None:
         json.dump(log_data, f, indent=2)
 
 
-def get_uptime(bot_start_time: float) -> str:
-    """Calculate bot uptime."""
-    uptime_seconds = int(time.time() - bot_start_time)
+def get_uptime(bot_start_time) -> str:
+    """Calculate bot uptime from either float timestamp or datetime object."""
+    # Handle both float timestamps and datetime objects
+    if isinstance(bot_start_time, datetime.datetime):
+        uptime_seconds = int((datetime.datetime.utcnow() - bot_start_time).total_seconds())
+    else:
+        uptime_seconds = int(time.time() - bot_start_time)
+
     hours = uptime_seconds // 3600
     minutes = (uptime_seconds % 3600) // 60
     seconds = uptime_seconds % 60
