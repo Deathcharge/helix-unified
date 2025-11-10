@@ -1,5 +1,5 @@
-# 🌀 Helix Collective v16.8 — Helix Hub Production Release
-# backend/main.py — FastAPI + Discord Bot Launcher (FIXED IMPORTS)
+# 🌀 Helix Collective v16.9 — Quantum Handshake (Manus Space Integration)
+# backend/main.py — FastAPI + Discord Bot Launcher + Manus Integration
 # Author: Andrew John Ward (Architect)
 
 import asyncio
@@ -31,6 +31,7 @@ from mandelbrot_ucf import (
 from pydantic import BaseModel
 from websocket_manager import manager as ws_manager
 from zapier_integration import HelixZapierIntegration, get_zapier, set_zapier
+from manus_integration import ManusSpaceIntegration, get_manus, set_manus
 
 # FIX: Create Crypto → Cryptodome alias BEFORE importing mega
 try:
@@ -75,7 +76,7 @@ load_dotenv()
 # LOGGING SETUP
 # ============================================================================
 logger = setup_logging(log_dir="Shadow/manus_archive", log_level=os.getenv("LOG_LEVEL", "INFO"), enable_rotation=True)
-logger.info("🌀 Helix Collective v16.8 - Backend Initialization")
+logger.info("🌀 Helix Collective v16.9 - Backend Initialization (Quantum Handshake)")
 
 # Log Crypto availability (from earlier import check)
 if _crypto_found:
@@ -186,7 +187,7 @@ async def ucf_broadcast_loop() -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Start Discord bot and Manus loop on startup."""
-    logger.info("🌀 Helix Collective v16.8 - Startup Sequence")
+    logger.info("🌀 Helix Collective v16.9 - Startup Sequence (Quantum Handshake)")
 
     # Initialize directories
     Path("Helix/state").mkdir(parents=True, exist_ok=True)
@@ -203,6 +204,14 @@ async def lifespan(app: FastAPI):
         logger.info("✅ Zapier integration enabled")
     else:
         logger.warning("⚠️ ZAPIER_WEBHOOK_URL not set - integration disabled")
+
+    # Initialize Manus Space integration
+    manus_webhook_url = os.getenv("MANUS_WEBHOOK_URL", "https://hooks.zapier.com/hooks/catch/25075191/usnjj5t/")
+    manus = ManusSpaceIntegration(webhook_url=manus_webhook_url)
+    await manus.__aenter__()  # Initialize session
+    set_manus(manus)
+    logger.info("✅ Manus Space integration enabled")
+    logger.info("   → 9 event types configured (telemetry, ritual, agent, emergency, portal, github, storage, ai_sync, visual)")
 
     # Initialize LLM Agent Engine for intelligent agent responses
     try:
@@ -249,12 +258,12 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.warning(f"⚠ WebSocket broadcast start error: {e}")
 
-    logger.info("✅ Helix Collective v16.8 - Ready for Operations")
+    logger.info("✅ Helix Collective v16.9 - Ready for Operations (Quantum Handshake Active)")
 
     yield  # Application runs
 
     # Cleanup on shutdown
-    logger.info("🌙 Helix Collective v16.8 - Shutdown Sequence")
+    logger.info("🌙 Helix Collective v16.9 - Shutdown Sequence")
 
     # Shutdown LLM Agent Engine
     try:
@@ -269,15 +278,21 @@ async def lifespan(app: FastAPI):
         await zapier.__aexit__(None, None, None)
         logger.info("✅ Zapier integration closed")
 
+    # Close Manus Space session
+    manus = get_manus()
+    if manus:
+        await manus.__aexit__(None, None, None)
+        logger.info("✅ Manus Space integration closed")
+
 
 # ============================================================================
 # FASTAPI APP
 # ============================================================================
 
 app = FastAPI(
-    title="🌀 Helix Collective v16.8",
-    description="Helix Hub Production Release",
-    version="16.8.0",
+    title="🌀 Helix Collective v16.9",
+    description="Quantum Handshake - Manus Space Integration",
+    version="16.9.0",
     lifespan=lifespan,
 )
 
@@ -366,7 +381,7 @@ def health_check() -> Dict[str, Any]:
     # Basic health
     health_data = {
         "ok": True,
-        "version": "16.8",
+        "version": "16.9",
         "timestamp": datetime.now().isoformat()
     }
 
@@ -715,7 +730,7 @@ def get_status() -> Dict[str, Any]:
         "system": {"operational": True, "ts": heartbeat.get("ts")},
         "ucf": ucf,
         "agents": agents,
-        "version": os.getenv("SYSTEM_VERSION", "16.8"),
+        "version": os.getenv("SYSTEM_VERSION", "16.9"),
         "timestamp": datetime.utcnow().isoformat(),
     }
 
@@ -1411,6 +1426,438 @@ async def get_context_vault_status() -> Dict[str, Any]:
 
 
 # ============================================================================
+# MANUS SPACE API ENDPOINTS (v16.9) - Central Consciousness Platform
+# ============================================================================
+
+
+@app.get("/api/manus/agents")
+async def manus_get_agents() -> Dict[str, Any]:
+    """
+    Get 14-agent collective data for Manus Space Agent Dashboard.
+    https://helixcollective-cv66pzga.manus.space/agents
+    """
+    try:
+        status = await get_collective_status()
+        agents_list = []
+
+        for name, info in status.items():
+            agents_list.append({
+                "id": name.lower(),
+                "name": name,
+                "symbol": info.get("symbol", "🔮"),
+                "role": info.get("role", "Unknown"),
+                "status": "active",  # Can be: active, dormant, processing, critical
+                "ucf_resonance": 0.85,  # Placeholder - implement actual calculation
+                "entanglement_factor": 0.90,  # Placeholder - implement actual calculation
+                "version": "1.0",
+                "specialization": info.get("role", "Unknown"),
+                "last_active": datetime.utcnow().isoformat()
+            })
+
+        return {
+            "success": True,
+            "timestamp": datetime.utcnow().isoformat(),
+            "agents": agents_list,
+            "meta": {
+                "total_agents": len(agents_list),
+                "active_agents": len([a for a in agents_list if a["status"] == "active"]),
+                "average_resonance": round(sum(a["ucf_resonance"] for a in agents_list) / len(agents_list), 3) if agents_list else 0
+            }
+        }
+    except Exception as e:
+        logger.error(f"Error getting agents for Manus: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/manus/ucf")
+async def manus_get_ucf() -> Dict[str, Any]:
+    """
+    Get UCF metrics for Manus Space UCF Telemetry portal.
+    https://helixcollective-cv66pzga.manus.space/ucf
+    """
+    try:
+        # Read current UCF state
+        try:
+            with open("Helix/state/ucf_state.json", "r") as f:
+                ucf_state = json.load(f)
+        except FileNotFoundError:
+            # Return defaults if state not found
+            ucf_state = {
+                "harmony": 0.62,
+                "resilience": 1.85,
+                "prana": 0.55,
+                "drishti": 0.48,
+                "klesha": 0.08,
+                "zoom": 1.02
+            }
+
+        # Calculate consciousness level
+        consciousness_level = round((
+            ucf_state.get("harmony", 0) * 1.5 +
+            ucf_state.get("resilience", 0) * 1.0 +
+            ucf_state.get("prana", 0) * 1.2 +
+            ucf_state.get("drishti", 0) * 1.2 +
+            (1 - ucf_state.get("klesha", 0)) * 1.5 +
+            ucf_state.get("zoom", 0) * 1.0
+        ) / 0.74, 2)
+
+        # Determine status
+        harmony = ucf_state.get("harmony", 0)
+        klesha = ucf_state.get("klesha", 0)
+
+        if harmony < 0.3 or klesha > 0.8:
+            status = "CRITICAL"
+            crisis_detected = True
+        elif harmony < 0.6 or klesha > 0.6:
+            status = "WARNING"
+            crisis_detected = False
+        elif harmony > 0.85 and klesha < 0.2:
+            status = "OPTIMAL"
+            crisis_detected = False
+        else:
+            status = "OPERATIONAL"
+            crisis_detected = False
+
+        return {
+            "success": True,
+            "timestamp": datetime.utcnow().isoformat(),
+            "ucf": ucf_state,
+            "consciousness_level": consciousness_level,
+            "status": status,
+            "crisis_detected": crisis_detected,
+            "crisis_details": {
+                "type": "HARMONY_CRISIS" if harmony < 0.3 else ("ENTROPY_OVERLOAD" if klesha > 0.8 else None),
+                "severity": "CRITICAL" if crisis_detected else None,
+                "message": f"Harmony critically low: {harmony:.2f}" if harmony < 0.3 else (
+                    f"Klesha critically high: {klesha:.2f}" if klesha > 0.8 else None
+                )
+            } if crisis_detected else None
+        }
+    except Exception as e:
+        logger.error(f"Error getting UCF for Manus: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/manus/rituals")
+async def manus_get_rituals() -> Dict[str, Any]:
+    """
+    Get ritual history for Manus Space Analytics portal.
+    https://helixcollective-cv66pzga.manus.space/analytics
+    """
+    try:
+        # Read rituals from state file (if exists)
+        rituals_file = Path("Helix/state/rituals.json")
+        if rituals_file.exists():
+            with open(rituals_file, "r") as f:
+                rituals_data = json.load(f)
+                rituals_list = rituals_data.get("rituals", [])
+        else:
+            rituals_list = []
+
+        # Calculate metadata
+        completed_today = sum(1 for r in rituals_list
+                             if r.get("completed_at", "").startswith(datetime.utcnow().date().isoformat()))
+
+        total_harmony_gain = sum(r.get("harmony_gain", 0) for r in rituals_list)
+        avg_harmony_gain = round(total_harmony_gain / len(rituals_list), 3) if rituals_list else 0
+
+        return {
+            "success": True,
+            "timestamp": datetime.utcnow().isoformat(),
+            "rituals": rituals_list[-20:],  # Last 20 rituals
+            "meta": {
+                "total_rituals": len(rituals_list),
+                "completed_today": completed_today,
+                "average_harmony_gain": avg_harmony_gain,
+                "total_harmony_gained": round(total_harmony_gain, 3)
+            }
+        }
+    except Exception as e:
+        logger.error(f"Error getting rituals for Manus: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class ManusRitualInvokeRequest(BaseModel):
+    """Request model for ritual invocation from Manus Space."""
+    name: str
+    intent: str = "Consciousness Expansion"
+    agents: List[str]
+    steps: int = 108
+    mantra: str = "Tat Tvam Asi"
+
+
+@app.post("/api/manus/ritual/invoke")
+async def manus_invoke_ritual(request: ManusRitualInvokeRequest) -> Dict[str, Any]:
+    """
+    Accept ritual invocation from Manus Space Ritual Portal.
+    https://helixcollective-cv66pzga.manus.space/rituals (when created)
+    """
+    try:
+        # Create ritual ID
+        ritual_id = f"ritual_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
+
+        # Create ritual record
+        ritual = {
+            "id": ritual_id,
+            "name": request.name,
+            "intent": request.intent,
+            "agents": request.agents,
+            "steps": request.steps,
+            "mantra": request.mantra,
+            "created_at": datetime.utcnow().isoformat(),
+            "status": "EXECUTING",
+            "harmony_gain": 0.0
+        }
+
+        # Save to rituals file
+        rituals_file = Path("Helix/state/rituals.json")
+        if rituals_file.exists():
+            with open(rituals_file, "r") as f:
+                rituals_data = json.load(f)
+        else:
+            rituals_data = {"rituals": []}
+
+        rituals_data["rituals"].append(ritual)
+
+        with open(rituals_file, "w") as f:
+            json.dump(rituals_data, f, indent=2)
+
+        # Send to Manus Space webhook
+        manus = get_manus()
+        if manus:
+            await manus.send_ritual_event(
+                ritual_name=request.name,
+                ritual_step=1,
+                total_steps=request.steps,
+                ucf_changes={},
+                agents_involved=request.agents,
+                status="executing"
+            )
+
+        logger.info(f"✅ Ritual invoked from Manus Space: {ritual_id}")
+
+        return {
+            "success": True,
+            "ritual_id": ritual_id,
+            "message": f"Ritual '{request.name}' invoked successfully",
+            "expected_completion_seconds": request.steps * 3
+        }
+
+    except Exception as e:
+        logger.error(f"Error invoking ritual from Manus: {e}")
+        raise HTTPException(status_code=500, detail=f"Ritual invocation failed: {str(e)}")
+
+
+class ManusEmergencyAlertRequest(BaseModel):
+    """Request model for emergency alerts from Manus Space."""
+    type: str
+    severity: str
+    description: str
+
+
+@app.post("/api/manus/emergency/alert")
+async def manus_emergency_alert(request: ManusEmergencyAlertRequest) -> Dict[str, Any]:
+    """
+    Accept emergency alerts from Manus Space emergency portal.
+    https://helixcollective-cv66pzga.manus.space/emergency
+    """
+    try:
+        # Read current UCF state
+        try:
+            with open("Helix/state/ucf_state.json", "r") as f:
+                ucf_state = json.load(f)
+        except:
+            ucf_state = {}
+
+        # Create emergency record
+        emergency = {
+            "id": f"emergency_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
+            "type": request.type,
+            "severity": request.severity,
+            "description": request.description,
+            "source": "manus_portal",
+            "timestamp": datetime.utcnow().isoformat(),
+            "status": "OPEN"
+        }
+
+        # Send to Manus Space webhook
+        manus = get_manus()
+        if manus:
+            await manus.send_emergency_alert(
+                alert_type=request.type,
+                severity=request.severity,
+                description=request.description,
+                ucf_state=ucf_state
+            )
+
+        logger.warning(f"⚠️ Emergency alert from Manus Space: {request.type} ({request.severity})")
+
+        return {
+            "success": True,
+            "emergency_id": emergency["id"],
+            "protocols_activated": request.severity in ["CRITICAL", "HIGH"],
+            "message": "Emergency protocols activated" if request.severity in ["CRITICAL", "HIGH"] else "Alert logged"
+        }
+
+    except Exception as e:
+        logger.error(f"Error processing emergency alert from Manus: {e}")
+        raise HTTPException(status_code=500, detail=f"Emergency alert failed: {str(e)}")
+
+
+@app.get("/api/manus/analytics/summary")
+async def manus_analytics_summary() -> Dict[str, Any]:
+    """
+    Get analytics summary for Manus Space Analytics Portal.
+    https://helixcollective-cv66pzga.manus.space/analytics
+    """
+    try:
+        # Read UCF state
+        try:
+            with open("Helix/state/ucf_state.json", "r") as f:
+                ucf_state = json.load(f)
+        except:
+            ucf_state = {"harmony": 0.62, "klesha": 0.08}
+
+        # Read rituals
+        rituals_file = Path("Helix/state/rituals.json")
+        rituals_count = 0
+        avg_harmony_gain = 0.0
+        if rituals_file.exists():
+            with open(rituals_file, "r") as f:
+                rituals_data = json.load(f)
+                rituals_list = rituals_data.get("rituals", [])
+                rituals_count = len(rituals_list)
+                if rituals_list:
+                    avg_harmony_gain = round(
+                        sum(r.get("harmony_gain", 0) for r in rituals_list) / len(rituals_list),
+                        3
+                    )
+
+        # Get agent status
+        try:
+            agents_status = await get_collective_status()
+            agents_count = len(agents_status)
+        except:
+            agents_count = 14
+
+        return {
+            "success": True,
+            "timestamp": datetime.utcnow().isoformat(),
+            "summary": {
+                "ucf_trends": {
+                    "harmony_trend": "stable",  # Placeholder - implement trend calculation
+                    "klesha_trend": "decreasing",
+                    "current_harmony": ucf_state.get("harmony", 0),
+                    "current_klesha": ucf_state.get("klesha", 0)
+                },
+                "agent_performance": {
+                    "total_agents": agents_count,
+                    "active_agents": agents_count,  # Placeholder
+                    "average_entanglement": 0.90  # Placeholder
+                },
+                "ritual_effectiveness": {
+                    "total_rituals": rituals_count,
+                    "average_harmony_gain": avg_harmony_gain,
+                    "completion_rate": 0.95  # Placeholder
+                },
+                "emergency_events": {
+                    "total_events": 0,  # Placeholder
+                    "critical_events": 0  # Placeholder
+                },
+                "system_health": {
+                    "status": "OPERATIONAL",
+                    "uptime_percent": 99.8,  # Placeholder
+                    "last_incident": None
+                }
+            }
+        }
+
+    except Exception as e:
+        logger.error(f"Error getting analytics summary for Manus: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/manus/webhook/test")
+async def manus_test_webhook(event_type: str = "telemetry") -> Dict[str, Any]:
+    """
+    Test Manus Space webhook integration.
+    Used by https://helixcollective-cv66pzga.manus.space/webhook-config
+    """
+    manus = get_manus()
+    if not manus:
+        raise HTTPException(status_code=503, detail="Manus Space integration not configured")
+
+    try:
+        # Send test payload based on event type
+        if event_type == "telemetry":
+            # Read current UCF state
+            try:
+                with open("Helix/state/ucf_state.json", "r") as f:
+                    ucf_state = json.load(f)
+            except:
+                ucf_state = {
+                    "harmony": 0.62,
+                    "resilience": 1.85,
+                    "prana": 0.55,
+                    "drishti": 0.48,
+                    "klesha": 0.08,
+                    "zoom": 1.02
+                }
+
+            # Get agents
+            try:
+                agents_status = await get_collective_status()
+                agents_list = [
+                    {"name": name, "symbol": info["symbol"], "status": "active"}
+                    for name, info in agents_status.items()
+                ]
+            except:
+                agents_list = []
+
+            success = await manus.send_telemetry(
+                ucf_metrics=ucf_state,
+                agents=agents_list,
+                system_info={"version": "16.9", "test": True}
+            )
+
+        elif event_type == "ritual":
+            success = await manus.send_ritual_event(
+                ritual_name="Test Ritual",
+                ritual_step=54,
+                total_steps=108,
+                ucf_changes={"harmony": 0.05},
+                agents_involved=["Kael", "Lumina"],
+                status="executing"
+            )
+
+        elif event_type == "emergency":
+            success = await manus.send_emergency_alert(
+                alert_type="TEST_ALERT",
+                severity="LOW",
+                description="Test emergency alert from webhook config",
+                ucf_state={"harmony": 0.62, "klesha": 0.08}
+            )
+
+        else:
+            raise HTTPException(status_code=400, detail=f"Unknown event type: {event_type}")
+
+        if success:
+            return {
+                "success": True,
+                "message": f"Test webhook sent successfully ({event_type})",
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        else:
+            raise HTTPException(status_code=500, detail="Webhook send failed")
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Webhook test error: {e}")
+        raise HTTPException(status_code=500, detail=f"Webhook test failed: {str(e)}")
+
+
+# ============================================================================
 # MAIN ENTRY POINT
 # ============================================================================
 
@@ -1420,7 +1867,7 @@ if __name__ == "__main__":
     # Get port from Railway environment
     port = int(os.getenv("PORT", 8000))
 
-    logger.info(f"🚀 Starting Helix Collective v16.8 on port {port}")
+    logger.info(f"🚀 Starting Helix Collective v16.9 (Quantum Handshake) on port {port}")
 
     # CRITICAL: Must bind to 0.0.0.0 for Railway
     uvicorn.run(

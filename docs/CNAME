@@ -1,0 +1,12 @@
+# helix.yourdomain.com
+#
+# Uncomment the line below and replace with your custom domain
+# Then update your DNS with a CNAME record pointing to: deathcharge.github.io
+#
+# Example DNS Configuration:
+# Type: CNAME
+# Name: helix (or @ for apex domain)
+# Value: deathcharge.github.io
+# TTL: 3600
+#
+# helix.yourdomain.com
