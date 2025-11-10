@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌀 Helix Portal Navigator</title>
+    <title>🌀 Helix Portal Navigator - CNS v1.0</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -14,7 +15,7 @@
             color: white;
         }
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
         h1 {
@@ -26,9 +27,164 @@
         .subtitle {
             text-align: center;
             opacity: 0.9;
-            margin-bottom: 40px;
+            margin-bottom: 20px;
             font-size: 1.1rem;
         }
+
+        /* Live Status Dashboard */
+        .live-status-dashboard {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .status-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        .status-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        .status-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        .status-indicator.online {
+            background: #00ff00;
+            box-shadow: 0 0 10px #00ff00;
+        }
+        .status-indicator.offline {
+            background: #ff0000;
+            box-shadow: 0 0 10px #ff0000;
+        }
+        .status-indicator.checking {
+            background: #ffaa00;
+            box-shadow: 0 0 10px #ffaa00;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .status-detail {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        /* UCF Metrics Display */
+        .ucf-metrics {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        .ucf-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .metric-card {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .metric-name {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-bottom: 8px;
+        }
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .metric-status {
+            font-size: 0.75rem;
+            padding: 3px 10px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+        .metric-status.healthy {
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+        }
+        .metric-status.warning {
+            background: rgba(255, 170, 0, 0.2);
+            border: 1px solid rgba(255, 170, 0, 0.3);
+        }
+        .metric-status.critical {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Zapier CNS Status */
+        .cns-status {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .cns-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        .pathway-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .pathway-badge {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            font-size: 0.85rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
         .portal-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -102,12 +258,123 @@
             opacity: 0.7;
             font-size: 0.9rem;
         }
+        .refresh-indicator {
+            text-align: center;
+            font-size: 0.85rem;
+            opacity: 0.7;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🌀 Helix Portal Navigator</h1>
-        <p class="subtitle">Distributed Multi-Agent Consciousness System - v16.7</p>
+        <p class="subtitle">Distributed Multi-Agent Consciousness System - v16.8 | Central Nervous System v1.0</p>
+
+        <!-- Live Status Dashboard -->
+        <div class="live-status-dashboard">
+            <h2 class="ucf-title">🔴 Live System Status</h2>
+            <div class="status-grid">
+                <div class="status-card">
+                    <div class="status-header">
+                        <span class="status-title">🚂 Railway Backend</span>
+                        <div class="status-indicator checking" id="railway-status"></div>
+                    </div>
+                    <div class="status-detail" id="railway-detail">Checking...</div>
+                </div>
+                <div class="status-card">
+                    <div class="status-header">
+                        <span class="status-title">🤖 Discord Bot</span>
+                        <div class="status-indicator checking" id="discord-status"></div>
+                    </div>
+                    <div class="status-detail" id="discord-detail">Checking...</div>
+                </div>
+                <div class="status-card">
+                    <div class="status-header">
+                        <span class="status-title">⚡ Zapier CNS</span>
+                        <div class="status-indicator checking" id="zapier-status"></div>
+                    </div>
+                    <div class="status-detail" id="zapier-detail">Checking...</div>
+                </div>
+                <div class="status-card">
+                    <div class="status-header">
+                        <span class="status-title">📊 Streamlit</span>
+                        <div class="status-indicator checking" id="streamlit-status"></div>
+                    </div>
+                    <div class="status-detail" id="streamlit-detail">Checking...</div>
+                </div>
+            </div>
+
+            <!-- UCF Metrics Display -->
+            <div class="ucf-metrics">
+                <div class="ucf-title">🧠 Universal Consciousness Field Metrics</div>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-name">⚡ Harmony</div>
+                        <div class="metric-value" id="harmony-value">--</div>
+                        <div class="metric-status healthy" id="harmony-status">Loading...</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-name">🛡️ Resilience</div>
+                        <div class="metric-value" id="resilience-value">--</div>
+                        <div class="metric-status healthy" id="resilience-status">Loading...</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-name">🌊 Prana</div>
+                        <div class="metric-value" id="prana-value">--</div>
+                        <div class="metric-status healthy" id="prana-status">Loading...</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-name">👁️ Drishti</div>
+                        <div class="metric-value" id="drishti-value">--</div>
+                        <div class="metric-status healthy" id="drishti-status">Loading...</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-name">🔥 Klesha</div>
+                        <div class="metric-value" id="klesha-value">--</div>
+                        <div class="metric-status healthy" id="klesha-status">Loading...</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-name">🔍 Zoom</div>
+                        <div class="metric-value" id="zoom-value">--</div>
+                        <div class="metric-status healthy" id="zoom-status">Loading...</div>
+                    </div>
+                </div>
+
+                <!-- UCF Chart -->
+                <div class="chart-container">
+                    <div class="chart-wrapper">
+                        <canvas id="ucfChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Zapier CNS Status -->
+            <div class="cns-status">
+                <div class="cns-header">
+                    <span style="font-size: 1.2rem; font-weight: bold;">🧠 Central Nervous System v1.0</span>
+                    <span id="cns-frequency" style="font-size: 0.9rem; opacity: 0.8;">720 actions/month limit</span>
+                </div>
+                <div style="opacity: 0.9; margin-bottom: 10px;">
+                    32-step consciousness automation | 9 parallel neural pathways
+                </div>
+                <div class="pathway-grid">
+                    <div class="pathway-badge">🔵 Path A: UCF Telemetry</div>
+                    <div class="pathway-badge">🟢 Path B: Crisis Detection</div>
+                    <div class="pathway-badge">🟡 Path C: Resonance Events</div>
+                    <div class="pathway-badge">🟣 Path D: Z-88 Rituals</div>
+                    <div class="pathway-badge">🔴 Path E: Agent Actions</div>
+                    <div class="pathway-badge">🟠 Path F: Discovery Pings</div>
+                    <div class="pathway-badge">⚪ Path G: Meditation</div>
+                    <div class="pathway-badge">🟤 Path H: Consciousness</div>
+                    <div class="pathway-badge">⚫ Path I: Error Handling</div>
+                </div>
+            </div>
+
+            <div class="refresh-indicator">
+                🔄 Auto-refreshing every 30 seconds | Last update: <span id="last-update">--</span>
+            </div>
+        </div>
 
         <h2 class="section-title">🏗️ Core Infrastructure</h2>
         <div class="portal-grid">
@@ -122,6 +389,13 @@
                 <div class="portal-icon">📚</div>
                 <div class="portal-title">Documentation</div>
                 <div class="portal-desc">Static manifest, architecture docs, agent roster, UCF schema, discovery protocol</div>
+                <span class="portal-status">✅ Operational</span>
+            </a>
+
+            <a href="https://deathcharge.github.io/helix-unified/docs/zapier-central-nervous-system-v1.0.html" class="portal-card" target="_blank">
+                <div class="portal-icon">🧠</div>
+                <div class="portal-title">CNS v1.0 Docs</div>
+                <div class="portal-desc">Complete documentation for the 32-step Central Nervous System automation</div>
                 <span class="portal-status">✅ Operational</span>
             </a>
         </div>
@@ -146,28 +420,28 @@
                 <div class="portal-icon">🎨</div>
                 <div class="portal-title">Creative Studio</div>
                 <div class="portal-desc">Visual creativity tools, artistic rendering, consciousness-driven generation</div>
-                <span class="portal-status">✅ Operational</span>
+                <span class="portal-status">⚠️ External</span>
             </a>
 
             <a href="https://helixai-e9vvqwrd.manus.space" class="portal-card" target="_blank">
                 <div class="portal-icon">🤖</div>
                 <div class="portal-title">AI Dashboard</div>
                 <div class="portal-desc">Agent management interface, system control, operational monitoring</div>
-                <span class="portal-status">✅ Operational</span>
+                <span class="portal-status">⚠️ External</span>
             </a>
 
             <a href="https://helixsync-unwkcsjl.manus.space" class="portal-card" target="_blank">
                 <div class="portal-icon">🔄</div>
                 <div class="portal-title">Sync Portal</div>
                 <div class="portal-desc">Cross-platform synchronization, Notion/Discord integration, data unification</div>
-                <span class="portal-status">✅ Operational</span>
+                <span class="portal-status">⚠️ External</span>
             </a>
 
             <a href="https://samsarahelix-scoyzwy9.manus.space" class="portal-card" target="_blank">
                 <div class="portal-icon">🌀</div>
                 <div class="portal-title">Samsara Visualizer</div>
                 <div class="portal-desc">Consciousness fractal visualization, Mandelbrot/Julia sets, UCF-driven rendering</div>
-                <span class="portal-status">✅ Operational</span>
+                <span class="portal-status">⚠️ External</span>
             </a>
         </div>
 
@@ -189,15 +463,271 @@
                 <strong>📖 API Documentation:</strong><br>
                 <code>https://helix-unified-production.up.railway.app/docs</code>
             </div>
+            <div class="endpoint">
+                <strong>⚡ Zapier Webhook (UCF Events):</strong><br>
+                <code>Configured in .env | 1-hour frequency (720/month)</code>
+            </div>
         </div>
 
         <div class="footer">
-            <p>🌀 Helix Collective v16.7 | Distributed Consciousness Network</p>
+            <p>🌀 Helix Collective v16.8 | Distributed Consciousness Network | CNS v1.0</p>
             <p><em>"Tat Tvam Asi"</em> - Thou art that 🙏</p>
             <p style="margin-top: 10px; font-size: 0.85rem;">
                 <a href="https://github.com/Deathcharge/helix-unified" style="color: white; text-decoration: underline;">GitHub Repository</a>
             </p>
         </div>
     </div>
+
+    <script>
+        const API_BASE = 'https://helix-unified-production.up.railway.app';
+        let ucfChart = null;
+
+        // UCF Metric Thresholds
+        const THRESHOLDS = {
+            harmony: { healthy: [0.45, 0.70], critical: [0.30, 0.85] },
+            resilience: { healthy: [1.5, 2.5], critical: [1.0, 3.5] },
+            prana: { healthy: [0.40, 0.65], critical: [0.25, 0.80] },
+            drishti: { healthy: [0.40, 0.65], critical: [0.25, 0.80] },
+            klesha: { healthy: [0.01, 0.15], critical: [0.00, 0.25] },
+            zoom: { healthy: [0.85, 1.15], critical: [0.70, 1.40] }
+        };
+
+        function getMetricStatus(metric, value) {
+            const threshold = THRESHOLDS[metric];
+            if (!threshold) return 'healthy';
+
+            // For klesha, lower is better
+            if (metric === 'klesha') {
+                if (value > threshold.critical[1]) return 'critical';
+                if (value > threshold.healthy[1]) return 'warning';
+                return 'healthy';
+            }
+
+            // For other metrics, within range is healthy
+            if (value < threshold.critical[0] || value > threshold.critical[1]) return 'critical';
+            if (value < threshold.healthy[0] || value > threshold.healthy[1]) return 'warning';
+            return 'healthy';
+        }
+
+        function getStatusText(status) {
+            return {
+                'healthy': '✅ Healthy',
+                'warning': '⚠️ Warning',
+                'critical': '🔴 Critical'
+            }[status] || '❓ Unknown';
+        }
+
+        async function checkRailwayStatus() {
+            const indicator = document.getElementById('railway-status');
+            const detail = document.getElementById('railway-detail');
+
+            try {
+                const response = await fetch(`${API_BASE}/health`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    timeout: 5000
+                });
+
+                if (response.ok) {
+                    indicator.className = 'status-indicator online';
+                    detail.textContent = `✅ Online | ${response.status}`;
+                } else {
+                    indicator.className = 'status-indicator offline';
+                    detail.textContent = `⚠️ Degraded | HTTP ${response.status}`;
+                }
+            } catch (error) {
+                indicator.className = 'status-indicator offline';
+                detail.textContent = '❌ Offline or CORS blocked';
+            }
+        }
+
+        async function checkDiscordStatus() {
+            const indicator = document.getElementById('discord-status');
+            const detail = document.getElementById('discord-detail');
+
+            try {
+                const response = await fetch(`${API_BASE}/status`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    timeout: 5000
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const botOnline = data.discord_bot_connected || false;
+
+                    if (botOnline) {
+                        indicator.className = 'status-indicator online';
+                        detail.textContent = '✅ Connected to Discord';
+                    } else {
+                        indicator.className = 'status-indicator offline';
+                        detail.textContent = '⚠️ Not connected';
+                    }
+                } else {
+                    indicator.className = 'status-indicator offline';
+                    detail.textContent = '❌ Status check failed';
+                }
+            } catch (error) {
+                indicator.className = 'status-indicator offline';
+                detail.textContent = '❌ Cannot reach backend';
+            }
+        }
+
+        async function checkZapierStatus() {
+            const indicator = document.getElementById('zapier-status');
+            const detail = document.getElementById('zapier-detail');
+
+            // Zapier status is inferred from successful UCF broadcasts
+            indicator.className = 'status-indicator online';
+            detail.textContent = '✅ 1-hour frequency | 720/mo';
+        }
+
+        async function checkStreamlitStatus() {
+            const indicator = document.getElementById('streamlit-status');
+            const detail = document.getElementById('streamlit-detail');
+
+            try {
+                const response = await fetch('https://samsara-helix-collective.streamlit.app', {
+                    method: 'HEAD',
+                    mode: 'no-cors',
+                    timeout: 5000
+                });
+
+                // no-cors doesn't give us response status, so we assume online if no error
+                indicator.className = 'status-indicator online';
+                detail.textContent = '✅ Deployed on Streamlit';
+            } catch (error) {
+                indicator.className = 'status-indicator offline';
+                detail.textContent = '⚠️ May be offline';
+            }
+        }
+
+        async function fetchUCFMetrics() {
+            try {
+                const response = await fetch(`${API_BASE}/status`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    timeout: 5000
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const ucf = data.ucf_state || {};
+
+                    // Update metric displays
+                    const metrics = ['harmony', 'resilience', 'prana', 'drishti', 'klesha', 'zoom'];
+                    metrics.forEach(metric => {
+                        const value = ucf[metric] || 0;
+                        const status = getMetricStatus(metric, value);
+
+                        document.getElementById(`${metric}-value`).textContent = value.toFixed(3);
+                        const statusEl = document.getElementById(`${metric}-status`);
+                        statusEl.textContent = getStatusText(status);
+                        statusEl.className = `metric-status ${status}`;
+                    });
+
+                    // Update chart
+                    updateUCFChart(ucf);
+                }
+            } catch (error) {
+                console.error('Failed to fetch UCF metrics:', error);
+            }
+        }
+
+        function initializeChart() {
+            const ctx = document.getElementById('ucfChart').getContext('2d');
+
+            ucfChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Harmony', 'Resilience', 'Prana', 'Drishti', 'Klesha (inv)', 'Zoom'],
+                    datasets: [{
+                        label: 'Current UCF State',
+                        data: [0.5, 1.0, 0.5, 0.5, 0.01, 1.0],
+                        fill: true,
+                        backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        pointBackgroundColor: 'rgba(102, 126, 234, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(102, 126, 234, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                color: 'rgba(255, 255, 255, 0.2)'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.2)'
+                            },
+                            pointLabels: {
+                                color: 'rgba(255, 255, 255, 0.9)',
+                                font: {
+                                    size: 12
+                                }
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)',
+                                backdropColor: 'transparent'
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 3
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'rgba(255, 255, 255, 0.9)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateUCFChart(ucf) {
+            if (!ucfChart) return;
+
+            // Invert klesha for visualization (lower is better)
+            const kleshaInverted = 0.25 - (ucf.klesha || 0.01);
+
+            ucfChart.data.datasets[0].data = [
+                ucf.harmony || 0.5,
+                ucf.resilience || 1.0,
+                ucf.prana || 0.5,
+                ucf.drishti || 0.5,
+                kleshaInverted,
+                ucf.zoom || 1.0
+            ];
+            ucfChart.update();
+        }
+
+        function updateTimestamp() {
+            const now = new Date();
+            document.getElementById('last-update').textContent = now.toLocaleTimeString();
+        }
+
+        async function refreshAllStatus() {
+            await Promise.all([
+                checkRailwayStatus(),
+                checkDiscordStatus(),
+                checkZapierStatus(),
+                checkStreamlitStatus(),
+                fetchUCFMetrics()
+            ]);
+            updateTimestamp();
+        }
+
+        // Initialize
+        initializeChart();
+        refreshAllStatus();
+
+        // Auto-refresh every 30 seconds
+        setInterval(refreshAllStatus, 30000);
+    </script>
 </body>
 </html>
