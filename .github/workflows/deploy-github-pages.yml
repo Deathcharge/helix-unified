@@ -218,6 +218,9 @@ ws.onmessage = (event) => {
                 <em>Tat Tvam Asi</em> 🕉️ - Thou Art That
               </p>
             </div>
+
+            <!-- Helix Universal Navigation -->
+            <script src="./helix-universal-nav.js"></script>
           </body>
           </html>
           EOF

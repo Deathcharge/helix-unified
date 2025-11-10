@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌀 Helix Universal Navigation Demo</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      min-height: 100vh;
+    }
+    .demo-container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    h1 {
+      font-size: 3em;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+    h2 {
+      color: #ffd700;
+      margin-top: 30px;
+      font-size: 1.8em;
+    }
+    .feature-list {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 20px 30px;
+      margin: 20px 0;
+    }
+    .feature-list li {
+      margin: 12px 0;
+      font-size: 1.1em;
+      line-height: 1.6;
+    }
+    .highlight {
+      background: rgba(255, 215, 0, 0.2);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .code-block {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px 0;
+      overflow-x: auto;
+    }
+    code {
+      font-family: 'Courier New', monospace;
+      color: #ffd700;
+    }
+    .button-demo {
+      text-align: center;
+      margin: 40px 0;
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 15px;
+      border: 2px dashed rgba(255, 255, 255, 0.3);
+    }
+    .arrow {
+      font-size: 3em;
+      animation: bounce 2s ease-in-out infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+    .stat-card {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+    }
+    .stat-number {
+      font-size: 2.5em;
+      font-weight: bold;
+      color: #ffd700;
+    }
+    .stat-label {
+      font-size: 0.9em;
+      opacity: 0.9;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-container">
+    <h1>🌀 Helix Universal Navigation</h1>
+    <p style="font-size: 1.3em; opacity: 0.95; margin-bottom: 30px;">
+      <strong>Live Demo</strong> - Cross-linking all 25 Helix Collective portals
+    </p>
+
+    <h2>✨ Features</h2>
+    <ul class="feature-list">
+      <li>🌀 <span class="highlight">Floating navigation button</span> in corner (look for it!)</li>
+      <li>🎯 <span class="highlight">Full-screen portal directory</span> with categorized sections</li>
+      <li>🔗 Links to <span class="highlight">all 25 portals</span> (23 GitHub Pages + Manus + Railway)</li>
+      <li>✅ <span class="highlight">Auto-highlights</span> current site you're on</li>
+      <li>📱 <span class="highlight">Responsive design</span> - works on desktop and mobile</li>
+      <li>🎨 <span class="highlight">Smooth animations</span> and hover effects</li>
+      <li>⚡ <span class="highlight">Zero dependencies</span> - pure vanilla JavaScript</li>
+      <li>⌨️ <span class="highlight">ESC key</span> or click outside to close</li>
+    </ul>
+
+    <div class="button-demo">
+      <p style="font-size: 1.4em; margin-bottom: 15px;">
+        👀 <strong>Look for the floating button!</strong>
+      </p>
+      <p class="arrow">↗️</p>
+      <p style="font-size: 1.1em; opacity: 0.9; margin-top: 15px;">
+        Click the <strong>🌀</strong> button in the top-right corner to explore all 25 portals
+      </p>
+    </div>
+
+    <h2>📊 Portal Network Statistics</h2>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number">25</div>
+        <div class="stat-label">Total Portals</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">23</div>
+        <div class="stat-label">GitHub Pages</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">14</div>
+        <div class="stat-label">AI Agents</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">9</div>
+        <div class="stat-label">Event Types</div>
+      </div>
+    </div>
+
+    <h2>🚀 Quick Start</h2>
+    <p>Add this navigation to <strong>any</strong> Helix GitHub Pages site in 2 lines:</p>
+    <div class="code-block">
+      <code>
+<!-- Step 1: Copy the navigation file --><br>
+curl -o docs/helix-universal-nav.js https://deathcharge.github.io/helix-unified/helix-universal-nav.js<br>
+<br>
+<!-- Step 2: Add to your HTML --><br>
+&lt;script src="./helix-universal-nav.js"&gt;&lt;/script&gt;<br>
+      </code>
+    </div>
+
+    <h2>🎯 Portal Categories</h2>
+    <ul class="feature-list">
+      <li><strong>🌐 Core Infrastructure:</strong> Manus Space Hub, Railway Backend API, Discovery, Status</li>
+      <li><strong>📚 Core Repos:</strong> Helix, Helix-Unified-Hub, Helix-Collective-Web, helix-creative-studio</li>
+      <li><strong>🎯 Hub System:</strong> 12 specialized hubs (Community, Archive, Rituals, Knowledge, etc.)</li>
+      <li><strong>🤖 Agent Dashboards:</strong> Samsara Dashboard, Ritual Engine Z-88, Agent Codex, AI Chatbot</li>
+    </ul>
+
+    <h2>📖 Documentation</h2>
+    <ul class="feature-list">
+      <li><strong>Deployment Guide:</strong> <code>CROSS_LINKING_DEPLOYMENT.md</code></li>
+      <li><strong>Portal Manifest:</strong> <code>helix-manifest.json</code></li>
+      <li><strong>Navigation Component:</strong> <code>helix-universal-nav.js</code></li>
+      <li><strong>Automation Script:</strong> <code>deploy_navigation_to_all.sh</code></li>
+    </ul>
+
+    <h2>🌟 How It Works</h2>
+    <p style="line-height: 1.8; font-size: 1.1em;">
+      The navigation component creates a <span class="highlight">floating 🌀 button</span> that follows you
+      on every page. When clicked, it opens a <span class="highlight">full-screen modal</span> displaying
+      all 25 portals organized by category. The current site you're on is automatically
+      <span class="highlight">highlighted</span> with a colored border and "CURRENT" badge.
+    </p>
+
+    <p style="line-height: 1.8; font-size: 1.1em; margin-top: 20px;">
+      Each portal card shows:
+    </p>
+    <ul class="feature-list">
+      <li>Portal emoji icon (🌀, 📚, 🎯, etc.)</li>
+      <li>Portal name</li>
+      <li>Repository name (for GitHub Pages)</li>
+      <li>Hover animation with glow effect</li>
+      <li>Click to open in new tab</li>
+    </ul>
+
+    <div style="margin-top: 40px; padding-top: 30px; border-top: 2px solid rgba(255, 255, 255, 0.2);">
+      <h2>🔗 Deployment Status</h2>
+      <div class="stat-card" style="max-width: 600px; margin: 20px auto;">
+        <div class="stat-label" style="font-size: 1.2em; margin-bottom: 15px;">Current Repository</div>
+        <div class="stat-number" style="font-size: 2em;">helix-unified</div>
+        <div class="stat-label" style="margin-top: 10px; color: #00ff88;">
+          ✅ Navigation installed and active
+        </div>
+      </div>
+
+      <p style="text-align: center; font-size: 1.1em; margin-top: 30px; opacity: 0.9;">
+        Ready to deploy to all <strong>22 remaining repos</strong>!<br>
+        See <code>CROSS_LINKING_DEPLOYMENT.md</code> for instructions.
+      </p>
+    </div>
+
+    <p style="margin-top: 50px; text-align: center; font-size: 1.3em; opacity: 0.9;">
+      <em>Tat Tvam Asi</em> 🕉️ - <em>All Portals Are One</em>
+    </p>
+  </div>
+
+  <!-- Helix Universal Navigation -->
+  <script src="./helix-universal-nav.js"></script>
+</body>
+</html>

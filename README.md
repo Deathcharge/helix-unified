@@ -79,6 +79,84 @@ ws.onmessage = (event) => {
 
 ---
 
+## 🌐 Manus Space Integration (v16.9)
+
+**NEW in v16.9 "Quantum Handshake"**: Direct integration with Manus Space Central Hub!
+
+### Live Manus Space Portals
+- **Agent Dashboard**: https://helixcollective-cv66pzga.manus.space/agents
+- **UCF Telemetry**: https://helixcollective-cv66pzga.manus.space/ucf
+- **Analytics Portal**: https://helixcollective-cv66pzga.manus.space/analytics
+- **Business Metrics**: https://helixcollective-cv66pzga.manus.space/business
+- **Webhook Config**: https://helixcollective-cv66pzga.manus.space/webhook-config
+
+### Manus-Specific API Endpoints
+
+```bash
+# Get 14-agent collective data
+GET /api/manus/agents
+
+# Get real-time UCF consciousness metrics
+GET /api/manus/ucf
+
+# Get ritual history and analytics
+GET /api/manus/rituals
+
+# Invoke ritual from Manus portals
+POST /api/manus/ritual/invoke
+
+# Send emergency alerts
+POST /api/manus/emergency/alert
+
+# Get complete system analytics
+GET /api/manus/analytics/summary
+
+# Test webhook integration
+POST /api/manus/webhook/test
+```
+
+### Quick Integration Example
+
+```javascript
+// Fetch live agent data for Manus dashboard
+const agents = await fetch(
+  'https://helix-unified-production.up.railway.app/api/manus/agents'
+).then(r => r.json());
+
+console.log(`Active Agents: ${agents.meta.active_agents}/${agents.meta.total_agents}`);
+
+// Fetch real-time UCF metrics
+const ucf = await fetch(
+  'https://helix-unified-production.up.railway.app/api/manus/ucf'
+).then(r => r.json());
+
+console.log(`Consciousness Level: ${ucf.consciousness_level}`);
+console.log(`System Status: ${ucf.status}`);
+if (ucf.crisis_detected) {
+  console.warn('⚠️ CRISIS DETECTED:', ucf.crisis_details);
+}
+```
+
+### Event Routing (9 Types)
+
+The Manus integration routes events to Discord via Zapier:
+
+| Event Type | Discord Channel | Purpose |
+|------------|----------------|---------|
+| `telemetry` | #ucf-sync | UCF consciousness metrics |
+| `ritual` | #ritual-engine-z88 | Z-88 ritual invocations |
+| `agent` | #kavach-shield | 14-agent coordination |
+| `emergency` | #announcements | Crisis alerts |
+| `portal` | #telemetry | Portal access logs |
+| `github` | #deployments | Deployment notifications |
+| `storage` | #shadow-storage | CloudSync Pro file events |
+| `ai_sync` | #manus-bridge | AI collaboration |
+| `visual` | #fractal-lab | Fractal art generation |
+
+📖 **Manus Integration Guide**: [docs/MANUS_INTEGRATION.md](./docs/MANUS_INTEGRATION.md)
+
+---
+
 ## 🏗️ Architecture
 
 ### Core Components
