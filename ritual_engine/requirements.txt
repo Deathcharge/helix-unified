@@ -1,0 +1,32 @@
+# Samsara Helix Ritual Engine - v16.8 Dependencies
+# Z-88 Ritual Engine with modern Streamlit and audio/visual processing
+
+# Web Framework
+streamlit==1.31.0
+
+# Audio Processing
+numpy==1.26.4
+scipy==1.13.0
+soundfile==0.12.1
+librosa==0.10.0
+
+# Image & Visualization
+Pillow==10.1.0
+matplotlib==3.8.3
+plotly==5.18.0
+
+# Fractal & Rendering
+numba==0.58.1
+
+# Environment & Configuration
+python-dotenv==1.0.1
+toml==0.10.2
+
+# Cryptography
+pycryptodome==3.20.0
+
+# Logging
+python-json-logger==2.0.7
+
+# Optional: Video generation (if needed)
+# opencv-python==4.9.0.80
