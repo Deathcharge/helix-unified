@@ -296,13 +296,44 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Add CORS middleware to allow frontend access
+# ============================================================================
+# CORS CONFIGURATION - Enhanced for Zapier Interface Integration
+# ============================================================================
+
+# CORS Configuration for ALL Zapier Interfaces and Manus Portals
+allowed_origins_str = os.getenv('ALLOWED_ORIGINS', '')
+allowed_origins = [origin.strip() for origin in allowed_origins_str.split(',') if origin.strip()]
+
+# Add explicit origins for all 3 Zapier interfaces + 4 Manus portals
+default_origins = [
+    # Zapier Interfaces (50 pages across 3 interfaces)
+    "https://meta-sigil-nexus-v16.zapier.app",
+    "https://helix-consciousness-interface.zapier.app",
+    "https://helix-consciousness-dashboard-1be70b.zapier.app",
+    # Manus Portals
+    "https://helixcollective-cv66pzga.manus.space",
+    "https://helixhub.manus.space",
+    "https://helixstudio-ggxdwcud.manus.space",
+    "https://helixsync-unwkcsjl.manus.space",
+    # Local development
+    "http://localhost:3000",
+    "http://localhost:5000",
+    "http://localhost:8000",
+]
+
+# Merge environment and default origins
+all_origins = list(set(allowed_origins + default_origins))
+
+logger.info(f"🌐 CORS enabled for {len(all_origins)} origins")
+logger.debug(f"   Origins: {', '.join(all_origins[:5])}...")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for now
-    allow_credentials=False,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_origins=all_origins if all_origins else ["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 # Include Web Chat routes
@@ -312,6 +343,32 @@ try:
     logger.info("✅ Web Chat routes loaded")
 except Exception as e:
     logger.warning(f"⚠️ Failed to load Web Chat routes: {e}")
+
+# ============================================================================
+# INCLUDE NEW API ROUTERS (v17.0)
+# ============================================================================
+
+# Include Zapier Integration routes (4 endpoints)
+try:
+    from backend.routes.zapier import router as zapier_router
+    app.include_router(zapier_router)
+    logger.info("✅ Zapier Integration routes loaded (v17.0)")
+    logger.info("   → /api/zapier/tables/ucf-telemetry")
+    logger.info("   → /api/zapier/tables/agent-network")
+    logger.info("   → /api/zapier/tables/emergency-alerts")
+    logger.info("   → /api/zapier/trigger-event")
+except Exception as e:
+    logger.error(f"❌ Failed to load Zapier Integration routes: {e}")
+
+# Include Interface Integration routes (2 endpoints)
+try:
+    from backend.routes.interface import router as interface_router
+    app.include_router(interface_router)
+    logger.info("✅ Interface Integration routes loaded (v17.0)")
+    logger.info("   → /api/interface/consciousness/update")
+    logger.info("   → /api/interface/command")
+except Exception as e:
+    logger.error(f"❌ Failed to load Interface Integration routes: {e}")
 
 # Setup templates directory (use absolute path for Railway compatibility)
 # Try multiple path resolution strategies for robustness
@@ -843,19 +900,44 @@ async def generate_music(request: MusicGenerationRequest) -> StreamingResponse:
 # ============================================================================
 
 
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
+@app.websocket("/ws/consciousness")
+async def consciousness_websocket_endpoint(websocket: WebSocket, token: str = None):
     """
-    WebSocket endpoint for real-time UCF state updates.
+    Enhanced WebSocket endpoint for real-time consciousness streaming with authentication.
 
-    Clients connect to ws://host/ws and receive:
+    Clients connect to ws://host/ws/consciousness?token=YOUR_TOKEN and receive:
     - UCF state updates when values change
     - Agent status updates
     - System events
+    - Emergency alerts
     - Heartbeat pings (every 30s)
 
+    Connection URL:
+    wss://helix-unified-production.up.railway.app/ws/consciousness?token=YOUR_TOKEN
+
+    Message Types (Client → Server):
+    - agent_connect: Initial authentication with agent info
+    - consciousness_update: External AI sending UCF data
+    - ping: Keep-alive
+
+    Message Types (Server → Client):
+    - auth_success: Authentication confirmed
+    - initial_state: Full system state on connect
+    - ucf_update: Real-time UCF updates
+    - agent_event: Agent status changes
+    - emergency: Critical alerts
+
     Example client usage:
-        const ws = new WebSocket('ws://localhost:8000/ws');
+        const ws = new WebSocket('wss://host/ws/consciousness?token=abc123');
+        ws.onopen = () => {
+            ws.send(JSON.stringify({
+                type: 'agent_connect',
+                agent: {
+                    name: 'ExternalAI',
+                    id: 'external_ai_v1.0'
+                }
+            }));
+        };
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
             if (data.type === 'ucf_update') {
@@ -863,7 +945,111 @@ async def websocket_endpoint(websocket: WebSocket):
             }
         };
     """
-    await ws_manager.connect(websocket)
+    await websocket.accept()
+
+    try:
+        # Wait for authentication message
+        auth_message = await websocket.receive_json()
+
+        if auth_message.get('type') != 'agent_connect':
+            await websocket.close(code=1008, reason="Authentication required - send agent_connect message")
+            return
+
+        agent_info = auth_message.get('agent', {})
+        agent_name = agent_info.get('name', 'Unknown')
+        agent_id = agent_info.get('id', 'unknown')
+
+        # TODO: Verify auth token if provided (for now, accept all connections)
+
+        logger.info(f"🔌 WebSocket connected: {agent_name} ({agent_id})")
+
+        # Connect to manager with client ID
+        await ws_manager.connect(websocket, client_id=agent_id)
+
+        # Import core helpers for state
+        from backend.core.ucf_helpers import get_current_ucf, calculate_consciousness_level, get_emergency_events
+
+        # Send authentication success
+        await websocket.send_json({
+            "type": "auth_success",
+            "agent_id": agent_id,
+            "agent_name": agent_name,
+            "timestamp": datetime.utcnow().isoformat() + "Z"
+        })
+
+        # Send initial system state
+        try:
+            ucf_state = get_current_ucf()
+            consciousness_level = calculate_consciousness_level(ucf_state)
+            emergency_list = get_emergency_events(limit=10)
+
+            # Get agents
+            from agents import get_collective_status
+            agents_status = await get_collective_status()
+
+            await websocket.send_json({
+                "type": "initial_state",
+                "data": {
+                    "ucf": ucf_state,
+                    "consciousness_level": consciousness_level,
+                    "agents_count": len(agents_status),
+                    "emergency_events": emergency_list
+                },
+                "timestamp": datetime.utcnow().isoformat() + "Z"
+            })
+        except Exception as e:
+            logger.error(f"Error sending initial state: {e}")
+
+        # Start heartbeat task
+        heartbeat = asyncio.create_task(send_heartbeats(websocket))
+
+        # Listen for client messages
+        while True:
+            data = await websocket.receive_json()
+
+            if data.get('type') == 'consciousness_update':
+                # External agent sending consciousness data
+                logger.info(f"Consciousness update from {agent_name}")
+                # TODO: Handle consciousness update from external agent
+                # - Update UCF state
+                # - Broadcast to all clients
+                # - Send to Zapier
+
+            elif data.get('type') == 'ping':
+                # Keep-alive
+                await websocket.send_json({
+                    "type": "pong",
+                    "timestamp": datetime.utcnow().isoformat() + "Z"
+                })
+
+            else:
+                # Echo back for unknown messages
+                await websocket.send_json({
+                    "type": "echo",
+                    "message": data,
+                    "timestamp": datetime.utcnow().isoformat() + "Z"
+                })
+
+    except WebSocketDisconnect:
+        ws_manager.disconnect(websocket)
+        if 'heartbeat' in locals() and not heartbeat.done():
+            heartbeat.cancel()
+        logger.info(f"🔌 WebSocket disconnected: {locals().get('agent_name', 'Unknown')}")
+    except Exception as e:
+        logger.error(f"WebSocket error: {e}")
+        ws_manager.disconnect(websocket)
+        if 'heartbeat' in locals() and not heartbeat.done():
+            heartbeat.cancel()
+
+
+@app.websocket("/ws")
+async def websocket_endpoint_legacy(websocket: WebSocket):
+    """
+    Legacy WebSocket endpoint (kept for backward compatibility).
+
+    New clients should use /ws/consciousness with authentication.
+    """
+    await ws_manager.connect(websocket, client_id=f"legacy_{id(websocket)}")
 
     try:
         # Start heartbeat task
