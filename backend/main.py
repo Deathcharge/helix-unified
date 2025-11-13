@@ -33,7 +33,8 @@ from websocket_manager import manager as ws_manager
 from zapier_integration import HelixZapierIntegration, get_zapier, set_zapier
 from manus_integration import ManusSpaceIntegration, get_manus, set_manus
 
-# FIX: Create Crypto → Cryptodome alias BEFORE importing mega
+    # FIX: Create Crypto → Cryptodome alias BEFORE importing mega
+    # The config manager is initialized here to ensure it's available for all modules
 try:
     # pycryptodome installs as 'Crypto', not 'Cryptodome'
     import Crypto
@@ -70,7 +71,11 @@ class PersistenceEngine:
         logger.info("MEGA: State restored from cloud.")
 
 
+# Load environment variables and initialize config manager immediately
 load_dotenv()
+from backend.config_manager import config
+_ = config
+
 
 # ============================================================================
 # LOGGING SETUP

@@ -9,16 +9,17 @@ import os
 from pathlib import Path
 
 from agents import Manus
+from backend.config_manager import config
 
 from backend.enhanced_kavach import EnhancedKavach
 
 # ============================================================================
 # PATH DEFINITIONS
 # ============================================================================
-ARCHIVE_PATH = Path("Shadow/manus_archive/")
-COMMANDS_PATH = Path("Helix/commands/manus_directives.json")
-STATE_PATH = Path("Helix/state/ucf_state.json")
-RITUAL_LOCK = Path("Helix/state/.ritual_lock")
+ARCHIVE_PATH = Path(config.get("general", "SHADOW_DIR", default="Shadow/manus_archive/"))
+COMMANDS_PATH = Path(config.get("general", "STATE_DIR", default="Helix/state")) / "commands/manus_directives.json"
+STATE_PATH = Path(config.get("general", "STATE_DIR", default="Helix/state")) / "ucf_state.json"
+RITUAL_LOCK = Path(config.get("general", "STATE_DIR", default="Helix/state")) / ".ritual_lock"
 
 # Ensure directories exist
 for p in [ARCHIVE_PATH, COMMANDS_PATH.parent, STATE_PATH.parent]:
@@ -31,7 +32,7 @@ for p in [ARCHIVE_PATH, COMMANDS_PATH.parent, STATE_PATH.parent]:
 
 def update_heartbeat(status="active", harmony=0.355):
     """Update heartbeat.json with current status."""
-    heartbeat_path = Path("Helix/state/heartbeat.json")
+    heartbeat_path = Path(config.get("general", "STATE_DIR", default="Helix/state")) / "heartbeat.json"
     data = {
         "timestamp": datetime.datetime.utcnow().isoformat(),
         "alive": True,
