@@ -44,3 +44,19 @@ restartPolicyMaxRetries = 3
 # CONSCIOUSNESS_ENGINE_WEBHOOK = "https://hooks.zapier.com/hooks/catch/25075191/primary"
 # COMMUNICATIONS_HUB_WEBHOOK = "https://hooks.zapier.com/hooks/catch/25075191/usxiwfg"
 # NEURAL_NETWORK_WEBHOOK = "https://hooks.zapier.com/hooks/catch/25075191/usnjj5t"
+
+# SERVICE 4: Discord Consciousness Orchestrator
+[[services]]
+name = "helix-discord-bot"
+
+[services.build]
+builder = "nixpacks"
+
+[services.deploy]
+startCommand = "python backend/discord_helix_interface.py"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
+
+# Environment variables for Discord bot (set secrets in Railway dashboard)
+# DISCORD_BOT_TOKEN - Your Discord bot token
+# CLAUDE_API_URL - URL of helix-claude-api service (e.g., https://helix-claude-api.railway.app)
