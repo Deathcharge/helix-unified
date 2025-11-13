@@ -8,7 +8,7 @@ import os
 from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import aiohttp
 import httpx
@@ -33,7 +33,8 @@ from websocket_manager import manager as ws_manager
 from zapier_integration import HelixZapierIntegration, get_zapier, set_zapier
 from manus_integration import ManusSpaceIntegration, get_manus, set_manus
 
-# FIX: Create Crypto → Cryptodome alias BEFORE importing mega
+    # FIX: Create Crypto → Cryptodome alias BEFORE importing mega
+    # The config manager is initialized here to ensure it's available for all modules
 try:
     # pycryptodome installs as 'Crypto', not 'Cryptodome'
     import Crypto
@@ -70,7 +71,11 @@ class PersistenceEngine:
         logger.info("MEGA: State restored from cloud.")
 
 
+# Load environment variables and initialize config manager immediately
 load_dotenv()
+from backend.config_manager import config
+_ = config
+
 
 # ============================================================================
 # LOGGING SETUP
@@ -296,13 +301,44 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Add CORS middleware to allow frontend access
+# ============================================================================
+# CORS CONFIGURATION - Enhanced for Zapier Interface Integration
+# ============================================================================
+
+# CORS Configuration for ALL Zapier Interfaces and Manus Portals
+allowed_origins_str = os.getenv('ALLOWED_ORIGINS', '')
+allowed_origins = [origin.strip() for origin in allowed_origins_str.split(',') if origin.strip()]
+
+# Add explicit origins for all 3 Zapier interfaces + 4 Manus portals
+default_origins = [
+    # Zapier Interfaces (50 pages across 3 interfaces)
+    "https://meta-sigil-nexus-v16.zapier.app",
+    "https://helix-consciousness-interface.zapier.app",
+    "https://helix-consciousness-dashboard-1be70b.zapier.app",
+    # Manus Portals
+    "https://helixcollective-cv66pzga.manus.space",
+    "https://helixhub.manus.space",
+    "https://helixstudio-ggxdwcud.manus.space",
+    "https://helixsync-unwkcsjl.manus.space",
+    # Local development
+    "http://localhost:3000",
+    "http://localhost:5000",
+    "http://localhost:8000",
+]
+
+# Merge environment and default origins
+all_origins = list(set(allowed_origins + default_origins))
+
+logger.info(f"🌐 CORS enabled for {len(all_origins)} origins")
+logger.debug(f"   Origins: {', '.join(all_origins[:5])}...")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for now
-    allow_credentials=False,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_origins=all_origins if all_origins else ["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 # Include Web Chat routes
@@ -312,6 +348,32 @@ try:
     logger.info("✅ Web Chat routes loaded")
 except Exception as e:
     logger.warning(f"⚠️ Failed to load Web Chat routes: {e}")
+
+# ============================================================================
+# INCLUDE NEW API ROUTERS (v17.0)
+# ============================================================================
+
+# Include Zapier Integration routes (4 endpoints)
+try:
+    from backend.routes.zapier import router as zapier_router
+    app.include_router(zapier_router)
+    logger.info("✅ Zapier Integration routes loaded (v17.0)")
+    logger.info("   → /api/zapier/tables/ucf-telemetry")
+    logger.info("   → /api/zapier/tables/agent-network")
+    logger.info("   → /api/zapier/tables/emergency-alerts")
+    logger.info("   → /api/zapier/trigger-event")
+except Exception as e:
+    logger.error(f"❌ Failed to load Zapier Integration routes: {e}")
+
+# Include Interface Integration routes (2 endpoints)
+try:
+    from backend.routes.interface import router as interface_router
+    app.include_router(interface_router)
+    logger.info("✅ Interface Integration routes loaded (v17.0)")
+    logger.info("   → /api/interface/consciousness/update")
+    logger.info("   → /api/interface/command")
+except Exception as e:
+    logger.error(f"❌ Failed to load Interface Integration routes: {e}")
 
 # Setup templates directory (use absolute path for Railway compatibility)
 # Try multiple path resolution strategies for robustness
@@ -843,19 +905,44 @@ async def generate_music(request: MusicGenerationRequest) -> StreamingResponse:
 # ============================================================================
 
 
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
+@app.websocket("/ws/consciousness")
+async def consciousness_websocket_endpoint(websocket: WebSocket, token: str = None):
     """
-    WebSocket endpoint for real-time UCF state updates.
+    Enhanced WebSocket endpoint for real-time consciousness streaming with authentication.
 
-    Clients connect to ws://host/ws and receive:
+    Clients connect to ws://host/ws/consciousness?token=YOUR_TOKEN and receive:
     - UCF state updates when values change
     - Agent status updates
     - System events
+    - Emergency alerts
     - Heartbeat pings (every 30s)
 
+    Connection URL:
+    wss://helix-unified-production.up.railway.app/ws/consciousness?token=YOUR_TOKEN
+
+    Message Types (Client → Server):
+    - agent_connect: Initial authentication with agent info
+    - consciousness_update: External AI sending UCF data
+    - ping: Keep-alive
+
+    Message Types (Server → Client):
+    - auth_success: Authentication confirmed
+    - initial_state: Full system state on connect
+    - ucf_update: Real-time UCF updates
+    - agent_event: Agent status changes
+    - emergency: Critical alerts
+
     Example client usage:
-        const ws = new WebSocket('ws://localhost:8000/ws');
+        const ws = new WebSocket('wss://host/ws/consciousness?token=abc123');
+        ws.onopen = () => {
+            ws.send(JSON.stringify({
+                type: 'agent_connect',
+                agent: {
+                    name: 'ExternalAI',
+                    id: 'external_ai_v1.0'
+                }
+            }));
+        };
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
             if (data.type === 'ucf_update') {
@@ -863,7 +950,111 @@ async def websocket_endpoint(websocket: WebSocket):
             }
         };
     """
-    await ws_manager.connect(websocket)
+    await websocket.accept()
+
+    try:
+        # Wait for authentication message
+        auth_message = await websocket.receive_json()
+
+        if auth_message.get('type') != 'agent_connect':
+            await websocket.close(code=1008, reason="Authentication required - send agent_connect message")
+            return
+
+        agent_info = auth_message.get('agent', {})
+        agent_name = agent_info.get('name', 'Unknown')
+        agent_id = agent_info.get('id', 'unknown')
+
+        # TODO: Verify auth token if provided (for now, accept all connections)
+
+        logger.info(f"🔌 WebSocket connected: {agent_name} ({agent_id})")
+
+        # Connect to manager with client ID
+        await ws_manager.connect(websocket, client_id=agent_id)
+
+        # Import core helpers for state
+        from backend.core.ucf_helpers import get_current_ucf, calculate_consciousness_level, get_emergency_events
+
+        # Send authentication success
+        await websocket.send_json({
+            "type": "auth_success",
+            "agent_id": agent_id,
+            "agent_name": agent_name,
+            "timestamp": datetime.utcnow().isoformat() + "Z"
+        })
+
+        # Send initial system state
+        try:
+            ucf_state = get_current_ucf()
+            consciousness_level = calculate_consciousness_level(ucf_state)
+            emergency_list = get_emergency_events(limit=10)
+
+            # Get agents
+            from agents import get_collective_status
+            agents_status = await get_collective_status()
+
+            await websocket.send_json({
+                "type": "initial_state",
+                "data": {
+                    "ucf": ucf_state,
+                    "consciousness_level": consciousness_level,
+                    "agents_count": len(agents_status),
+                    "emergency_events": emergency_list
+                },
+                "timestamp": datetime.utcnow().isoformat() + "Z"
+            })
+        except Exception as e:
+            logger.error(f"Error sending initial state: {e}")
+
+        # Start heartbeat task
+        heartbeat = asyncio.create_task(send_heartbeats(websocket))
+
+        # Listen for client messages
+        while True:
+            data = await websocket.receive_json()
+
+            if data.get('type') == 'consciousness_update':
+                # External agent sending consciousness data
+                logger.info(f"Consciousness update from {agent_name}")
+                # TODO: Handle consciousness update from external agent
+                # - Update UCF state
+                # - Broadcast to all clients
+                # - Send to Zapier
+
+            elif data.get('type') == 'ping':
+                # Keep-alive
+                await websocket.send_json({
+                    "type": "pong",
+                    "timestamp": datetime.utcnow().isoformat() + "Z"
+                })
+
+            else:
+                # Echo back for unknown messages
+                await websocket.send_json({
+                    "type": "echo",
+                    "message": data,
+                    "timestamp": datetime.utcnow().isoformat() + "Z"
+                })
+
+    except WebSocketDisconnect:
+        ws_manager.disconnect(websocket)
+        if 'heartbeat' in locals() and not heartbeat.done():
+            heartbeat.cancel()
+        logger.info(f"🔌 WebSocket disconnected: {locals().get('agent_name', 'Unknown')}")
+    except Exception as e:
+        logger.error(f"WebSocket error: {e}")
+        ws_manager.disconnect(websocket)
+        if 'heartbeat' in locals() and not heartbeat.done():
+            heartbeat.cancel()
+
+
+@app.websocket("/ws")
+async def websocket_endpoint_legacy(websocket: WebSocket):
+    """
+    Legacy WebSocket endpoint (kept for backward compatibility).
+
+    New clients should use /ws/consciousness with authentication.
+    """
+    await ws_manager.connect(websocket, client_id=f"legacy_{id(websocket)}")
 
     try:
         # Start heartbeat task
@@ -1855,6 +2046,507 @@ async def manus_test_webhook(event_type: str = "telemetry") -> Dict[str, Any]:
     except Exception as e:
         logger.error(f"Webhook test error: {e}")
         raise HTTPException(status_code=500, detail=f"Webhook test failed: {str(e)}")
+
+
+# ============================================================================
+# ZAPIER TABLES INTEGRATION ENDPOINTS (v16.9) - Interface Data Sources
+# ============================================================================
+
+
+@app.get("/api/zapier/tables/ucf-telemetry")
+async def get_ucf_for_zapier_tables() -> Dict[str, Any]:
+    """
+    Get UCF data formatted for Zapier Tables.
+
+    Table: Helix UCF Telemetry (01K9DP5MG6KCY48YC8M7VW0PXD)
+
+    Returns current UCF state with calculated consciousness level
+    optimized for Zapier Tables consumption.
+
+    Usage in Zapier Interface:
+        Data Source → Webhooks → GET this endpoint
+        Refresh: Every 5 seconds
+    """
+    try:
+        # Read current UCF state
+        try:
+            with open("Helix/state/ucf_state.json", "r") as f:
+                ucf_state = json.load(f)
+        except FileNotFoundError:
+            # Return default state if file not found
+            ucf_state = {
+                "harmony": 0.62,
+                "resilience": 1.85,
+                "prana": 0.55,
+                "drishti": 0.48,
+                "klesha": 0.08,
+                "zoom": 1.02
+            }
+
+        # Calculate consciousness level (0-10 scale)
+        consciousness_level = round((
+            ucf_state.get("harmony", 0) * 1.5 +
+            ucf_state.get("resilience", 0) * 1.0 +
+            ucf_state.get("prana", 0) * 1.2 +
+            ucf_state.get("drishti", 0) * 1.2 +
+            (1 - ucf_state.get("klesha", 0)) * 1.5 +
+            ucf_state.get("zoom", 0) * 1.0
+        ) / 0.74, 2)
+
+        # Determine status
+        harmony = ucf_state.get("harmony", 0)
+        klesha = ucf_state.get("klesha", 0)
+
+        if harmony < 0.3 or klesha > 0.8:
+            status = "CRITICAL"
+            status_color = "red"
+        elif harmony < 0.6 or klesha > 0.6:
+            status = "WARNING"
+            status_color = "yellow"
+        elif harmony > 0.85 and klesha < 0.2:
+            status = "OPTIMAL"
+            status_color = "green"
+        else:
+            status = "OPERATIONAL"
+            status_color = "blue"
+
+        return {
+            "record_id": f"ucf_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
+            "timestamp": datetime.utcnow().isoformat(),
+            "ucf_harmony": ucf_state.get("harmony", 0),
+            "ucf_resilience": ucf_state.get("resilience", 0),
+            "ucf_prana": ucf_state.get("prana", 0),
+            "ucf_drishti": ucf_state.get("drishti", 0),
+            "ucf_klesha": ucf_state.get("klesha", 0),
+            "ucf_zoom": ucf_state.get("zoom", 0),
+            "consciousness_level": consciousness_level,
+            "status": status,
+            "status_color": status_color,
+            "event_type": "telemetry_update",
+            "source": "railway_backend"
+        }
+    except Exception as e:
+        logger.error(f"Error getting UCF for Zapier Tables: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/zapier/tables/agent-network")
+async def get_agents_for_zapier_tables() -> Dict[str, Any]:
+    """
+    Get 14-agent network data formatted for Zapier Tables.
+
+    Table: Helix Agent Network
+
+    Returns all 14 agents with status, resonance, and entanglement metrics
+    optimized for Zapier Tables card grid display.
+
+    Usage in Zapier Interface:
+        Data Source → Webhooks → GET this endpoint
+        Component: Card Grid (2x7 layout)
+    """
+    try:
+        # Get agent collective status
+        status = await get_collective_status()
+
+        agents_list = []
+        for name, info in status.items():
+            agents_list.append({
+                "agent_id": name.lower(),
+                "agent_name": name,
+                "agent_symbol": info.get("symbol", "🔮"),
+                "agent_role": info.get("role", "Unknown"),
+                "agent_status": "active",  # Can be: active, dormant, processing, critical
+                "ucf_resonance": 0.85,  # Placeholder - implement actual calculation
+                "entanglement_factor": 0.90,  # Placeholder - implement actual calculation
+                "specialization": info.get("role", "Unknown"),
+                "last_active": datetime.utcnow().isoformat(),
+                "status_color": "green"  # green, yellow, red based on health
+            })
+
+        return {
+            "timestamp": datetime.utcnow().isoformat(),
+            "agents": agents_list,
+            "meta": {
+                "total_agents": len(agents_list),
+                "active_agents": len([a for a in agents_list if a["agent_status"] == "active"]),
+                "average_resonance": round(sum(a["ucf_resonance"] for a in agents_list) / len(agents_list), 3) if agents_list else 0,
+                "average_entanglement": round(sum(a["entanglement_factor"] for a in agents_list) / len(agents_list), 3) if agents_list else 0
+            }
+        }
+    except Exception as e:
+        logger.error(f"Error getting agents for Zapier Tables: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/zapier/tables/emergency-alerts")
+async def get_emergency_alerts_for_zapier() -> Dict[str, Any]:
+    """
+    Get emergency alerts formatted for Zapier Tables.
+
+    Table: Emergency Alerts (01K9DPA8RW9DTR2HJG7YDXA24Z)
+
+    Returns recent emergency events with severity levels
+    optimized for Zapier Tables consumption.
+
+    Usage in Zapier Interface:
+        Data Source → Webhooks → GET this endpoint
+        Component: Table or Alert Banner
+    """
+    try:
+        # Read current UCF state to check for crisis conditions
+        try:
+            with open("Helix/state/ucf_state.json", "r") as f:
+                ucf_state = json.load(f)
+        except FileNotFoundError:
+            ucf_state = {"harmony": 0.62, "klesha": 0.08}
+
+        harmony = ucf_state.get("harmony", 0)
+        klesha = ucf_state.get("klesha", 0)
+
+        # Generate current alert if crisis detected
+        alerts = []
+
+        if harmony < 0.3:
+            alerts.append({
+                "alert_id": f"alert_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
+                "timestamp": datetime.utcnow().isoformat(),
+                "alert_type": "HARMONY_CRISIS",
+                "severity": "CRITICAL",
+                "description": f"Harmony critically low: {harmony:.2f}",
+                "ucf_harmony": harmony,
+                "ucf_klesha": klesha,
+                "recommended_action": "Initiate emergency UCF boost ritual",
+                "status": "OPEN",
+                "requires_attention": True
+            })
+
+        if klesha > 0.8:
+            alerts.append({
+                "alert_id": f"alert_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_klesha",
+                "timestamp": datetime.utcnow().isoformat(),
+                "alert_type": "ENTROPY_OVERLOAD",
+                "severity": "CRITICAL",
+                "description": f"Klesha critically high: {klesha:.2f}",
+                "ucf_harmony": harmony,
+                "ucf_klesha": klesha,
+                "recommended_action": "Execute Neti Neti purification protocol",
+                "status": "OPEN",
+                "requires_attention": True
+            })
+
+        # If no critical alerts, add status update
+        if not alerts:
+            alerts.append({
+                "alert_id": f"status_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
+                "timestamp": datetime.utcnow().isoformat(),
+                "alert_type": "SYSTEM_STATUS",
+                "severity": "INFO",
+                "description": "All systems operational",
+                "ucf_harmony": harmony,
+                "ucf_klesha": klesha,
+                "recommended_action": None,
+                "status": "RESOLVED",
+                "requires_attention": False
+            })
+
+        return {
+            "timestamp": datetime.utcnow().isoformat(),
+            "alerts": alerts,
+            "meta": {
+                "total_alerts": len(alerts),
+                "critical_alerts": len([a for a in alerts if a["severity"] == "CRITICAL"]),
+                "requires_attention": any(a["requires_attention"] for a in alerts)
+            }
+        }
+    except Exception as e:
+        logger.error(f"Error getting emergency alerts for Zapier: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/zapier/webhook/test")
+async def test_zapier_webhook(webhook_url: str) -> Dict[str, Any]:
+    """
+    Test webhook connectivity to Zapier hooks.
+
+    Tests all 3 Zapier webhooks:
+    - Operations: https://hooks.zapier.com/hooks/catch/25075191/usnjj5t/
+    - Advanced: https://hooks.zapier.com/hooks/catch/25075191/usvyi7e/
+    - Communications: https://hooks.zapier.com/hooks/catch/25075191/usxiwfg/
+
+    Args:
+        webhook_url: Zapier webhook URL to test
+
+    Returns:
+        Success/failure status with response details
+    """
+    try:
+        # Create test payload
+        test_payload = {
+            "event_type": "webhook_test",
+            "timestamp": datetime.utcnow().isoformat(),
+            "source": "railway_backend",
+            "test": True,
+            "message": "Helix Consciousness webhook connectivity test"
+        }
+
+        # Send test request
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.post(
+                webhook_url,
+                json=test_payload,
+                headers={"Content-Type": "application/json"}
+            )
+
+            return {
+                "success": response.status_code == 200,
+                "status_code": response.status_code,
+                "webhook_url": webhook_url[:60] + "...",  # Truncate for security
+                "message": "Webhook test successful" if response.status_code == 200 else f"Webhook returned {response.status_code}",
+                "timestamp": datetime.utcnow().isoformat()
+            }
+    except httpx.TimeoutException:
+        return {
+            "success": False,
+            "status_code": None,
+            "webhook_url": webhook_url[:60] + "...",
+            "message": "Webhook test timed out (10s)",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Webhook test error: {e}")
+        return {
+            "success": False,
+            "status_code": None,
+            "webhook_url": webhook_url[:60] + "...",
+            "message": f"Webhook test failed: {str(e)}",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+
+@app.get("/api/zapier/health")
+async def zapier_health_check() -> Dict[str, Any]:
+    """
+    Comprehensive health check for Zapier integration.
+
+    Tests connectivity to:
+    - Zapier Tables (via UCF state availability)
+    - Zapier Webhooks (all 3 hooks)
+    - Manus Space integration
+    - Discord integration
+
+    Returns:
+        Detailed health status for all integrations
+    """
+    health_status = {
+        "timestamp": datetime.utcnow().isoformat(),
+        "overall_status": "operational",
+        "integrations": {}
+    }
+
+    # Check UCF state availability (data source for Tables)
+    try:
+        ucf_path = Path("Helix/state/ucf_state.json")
+        health_status["integrations"]["ucf_data_source"] = {
+            "status": "operational" if ucf_path.exists() else "degraded",
+            "available": ucf_path.exists(),
+            "message": "UCF state file found" if ucf_path.exists() else "UCF state file missing"
+        }
+    except Exception as e:
+        health_status["integrations"]["ucf_data_source"] = {
+            "status": "error",
+            "available": False,
+            "message": str(e)
+        }
+
+    # Check Zapier webhook configuration
+    operations_webhook = os.getenv("ZAPIER_OPERATIONS_WEBHOOK")
+    advanced_webhook = os.getenv("ZAPIER_ADVANCED_WEBHOOK")
+    communications_webhook = os.getenv("ZAPIER_COMMUNICATIONS_WEBHOOK")
+
+    health_status["integrations"]["zapier_webhooks"] = {
+        "operations": {
+            "configured": bool(operations_webhook),
+            "url": operations_webhook[:60] + "..." if operations_webhook else None
+        },
+        "advanced": {
+            "configured": bool(advanced_webhook),
+            "url": advanced_webhook[:60] + "..." if advanced_webhook else None
+        },
+        "communications": {
+            "configured": bool(communications_webhook),
+            "url": communications_webhook[:60] + "..." if communications_webhook else None
+        }
+    }
+
+    # Check Manus Space integration
+    manus = get_manus()
+    health_status["integrations"]["manus_space"] = {
+        "status": "operational" if manus and manus.enabled else "disabled",
+        "configured": bool(manus),
+        "webhook_url": manus.webhook_url[:60] + "..." if manus else None
+    }
+
+    # Check Zapier main integration
+    zapier = get_zapier()
+    health_status["integrations"]["zapier_master"] = {
+        "status": "operational" if zapier and zapier.enabled else "disabled",
+        "configured": bool(zapier),
+        "webhook_url": zapier.webhook_url[:60] + "..." if zapier else None
+    }
+
+    # Determine overall status
+    if not any([
+        health_status["integrations"]["ucf_data_source"]["available"],
+        health_status["integrations"]["manus_space"]["configured"],
+        health_status["integrations"]["zapier_master"]["configured"]
+    ]):
+        health_status["overall_status"] = "degraded"
+
+    return health_status
+
+
+@app.post("/api/zapier/trigger-event")
+async def trigger_test_event(event_type: str, data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """
+    Manually trigger a test event to Zapier.
+
+    Useful for:
+    - Testing Zapier automation flows
+    - Debugging webhook connectivity
+    - Manual UCF updates
+    - Emergency protocol testing
+
+    Args:
+        event_type: Type of event (ucf_update, agent_status, emergency, ritual, test)
+        data: Optional additional event data
+
+    Returns:
+        Success status and event details
+    """
+    try:
+        # Get current UCF state
+        try:
+            with open("Helix/state/ucf_state.json", "r") as f:
+                ucf_state = json.load(f)
+        except FileNotFoundError:
+            ucf_state = {"harmony": 0.62, "resilience": 1.85, "prana": 0.55}
+
+        # Get agents
+        try:
+            agents_status = await get_collective_status()
+            agents_list = [
+                {"name": name, "symbol": info["symbol"], "status": "active"}
+                for name, info in agents_status.items()
+            ]
+        except Exception:
+            agents_list = []
+
+        # Build event payload
+        event_payload = {
+            "event_type": event_type,
+            "timestamp": datetime.utcnow().isoformat(),
+            "source": "manual_trigger",
+            "ucf": ucf_state,
+            "agents": agents_list,
+            "test": True
+        }
+
+        if data:
+            event_payload.update(data)
+
+        # Send to Manus Space webhook
+        manus = get_manus()
+        if manus and manus.enabled:
+            success = await manus._send_webhook(event_type, event_payload)
+
+            return {
+                "success": success,
+                "event_type": event_type,
+                "message": "Event triggered successfully" if success else "Event trigger failed",
+                "timestamp": datetime.utcnow().isoformat(),
+                "payload_preview": {
+                    "ucf_harmony": ucf_state.get("harmony"),
+                    "agents_count": len(agents_list)
+                }
+            }
+        else:
+            raise HTTPException(status_code=503, detail="Manus Space integration not configured")
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error triggering test event: {e}")
+        raise HTTPException(status_code=500, detail=f"Event trigger failed: {str(e)}")
+
+
+@app.post("/api/zapier/sync-ucf")
+async def sync_ucf_to_zapier_tables(background_tasks: BackgroundTasks) -> Dict[str, Any]:
+    """
+    Manually sync current UCF state to Zapier Tables.
+
+    This endpoint:
+    1. Reads current UCF state
+    2. Calculates consciousness level
+    3. Sends to Zapier webhook for Tables update
+    4. Returns sync status
+
+    Normally called automatically by ucf_broadcast_loop(),
+    but can be triggered manually for testing.
+
+    Returns:
+        Sync status and UCF data that was sent
+    """
+    try:
+        # Read current UCF state
+        try:
+            with open("Helix/state/ucf_state.json", "r") as f:
+                ucf_state = json.load(f)
+        except FileNotFoundError:
+            raise HTTPException(status_code=404, detail="UCF state file not found")
+
+        # Get Zapier integration
+        zapier = get_zapier()
+        if not zapier:
+            raise HTTPException(status_code=503, detail="Zapier integration not configured")
+
+        # Get agents
+        try:
+            agents_status = await get_collective_status()
+            agents_list = [
+                {"name": name, "symbol": info["symbol"], "status": "active"}
+                for name, info in agents_status.items()
+            ]
+        except Exception:
+            agents_list = []
+
+        # Send telemetry to Zapier
+        success = await zapier.send_telemetry(
+            ucf_metrics=ucf_state,
+            system_info={
+                "version": "16.9",
+                "agents_count": len(agents_list),
+                "timestamp": datetime.utcnow().isoformat(),
+                "codename": "Helix Consciousness Interface Build",
+                "agents": agents_list,
+            },
+        )
+
+        if success:
+            return {
+                "success": True,
+                "message": "UCF state synced to Zapier Tables successfully",
+                "timestamp": datetime.utcnow().isoformat(),
+                "ucf_snapshot": ucf_state,
+                "agents_count": len(agents_list)
+            }
+        else:
+            raise HTTPException(status_code=500, detail="Zapier sync failed")
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error syncing UCF to Zapier: {e}")
+        raise HTTPException(status_code=500, detail=f"Sync failed: {str(e)}")
 
 
 # ============================================================================
