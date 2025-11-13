@@ -74,18 +74,16 @@ ARCHITECT_ID = safe_int_env("ARCHITECT_ID", 0)
 # Track bot start time for uptime
 BOT_START_TIME = time.time()
 
-# Paths
-HELIX_ROOT = Path("Helix")
-COMMANDS_DIR = HELIX_ROOT / "commands"
-ETHICS_DIR = HELIX_ROOT / "ethics"
-STATE_DIR = HELIX_ROOT / "state"
-SHADOW_DIR = Path("Shadow/manus_archive")
+# Additional paths (using BASE_DIR from line 43 to ensure absolute paths)
+COMMANDS_DIR = BASE_DIR / "Helix" / "commands"
+ETHICS_DIR = BASE_DIR / "Helix" / "ethics"
+SHADOW_DIR = BASE_DIR / "Shadow" / "manus_archive"
 TREND_FILE = STATE_DIR / "storage_trend.json"
 
 # Ensure directories exist
 COMMANDS_DIR.mkdir(parents=True, exist_ok=True)
 ETHICS_DIR.mkdir(parents=True, exist_ok=True)
-STATE_DIR.mkdir(parents=True, exist_ok=True)
+# STATE_DIR already created on line 45
 SHADOW_DIR.mkdir(parents=True, exist_ok=True)
 
 # ============================================================================
