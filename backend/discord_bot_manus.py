@@ -33,6 +33,7 @@ import discord
 from backend.agents import AGENTS
 from discord.ext import commands, tasks
 from backend.z88_ritual_engine import load_ucf_state
+from backend.config_manager import config
 from backend.zapier_client import ZapierClient  # v16.5 Zapier integration
 
 # Configure logger
@@ -75,15 +76,15 @@ ARCHITECT_ID = safe_int_env("ARCHITECT_ID", 0)
 BOT_START_TIME = time.time()
 
 # Paths
-HELIX_ROOT = Path("Helix")
-COMMANDS_DIR = HELIX_ROOT / "commands"
-ETHICS_DIR = HELIX_ROOT / "ethics"
-STATE_DIR = HELIX_ROOT / "state"
-SHADOW_DIR = Path("Shadow/manus_archive")
-TREND_FILE = STATE_DIR / "storage_trend.json"
+
+
+ETHICS_DIR = BASE_DIR / config.get("general", "ETHICS_DIR", default="Helix/ethics")
+STATE_DIR = BASE_DIR / config.get("general", "STATE_DIR", default="Helix/state")
+SHADOW_DIR = BASE_DIR / config.get("general", "SHADOW_DIR", default="Shadow/manus_archive")
+
 
 # Ensure directories exist
-COMMANDS_DIR.mkdir(parents=True, exist_ok=True)
+
 ETHICS_DIR.mkdir(parents=True, exist_ok=True)
 STATE_DIR.mkdir(parents=True, exist_ok=True)
 SHADOW_DIR.mkdir(parents=True, exist_ok=True)
@@ -96,7 +97,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.guilds = True
 
-bot = commands.Bot(command_prefix="!", intents=intents)
+bot = commands.Bot(command_prefix=config.get("discord", "COMMAND_PREFIX", default="!"), intents=intents)
 
 # Bot start time for uptime tracking
 bot.start_time = None
