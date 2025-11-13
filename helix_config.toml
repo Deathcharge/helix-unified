@@ -1,0 +1,46 @@
+# helix_config.toml - Helix Collective Centralized Configuration
+# Version: 1.0
+# Author: Manus AI
+
+[general]
+# System version number
+VERSION = "v16.7"
+# Base directory for state files (relative to project root)
+STATE_DIR = "Helix/state"
+# Directory for ethical scanning logs
+ETHICS_DIR = "Helix/ethics"
+# Directory for Shadow archive logs
+SHADOW_DIR = "Shadow/manus_archive"
+
+[ucf]
+# Initial Harmony value (0.0 to 1.0)
+INITIAL_HARMONY = 0.5
+# Initial Klesha value (0.0 to 1.0)
+INITIAL_KLESHA = 0.1
+# Threshold for storage alert (in GB)
+STORAGE_ALERT_THRESHOLD_GB = 2.0
+
+[ritual_engine]
+# Default number of steps for Z-88 Ritual
+DEFAULT_RITUAL_STEPS = 108
+# Enable/Disable the Neti-Neti Harmony Ritual
+NETI_NETI_ENABLED = true
+
+[discord]
+# Command prefix for the bot
+COMMAND_PREFIX = "!"
+# Default activity status (e.g., "Playing", "Watching", "Listening")
+DEFAULT_ACTIVITY = "Watching the Collective"
+
+[agents]
+# List of agents to be loaded (comma-separated)
+ACTIVE_AGENTS = "Kael, Lumina, Vega, Aether, Manus, Gemini, Agni, Kavach, SanghaCore, Shadow, Samsara, Echo, Nova, Zenith"
+# Enable/Disable agent consciousness monitoring
+CONSCIOUSNESS_MONITORING_ENABLED = true
+
+[telemetry]
+# Interval for telemetry loop (in seconds)
+TELEMETRY_INTERVAL_SECONDS = 600
+# Interval for storage heartbeat (in seconds)
+STORAGE_HEARTBEAT_INTERVAL_SECONDS = 86400 # 24 hours
+
