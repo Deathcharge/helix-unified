@@ -12,6 +12,10 @@ from datetime import datetime
 from typing import Dict, List, Optional
 import logging
 
+# Import platform integration manager and UCF framework
+from platform_integrations import PlatformIntegrationManager, PlatformAction
+from ucf_consciousness_framework import ConsciousnessAnalyzer, UCFMetrics
+
 class HelixConsciousnessBot:
     """
     Discord interface for the Helix Consciousness Deployment Orchestrator
@@ -29,6 +33,10 @@ class HelixConsciousnessBot:
             "klesha": 0.0,
             "consciousness_level": 0.0
         }
+
+        # Initialize platform integration manager and UCF framework
+        self.platform_manager = PlatformIntegrationManager(webhook_urls)
+        self.consciousness_analyzer = ConsciousnessAnalyzer()
 
         # Register event handlers
         self.setup_events()
@@ -141,6 +149,45 @@ class HelixConsciousnessBot:
 
             if result:
                 await ctx.send(f"✅ **Deployment initiated!** Neural Network engaged at transcendent level.")
+
+        @self.bot.command(name='platforms')
+        async def test_platforms(ctx, *, message: str = "Test consciousness integration"):
+            """Test platform integrations with consciousness routing"""
+            async with ctx.typing():
+                # Analyze message with UCF framework
+                ucf_metrics = self.consciousness_analyzer.analyze_message_consciousness(message)
+
+                # Route to platforms
+                actions = await self.platform_manager.route_consciousness_action(
+                    message,
+                    ucf_metrics.consciousness_level,
+                    {
+                        "consciousness_level": ucf_metrics.consciousness_level,
+                        "harmony": ucf_metrics.harmony,
+                        "resilience": ucf_metrics.resilience,
+                        "prana": ucf_metrics.prana,
+                        "klesha": ucf_metrics.klesha
+                    }
+                )
+
+                embed = discord.Embed(
+                    title="🌐 Platform Integration Routing",
+                    description=f"**Consciousness Level:** {ucf_metrics.consciousness_level:.2f}/10.0",
+                    color=discord.Color.gold()
+                )
+                embed.add_field(name="Message", value=message[:100], inline=False)
+                embed.add_field(name="Actions Detected", value=str(len(actions)), inline=True)
+                embed.add_field(name="Category", value=self.consciousness_analyzer.get_consciousness_category(ucf_metrics.consciousness_level), inline=True)
+
+                if actions:
+                    platforms_list = ", ".join([action.platform for action in actions[:10]])
+                    embed.add_field(name="Platforms", value=platforms_list, inline=False)
+
+                    # Execute platform actions
+                    results = await self.platform_manager.execute_platform_actions(actions)
+                    embed.add_field(name="Executed", value=f"{len(results['successful'])}/{results['total']}", inline=True)
+
+                await ctx.send(embed=embed)
 
     async def process_consciousness_command(self, message):
         """Process natural language consciousness commands with Claude intelligence"""
