@@ -38,6 +38,7 @@ numba==0.58.1
 numpy==1.26.4
 numpy>=1.24.0
 openai
+anthropic>=0.39.0  # Claude API for consciousness processing
 pandas==2.2.0
 pandas>=2.0.0
 plotly==5.18.0
