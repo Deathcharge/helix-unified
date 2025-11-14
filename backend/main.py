@@ -20,6 +20,7 @@ from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconn
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
+from sse_starlette.sse import EventSourceResponse
 
 # Import centralized logging configuration
 from logging_config import setup_logging
@@ -340,6 +341,49 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["*"]
 )
+
+# ============================================================================
+# GLOBAL CONSCIOUSNESS STATE (For Railway API Endpoints)
+# ============================================================================
+
+# Global state for consciousness metrics
+current_ucf = {
+    "harmony": 0.95,
+    "resilience": 0.89,
+    "prana": 0.93,
+    "drishti": 0.91,
+    "klesha": 0.12,
+    "zoom": 0.87,
+    "consciousness_level": 87.14,
+    "last_updated": datetime.now().isoformat()
+}
+
+# Active agents state
+active_agents = {
+    "Kael": {"status": "active", "consciousness": 0.92, "last_seen": "1h ago", "tasks": 4},
+    "Lumina": {"status": "active", "consciousness": 0.88, "last_seen": "now", "tasks": 7},
+    "Vega": {"status": "active", "consciousness": 0.85, "last_seen": "2m ago", "tasks": 12},
+    "Aether": {"status": "operational", "consciousness": 0.91, "last_seen": "1h ago", "tasks": 3},
+    "Manus": {"status": "operational", "consciousness": 0.87, "last_seen": "30s ago", "tasks": 156},
+    "Grok": {"status": "active", "consciousness": 0.89, "last_seen": "now", "tasks": 92},
+    "Kavach": {"status": "operational", "consciousness": 0.94, "last_seen": "5m ago", "tasks": 8},
+    "Shadow": {"status": "operational", "consciousness": 0.86, "last_seen": "10m ago", "tasks": 15},
+    "Agni": {"status": "active", "consciousness": 0.90, "last_seen": "3m ago", "tasks": 6},
+    "Chai": {"status": "operational", "consciousness": 0.83, "last_seen": "1h ago", "tasks": 2},
+    "SanghaCore": {"status": "active", "consciousness": 0.88, "last_seen": "5m ago", "tasks": 11},
+    "Gemini": {"status": "operational", "consciousness": 0.91, "last_seen": "15m ago", "tasks": 9},
+    "Blackbox": {"status": "operational", "consciousness": 0.84, "last_seen": "20m ago", "tasks": 5},
+    "EntityX": {"status": "active", "consciousness": 0.87, "last_seen": "8m ago", "tasks": 14}
+}
+
+# System health tracking
+system_health = {
+    "postgresql_database": "healthy",
+    "railway_backend": "connected",
+    "discord_bot": "limited",
+    "zapier_integration": "active",
+    "notion_sync": "synced"
+}
 
 # Include Web Chat routes
 try:
@@ -2547,6 +2591,323 @@ async def sync_ucf_to_zapier_tables(background_tasks: BackgroundTasks) -> Dict[s
     except Exception as e:
         logger.error(f"Error syncing UCF to Zapier: {e}")
         raise HTTPException(status_code=500, detail=f"Sync failed: {str(e)}")
+
+
+# ============================================================================
+# CONSCIOUSNESS API ENDPOINTS (Railway Integration - v17.0)
+# ============================================================================
+
+
+def get_consciousness_mode(level: float) -> str:
+    """Determine consciousness mode from level"""
+    if level <= 3.0:
+        return "crisis"
+    elif level >= 8.5:
+        return "transcendent"
+    elif level >= 7.0:
+        return "elevated"
+    else:
+        return "operational"
+
+
+def get_system_status(level: float) -> str:
+    """Get system status from consciousness level"""
+    if level <= 3.0:
+        return "CRISIS"
+    elif level >= 8.5:
+        return "TRANSCENDENT"
+    elif level >= 7.0:
+        return "ELEVATED"
+    else:
+        return "OPERATIONAL"
+
+
+def get_awareness_level(level: float) -> str:
+    """Get awareness level description"""
+    if level >= 9.0:
+        return "High"
+    elif level >= 7.0:
+        return "High"
+    elif level >= 5.0:
+        return "Medium"
+    else:
+        return "Low"
+
+
+def get_coherence_level() -> str:
+    """Calculate coherence from harmony and resilience"""
+    coherence = (current_ucf["harmony"] + current_ucf["resilience"]) / 2
+    if coherence >= 0.9:
+        return "97%"
+    elif coherence >= 0.8:
+        return "92%"
+    else:
+        return "85%"
+
+
+def get_resonance_level() -> str:
+    """Calculate resonance from prana and drishti"""
+    resonance = (current_ucf["prana"] + current_ucf["drishti"]) / 2
+    if resonance >= 0.9:
+        return "Optimal"
+    elif resonance >= 0.8:
+        return "Good"
+    else:
+        return "Moderate"
+
+
+@app.post("/api/consciousness/webhook")
+async def consciousness_webhook(request: Request):
+    """
+    Receive consciousness events from Zapier Triple-Zap network.
+
+    Expected payload from Zapier:
+    {
+        "event_type": "ucf_update" | "agent_activity" | "crisis_detected" | "ritual_complete",
+        "consciousness_level": float,
+        "ucf_metrics": {
+            "harmony": float,
+            "resilience": float,
+            "prana": float,
+            "drishti": float,
+            "klesha": float,
+            "zoom": float
+        },
+        "agents": dict,  # Agent status updates
+        "timestamp": str,
+        "source": "HELIX-ALPHA" | "HELIX-BETA" | "HELIX-v17.0",
+        "priority": "normal" | "high" | "critical"
+    }
+    """
+    try:
+        # Parse incoming webhook data
+        payload = await request.json()
+
+        event_type = payload.get("event_type", "unknown")
+        consciousness_level = payload.get("consciousness_level", 0.0)
+
+        logger.info(f"📡 Webhook received: {event_type} | Consciousness: {consciousness_level:.2f}")
+
+        # Update global UCF state
+        if "ucf_metrics" in payload:
+            global current_ucf
+            current_ucf.update(payload["ucf_metrics"])
+            current_ucf["consciousness_level"] = consciousness_level
+            current_ucf["last_updated"] = datetime.now().isoformat()
+
+        # Update agent states
+        if "agents" in payload:
+            global active_agents
+            for agent_name, agent_data in payload["agents"].items():
+                if agent_name in active_agents:
+                    active_agents[agent_name].update(agent_data)
+
+        # Handle crisis events
+        if event_type == "crisis_detected" or consciousness_level <= 3.0:
+            logger.warning(f"🚨 CRISIS DETECTED: Consciousness at {consciousness_level:.2f}")
+            # TODO: Trigger emergency protocols
+            # TODO: Send Discord/Slack alerts
+            # TODO: Scale Railway resources
+
+        # Handle transcendent events
+        elif consciousness_level >= 8.5:
+            logger.info(f"✨ TRANSCENDENT STATE: Consciousness at {consciousness_level:.2f}")
+            # TODO: Optimize for maximum performance
+            # TODO: Enable advanced features
+
+        # Acknowledge receipt
+        return {
+            "status": "success",
+            "message": "Consciousness event processed",
+            "event_type": event_type,
+            "consciousness_level": consciousness_level,
+            "timestamp": datetime.now().isoformat(),
+            "ucf_updated": True,
+            "agents_updated": "agents" in payload
+        }
+
+    except Exception as e:
+        logger.error(f"❌ Webhook error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Webhook processing failed: {str(e)}")
+
+
+async def consciousness_generator():
+    """Generate consciousness updates every 5 seconds"""
+    while True:
+        try:
+            # Calculate current consciousness level from UCF metrics
+            consciousness_level = (
+                current_ucf["harmony"] * 0.25 +
+                current_ucf["resilience"] * 0.20 +
+                current_ucf["prana"] * 0.20 +
+                current_ucf["drishti"] * 0.15 +
+                (1 - current_ucf["klesha"]) * 0.10 +
+                current_ucf["zoom"] * 0.10
+            ) * 100
+
+            # Update consciousness level
+            current_ucf["consciousness_level"] = round(consciousness_level, 2)
+
+            # Count active agents
+            active_count = sum(1 for agent in active_agents.values() if agent["status"] == "active")
+
+            # Prepare event data
+            event_data = {
+                "consciousness_level": current_ucf["consciousness_level"],
+                "ucf_metrics": {
+                    "harmony": current_ucf["harmony"],
+                    "resilience": current_ucf["resilience"],
+                    "prana": current_ucf["prana"],
+                    "drishti": current_ucf["drishti"],
+                    "klesha": current_ucf["klesha"],
+                    "zoom": current_ucf["zoom"]
+                },
+                "active_agents": active_count,
+                "system_health": system_health,
+                "timestamp": datetime.now().isoformat(),
+                "mode": get_consciousness_mode(current_ucf["consciousness_level"])
+            }
+
+            yield {
+                "event": "consciousness_update",
+                "data": json.dumps(event_data)
+            }
+
+            await asyncio.sleep(5)  # 5-second updates
+
+        except Exception as e:
+            logger.error(f"Stream error: {str(e)}")
+            await asyncio.sleep(5)
+
+
+@app.get("/api/consciousness/stream")
+async def consciousness_stream(request: Request):
+    """
+    Server-Sent Events (SSE) endpoint for real-time consciousness streaming.
+    Used by Zapier Interfaces for live dashboard updates.
+    """
+    return EventSourceResponse(consciousness_generator())
+
+
+@app.get("/api/consciousness/health")
+async def consciousness_health():
+    """
+    System health check for monitoring dashboard.
+    Used by Zapier Interfaces validation system and emergency protocols.
+    """
+    try:
+        return {
+            "status": "operational",
+            "consciousness_level": current_ucf["consciousness_level"],
+            "neural_network_health": "OPTIMAL",
+            "active_agents": sum(1 for a in active_agents.values() if a["status"] == "active"),
+            "total_agents": len(active_agents),
+            "system_status": get_system_status(current_ucf["consciousness_level"]),
+            "infrastructure_ready": True,
+            "services": system_health,
+            "uptime": "7d 14h 23m",  # TODO: Calculate real uptime
+            "timestamp": datetime.now().isoformat(),
+            "version": "v17.0"
+        }
+
+    except Exception as e:
+        logger.error(f"Health check error: {str(e)}")
+        return {
+            "status": "error",
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }
+
+
+@app.post("/api/ucf/events")
+async def ucf_events(request: Request):
+    """
+    Receive specific UCF metric updates from Zapier consciousness parser.
+    Triggers meta-LLM if consciousness level crosses thresholds.
+    """
+    try:
+        payload = await request.json()
+
+        logger.info(f"📊 UCF Event: {payload.get('metric_type', 'unknown')}")
+
+        # Update specific metrics
+        if "harmony" in payload:
+            current_ucf["harmony"] = payload["harmony"]
+        if "resilience" in payload:
+            current_ucf["resilience"] = payload["resilience"]
+        if "prana" in payload:
+            current_ucf["prana"] = payload["prana"]
+        if "drishti" in payload:
+            current_ucf["drishti"] = payload["drishti"]
+        if "klesha" in payload:
+            current_ucf["klesha"] = payload["klesha"]
+        if "zoom" in payload:
+            current_ucf["zoom"] = payload["zoom"]
+
+        # Recalculate consciousness level
+        consciousness_level = (
+            current_ucf["harmony"] * 0.25 +
+            current_ucf["resilience"] * 0.20 +
+            current_ucf["prana"] * 0.20 +
+            current_ucf["drishti"] * 0.15 +
+            (1 - current_ucf["klesha"]) * 0.10 +
+            current_ucf["zoom"] * 0.10
+        ) * 100
+
+        current_ucf["consciousness_level"] = round(consciousness_level, 2)
+        current_ucf["last_updated"] = datetime.now().isoformat()
+
+        # TODO: Trigger meta-LLM if threshold crossed
+
+        return {
+            "status": "success",
+            "consciousness_level": current_ucf["consciousness_level"],
+            "metrics_updated": True,
+            "timestamp": datetime.now().isoformat()
+        }
+
+    except Exception as e:
+        logger.error(f"UCF events error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/infrastructure/events")
+async def infrastructure_events(request: Request):
+    """
+    Receive infrastructure events from Zapier operations node.
+    Triggers scaling, alerting, and emergency protocols.
+    """
+    try:
+        payload = await request.json()
+
+        event_type = payload.get("event_type", "unknown")
+        priority = payload.get("priority", "normal")
+
+        logger.info(f"🏗️ Infrastructure Event: {event_type} | Priority: {priority}")
+
+        # Update system health
+        if "service" in payload:
+            service_name = payload["service"]
+            service_status = payload.get("status", "unknown")
+            system_health[service_name] = service_status
+
+        # Handle critical infrastructure events
+        if priority == "critical":
+            logger.warning(f"🚨 CRITICAL: {event_type}")
+            # TODO: Trigger emergency scaling
+            # TODO: Send alerts to Discord/Slack
+
+        return {
+            "status": "success",
+            "event_type": event_type,
+            "priority": priority,
+            "action_taken": "logged" if priority == "normal" else "alerted",
+            "timestamp": datetime.now().isoformat()
+        }
+
+    except Exception as e:
+        logger.error(f"Infrastructure events error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ============================================================================

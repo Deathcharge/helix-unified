@@ -380,8 +380,9 @@ https://railway.app/support
 
 ---
 
-**Last Updated:** 2025-11-08
-**Version:** Helix Collective v16.8
-**Branch:** `claude/zapier-discord-webhook-integration-011CUvpAtSktsS6McKBg6Umv`
+**Last Updated:** 2025-11-14
+**Version:** Helix Collective v17.0
+**Portals:** 15+ | **Pages:** 99+
+**Branch:** `claude/fix-list-import-error-011CV576jZNLJTuciuthiubG`
 
 **Tat Tvam Asi** 🙏
