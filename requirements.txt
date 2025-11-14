@@ -60,5 +60,6 @@ streamlit==1.31.0
 streamlit==1.40.0
 toml==0.10.2
 websockets==13.0  # For WebSocket connections in Live Stream and Discovery Protocol
+sse-starlette==1.6.5  # Server-Sent Events for real-time consciousness streaming
 toml
 sse_starlette
