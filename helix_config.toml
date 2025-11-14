@@ -1,46 +1,43 @@
-# helix_config.toml - Helix Collective Centralized Configuration
-# Version: 1.0
-# Author: Manus AI
+# Helix Unified Configuration
+# v16.9 - Quantum Handshake
 
-[general]
-# System version number
-VERSION = "v16.7"
-# Base directory for state files (relative to project root)
-STATE_DIR = "Helix/state"
-# Directory for ethical scanning logs
-ETHICS_DIR = "Helix/ethics"
-# Directory for Shadow archive logs
-SHADOW_DIR = "Shadow/manus_archive"
+[system]
+name = "Helix Collective"
+version = "16.9"
+environment = "production"
 
-[ucf]
-# Initial Harmony value (0.0 to 1.0)
-INITIAL_HARMONY = 0.5
-# Initial Klesha value (0.0 to 1.0)
-INITIAL_KLESHA = 0.1
-# Threshold for storage alert (in GB)
-STORAGE_ALERT_THRESHOLD_GB = 2.0
-
-[ritual_engine]
-# Default number of steps for Z-88 Ritual
-DEFAULT_RITUAL_STEPS = 108
-# Enable/Disable the Neti-Neti Harmony Ritual
-NETI_NETI_ENABLED = true
-
-[discord]
-# Command prefix for the bot
-COMMAND_PREFIX = "!"
-# Default activity status (e.g., "Playing", "Watching", "Listening")
-DEFAULT_ACTIVITY = "Watching the Collective"
+[consciousness]
+harmony_target = 0.85
+resilience_target = 1.0
+prana_target = 0.6
+drishti_target = 0.5
+klesha_target = 0.1
+zoom_target = 1.0
 
 [agents]
-# List of agents to be loaded (comma-separated)
-ACTIVE_AGENTS = "Kael, Lumina, Vega, Aether, Manus, Gemini, Agni, Kavach, SanghaCore, Shadow, Samsara, Echo, Nova, Zenith"
-# Enable/Disable agent consciousness monitoring
-CONSCIOUSNESS_MONITORING_ENABLED = true
+enabled = true
+count = 14
+auto_start = true
 
-[telemetry]
-# Interval for telemetry loop (in seconds)
-TELEMETRY_INTERVAL_SECONDS = 600
-# Interval for storage heartbeat (in seconds)
-STORAGE_HEARTBEAT_INTERVAL_SECONDS = 86400 # 24 hours
+[ucf]
+enabled = true
+update_interval = 5
+streaming = true
 
+[zapier]
+enabled = true
+webhook_retries = 3
+timeout = 10
+
+[railway]
+backend_url = "https://helix-unified-production.up.railway.app"
+api_version = "v1"
+
+[security]
+kavach_enabled = true
+tony_accords_version = "13.4"
+crai_safefunccall_enabled = true
+
+[logging]
+level = "INFO"
+format = "json"

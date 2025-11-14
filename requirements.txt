@@ -61,3 +61,4 @@ streamlit==1.40.0
 toml==0.10.2
 websockets==13.0  # For WebSocket connections in Live Stream and Discovery Protocol
 toml
+sse_starlette
