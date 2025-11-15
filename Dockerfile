@@ -55,6 +55,9 @@ COPY fix_crypto_imports.py .
 # Copy discovery manifest for external AI agents (v16.7)
 COPY helix-manifest.json .
 
+# Copy configuration file (CRITICAL: required by backend/config_manager.py)
+COPY helix_config.toml .
+
 # MemeSync artifacts integrated into bot/discord_bot_manus.py
 
 # Create runtime directories (app will use these)

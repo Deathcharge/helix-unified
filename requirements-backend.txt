@@ -6,6 +6,7 @@ uvicorn[standard]==0.32.0
 python-dotenv==1.0.1
 jinja2==3.1.2  # Template engine for web dashboard
 aiofiles==23.2.1  # For async file operations (moved up)
+sse-starlette==2.1.3  # Server-Sent Events for real-time streaming
 
 # Discord Integration
 discord.py==2.4.0
