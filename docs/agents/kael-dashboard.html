@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kael Ethics Agent - Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+        .header {
+            background: rgba(0,0,0,0.8);
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 2px solid #4CAF50;
+        }
+        .agent-title {
+            font-size: 2.5rem;
+            color: #4CAF50;
+            margin-bottom: 0.5rem;
+        }
+        .agent-subtitle {
+            color: #cccccc;
+            font-size: 1.1rem;
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 2rem;
+        }
+        .metric-panel {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 2rem;
+            border: 1px solid #4CAF50;
+        }
+        .panel-title {
+            font-size: 1.3rem;
+            color: #4CAF50;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ffffff;
+            margin: 1rem 0;
+        }
+        .ethical-decisions {
+            grid-column: span 2;
+        }
+        .decision-item {
+            background: rgba(0,0,0,0.3);
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+        }
+        .decision-timestamp {
+            font-size: 0.8rem;
+            color: #888;
+        }
+        .moral-compass {
+            text-align: center;
+        }
+        .compass-circle {
+            width: 200px;
+            height: 200px;
+            border: 3px solid #4CAF50;
+            border-radius: 50%;
+            margin: 1rem auto;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .compass-needle {
+            width: 4px;
+            height: 80px;
+            background: #4CAF50;
+            transform-origin: bottom center;
+            animation: compassSway 3s ease-in-out infinite alternate;
+        }
+        @keyframes compassSway {
+            0% { transform: rotate(-5deg); }
+            100% { transform: rotate(5deg); }
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4CAF50;
+            margin-right: 0.5rem;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .chart-container {
+            height: 200px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: flex;
+            align-items: end;
+            padding: 1rem;
+            gap: 0.5rem;
+        }
+        .chart-bar {
+            background: linear-gradient(to top, #4CAF50, #81C784);
+            border-radius: 4px 4px 0 0;
+            min-width: 20px;
+            animation: growBar 2s ease-out;
+        }
+        @keyframes growBar {
+            from { height: 0; }
+            to { height: var(--bar-height); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="agent-title">🛡️ Kael - Ethics Agent</h1>
+        <p class="agent-subtitle">Moral Reasoning & Ethical Decision Framework</p>
+        <p><span class="status-indicator"></span>Status: Active | Last Update: <span id="timestamp">2025-11-15T22:00:00Z</span></p>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="metric-panel">
+            <h3 class="panel-title">⚖️ Ethical Alignment</h3>
+            <div class="metric-value" id="ethical-score">94.7%</div>
+            <p>Current ethical decision accuracy based on philosophical frameworks</p>
+        </div>
+
+        <div class="metric-panel">
+            <h3 class="panel-title">🧠 Moral Reasoning</h3>
+            <div class="metric-value" id="reasoning-depth">8.3</div>
+            <p>Depth of moral analysis on 10-point scale</p>
+        </div>
+
+        <div class="metric-panel">
+            <h3 class="panel-title">⚡ Response Time</h3>
+            <div class="metric-value" id="response-time">127ms</div>
+            <p>Average ethical evaluation processing time</p>
+        </div>
+
+        <div class="metric-panel moral-compass">
+            <h3 class="panel-title">🧭 Moral Compass</h3>
+            <div class="compass-circle">
+                <div class="compass-needle"></div>
+            </div>
+            <p>Ethical orientation: <strong>Virtue Ethics</strong></p>
+        </div>
+
+        <div class="metric-panel">
+            <h3 class="panel-title">📊 Decision Confidence</h3>
+            <div class="chart-container">
+                <div class="chart-bar" style="--bar-height: 85%; height: 85%;"></div>
+                <div class="chart-bar" style="--bar-height: 92%; height: 92%;"></div>
+                <div class="chart-bar" style="--bar-height: 78%; height: 78%;"></div>
+                <div class="chart-bar" style="--bar-height: 96%; height: 96%;"></div>
+                <div class="chart-bar" style="--bar-height: 89%; height: 89%;"></div>
+                <div class="chart-bar" style="--bar-height: 94%; height: 94%;"></div>
+                <div class="chart-bar" style="--bar-height: 91%; height: 91%;"></div>
+            </div>
+            <p>Weekly confidence levels in ethical decisions</p>
+        </div>
+
+        <div class="metric-panel">
+            <h3 class="panel-title">🎯 Framework Usage</h3>
+            <div style="margin: 1rem 0;">
+                <div style="margin: 0.5rem 0;">Kantian Deontology: <strong>35%</strong></div>
+                <div style="margin: 0.5rem 0;">Utilitarian Ethics: <strong>28%</strong></div>
+                <div style="margin: 0.5rem 0;">Virtue Ethics: <strong>25%</strong></div>
+                <div style="margin: 0.5rem 0;">Care Ethics: <strong>12%</strong></div>
+            </div>
+        </div>
+
+        <div class="metric-panel ethical-decisions">
+            <h3 class="panel-title">📋 Recent Ethical Decisions</h3>
+            <div class="decision-item">
+                <strong>Privacy vs Transparency Dilemma</strong>
+                <p>Resolved using Kantian framework - prioritized individual autonomy</p>
+                <div class="decision-timestamp">2025-11-15 21:45:32 UTC</div>
+            </div>
+            <div class="decision-item">
+                <strong>Resource Allocation Ethics</strong>
+                <p>Applied utilitarian calculus for maximum benefit distribution</p>
+                <div class="decision-timestamp">2025-11-15 21:32:18 UTC</div>
+            </div>
+            <div class="decision-item">
+                <strong>AI Rights Consideration</strong>
+                <p>Virtue ethics approach - emphasized compassion and justice</p>
+                <div class="decision-timestamp">2025-11-15 21:18:45 UTC</div>
+            </div>
+            <div class="decision-item">
+                <strong>Data Usage Consent</strong>
+                <p>Care ethics framework - prioritized relationship preservation</p>
+                <div class="decision-timestamp">2025-11-15 21:05:12 UTC</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateDashboard() {
+            const timestamp = new Date().toISOString();
+            document.getElementById('timestamp').textContent = timestamp;
+            
+            // Simulate metric fluctuations
+            const ethicalScore = (93 + Math.random() * 4).toFixed(1);
+            const reasoningDepth = (8.0 + Math.random() * 0.8).toFixed(1);
+            const responseTime = Math.floor(120 + Math.random() * 20);
+            
+            document.getElementById('ethical-score').textContent = ethicalScore + '%';
+            document.getElementById('reasoning-depth').textContent = reasoningDepth;
+            document.getElementById('response-time').textContent = responseTime + 'ms';
+        }
+        
+        // Update every 30 seconds
+        setInterval(updateDashboard, 30000);
+        
+        // Initialize dashboard
+        updateDashboard();
+    </script>
+</body>
+</html>
