@@ -125,6 +125,18 @@ class ZapierClient:
         result = await self._send_webhook(payload)
         return result is not None
 
+    async def send_health_alert(self, health_statuses: list) -> bool:
+        """Path H: Send aggregated agent health status for critical alerts"""
+        payload = {
+            "type": "health_alert",
+            "status_summary": f"{len(health_statuses)} agents checked",
+            "critical_count": sum(1 for s in health_statuses if s.get("status") == "CRITICAL"),
+            "health_statuses": health_statuses,
+            "harmony_snapshot": self._get_current_harmony(),
+        }
+        result = await self._send_webhook(payload)
+        return result is not None
+
     async def send_error_alert(
         self, error_message: str, component: str, severity: str = "high", context: Optional[Dict] = None
     ) -> bool:
@@ -214,6 +226,12 @@ async def quick_log_event(title: str, agent: str = "System", description: str = 
         zap = ZapierClient(session)
         await zap.log_event(title, "Status", agent, description)
 
+
+async def quick_send_health_alert(health_statuses: list):
+    """Quick health alert without session management"""
+    async with aiohttp.ClientSession() as session:
+        zap = ZapierClient(session)
+        await zap.send_health_alert(health_statuses)
 
 async def quick_error_alert(error: str, component: str = "System"):
     """Quick error alert without session management"""
