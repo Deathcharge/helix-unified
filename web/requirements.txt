@@ -1,0 +1,90 @@
+# Helix Consciousness Empire - Python Dependencies
+# For helixspiral.work and helixspirals.replit.app
+
+# Core Web Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+starlette==0.27.0
+
+# HTTP and API
+requests==2.31.0
+httpx==0.25.2
+aiohttp==3.9.1
+
+# Data Processing and Validation
+pydantic==2.5.0
+pydantic-settings==2.1.0
+numpy==1.24.3
+pandas==2.0.3
+
+# Async and Concurrency
+aiofiles==23.2.1
+
+# Database and Storage
+sqlalchemy==2.0.23
+redis==5.0.1
+
+# Authentication and Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.6
+
+# Consciousness and AI Integration
+openai==1.3.7
+anthropics==0.8.1
+transformers==4.35.2
+torch==2.1.1
+scikit-learn==1.3.2
+
+# Web and CORS
+websockets==12.0
+
+# Logging and Monitoring
+loguru==0.7.2
+prometheus-client==0.19.0
+
+# Configuration and Environment
+python-dotenv==1.0.0
+pyyaml==6.0.1
+
+# Date and Time
+python-dateutil==2.8.2
+pytz==2023.3
+
+# Discord Integration
+discord.py==2.3.2
+
+# Social Media and Communication
+slack-sdk==3.26.1
+
+# File Processing
+Pillow==10.1.0
+
+# Cryptography and Security
+cryptography==41.0.7
+bcrypt==4.1.2
+
+# Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+
+# Deployment
+gunicorn==21.2.0
+psutil==5.9.6
+
+# Consciousness Libraries
+scipy==1.11.4
+matplotlib==3.8.2
+plotly==5.17.0
+
+# NLP
+nltk==3.8.1
+textblob==0.17.1
+
+# ML
+joblib==1.3.2
+
+# Utilities
+click==8.1.7
+rich==13.7.0
+tqdm==4.66.1

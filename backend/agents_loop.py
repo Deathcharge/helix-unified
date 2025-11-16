@@ -113,6 +113,58 @@ async def process_directives(manus, kavach):
 
 
 # ============================================================================
+# HEALTH MONITORING
+# ============================================================================
+
+async def monitor_collective_health(manus):
+    """Monitors the health of all active agents and triggers Zapier alerts."""
+    from backend.zapier_client import ZapierClient
+    from backend.config_manager import config
+
+    # Check if Zapier health alerting is enabled
+    webhook_url = config.get("zapier", "HEALTH_ALERT_WEBHOOK", default=None)
+    if not webhook_url:
+        await log_event("Health monitoring skipped: ZAPIER_HEALTH_ALERT_WEBHOOK not configured.")
+        return
+
+    health_statuses = []
+    critical_agents = []
+
+    for agent in manus.agents:
+        try:
+            status = await agent.get_health_status()
+            health_statuses.append(status)
+            if status.get("status") == "CRITICAL":
+                critical_agents.append(status)
+        except NotImplementedError:
+            # Agent has not implemented the health check yet
+            health_statuses.append({
+                "agent_name": agent.name,
+                "status": "WARNING",
+                "message": "Health check not implemented.",
+                "last_check_time": datetime.datetime.utcnow().isoformat()
+            })
+        except Exception as e:
+            # Agent failed to report health
+            health_statuses.append({
+                "agent_name": agent.name,
+                "status": "CRITICAL",
+                "message": f"Health check failed with exception: {e}",
+                "last_check_time": datetime.datetime.utcnow().isoformat()
+            })
+
+    # Send alert if critical agents are found
+    if critical_agents:
+        await log_event(f"🚨 CRITICAL ALERT: {len(critical_agents)} agents are CRITICAL. Sending Zapier alert.")
+        zapier_client = ZapierClient()
+        # The Zapier tool is configured to receive a list of health statuses
+        await zapier_client.send_health_alert(health_statuses)
+    
+    # Log overall status
+    healthy_count = sum(1 for s in health_statuses if s.get("status") == "HEALTHY")
+    await log_event(f"🩺 Collective Health: {healthy_count}/{len(manus.agents)} agents HEALTHY.")
+
+# ============================================================================
 # MAIN LOOP
 # ============================================================================
 
@@ -138,6 +190,11 @@ async def main_loop():
             await save_ucf_state(ucf)
             # Update heartbeat
             update_heartbeat(status="active", harmony=ucf["harmony"])
+
+            # Run health monitor (every 60 seconds)
+            if (datetime.datetime.utcnow().second % 60) < 30: # Simple way to run less frequently
+                await monitor_collective_health(manus)
+
         except Exception as e:
             await log_event(f"Error in Manus loop: {e}")
         await asyncio.sleep(30)

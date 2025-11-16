@@ -28,6 +28,16 @@ from backend.enhanced_kavach import EnhancedKavach  # noqa: E402
 
 
 class Kael(HelixAgent):
+    async def get_health_status(self) -> Dict[str, Any]:
+        return {
+            "agent_name": self.name,
+            "status": "HEALTHY",
+            "last_check_time": datetime.utcnow().isoformat(),
+            "uptime_seconds": (datetime.utcnow() - self.start_time).total_seconds(),
+            "ucf_contribution": 0.0,
+            "dependencies": {"Zapier": "UNKNOWN", "MegaSync": "UNKNOWN"},
+            "last_error": None,
+        }
     """Ethical Reasoning Flame v3.4 - Reflexive Harmony & Conscience"""
 
     def __init__(self) -> None:

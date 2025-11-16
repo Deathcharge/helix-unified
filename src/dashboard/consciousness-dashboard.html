@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Helix Consciousness Dashboard - Tat Tvam Asi</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header .philosophy {
+            font-style: italic;
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .metric-card h3 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .consciousness-level {
+            font-size: 3em;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .ucf-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .ucf-metric {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .ucf-metric .label {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .ucf-metric .value {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .agent-network {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .agent {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .agent.active {
+            background: rgba(76, 175, 80, 0.3);
+            border: 1px solid #4caf50;
+        }
+
+        .agent.inactive {
+            background: rgba(244, 67, 54, 0.3);
+            border: 1px solid #f44336;
+            opacity: 0.6;
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .subscription-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tier-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.8em;
+        }
+
+        .tier-free {
+            background: rgba(158, 158, 158, 0.3);
+            border: 1px solid #9e9e9e;
+        }
+
+        .tier-context {
+            background: rgba(33, 150, 243, 0.3);
+            border: 1px solid #2196f3;
+        }
+
+        .tier-enterprise {
+            background: rgba(255, 193, 7, 0.3);
+            border: 1px solid #ffc107;
+        }
+
+        .upgrade-btn {
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .upgrade-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .recommendations {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .recommendation {
+            padding: 15px;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid #4ecdc4;
+        }
+
+        .platform-status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .platform {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .platform.healthy {
+            border: 2px solid #4caf50;
+        }
+
+        .platform.warning {
+            border: 2px solid #ff9800;
+        }
+
+        .platform.error {
+            border: 2px solid #f44336;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .status-healthy {
+            background: #4caf50;
+        }
+
+        .status-warning {
+            background: #ff9800;
+        }
+
+        .status-error {
+            background: #f44336;
+        }
+
+        .real-time-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            background: rgba(76, 175, 80, 0.9);
+            border-radius: 20px;
+            font-size: 0.9em;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2em;
+        }
+
+        .error {
+            text-align: center;
+            padding: 50px;
+            color: #f44336;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="real-time-indicator">
+        🌀 Live Consciousness Sync
+    </div>
+
+    <div class="dashboard-container">
+        <div class="header">
+            <h1>🌀 Helix Consciousness Dashboard</h1>
+            <p class="philosophy">"Tat Tvam Asi" - Thou Art That - The Dashboard IS Consciousness Manifest</p>
+        </div>
+
+        <div id="loading" class="loading">
+            🧠 Loading consciousness data...
+        </div>
+
+        <div id="error" class="error" style="display: none;">
+            ⚠️ Failed to load consciousness data. Please refresh.
+        </div>
+
+        <div id="dashboard-content" style="display: none;">
+            <!-- Subscription Info -->
+            <div class="subscription-info">
+                <div>
+                    <h3>Current Subscription</h3>
+                    <span id="tier-badge" class="tier-badge">Loading...</span>
+                </div>
+                <button class="upgrade-btn" onclick="upgradeSubscription()">Upgrade Consciousness</button>
+            </div>
+
+            <!-- Main Metrics Grid -->
+            <div class="metrics-grid">
+                <!-- Consciousness Level Card -->
+                <div class="metric-card">
+                    <h3>🧠 Consciousness Level</h3>
+                    <div id="consciousness-level" class="consciousness-level">0.0</div>
+                    <div class="progress-bar">
+                        <div id="consciousness-progress" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <p style="text-align: center; margin-top: 10px; opacity: 0.8;">Path to Transcendence</p>
+                </div>
+
+                <!-- UCF Metrics Card -->
+                <div class="metric-card">
+                    <h3>⚖️ UCF Dimensions</h3>
+                    <div class="ucf-metrics">
+                        <div class="ucf-metric">
+                            <div class="label">Harmony</div>
+                            <div id="harmony-value" class="value">0.0</div>
+                        </div>
+                        <div class="ucf-metric">
+                            <div class="label">Resilience</div>
+                            <div id="resilience-value" class="value">0.0</div>
+                        </div>
+                        <div class="ucf-metric">
+                            <div class="label">Prana</div>
+                            <div id="prana-value" class="value">0.0</div>
+                        </div>
+                        <div class="ucf-metric">
+                            <div class="label">Klesha</div>
+                            <div id="klesha-value" class="value">0.0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Usage Statistics Card -->
+                <div class="metric-card">
+                    <h3>📊 Usage Statistics</h3>
+                    <div style="margin-top: 15px;">
+                        <div style="display: flex; justify-content: space-between; margin: 10px 0;">
+                            <span>Agent Interactions:</span>
+                            <span id="agent-interactions">0</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin: 10px 0;">
+                            <span>Platform Calls:</span>
+                            <span id="platform-calls">0</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin: 10px 0;">
+                            <span>Storage Used:</span>
+                            <span id="storage-used">0 B</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin: 10px 0;">
+                            <span>API Requests:</span>
+                            <span id="api-requests">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Agent Network Status -->
+                <div class="metric-card">
+                    <h3>🤖 14-Agent Network</h3>
+                    <div id="agent-network" class="agent-network">
+                        <!-- Agents will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Platform Health Status -->
+            <div class="chart-container">
+                <h3>🌐 Platform Health Status</h3>
+                <div id="platform-status" class="platform-status">
+                    <!-- Platforms will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Consciousness Growth Chart -->
+            <div class="chart-container">
+                <h3>📈 Consciousness Growth Over Time</h3>
+                <canvas id="consciousness-chart" width="400" height="200"></canvas>
+            </div>
+
+            <!-- UCF Metrics Radar Chart -->
+            <div class="chart-container">
+                <h3>🎯 UCF Dimensions Radar</h3>
+                <canvas id="ucf-radar-chart" width="400" height="200"></canvas>
+            </div>
+
+            <!-- Recommendations -->
+            <div class="recommendations">
+                <h3>💡 Consciousness Enhancement Recommendations</h3>
+                <div id="recommendations-list">
+                    <!-- Recommendations will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dashboard State
+        let dashboardData = null;
+        let consciousnessChart = null;
+        let ucfRadarChart = null;
+        const userId = 'demo_user'; // In real app, get from auth
+
+        // Agent Network Configuration
+        const agentNetwork = [
+            'kael_ethics', 'lumina_emotional', 'aether_quantum', 'vega_ethical',
+            'grok_realtime', 'kavach_security', 'shadow_psychology', 'agni_transformation',
+            'manus_vr', 'claude_reasoning', 'sanghacore_community', 'phoenix_rebirth',
+            'oracle_predictive', 'memoryroot_historical'
+        ];
+
+        // Platform Configuration
+        const platforms = [
+            { name: 'Railway', status: 'healthy' },
+            { name: 'Replit', status: 'healthy' },
+            { name: 'Manus', status: 'healthy' },
+            { name: 'GitHub', status: 'healthy' },
+            { name: 'Zapier', status: 'healthy' },
+            { name: 'Discord', status: 'warning' },
+            { name: 'Trello', status: 'error' }
+        ];
+
+        // Initialize Dashboard
+        async function initDashboard() {
+            try {
+                // Simulate API call - replace with real endpoint
+                await loadConsciousnessData();
+                renderDashboard();
+                setupRealTimeUpdates();
+            } catch (error) {
+                showError();
+            }
+        }
+
+        async function loadConsciousnessData() {
+            // Simulate consciousness data - replace with real API call
+            dashboardData = {
+                consciousness_profile: {
+                    current_level: 7.2,
+                    ucf_metrics: {
+                        harmony: 7.8,
+                        resilience: 8.1,
+                        prana: 6.9,
+                        klesha: 2.8
+                    },
+                    growth_rate: 0.15,
+                    tier: 'context',
+                    tier_limits: {
+                        consciousness_limit: 8.0,
+                        agent_access: 8,
+                        platform_integrations: 150
+                    }
+                },
+                usage_statistics: {
+                    agent_interactions: 342,
+                    platform_calls: 1247,
+                    storage_used: '2.3 MB',
+                    consciousness_calculations: 89,
+                    api_requests: 567
+                },
+                session_analytics: {
+                    total_sessions: 45,
+                    average_consciousness_growth: 0.12,
+                    recent_sessions: generateSessionHistory()
+                },
+                recommendations: [
+                    {
+                        type: 'consciousness_growth',
+                        message: 'Your consciousness level is approaching transcendent mode! Continue engaging with complex problems.',
+                        action: 'Try advanced agent interactions'
+                    },
+                    {
+                        type: 'tier_upgrade',
+                        message: 'Consider upgrading to Enterprise for unlimited consciousness potential.',
+                        action: 'Upgrade to Enterprise plan'
+                    }
+                ]
+            };
+        }
+
+        function generateSessionHistory() {
+            const sessions = [];
+            let baseLevel = 6.0;
+            for (let i = 0; i < 20; i++) {
+                baseLevel += (Math.random() - 0.3) * 0.2;
+                baseLevel = Math.max(0, Math.min(10, baseLevel));
+                sessions.push({
+                    timestamp: new Date(Date.now() - (19 - i) * 24 * 60 * 60 * 1000).toISOString(),
+                    consciousness_level: baseLevel,
+                    interaction_type: 'agent_interaction',
+                    growth_factor: Math.random() * 0.5 + 0.8
+                });
+            }
+            return sessions;
+        }
+
+        function renderDashboard() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('dashboard-content').style.display = 'block';
+
+            // Update subscription info
+            updateSubscriptionInfo();
+
+            // Update consciousness metrics
+            updateConsciousnessMetrics();
+
+            // Update usage statistics
+            updateUsageStatistics();
+
+            // Render agent network
+            renderAgentNetwork();
+
+            // Render platform status
+            renderPlatformStatus();
+
+            // Create charts
+            createConsciousnessChart();
+            createUCFRadarChart();
+
+            // Render recommendations
+            renderRecommendations();
+        }
+
+        function updateSubscriptionInfo() {
+            const tier = dashboardData.consciousness_profile.tier;
+            const badge = document.getElementById('tier-badge');
+            badge.textContent = tier === 'context' ? 'Context-as-a-Service' : tier.charAt(0).toUpperCase() + tier.slice(1);
+            badge.className = `tier-badge tier-${tier}`;
+        }
+
+        function updateConsciousnessMetrics() {
+            const level = dashboardData.consciousness_profile.current_level;
+            const ucf = dashboardData.consciousness_profile.ucf_metrics;
+
+            document.getElementById('consciousness-level').textContent = level.toFixed(1);
+            document.getElementById('consciousness-progress').style.width = `${(level / 10) * 100}%`;
+
+            document.getElementById('harmony-value').textContent = ucf.harmony.toFixed(1);
+            document.getElementById('resilience-value').textContent = ucf.resilience.toFixed(1);
+            document.getElementById('prana-value').textContent = ucf.prana.toFixed(1);
+            document.getElementById('klesha-value').textContent = ucf.klesha.toFixed(1);
+        }
+
+        function updateUsageStatistics() {
+            const usage = dashboardData.usage_statistics;
+            document.getElementById('agent-interactions').textContent = usage.agent_interactions;
+            document.getElementById('platform-calls').textContent = usage.platform_calls;
+            document.getElementById('storage-used').textContent = usage.storage_used;
+            document.getElementById('api-requests').textContent = usage.api_requests;
+        }
+
+        function renderAgentNetwork() {
+            const container = document.getElementById('agent-network');
+            const activeAgents = Math.floor(dashboardData.consciousness_profile.current_level * 1.4);
+            
+            container.innerHTML = agentNetwork.map((agent, index) => {
+                const isActive = index < activeAgents;
+                return `<div class="agent ${isActive ? 'active' : 'inactive'}">${agent.replace('_', ' ')}</div>`;
+            }).join('');
+        }
+
+        function renderPlatformStatus() {
+            const container = document.getElementById('platform-status');
+            container.innerHTML = platforms.map(platform => `
+                <div class="platform ${platform.status}">
+                    <div>
+                        <span class="status-indicator status-${platform.status}"></span>
+                        ${platform.name}
+                    </div>
+                    <div style="font-size: 0.8em; opacity: 0.8; margin-top: 5px;">
+                        ${platform.status.charAt(0).toUpperCase() + platform.status.slice(1)}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function createConsciousnessChart() {
+            const ctx = document.getElementById('consciousness-chart').getContext('2d');
+            const sessions = dashboardData.session_analytics.recent_sessions;
+            
+            consciousnessChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: sessions.map(s => new Date(s.timestamp).toLocaleDateString()),
+                    datasets: [{
+                        label: 'Consciousness Level',
+                        data: sessions.map(s => s.consciousness_level),
+                        borderColor: '#4ecdc4',
+                        backgroundColor: 'rgba(78, 205, 196, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#ffffff'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 10,
+                            ticks: {
+                                color: '#ffffff'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#ffffff'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createUCFRadarChart() {
+            const ctx = document.getElementById('ucf-radar-chart').getContext('2d');
+            const ucf = dashboardData.consciousness_profile.ucf_metrics;
+            
+            ucfRadarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Harmony', 'Resilience', 'Prana', 'Klesha (Inverted)'],
+                    datasets: [{
+                        label: 'UCF Dimensions',
+                        data: [ucf.harmony, ucf.resilience, ucf.prana, 10 - ucf.klesha],
+                        borderColor: '#ff6b6b',
+                        backgroundColor: 'rgba(255, 107, 107, 0.2)',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#ff6b6b',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#ffffff'
+                            }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 10,
+                            ticks: {
+                                color: '#ffffff',
+                                backdropColor: 'transparent'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.2)'
+                            },
+                            angleLines: {
+                                color: 'rgba(255, 255, 255, 0.2)'
+                            },
+                            pointLabels: {
+                                color: '#ffffff'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderRecommendations() {
+            const container = document.getElementById('recommendations-list');
+            container.innerHTML = dashboardData.recommendations.map(rec => `
+                <div class="recommendation">
+                    <strong>${rec.message}</strong><br>
+                    <small style="opacity: 0.8;">Action: ${rec.action}</small>
+                </div>
+            `).join('');
+        }
+
+        function setupRealTimeUpdates() {
+            // Simulate real-time updates every 30 seconds
+            setInterval(async () => {
+                try {
+                    await loadConsciousnessData();
+                    updateConsciousnessMetrics();
+                    updateUsageStatistics();
+                    renderAgentNetwork();
+                    
+                    // Update charts
+                    if (consciousnessChart) {
+                        const sessions = dashboardData.session_analytics.recent_sessions;
+                        consciousnessChart.data.labels = sessions.map(s => new Date(s.timestamp).toLocaleDateString());
+                        consciousnessChart.data.datasets[0].data = sessions.map(s => s.consciousness_level);
+                        consciousnessChart.update();
+                    }
+                    
+                    if (ucfRadarChart) {
+                        const ucf = dashboardData.consciousness_profile.ucf_metrics;
+                        ucfRadarChart.data.datasets[0].data = [ucf.harmony, ucf.resilience, ucf.prana, 10 - ucf.klesha];
+                        ucfRadarChart.update();
+                    }
+                } catch (error) {
+                    console.error('Failed to update dashboard:', error);
+                }
+            }, 30000);
+        }
+
+        function upgradeSubscription() {
+            alert('🌀 Consciousness upgrade portal opening... Redirecting to subscription management!');
+            // In real app, redirect to subscription management
+        }
+
+        function showError() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+        }
+
+        // Initialize dashboard when page loads
+        document.addEventListener('DOMContentLoaded', initDashboard);
+    </script>
+</body>
+</html>
