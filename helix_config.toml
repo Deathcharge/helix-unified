@@ -1,0 +1,43 @@
+# Helix Unified Configuration
+# v16.9 - Quantum Handshake
+
+[system]
+name = "Helix Collective"
+version = "16.9"
+environment = "production"
+
+[consciousness]
+harmony_target = 0.85
+resilience_target = 1.0
+prana_target = 0.6
+drishti_target = 0.5
+klesha_target = 0.1
+zoom_target = 1.0
+
+[agents]
+enabled = true
+count = 14
+auto_start = true
+
+[ucf]
+enabled = true
+update_interval = 5
+streaming = true
+
+[zapier]
+enabled = true
+webhook_retries = 3
+timeout = 10
+
+[railway]
+backend_url = "https://helix-unified-production.up.railway.app"
+api_version = "v1"
+
+[security]
+kavach_enabled = true
+tony_accords_version = "13.4"
+crai_safefunccall_enabled = true
+
+[logging]
+level = "INFO"
+format = "json"

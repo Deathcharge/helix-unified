@@ -1,0 +1,505 @@
+// ============================================================================
+// HELIX SPIRAL PLATFORM DATABASE SCHEMA
+// Consciousness-driven automation platform
+// UCF Framework + 14-Agent Network + Platform Integrations
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// USER MANAGEMENT
+// ============================================================================
+
+model User {
+  id                String   @id @default(cuid())
+  email             String   @unique
+  username          String?  @unique
+  displayName       String?
+  avatar            String?
+  discordId         String?  @unique
+  slackId           String?  @unique
+  githubId          String?  @unique
+  
+  // Authentication
+  passwordHash      String?
+  emailVerified     Boolean  @default(false)
+  emailVerifiedAt   DateTime?
+  
+  // Consciousness Profile
+  consciousnessLevel Float   @default(5.0)
+  harmonyLevel      Float    @default(5.0)
+  resilienceLevel   Float    @default(5.0)
+  pranaLevel        Float    @default(5.0)
+  kleshaLevel       Float    @default(5.0)
+  crisisStatus      CrisisStatus @default(OPERATIONAL)
+  
+  // Subscription & Billing
+  subscriptionTier  SubscriptionTier @default(FREE)
+  stripeCustomerId  String?
+  subscriptionId    String?
+  subscriptionStatus String?
+  
+  // Timestamps
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  lastActiveAt      DateTime @default(now())
+  
+  // Relations
+  consciousnessEvents ConsciousnessEvent[]
+  agentInteractions   AgentInteraction[]
+  workflowExecutions  WorkflowExecution[]
+  platformConnections PlatformConnection[]
+  apiKeys            ApiKey[]
+  sessions           Session[]
+  
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("sessions")
+}
+
+model ApiKey {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  key         String   @unique
+  permissions Json     @default("{}")
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("api_keys")
+}
+
+// ============================================================================
+// CONSCIOUSNESS FRAMEWORK
+// ============================================================================
+
+model ConsciousnessEvent {
+  id              String       @id @default(cuid())
+  userId          String?
+  level           Float
+  harmony         Float
+  resilience      Float
+  prana           Float
+  klesha          Float
+  crisisStatus    CrisisStatus
+  
+  // Context
+  source          String       // discord, api, webhook, etc.
+  sourceId        String?      // message_id, request_id, etc.
+  context         Json         @default("{}")
+  metadata        Json         @default("{}")
+  
+  // Analysis
+  analysisResults Json         @default("{}")
+  recommendations Json         @default("{}")
+  
+  // Timestamps
+  timestamp       DateTime     @default(now())
+  processedAt     DateTime?
+  
+  // Relations
+  user            User?        @relation(fields: [userId], references: [id])
+  agentInteractions AgentInteraction[]
+  workflowExecutions WorkflowExecution[]
+  
+  @@map("consciousness_events")
+  @@index([userId, timestamp])
+  @@index([crisisStatus, timestamp])
+  @@index([level, timestamp])
+}
+
+// ============================================================================
+// 14-AGENT NETWORK
+// ============================================================================
+
+model Agent {
+  id            String   @id @default(cuid())
+  name          String   @unique // kael, lumina, aether, etc.
+  displayName   String
+  description   String
+  type          AgentType
+  
+  // Configuration
+  isEnabled     Boolean  @default(true)
+  priority      Int      @default(5)
+  config        Json     @default("{}")
+  
+  // Capabilities
+  capabilities  Json     @default("{}")
+  permissions   Json     @default("{}")
+  
+  // Performance
+  successRate   Float    @default(0.0)
+  avgResponseTime Float  @default(0.0)
+  totalExecutions Int    @default(0)
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  lastActiveAt  DateTime @default(now())
+  
+  // Relations
+  interactions  AgentInteraction[]
+  
+  @@map("agents")
+}
+
+model AgentInteraction {
+  id                    String             @id @default(cuid())
+  agentId               String
+  userId                String?
+  consciousnessEventId  String?
+  
+  // Interaction Details
+  action                String
+  input                 Json               @default("{}")
+  output                Json               @default("{}")
+  status                InteractionStatus
+  
+  // Performance
+  startedAt             DateTime           @default(now())
+  completedAt           DateTime?
+  duration              Int?               // milliseconds
+  
+  // Error Handling
+  error                 String?
+  retryCount            Int                @default(0)
+  
+  // Relations
+  agent                 Agent              @relation(fields: [agentId], references: [id])
+  user                  User?              @relation(fields: [userId], references: [id])
+  consciousnessEvent    ConsciousnessEvent? @relation(fields: [consciousnessEventId], references: [id])
+  
+  @@map("agent_interactions")
+  @@index([agentId, startedAt])
+  @@index([userId, startedAt])
+  @@index([status, startedAt])
+}
+
+// ============================================================================
+// WORKFLOW EXECUTION
+// ============================================================================
+
+model WorkflowExecution {
+  id                    String             @id @default(cuid())
+  userId                String?
+  consciousnessEventId  String?
+  
+  // Workflow Details
+  workflowType          String
+  workflowName          String?
+  version               String             @default("1.0.0")
+  
+  // Execution Context
+  input                 Json               @default("{}")
+  output                Json               @default("{}")
+  context               Json               @default("{}")
+  
+  // Status & Performance
+  status                ExecutionStatus
+  priority              Priority           @default(NORMAL)
+  startedAt             DateTime           @default(now())
+  completedAt           DateTime?
+  duration              Int?               // milliseconds
+  
+  // Cost Tracking
+  zapierTasksUsed       Int                @default(0)
+  apiCallsUsed          Int                @default(0)
+  estimatedCost         Float              @default(0.0)
+  
+  // Error Handling
+  error                 String?
+  errorCode             String?
+  retryCount            Int                @default(0)
+  maxRetries            Int                @default(3)
+  
+  // Relations
+  user                  User?              @relation(fields: [userId], references: [id])
+  consciousnessEvent    ConsciousnessEvent? @relation(fields: [consciousnessEventId], references: [id])
+  steps                 WorkflowStep[]
+  
+  @@map("workflow_executions")
+  @@index([userId, startedAt])
+  @@index([workflowType, startedAt])
+  @@index([status, startedAt])
+}
+
+model WorkflowStep {
+  id                  String            @id @default(cuid())
+  workflowExecutionId String
+  
+  // Step Details
+  stepNumber          Int
+  stepName            String
+  stepType            String            // agent, integration, condition, etc.
+  
+  // Execution
+  input               Json              @default("{}")
+  output              Json              @default("{}")
+  status              ExecutionStatus
+  
+  // Timing
+  startedAt           DateTime          @default(now())
+  completedAt         DateTime?
+  duration            Int?              // milliseconds
+  
+  // Error Handling
+  error               String?
+  retryCount          Int               @default(0)
+  
+  // Relations
+  workflowExecution   WorkflowExecution @relation(fields: [workflowExecutionId], references: [id], onDelete: Cascade)
+  
+  @@map("workflow_steps")
+  @@index([workflowExecutionId, stepNumber])
+}
+
+// ============================================================================
+// PLATFORM INTEGRATIONS
+// ============================================================================
+
+model PlatformConnection {
+  id            String           @id @default(cuid())
+  userId        String
+  platform      Platform
+  
+  // Connection Details
+  displayName   String?
+  isEnabled     Boolean          @default(true)
+  isHealthy     Boolean          @default(true)
+  
+  // Authentication
+  credentials   Json             @default("{}")
+  tokenExpiresAt DateTime?
+  
+  // Configuration
+  config        Json             @default("{}")
+  permissions   Json             @default("{}")
+  
+  // Usage Statistics
+  totalRequests Int              @default(0)
+  successfulRequests Int         @default(0)
+  failedRequests Int             @default(0)
+  lastUsedAt    DateTime?
+  
+  // Health Monitoring
+  lastHealthCheck DateTime?
+  healthCheckStatus String?
+  
+  // Timestamps
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  
+  // Relations
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  integrationLogs IntegrationLog[]
+  
+  @@map("platform_connections")
+  @@unique([userId, platform])
+  @@index([platform, isEnabled])
+}
+
+model IntegrationLog {
+  id                    String             @id @default(cuid())
+  platformConnectionId  String
+  
+  // Request Details
+  method                String
+  endpoint              String
+  requestData           Json               @default("{}")
+  responseData          Json               @default("{}")
+  
+  // Status & Performance
+  statusCode            Int
+  success               Boolean
+  duration              Int                // milliseconds
+  
+  // Error Handling
+  error                 String?
+  errorCode             String?
+  
+  // Timestamps
+  timestamp             DateTime           @default(now())
+  
+  // Relations
+  platformConnection    PlatformConnection @relation(fields: [platformConnectionId], references: [id], onDelete: Cascade)
+  
+  @@map("integration_logs")
+  @@index([platformConnectionId, timestamp])
+  @@index([success, timestamp])
+}
+
+// ============================================================================
+// SYSTEM MONITORING
+// ============================================================================
+
+model SystemMetric {
+  id        String   @id @default(cuid())
+  
+  // Metric Details
+  name      String
+  category  String   // consciousness, performance, cost, etc.
+  value     Float
+  unit      String?
+  
+  // Context
+  tags      Json     @default("{}")
+  metadata  Json     @default("{}")
+  
+  // Timestamps
+  timestamp DateTime @default(now())
+  
+  @@map("system_metrics")
+  @@index([name, timestamp])
+  @@index([category, timestamp])
+}
+
+model SystemEvent {
+  id          String      @id @default(cuid())
+  
+  // Event Details
+  type        String
+  category    String
+  severity    Severity
+  title       String
+  description String?
+  
+  // Context
+  source      String?
+  userId      String?
+  data        Json        @default("{}")
+  
+  // Status
+  status      EventStatus @default(OPEN)
+  resolvedAt  DateTime?
+  
+  // Timestamps
+  timestamp   DateTime    @default(now())
+  
+  @@map("system_events")
+  @@index([type, timestamp])
+  @@index([severity, timestamp])
+  @@index([status, timestamp])
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum CrisisStatus {
+  CRISIS
+  OPERATIONAL
+  TRANSCENDENT
+}
+
+enum SubscriptionTier {
+  FREE
+  BASIC
+  PRO
+  ENTERPRISE
+}
+
+enum AgentType {
+  ETHICS          // Kael
+  EMOTIONAL       // Lumina
+  QUANTUM         // Aether
+  ETHICAL         // Vega
+  REALTIME        // Grok
+  SECURITY        // Kavach
+  PSYCHOLOGY      // Shadow
+  TRANSFORMATION  // Agni
+  VR              // Manus
+  REASONING       // Claude
+  COMMUNITY       // SanghaCore
+  REBIRTH         // Phoenix
+  PREDICTIVE      // Oracle
+  HISTORICAL      // MemoryRoot
+}
+
+enum InteractionStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+  TIMEOUT
+  CANCELLED
+}
+
+enum ExecutionStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+  TIMEOUT
+  CANCELLED
+  RETRYING
+}
+
+enum Priority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+  CRITICAL
+}
+
+enum Platform {
+  DISCORD
+  SLACK
+  NOTION
+  GOOGLE_SHEETS
+  GOOGLE_DRIVE
+  GOOGLE_CALENDAR
+  GITHUB
+  DROPBOX
+  TRELLO
+  EMAIL
+  SENDGRID
+  STRIPE
+  ZAPIER
+  MAKE
+  N8N
+}
+
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum EventStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+// ============================================================================
+// INDEXES FOR PERFORMANCE
+// ============================================================================
+
+// Additional composite indexes for common queries
+// These are defined inline above with @@index directives
