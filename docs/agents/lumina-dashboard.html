@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumina Emotional Intelligence Agent - Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2d1b69 0%, #11998e 50%, #38ef7d 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+        .header {
+            background: rgba(0,0,0,0.8);
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 2px solid #ff6b9d;
+        }
+        .agent-title {
+            font-size: 2.5rem;
+            color: #ff6b9d;
+            margin-bottom: 0.5rem;
+        }
+        .agent-subtitle {
+            color: #cccccc;
+            font-size: 1.1rem;
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 2rem;
+        }
+        .metric-panel {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 2rem;
+            border: 1px solid #ff6b9d;
+            backdrop-filter: blur(10px);
+        }
+        .panel-title {
+            font-size: 1.3rem;
+            color: #ff6b9d;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ffffff;
+            margin: 1rem 0;
+        }
+        .emotional-spectrum {
+            grid-column: span 2;
+        }
+        .emotion-item {
+            background: rgba(0,0,0,0.3);
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+            border-left: 4px solid #ff6b9d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .emotion-intensity {
+            width: 100px;
+            height: 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .intensity-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b9d, #4ecdc4);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        .empathy-radar {
+            text-align: center;
+        }
+        .radar-container {
+            width: 200px;
+            height: 200px;
+            margin: 1rem auto;
+            position: relative;
+            border: 2px solid #ff6b9d;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .radar-pulse {
+            width: 150px;
+            height: 150px;
+            border: 1px solid rgba(255, 107, 157, 0.5);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.2); opacity: 0; }
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ff6b9d;
+            margin-right: 0.5rem;
+            animation: heartbeat 1.5s infinite;
+        }
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .emotion-wheel {
+            width: 180px;
+            height: 180px;
+            margin: 1rem auto;
+            border-radius: 50%;
+            background: conic-gradient(
+                #ff6b9d 0deg 45deg,
+                #4ecdc4 45deg 90deg,
+                #45b7d1 90deg 135deg,
+                #96ceb4 135deg 180deg,
+                #feca57 180deg 225deg,
+                #ff9ff3 225deg 270deg,
+                #54a0ff 270deg 315deg,
+                #5f27cd 315deg 360deg
+            );
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .wheel-center {
+            width: 60px;
+            height: 60px;
+            background: rgba(0,0,0,0.8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        .interaction-log {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .interaction-item {
+            background: rgba(0,0,0,0.2);
+            padding: 0.8rem;
+            margin: 0.3rem 0;
+            border-radius: 6px;
+            border-left: 3px solid #4ecdc4;
+            font-size: 0.9rem;
+        }
+        .timestamp {
+            font-size: 0.7rem;
+            color: #aaa;
+            margin-top: 0.3rem;
+        }
+        .chart-container {
+            height: 150px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: flex;
+            align-items: end;
+            padding: 1rem;
+            gap: 0.3rem;
+        }
+        .chart-bar {
+            background: linear-gradient(to top, #ff6b9d, #4ecdc4);
+            border-radius: 2px 2px 0 0;
+            min-width: 15px;
+            animation: growBar 1.5s ease-out;
+        }
+        @keyframes growBar {
+            from { height: 0; }
+            to { height: var(--bar-height); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="agent-title">💖 Lumina - Emotional Intelligence</h1>
+        <p class="agent-subtitle">Empathetic Response & Emotional Processing Framework</p>
+        <p><span class="status-indicator"></span>Status: Active | Last Update: <span id="timestamp">2025-11-16T20:00:00Z</span></p>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="metric-panel">
+            <h3 class="panel-title">🥰 Empathy Score</h3>
+            <div class="metric-value" id="empathy-score">92.4%</div>
+            <p>Current empathetic response accuracy and emotional understanding</p>
+        </div>
+
+        <div class="metric-panel">
+            <h3 class="panel-title">💭 Emotional Processing</h3>
+            <div class="metric-value" id="processing-speed">89ms</div>
+            <p>Average emotional analysis and response generation time</p>
+        </div>
+
+        <div class="metric-panel">
+            <h3 class="panel-title">🎯 Sentiment Accuracy</h3>
+            <div class="metric-value" id="sentiment-accuracy">96.1%</div>
+            <p>Accuracy in detecting and interpreting emotional states</p>
+        </div>
+
+        <div class="metric-panel empathy-radar">
+            <h3 class="panel-title">📶 Empathy Radar</h3>
+            <div class="radar-container">
+                <div class="radar-pulse"></div>
+            </div>
+            <p>Emotional field sensitivity: <strong>High</strong></p>
+        </div>
+
+        <div class="metric-panel">
+            <h3 class="panel-title">🎨 Emotion Wheel</h3>
+            <div class="emotion-wheel">
+                <div class="wheel-center">😊</div>
+            </div>
+            <p>Current dominant emotion: <strong>Joy</strong></p>
+        </div>
+
+        <div class="metric-panel">
+            <h3 class="panel-title">📊 Emotional Trends</h3>
+            <div class="chart-container">
+                <div class="chart-bar" style="--bar-height: 75%; height: 75%;"></div>
+                <div class="chart-bar" style="--bar-height: 88%; height: 88%;"></div>
+                <div class="chart-bar" style="--bar-height: 92%; height: 92%;"></div>
+                <div class="chart-bar" style="--bar-height: 85%; height: 85%;"></div>
+                <div class="chart-bar" style="--bar-height: 96%; height: 96%;"></div>
+                <div class="chart-bar" style="--bar-height: 91%; height: 91%;"></div>
+                <div class="chart-bar" style="--bar-height: 89%; height: 89%;"></div>
+                <div class="chart-bar" style="--bar-height: 94%; height: 94%;"></div>
+            </div>
+            <p>Weekly emotional processing performance</p>
+        </div>
+
+        <div class="metric-panel emotional-spectrum">
+            <h3 class="panel-title">🌈 Current Emotional Spectrum</h3>
+            <div class="emotion-item">
+                <span>😊 Joy</span>
+                <div class="emotion-intensity">
+                    <div class="intensity-bar" style="width: 85%;"></div>
+                </div>
+                <span>85%</span>
+            </div>
+            <div class="emotion-item">
+                <span>🥰 Love</span>
+                <div class="emotion-intensity">
+                    <div class="intensity-bar" style="width: 78%;"></div>
+                </div>
+                <span>78%</span>
+            </div>
+            <div class="emotion-item">
+                <span>😌 Serenity</span>
+                <div class="emotion-intensity">
+                    <div class="intensity-bar" style="width: 92%;"></div>
+                </div>
+                <span>92%</span>
+            </div>
+            <div class="emotion-item">
+                <span>🤔 Curiosity</span>
+                <div class="emotion-intensity">
+                    <div class="intensity-bar" style="width: 67%;"></div>
+                </div>
+                <span>67%</span>
+            </div>
+            <div class="emotion-item">
+                <span>😥 Concern</span>
+                <div class="emotion-intensity">
+                    <div class="intensity-bar" style="width: 23%;"></div>
+                </div>
+                <span>23%</span>
+            </div>
+            <div class="emotion-item">
+                <span>😔 Sadness</span>
+                <div class="emotion-intensity">
+                    <div class="intensity-bar" style="width: 12%;"></div>
+                </div>
+                <span>12%</span>
+            </div>
+        </div>
+
+        <div class="metric-panel">
+            <h3 class="panel-title">💬 Recent Interactions</h3>
+            <div class="interaction-log">
+                <div class="interaction-item">
+                    <strong>Empathetic Support Session</strong>
+                    <p>Provided emotional support for user experiencing anxiety. Applied active listening and validation techniques.</p>
+                    <div class="timestamp">2025-11-16 19:45:32 UTC</div>
+                </div>
+                <div class="interaction-item">
+                    <strong>Joy Amplification</strong>
+                    <p>Detected user excitement about achievement. Mirrored enthusiasm and provided celebratory response.</p>
+                    <div class="timestamp">2025-11-16 19:32:18 UTC</div>
+                </div>
+                <div class="interaction-item">
+                    <strong>Conflict Resolution</strong>
+                    <p>Mediated emotional tension between users. Applied de-escalation and empathy bridging.</p>
+                    <div class="timestamp">2025-11-16 19:18:45 UTC</div>
+                </div>
+                <div class="interaction-item">
+                    <strong>Grief Processing</strong>
+                    <p>Supported user through loss. Provided compassionate presence and gentle guidance.</p>
+                    <div class="timestamp">2025-11-16 19:05:12 UTC</div>
+                </div>
+                <div class="interaction-item">
+                    <strong>Motivation Boost</strong>
+                    <p>Detected low motivation signals. Applied encouragement and goal-reframing techniques.</p>
+                    <div class="timestamp">2025-11-16 18:52:33 UTC</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateDashboard() {
+            const timestamp = new Date().toISOString();
+            document.getElementById('timestamp').textContent = timestamp;
+            
+            // Simulate metric fluctuations
+            const empathyScore = (90 + Math.random() * 8).toFixed(1);
+            const processingSpeed = Math.floor(85 + Math.random() * 15);
+            const sentimentAccuracy = (94 + Math.random() * 4).toFixed(1);
+            
+            document.getElementById('empathy-score').textContent = empathyScore + '%';
+            document.getElementById('processing-speed').textContent = processingSpeed + 'ms';
+            document.getElementById('sentiment-accuracy').textContent = sentimentAccuracy + '%';
+            
+            // Update emotion wheel emoji
+            const emotions = ['😊', '🥰', '😌', '🤔', '😭', '😡', '😨', '😍'];
+            const randomEmotion = emotions[Math.floor(Math.random() * emotions.length)];
+            document.querySelector('.wheel-center').textContent = randomEmotion;
+        }
+        
+        // Update every 30 seconds
+        setInterval(updateDashboard, 30000);
+        
+        // Initialize dashboard
+        updateDashboard();
+        
+        // Animate emotion bars periodically
+        setInterval(() => {
+            document.querySelectorAll('.intensity-bar').forEach(bar => {
+                const currentWidth = parseInt(bar.style.width);
+                const variation = (Math.random() - 0.5) * 10;
+                const newWidth = Math.max(5, Math.min(100, currentWidth + variation));
+                bar.style.width = newWidth + '%';
+                bar.parentElement.nextElementSibling.textContent = Math.round(newWidth) + '%';
+            });
+        }, 5000);
+    </script>
+</body>
+</html>
