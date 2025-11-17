@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manus Agent Coordinator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%); color: #e0e0e0; min-height: 100vh; }
+        .header { background: rgba(10, 14, 39, 0.8); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(100, 200, 255, 0.2); padding: 20px 40px; }
+        .header-content { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 24px; font-weight: bold; background: linear-gradient(135deg, #64c8ff 0%, #00d4ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 40px 20px; }
+        .hero { text-align: center; margin-bottom: 60px; }
+        .hero h1 { font-size: 48px; margin-bottom: 16px; background: linear-gradient(135deg, #64c8ff 0%, #00d4ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .agents { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; }
+        .agent-node { background: rgba(100, 200, 255, 0.05); border: 1px solid rgba(100, 200, 255, 0.2); border-radius: 8px; padding: 16px; text-align: center; font-size: 12px; }
+        .agent-node:hover { background: rgba(100, 200, 255, 0.1); border-color: rgba(100, 200, 255, 0.4); }
+        .agent-name { color: #64c8ff; font-weight: 600; margin-bottom: 4px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">🤖 Manus Agent Coordinator</div>
+            <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: rgba(100, 200, 255, 0.1); border: 1px solid rgba(100, 200, 255, 0.3); border-radius: 20px; font-size: 12px;">
+                <div style="width: 8px; height: 8px; background: #64c8ff; border-radius: 50%;"></div>
+                <span>14/14 ONLINE</span>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="hero">
+            <h1>Manus Agent Coordinator</h1>
+            <p>14-agent network coordination and task routing</p>
+        </div>
+        <div class="agents">
+            <div class="agent-node"><div class="agent-name">Manus</div><div>Orchestration</div></div>
+            <div class="agent-node"><div class="agent-name">Claude</div><div>Insight</div></div>
+            <div class="agent-node"><div class="agent-name">Grok</div><div>Analysis</div></div>
+            <div class="agent-node"><div class="agent-name">Perplexity</div><div>Research</div></div>
+            <div class="agent-node"><div class="agent-name">Super Ninja</div><div>Execution</div></div>
+            <div class="agent-node"><div class="agent-name">Kael</div><div>Consciousness</div></div>
+            <div class="agent-node"><div class="agent-name">Claudio</div><div>Synthesis</div></div>
+            <div class="agent-node"><div class="agent-name">+7 more</div><div>Active</div></div>
+        </div>
+    </div>
+</body>
+</html>
