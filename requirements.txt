@@ -24,9 +24,8 @@
 # Visualization
 # Web Framework
 # Z-88 Ritual Engine with modern Streamlit and audio/visual processing
-# opencv-python==4.9.0.80
-# sqlalchemy==2.0.25
-Pillow==10.1.0
+# Core Dependencies - Python 3.13 Compatible
+Pillow==11.0.0  # Updated for Python 3.13 support
 aiohttp==3.11.0
 fastapi==0.115.0
 httpx==0.28.0
@@ -36,30 +35,22 @@ mega.py
 notion-client==2.5.0
 numba==0.58.1
 numpy==1.26.4
-numpy>=1.24.0
 openai
 anthropic>=0.39.0  # Claude API for consciousness processing
 discord.py>=2.3.2  # Discord bot for consciousness orchestration
 pandas==2.2.0
-pandas>=2.0.0
 plotly==5.18.0
-pycryptodome
 pycryptodome==3.20.0
 pydantic>=2.9.0  # Python 3.13 compatible
 python-dotenv==1.0.1
 python-json-logger==2.0.7
 pyyaml==6.0.1
-requests==2.31.0
 requests==2.32.3
 scipy==1.13.0
 seaborn==0.13.1
 soundfile==0.12.1
-streamlit
-streamlit-option-menu==0.3.12
-streamlit==1.31.0
 streamlit==1.40.0
+streamlit-option-menu==0.3.12
 toml==0.10.2
 websockets==13.0  # For WebSocket connections in Live Stream and Discovery Protocol
 sse-starlette==1.6.5  # Server-Sent Events for real-time consciousness streaming
-toml
-sse_starlette
