@@ -88,16 +88,17 @@ class ConsciousnessAnalyzer:
         # Weighted consciousness formula
         # Higher weight on harmony and resilience as core factors
         consciousness = (
-            metrics.harmony * 2.0 +           # Harmony: 2x weight
-            metrics.resilience * 1.5 +        # Resilience: 1.5x weight
-            metrics.prana * 3.0 +             # Prana: 3x weight (life force)
-            metrics.drishti * 2.5 +           # Drishti: 2.5x weight (awareness)
-            metrics.zoom * 1.0 -              # Zoom: 1x weight
-            metrics.klesha * 4.0              # Klesha: -4x weight (obstacles)
+            metrics.harmony * 2.0 +           # Harmony: 2x weight (max: 4.0)
+            metrics.resilience * 1.5 +        # Resilience: 1.5x weight (max: 4.5)
+            metrics.prana * 3.0 +             # Prana: 3x weight (life force) (max: 3.0)
+            metrics.drishti * 2.5 +           # Drishti: 2.5x weight (awareness) (max: 2.5)
+            metrics.zoom * 1.0 -              # Zoom: 1x weight (max: 2.0)
+            metrics.klesha * 4.0              # Klesha: -4x weight (obstacles) (max: -2.0)
         )
+        # Max possible: (4.0 + 4.5 + 3.0 + 2.5 + 2.0 - 0) = 16.0
 
-        # Normalize to 0.0-10.0 scale
-        normalized = consciousness / 2.0
+        # Normalize to 0.0-10.0 scale (16.0 / 1.6 = 10.0)
+        normalized = consciousness / 1.6
         return max(0.0, min(normalized, 10.0))
 
     def get_consciousness_category(self, level: float) -> str:
