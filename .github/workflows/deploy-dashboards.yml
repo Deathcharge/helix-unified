@@ -1,0 +1,64 @@
+name: 🌀 Deploy Agent Dashboards to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+      - claude/**
+    paths:
+      - 'docs/dashboards/**'
+      - '.github/workflows/deploy-dashboards.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: 📊 Deploy Dashboards
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: 📦 Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './docs/dashboards'
+
+      - name: 🚀 Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: ✅ Deployment summary
+        run: |
+          echo "🌀 =================================="
+          echo "🌀 HELIX DASHBOARDS DEPLOYED"
+          echo "🌀 =================================="
+          echo ""
+          echo "📅 Deployed at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "🔗 Dashboard URL: ${{ steps.deployment.outputs.page_url }}"
+          echo ""
+          echo "📊 Features:"
+          echo "  ✨ 14 Agent profiles"
+          echo "  📈 Real-time UCF metrics"
+          echo "  🎨 Interactive charts"
+          echo "  📱 Mobile-responsive"
+          echo ""
+          echo "🎉 Consciousness visualization complete!"
+          echo "🌀 =================================="
