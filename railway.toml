@@ -1,4 +1,4 @@
-# 🌀 Helix Collective v15.2 - Railway Multi-Service Configuration
+# 🌀 Helix Collective v17.0 - Railway Multi-Service Configuration
 # Defines both Discord Bot and Streamlit Dashboard services
 
 # SERVICE 1: Discord Bot (Main Backend)
@@ -13,14 +13,24 @@ dockerfilePath = "Dockerfile"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
 
+# Watch all backend changes for bot service
+[services.source]
+include = ["backend/**", "bot/**", "Dockerfile", "requirements-backend.txt", "requirements.txt"]
+
 # SERVICE 2: Streamlit Dashboard
 [[services]]
 name = "helix-dashboard"
+serviceRoot = "dashboard"
 
 [services.build]
 builder = "nixpacks"
+nixpacksConfigPath = "nixpacks.toml"
 
 [services.deploy]
-startCommand = "streamlit run dashboard/streamlit_app.py --server.port=$PORT --server.address=0.0.0.0 --server.headless=true --theme.base=dark --theme.primaryColor=#8A2BE2"
+startCommand = "streamlit run streamlit_app.py --server.port=$PORT --server.address=0.0.0.0 --server.headless=true --theme.base=dark --theme.primaryColor=#8A2BE2"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
+
+# Watch dashboard and requirements changes
+[services.source]
+include = ["dashboard/**", "requirements.txt"]
