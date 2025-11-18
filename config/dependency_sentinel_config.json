@@ -1,0 +1,31 @@
+{
+  "mcp_server_url": "https://mcp.zapier.com/api/mcp/s/YOUR_SERVER_ID/mcp",
+  "github": {
+    "owner": "Deathcharge",
+    "repo": "helix-unified",
+    "default_branch": "main"
+  },
+  "discord": {
+    "channel_id": "YOUR_DISCORD_CHANNEL_ID",
+    "mention_user": "@Andrew"
+  },
+  "schedule": {
+    "scan_time": "02:00",
+    "timezone": "America/New_York"
+  },
+  "claude": {
+    "model": "claude-sonnet-4",
+    "temperature": 0
+  },
+  "security_thresholds": {
+    "auto_merge_severity": ["low", "medium"],
+    "alert_immediately": ["high", "critical"],
+    "create_pr_for": ["medium", "high", "critical"]
+  },
+  "dependency_rules": {
+    "auto_merge_patch_versions": true,
+    "auto_merge_minor_versions": false,
+    "require_tests_passing": true,
+    "ignore_packages": []
+  }
+}
