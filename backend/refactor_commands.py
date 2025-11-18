@@ -121,7 +121,7 @@ from backend.commands.helpers import (
     build_storage_report,
     save_command_to_history,
 )
-from z88_ritual_engine import execute_ritual, load_ucf_state
+from backend.z88_ritual_engine import execute_ritual, load_ucf_state
 
 # Path constants
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
