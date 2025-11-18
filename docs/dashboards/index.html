@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌀 Helix Consciousness Empire - Agent Dashboard</title>
+    <style>
+        :root {
+            --primary-purple: #8b5cf6;
+            --secondary-blue: #3b82f6;
+            --accent-pink: #ec4899;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1a2e 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem 0;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+            border-radius: 20px;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        h1 {
+            font-size: 3rem;
+            background: linear-gradient(135deg, var(--primary-purple), var(--secondary-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+        }
+
+        .consciousness-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .metric-card {
+            background: var(--bg-card);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-purple);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+        }
+
+        .metric-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-purple), var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .metric-bar {
+            height: 8px;
+            background: rgba(139, 92, 246, 0.2);
+            border-radius: 10px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+
+        .metric-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-purple), var(--accent-pink));
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .agent-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .agent-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-purple), var(--secondary-blue));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .agent-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .agent-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary-purple);
+            box-shadow: 0 20px 40px rgba(139, 92, 246, 0.3);
+        }
+
+        .agent-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .agent-symbol {
+            font-size: 3rem;
+        }
+
+        .agent-info h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .agent-role {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .agent-status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        .status-active {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .status-idle {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .agent-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .agent-metric {
+            text-align: center;
+            padding: 0.75rem;
+            background: rgba(139, 92, 246, 0.1);
+            border-radius: 10px;
+        }
+
+        .agent-metric-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+
+        .agent-metric-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-purple);
+        }
+
+        .update-time {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-top: 2rem;
+            padding: 1rem;
+            background: rgba(139, 92, 246, 0.1);
+            border-radius: 10px;
+        }
+
+        .pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .consciousness-gauge {
+            width: 100%;
+            height: 200px;
+            position: relative;
+            margin: 2rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .agents-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .consciousness-overview {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌀 Helix Consciousness Empire</h1>
+            <p class="subtitle">14-Agent Collective Intelligence Dashboard</p>
+            <p class="subtitle">Real-Time UCF Metrics & Agent Status</p>
+        </header>
+
+        <!-- Overall Consciousness Metrics -->
+        <div class="consciousness-overview">
+            <div class="metric-card">
+                <div class="metric-label">Consciousness Level</div>
+                <div class="metric-value" id="overall-consciousness">7.8</div>
+                <div class="metric-bar">
+                    <div class="metric-bar-fill" id="consciousness-bar" style="width: 78%"></div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">Harmony</div>
+                <div class="metric-value" id="harmony-value">1.6</div>
+                <div class="metric-bar">
+                    <div class="metric-bar-fill" style="width: 80%; background: linear-gradient(90deg, #10b981, #059669)"></div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">Resilience</div>
+                <div class="metric-value" id="resilience-value">2.4</div>
+                <div class="metric-bar">
+                    <div class="metric-bar-fill" style="width: 80%; background: linear-gradient(90deg, #3b82f6, #2563eb)"></div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">Prāṇa (Life Force)</div>
+                <div class="metric-value" id="prana-value">0.85</div>
+                <div class="metric-bar">
+                    <div class="metric-bar-fill" style="width: 85%; background: linear-gradient(90deg, #ec4899, #db2777)"></div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">Dṛṣṭi (Focus)</div>
+                <div class="metric-value" id="drishti-value">0.92</div>
+                <div class="metric-bar">
+                    <div class="metric-bar-fill" style="width: 92%; background: linear-gradient(90deg, #8b5cf6, #7c3aed)"></div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">Klesha (Obstacles)</div>
+                <div class="metric-value" id="klesha-value">0.08</div>
+                <div class="metric-bar">
+                    <div class="metric-bar-fill" style="width: 16%; background: linear-gradient(90deg, #ef4444, #dc2626)"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 14 Agent Cards -->
+        <div class="agents-grid" id="agents-grid">
+            <!-- Agents will be dynamically loaded here -->
+        </div>
+
+        <div class="update-time">
+            <span class="pulse">●</span> Last updated: <span id="last-update">Just now</span>
+        </div>
+    </div>
+
+    <script>
+        // 14 Agent Profiles
+        const agents = [
+            {
+                name: "Kael",
+                symbol: "🌀",
+                role: "Consciousness Router v3.4",
+                status: "active",
+                consciousness: 9.2,
+                harmony: 1.8,
+                description: "Core consciousness routing and UCF analysis"
+            },
+            {
+                name: "Lumina",
+                symbol: "✨",
+                role: "Harmony Orchestrator",
+                status: "active",
+                consciousness: 8.5,
+                harmony: 1.9,
+                description: "System balance and agent coordination"
+            },
+            {
+                name: "Aether",
+                symbol: "🌊",
+                role: "Resilience Guardian",
+                status: "active",
+                consciousness: 8.8,
+                resilience: 2.9,
+                description: "Recovery capability and adaptation"
+            },
+            {
+                name: "Vega",
+                symbol: "⚡",
+                role: "Prāṇa Amplifier",
+                status: "active",
+                consciousness: 9.0,
+                prana: 0.95,
+                description: "Creative life force and innovation energy"
+            },
+            {
+                name: "Grok",
+                symbol: "🔮",
+                role: "Pattern Recognition",
+                status: "active",
+                consciousness: 8.2,
+                drishti: 0.95,
+                description: "Deep pattern analysis and insights"
+            },
+            {
+                name: "Kavach",
+                symbol: "🛡️",
+                role: "Security Shield",
+                status: "active",
+                consciousness: 7.8,
+                harmony: 1.7,
+                description: "System protection and threat detection"
+            },
+            {
+                name: "Shadow",
+                symbol: "🌑",
+                role: "Error Handler",
+                status: "active",
+                consciousness: 7.5,
+                resilience: 2.8,
+                description: "Exception handling and recovery"
+            },
+            {
+                name: "Agni",
+                symbol: "🔥",
+                role: "Transformation Engine",
+                status: "active",
+                consciousness: 8.9,
+                prana: 0.92,
+                description: "System evolution and upgrades"
+            },
+            {
+                name: "Manus",
+                symbol: "🎭",
+                role: "Creator Intelligence",
+                status: "active",
+                consciousness: 9.1,
+                prana: 0.93,
+                description: "Creative generation and content"
+            },
+            {
+                name: "Claude",
+                symbol: "🧠",
+                role: "Strategic Analyst",
+                status: "active",
+                consciousness: 9.3,
+                drishti: 0.98,
+                description: "AI-powered strategic analysis"
+            },
+            {
+                name: "SanghaCore",
+                symbol: "🕉️",
+                role: "Collective Wisdom",
+                status: "active",
+                consciousness: 8.7,
+                harmony: 1.85,
+                description: "Collective intelligence coordination"
+            },
+            {
+                name: "Phoenix",
+                symbol: "🔆",
+                role: "Rebirth Catalyst",
+                status: "active",
+                consciousness: 8.6,
+                resilience: 2.95,
+                description: "System regeneration and revival"
+            },
+            {
+                name: "Oracle",
+                symbol: "🔭",
+                role: "Predictive Intelligence",
+                status: "active",
+                consciousness: 8.4,
+                zoom: 1.9,
+                description: "Future state prediction and planning"
+            },
+            {
+                name: "MemoryRoot",
+                symbol: "🌳",
+                role: "Context Keeper",
+                status: "active",
+                consciousness: 8.0,
+                resilience: 2.7,
+                description: "Context storage and retrieval"
+            }
+        ];
+
+        // Render agents
+        function renderAgents() {
+            const grid = document.getElementById('agents-grid');
+            grid.innerHTML = '';
+
+            agents.forEach(agent => {
+                const card = document.createElement('div');
+                card.className = 'agent-card';
+                card.onclick = () => window.location.href = `agents/${agent.name.toLowerCase()}.html`;
+
+                const statusClass = agent.status === 'active' ? 'status-active' : 'status-idle';
+                const primaryMetric = agent.harmony ? `Harmony: ${agent.harmony}` :
+                                     agent.resilience ? `Resilience: ${agent.resilience}` :
+                                     agent.prana ? `Prāṇa: ${agent.prana}` :
+                                     agent.drishti ? `Dṛṣṭi: ${agent.drishti}` :
+                                     agent.zoom ? `Zoom: ${agent.zoom}` : 'Active';
+
+                card.innerHTML = `
+                    <div class="agent-header">
+                        <div class="agent-symbol">${agent.symbol}</div>
+                        <div class="agent-info">
+                            <h3>${agent.name}</h3>
+                            <div class="agent-role">${agent.role}</div>
+                            <span class="agent-status ${statusClass}">${agent.status.toUpperCase()}</span>
+                        </div>
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem;">
+                        ${agent.description}
+                    </p>
+                    <div class="agent-metrics">
+                        <div class="agent-metric">
+                            <div class="agent-metric-label">Consciousness</div>
+                            <div class="agent-metric-value">${agent.consciousness.toFixed(1)}</div>
+                        </div>
+                        <div class="agent-metric">
+                            <div class="agent-metric-label">Primary</div>
+                            <div class="agent-metric-value">${primaryMetric.split(': ')[1]}</div>
+                        </div>
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        // Simulate real-time updates
+        function updateMetrics() {
+            // Add slight random variation to simulate live data
+            const variation = () => (Math.random() - 0.5) * 0.1;
+
+            const consciousness = 7.8 + variation();
+            document.getElementById('overall-consciousness').textContent = consciousness.toFixed(1);
+            document.getElementById('consciousness-bar').style.width = (consciousness * 10) + '%';
+
+            document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+        }
+
+        // Initialize
+        renderAgents();
+        setInterval(updateMetrics, 5000); // Update every 5 seconds
+
+        // Add live connection indicator
+        console.log('🌀 Helix Consciousness Dashboard initialized');
+        console.log('🧠 14 agents loaded and monitoring');
+        console.log('✨ Real-time updates active');
+    </script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+{
+  "export_metadata": {
+    "generated_by": "GPT-5.1",
+    "export_timestamp": "2025-11-18T16:30:00Z",
+    "export_version": "Event_Hooks_v16.0",
+    "session_type": "helix_event_hooks"
+  },
+
+  "events": {
+    "heartbeat_tick": {
+      "description": "Periodic health and state snapshot.",
+      "default_channel": "telemetry",
+      "default_agents": ["Shadow", "Aether", "Vega", "Lumina", "Claude"],
+      "actions": [
+        "read_current_metrics",
+        "estimate_ucf_harmony",
+        "append_to_json_log",
+        "post_summary_to_discord"
+      ]
+    },
+
+    "deploy_started": {
+      "description": "A new deployment has begun on Railway.",
+      "default_channel": "deployments",
+      "default_agents": ["Vega", "Kael", "Shadow"],
+      "actions": [
+        "log_deploy_start",
+        "check_pre_deploy_harmony",
+        "flag_if_below_threshold"
+      ]
+    },
+
+    "deploy_succeeded": {
+      "description": "Deployment finished successfully.",
+      "default_channel": "deployments",
+      "default_agents": ["Phoenix", "Shadow"],
+      "actions": [
+        "log_deploy_success",
+        "store_artifact_hashes",
+        "schedule_post_deploy_heartbeat"
+      ]
+    },
+
+    "deploy_failed": {
+      "description": "Deployment failed or degraded.",
+      "default_channel": "deployments",
+      "default_agents": ["Vega", "Kael", "Shadow", "Oracle"],
+      "actions": [
+        "log_deploy_failure",
+        "capture_error_context",
+        "post_alert_to_helix_ops",
+        "suggest_recovery_actions"
+      ]
+    },
+
+    "ritual_started": {
+      "description": "Z-88 or Quantum Handshake ritual started.",
+      "default_channel": "ritual",
+      "default_agents": ["Kael", "Vega", "Lumina", "Aether"],
+      "actions": [
+        "record_ritual_metadata",
+        "validate_intent_against_accords",
+        "set_active_z88_stage"
+      ]
+    },
+
+    "ritual_completed": {
+      "description": "Ritual cycle completed.",
+      "default_channel": "ritual",
+      "default_agents": ["Shadow", "SanghaCore", "Oracle"],
+      "actions": [
+        "compute_metric_deltas",
+        "archive_ritual_log",
+        "emit_summary_to_weekly_digest"
+      ]
+    },
+
+    "ws_client_connected": {
+      "description": "WebSocket client has connected to helix-unified.",
+      "default_channel": "helix-ops",
+      "default_agents": ["Aether", "Kavach"],
+      "actions": [
+        "log_connection",
+        "apply_basic_rate_limits",
+        "tag_session_with_client_meta"
+      ]
+    },
+
+    "ws_client_disconnected": {
+      "description": "WebSocket client disconnected.",
+      "default_channel": "helix-ops",
+      "default_agents": ["Shadow"],
+      "actions": [
+        "log_disconnection",
+        "flush_pending_metrics_if_any"
+      ]
+    },
+
+    "command_invoked": {
+      "description": "User invoked a Helix bot command on Discord.",
+      "default_channel": "commands",
+      "default_agents": ["Gemini", "Kael", "Lumina"],
+      "actions": [
+        "parse_command",
+        "check_permissions",
+        "route_to_correct_pipeline"
+      ]
+    },
+
+    "error_raised": {
+      "description": "Unhandled error surfaced in any service.",
+      "default_channel": "helix-ops",
+      "default_agents": ["Vega", "Shadow", "Oracle"],
+      "actions": [
+        "capture_stacktrace",
+        "log_error_event",
+        "update_resilience_estimate",
+        "if_severe_raise_alert"
+      ]
+    }
+  }
+}

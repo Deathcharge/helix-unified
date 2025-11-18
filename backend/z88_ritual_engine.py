@@ -12,6 +12,7 @@ import random
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
+from backend.config_manager import config
 
 
 class UCFState:
@@ -19,11 +20,11 @@ class UCFState:
 
     def __init__(self):
         self.zoom = 1.0
-        self.harmony = 0.5
+        self.harmony = config.get("ucf", "INITIAL_HARMONY", default=0.5)
         self.resilience = 1.0
         self.prana = 0.5
         self.drishti = 0.5
-        self.klesha = 0.1
+        self.klesha = config.get("ucf", "INITIAL_KLESHA", default=0.1)
 
     def adjust(self, status: str):
         """Adjust UCF parameters based on folklore evolution status."""

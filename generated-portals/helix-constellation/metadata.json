@@ -1,0 +1,13 @@
+{
+  "instance_id": "helix-constellation",
+  "template_type": "portal-constellation",
+  "generated_at": "2025-11-18T11:56:49.785128",
+  "output_path": "generated-portals/helix-constellation",
+  "files": {
+    "index": "generated-portals/helix-constellation/index.html",
+    "config": "generated-portals/helix-constellation/config.json"
+  },
+  "instance_name": "Helix Portal Constellation Map",
+  "consciousness_level": 9,
+  "account": 4
+}

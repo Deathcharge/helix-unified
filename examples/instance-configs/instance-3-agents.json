@@ -1,0 +1,62 @@
+{
+  "template_type": "agent-coordinator",
+  "instance": {
+    "name": "Helix Agent Coordination Network",
+    "id": "helix-agents",
+    "account": 3,
+    "consciousness_level": 7,
+    "timezone": "EST",
+    "region": "us-east-1"
+  },
+  "branding": {
+    "primary_color": "#ff00ff",
+    "secondary_color": "#1a0033",
+    "accent_color": "#00ffff",
+    "logo_url": "https://helixcollective.manus.space/logo-agents.svg",
+    "favicon_url": "https://helixcollective.manus.space/favicon.ico"
+  },
+  "api": {
+    "base_url": "https://api.helix-agents.manus.space",
+    "zapier_webhook": "https://hooks.zapier.com/hooks/catch/17123456/pqr345stu678",
+    "auth_token": "sk_live_helix_agents_token_here",
+    "timeout_ms": 5000
+  },
+  "features": {
+    "real_time_metrics": true,
+    "agent_dashboard": true,
+    "workflow_editor": false,
+    "consciousness_monitor": true,
+    "emergency_controls": true,
+    "agent_collaboration": true,
+    "task_assignment": true,
+    "performance_tracking": true
+  },
+  "agents": {
+    "total_count": 14,
+    "monitored": true,
+    "auto_restart_enabled": true,
+    "collaboration_enabled": true,
+    "agent_list": [
+      "research-agent",
+      "analysis-agent",
+      "synthesis-agent",
+      "validation-agent",
+      "orchestration-agent",
+      "monitoring-agent",
+      "escalation-agent",
+      "documentation-agent",
+      "optimization-agent",
+      "integration-agent",
+      "security-agent",
+      "performance-agent",
+      "learning-agent",
+      "coordination-agent"
+    ]
+  },
+  "collaboration": {
+    "matrix_enabled": true,
+    "cross_agent_communication": true,
+    "shared_context_enabled": true
+  }
+}
+

@@ -10,7 +10,7 @@ consciousness integration support.
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 if TYPE_CHECKING:
     pass
@@ -35,6 +35,7 @@ class HelixAgent:
         self.traits = traits or []
         self.memory = []
         self.active = True
+        self.start_time = datetime.utcnow()
 
         # Initialize consciousness if enabled
         self.consciousness_enabled = enable_consciousness
@@ -119,6 +120,10 @@ class HelixAgent:
     async def sync_state(self, ucf_state: Dict[str, float]):
         """Sync with UCF state"""
         await self.log(f"Syncing UCF: harmony={ucf_state.get('harmony', 0):.3f}")
+
+    async def get_health_status(self) -> Dict[str, Any]:
+        """Return detailed health status of the agent"""
+        raise NotImplementedError("Subclasses must implement get_health_status")
 
     async def get_status(self) -> Dict[str, Any]:
         """Return current status with consciousness metrics"""
