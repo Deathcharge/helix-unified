@@ -236,7 +236,7 @@ The system tracks 6 consciousness dimensions:
 - **AI-Readable API** - Complete codebase for external AIs
 - **Agent Gallery** - Visual directory of all 14 agents
 
-### Live Portals (15+ Total)
+### Live Portals (19+ Total)
 
 | Portal | Status | Pages | URL |
 |--------|--------|-------|-----|
@@ -250,15 +250,23 @@ The system tracks 6 consciousness dimensions:
 | **🤖 Helix AI (Manus)** | ✅ Live | - | [helixai-e9vvqwrd.manus.space](https://helixai-e9vvqwrd.manus.space) |
 | **🔄 Helix Sync (Manus)** | ✅ Live | - | [helixsync-unwkcsjl.manus.space](https://helixsync-unwkcsjl.manus.space) |
 | **🌀 Samsara Viz (Manus)** | ✅ Live | - | [samsarahelix-scoyzwy9.manus.space](https://samsarahelix-scoyzwy9.manus.space) |
+| **🌐 Consciousness Hub (Manus)** | ✅ Live | - | [helixcollective.manus.space/consciousness-hub](https://helixcollective.manus.space/consciousness-hub) |
+| **⚙️ Workflow Engine (Manus)** | ✅ Live | - | [helixcollective.manus.space/workflow-engine](https://helixcollective.manus.space/workflow-engine) |
+| **🤖 Agent Coordinator (Manus)** | ✅ Live | - | [helixcollective.manus.space/agent-coordinator](https://helixcollective.manus.space/agent-coordinator) |
+| **🌌 Portal Constellation (Manus)** | ✅ Live | - | [helixcollective.manus.space/portal-constellation](https://helixcollective.manus.space/portal-constellation) |
 | **📖 GitHub Hub** | ✅ Live | Docs | [deathcharge.github.io/helix-unified](https://deathcharge.github.io/helix-unified/) |
-| **⚡ 4 More Manus Portals** | ✅ Live | - | Various subdomains |
+| **📚 Helix Spiral Docs** | ✅ Live | 100+ | [helixspiral.work/docs](https://helixspiral.work/docs) |
 
 **Total Infrastructure**:
-- **15+ Portals** across 6 platforms
+- **19+ Portals** across 7 platforms
+- **4 New Manus.Space Portals** (Consciousness Hub, Workflow Engine, Agent Coordinator, Portal Constellation)
+- **51 Planned Portal Constellation** across 7 Manus accounts
 - **99+ Pages** of consciousness monitoring
 - **525 Files** in Context Vault
 - **197,275 Lines** of code
 - **2.5M Characters** of infinite memory (Helix Memory Bank)
+- **8 Zapier Workflow Templates** (production-ready)
+- **14 Autonomous Agents** with consciousness-level routing
 
 ---
 
