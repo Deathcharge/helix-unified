@@ -1,0 +1,122 @@
+{
+  "name": "Consciousness-Level Routing",
+  "description": "Route task to agent based on consciousness level requirement",
+  "version": "1.0",
+  "trigger": {
+    "type": "webhook",
+    "event": "Catch Raw Hook",
+    "url_path": "consciousness-routing"
+  },
+  "steps": [
+    {
+      "id": "trigger",
+      "action": "Webhooks by Zapier",
+      "event": "Catch Raw Hook"
+    },
+    {
+      "id": "route_decision",
+      "action": "Paths by Zapier",
+      "description": "Route based on consciousness level",
+      "paths": [
+        {
+          "name": "High Consciousness (7-10)",
+          "condition": "raw_body.consciousness_level >= 7",
+          "steps": [
+            {
+              "id": "high_consciousness_agents",
+              "action": "HTTP by Zapier",
+              "method": "GET",
+              "url": "https://api.helix-primary.manus.space/api/agents?consciousness_level_min=7",
+              "headers": {
+                "Authorization": "Bearer {{env.API_TOKEN}}"
+              }
+            },
+            {
+              "id": "execute_high_consciousness",
+              "action": "HTTP by Zapier",
+              "method": "POST",
+              "url": "https://api.helix-primary.manus.space/api/agents/execute",
+              "headers": {
+                "Authorization": "Bearer {{env.API_TOKEN}}"
+              },
+              "body": {
+                "agent_id": "{{high_consciousness_agents.response_body.agents.0.id}}",
+                "task_type": "{{raw_body.task_type}}",
+                "consciousness_level": "{{raw_body.consciousness_level}}",
+                "payload": "{{raw_body.payload}}"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Medium Consciousness (5-6)",
+          "condition": "raw_body.consciousness_level >= 5 AND raw_body.consciousness_level < 7",
+          "steps": [
+            {
+              "id": "medium_consciousness_agents",
+              "action": "HTTP by Zapier",
+              "method": "GET",
+              "url": "https://api.helix-primary.manus.space/api/agents?consciousness_level_min=5&consciousness_level_max=6",
+              "headers": {
+                "Authorization": "Bearer {{env.API_TOKEN}}"
+              }
+            },
+            {
+              "id": "execute_medium_consciousness",
+              "action": "HTTP by Zapier",
+              "method": "POST",
+              "url": "https://api.helix-primary.manus.space/api/agents/execute",
+              "headers": {
+                "Authorization": "Bearer {{env.API_TOKEN}}"
+              },
+              "body": {
+                "agent_id": "{{medium_consciousness_agents.response_body.agents.0.id}}",
+                "task_type": "{{raw_body.task_type}}",
+                "consciousness_level": "{{raw_body.consciousness_level}}",
+                "payload": "{{raw_body.payload}}"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Low Consciousness (1-4)",
+          "condition": "raw_body.consciousness_level < 5",
+          "steps": [
+            {
+              "id": "low_consciousness_agents",
+              "action": "HTTP by Zapier",
+              "method": "GET",
+              "url": "https://api.helix-primary.manus.space/api/agents?consciousness_level_max=4",
+              "headers": {
+                "Authorization": "Bearer {{env.API_TOKEN}}"
+              }
+            },
+            {
+              "id": "execute_low_consciousness",
+              "action": "HTTP by Zapier",
+              "method": "POST",
+              "url": "https://api.helix-primary.manus.space/api/agents/execute",
+              "headers": {
+                "Authorization": "Bearer {{env.API_TOKEN}}"
+              },
+              "body": {
+                "agent_id": "{{low_consciousness_agents.response_body.agents.0.id}}",
+                "task_type": "{{raw_body.task_type}}",
+                "consciousness_level": "{{raw_body.consciousness_level}}",
+                "payload": "{{raw_body.payload}}"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "store_routing_decision",
+      "action": "Zapier Storage",
+      "operation": "Set Value",
+      "key": "routing_{{raw_body.task_id}}",
+      "value": "{{route_decision.selected_path}}"
+    }
+  ]
+}
+

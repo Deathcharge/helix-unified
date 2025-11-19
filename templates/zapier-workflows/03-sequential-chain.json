@@ -1,0 +1,134 @@
+{
+  "name": "Sequential Agent Chain",
+  "description": "Execute agents in sequence, passing results between them",
+  "version": "1.0",
+  "trigger": {
+    "type": "webhook",
+    "event": "Catch Raw Hook",
+    "url_path": "sequential-chain"
+  },
+  "steps": [
+    {
+      "id": "trigger",
+      "action": "Webhooks by Zapier",
+      "event": "Catch Raw Hook"
+    },
+    {
+      "id": "step_1_research",
+      "action": "HTTP by Zapier",
+      "method": "POST",
+      "url": "https://api.helix-primary.manus.space/api/agents/execute",
+      "headers": {
+        "Authorization": "Bearer {{env.API_TOKEN}}"
+      },
+      "body": {
+        "agent_id": "research-agent",
+        "task_type": "data_retrieval",
+        "consciousness_level": 5,
+        "payload": "{{raw_body.input_data}}"
+      },
+      "description": "Step 1: Research Agent - Data Retrieval"
+    },
+    {
+      "id": "step_2_analysis",
+      "action": "HTTP by Zapier",
+      "method": "POST",
+      "url": "https://api.helix-primary.manus.space/api/agents/execute",
+      "headers": {
+        "Authorization": "Bearer {{env.API_TOKEN}}"
+      },
+      "body": {
+        "agent_id": "analysis-agent",
+        "task_type": "analysis",
+        "consciousness_level": 6,
+        "payload": "{{step_1_research.response_body.result}}"
+      },
+      "description": "Step 2: Analysis Agent - Data Analysis"
+    },
+    {
+      "id": "step_3_synthesis",
+      "action": "HTTP by Zapier",
+      "method": "POST",
+      "url": "https://api.helix-primary.manus.space/api/agents/execute",
+      "headers": {
+        "Authorization": "Bearer {{env.API_TOKEN}}"
+      },
+      "body": {
+        "agent_id": "synthesis-agent",
+        "task_type": "strategy_planning",
+        "consciousness_level": 7,
+        "payload": "{{step_2_analysis.response_body.result}}"
+      },
+      "description": "Step 3: Synthesis Agent - Strategy Planning"
+    },
+    {
+      "id": "step_4_validation",
+      "action": "HTTP by Zapier",
+      "method": "POST",
+      "url": "https://api.helix-primary.manus.space/api/agents/execute",
+      "headers": {
+        "Authorization": "Bearer {{env.API_TOKEN}}"
+      },
+      "body": {
+        "agent_id": "validation-agent",
+        "task_type": "validation",
+        "consciousness_level": 5,
+        "payload": "{{step_3_synthesis.response_body.result}}"
+      },
+      "description": "Step 4: Validation Agent - Quality Assurance"
+    },
+    {
+      "id": "compile_results",
+      "action": "Formatter by Zapier",
+      "transform": "JSON",
+      "input": {
+        "workflow_id": "{{raw_body.workflow_id}}",
+        "status": "completed",
+        "steps": {
+          "research": "{{step_1_research.response_body}}",
+          "analysis": "{{step_2_analysis.response_body}}",
+          "synthesis": "{{step_3_synthesis.response_body}}",
+          "validation": "{{step_4_validation.response_body}}"
+        },
+        "final_result": "{{step_4_validation.response_body.result}}"
+      },
+      "description": "Compile all results"
+    },
+    {
+      "id": "send_final_result",
+      "action": "Webhooks by Zapier",
+      "event": "POST to URL",
+      "url": "{{raw_body.callback_url}}",
+      "body": "{{compile_results.output}}",
+      "description": "Send final result to caller"
+    }
+  ],
+  "error_handling": {
+    "type": "path",
+    "paths": [
+      {
+        "condition": "step_1_research.status != 200",
+        "steps": [
+          {
+            "action": "Zapier Storage",
+            "operation": "Set Value",
+            "key": "error_step_1",
+            "value": "Research agent failed"
+          }
+        ]
+      },
+      {
+        "condition": "step_2_analysis.status != 200",
+        "steps": [
+          {
+            "action": "Zapier Storage",
+            "operation": "Set Value",
+            "key": "error_step_2",
+            "value": "Analysis agent failed"
+          }
+        ]
+      }
+    ]
+  }
+}
+

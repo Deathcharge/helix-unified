@@ -1,0 +1,184 @@
+{
+  "name": "Incident Response Workflow",
+  "description": "Automated incident detection, escalation, and resolution",
+  "version": "1.0",
+  "trigger": {
+    "type": "webhook",
+    "event": "Catch Raw Hook",
+    "url_path": "incident-response"
+  },
+  "steps": [
+    {
+      "id": "trigger",
+      "action": "Webhooks by Zapier",
+      "event": "Catch Raw Hook",
+      "description": "Receive incident alert"
+    },
+    {
+      "id": "detect_anomaly",
+      "action": "HTTP by Zapier",
+      "method": "POST",
+      "url": "https://api.helix-primary.manus.space/api/agents/execute",
+      "headers": {
+        "Authorization": "Bearer {{env.API_TOKEN}}"
+      },
+      "body": {
+        "agent_id": "monitoring-agent",
+        "task_type": "pattern_matching",
+        "consciousness_level": 5,
+        "payload": {
+          "metrics": "{{raw_body.metrics}}",
+          "thresholds": {
+            "cpu": 80,
+            "memory": 85,
+            "disk": 90,
+            "error_rate": 5
+          }
+        }
+      },
+      "description": "Step 1: Detect anomaly"
+    },
+    {
+      "id": "analyze_incident",
+      "action": "HTTP by Zapier",
+      "method": "POST",
+      "url": "https://api.helix-primary.manus.space/api/agents/execute",
+      "headers": {
+        "Authorization": "Bearer {{env.API_TOKEN}}"
+      },
+      "body": {
+        "agent_id": "analysis-agent",
+        "task_type": "analysis",
+        "consciousness_level": 6,
+        "payload": "{{detect_anomaly.response_body.anomaly_data}}"
+      },
+      "description": "Step 2: Analyze incident"
+    },
+    {
+      "id": "determine_severity",
+      "action": "Paths by Zapier",
+      "description": "Determine incident severity",
+      "paths": [
+        {
+          "name": "Critical",
+          "condition": "analyze_incident.response_body.severity == 'critical'",
+          "steps": [
+            {
+              "id": "escalate_critical",
+              "action": "HTTP by Zapier",
+              "method": "POST",
+              "url": "https://api.helix-primary.manus.space/api/agents/execute",
+              "headers": {
+                "Authorization": "Bearer {{env.API_TOKEN}}"
+              },
+              "body": {
+                "agent_id": "escalation-agent",
+                "task_type": "routing",
+                "consciousness_level": 7,
+                "payload": {
+                  "incident_type": "{{analyze_incident.response_body.type}}",
+                  "severity": "critical",
+                  "auto_remediation": true
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "High",
+          "condition": "analyze_incident.response_body.severity == 'high'",
+          "steps": [
+            {
+              "id": "escalate_high",
+              "action": "HTTP by Zapier",
+              "method": "POST",
+              "url": "https://api.helix-primary.manus.space/api/agents/execute",
+              "headers": {
+                "Authorization": "Bearer {{env.API_TOKEN}}"
+              },
+              "body": {
+                "agent_id": "escalation-agent",
+                "task_type": "routing",
+                "consciousness_level": 6,
+                "payload": {
+                  "incident_type": "{{analyze_incident.response_body.type}}",
+                  "severity": "high",
+                  "auto_remediation": false
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Medium",
+          "condition": "analyze_incident.response_body.severity == 'medium'",
+          "steps": [
+            {
+              "id": "log_medium",
+              "action": "Zapier Storage",
+              "operation": "Set Value",
+              "key": "incident_{{timestamp}}",
+              "value": "{{analyze_incident.response_body}}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "execute_remediation",
+      "action": "HTTP by Zapier",
+      "method": "POST",
+      "url": "https://api.helix-primary.manus.space/api/agents/execute",
+      "headers": {
+        "Authorization": "Bearer {{env.API_TOKEN}}"
+      },
+      "body": {
+        "agent_id": "orchestration-agent",
+        "task_type": "autonomous_execution",
+        "consciousness_level": 8,
+        "payload": {
+          "incident_id": "{{raw_body.incident_id}}",
+          "incident_type": "{{analyze_incident.response_body.type}}",
+          "auto_remediation": true,
+          "escalation_data": "{{determine_severity.selected_path}}"
+        }
+      },
+      "description": "Step 3: Execute remediation"
+    },
+    {
+      "id": "verify_resolution",
+      "action": "HTTP by Zapier",
+      "method": "POST",
+      "url": "https://api.helix-primary.manus.space/api/agents/execute",
+      "headers": {
+        "Authorization": "Bearer {{env.API_TOKEN}}"
+      },
+      "body": {
+        "agent_id": "validation-agent",
+        "task_type": "validation",
+        "consciousness_level": 5,
+        "payload": {
+          "incident_id": "{{raw_body.incident_id}}",
+          "remediation_result": "{{execute_remediation.response_body}}"
+        }
+      },
+      "description": "Step 4: Verify resolution"
+    },
+    {
+      "id": "send_incident_report",
+      "action": "Webhooks by Zapier",
+      "event": "POST to URL",
+      "url": "{{raw_body.callback_url}}",
+      "body": {
+        "incident_id": "{{raw_body.incident_id}}",
+        "status": "resolved",
+        "detection": "{{detect_anomaly.response_body}}",
+        "analysis": "{{analyze_incident.response_body}}",
+        "remediation": "{{execute_remediation.response_body}}",
+        "verification": "{{verify_resolution.response_body}}"
+      },
+      "description": "Send incident report"
+    }
+  ]
+}
+
