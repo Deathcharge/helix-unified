@@ -69,6 +69,6 @@ pytest-mock==3.12.0
 # Database Migrations
 alembic==1.13.1
 
-# Optional Storage Dependencies (install separately if needed)
-# webdav3  # Not available for Python 3.11+ - install manually if using Nextcloud
+# Cloud Storage Dependencies
+webdavclient3==3.14.6  # Nextcloud/WebDAV integration (Python 3.11+ compatible)
 # boto3    # Optional - install if using Backblaze B2 storage
