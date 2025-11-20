@@ -1,0 +1,9 @@
+# Force Nixpacks to build as Python app
+[phases.setup]
+nixPkgs = ['python311']
+
+[phases.install]
+cmds = ['pip install -r ../requirements.txt']
+
+[start]
+cmd = 'bash railway_start.sh'

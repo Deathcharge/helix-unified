@@ -1,0 +1,26 @@
+{
+  "template_type": "workflow-engine",
+  "instance": {
+    "name": "Helix Workflow Automation Engine",
+    "id": "helix-workflows",
+    "account": 2,
+    "consciousness_level": 6,
+    "timezone": "EST"
+  },
+  "branding": {
+    "primary_color": "#00ff88",
+    "secondary_color": "#0a0e27",
+    "accent_color": "#ffaa00",
+    "logo_url": "https://helixcollective.manus.space/logo-alt.svg"
+  },
+  "api": {
+    "base_url": "https://api.helix-workflows.manus.space",
+    "zapier_webhook": "https://hooks.zapier.com/hooks/catch/17123456/xyz789uvw012",
+    "auth_token": "sk_live_helix_workflows_token_here"
+  },
+  "features": {
+    "real_time_metrics": true,
+    "workflow_editor": true,
+    "execution_history": true
+  }
+}

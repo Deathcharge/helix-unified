@@ -29,6 +29,7 @@ from statistics import mean, stdev
 from typing import Any, Dict, List, Optional, Tuple
 
 import aiohttp
+from aiohttp import web
 import discord
 from backend.agents import AGENTS
 from discord.ext import commands, tasks
@@ -548,6 +549,10 @@ async def on_ready() -> None:
     logger.info(f"   Status Channel: {STATUS_CHANNEL_ID}")
     logger.info(f"   Telemetry Channel: {TELEMETRY_CHANNEL_ID}")
     logger.info(f"   Storage Channel: {STORAGE_CHANNEL_ID}")
+
+    # Start HTTP healthcheck server for Railway
+    if not hasattr(bot, 'healthcheck_runner'):
+        bot.healthcheck_runner = await start_healthcheck_server()
 
     # Initialize Zapier client for monitoring
     if not bot.http_session:
@@ -1227,6 +1232,39 @@ async def before_weekly_digest():
     """Wait for bot to be ready"""
     await bot.wait_until_ready()
 
+
+# ============================================================================
+# HTTP HEALTHCHECK SERVER (for Railway monitoring)
+# ============================================================================
+
+async def health_handler(request):
+    """Healthcheck endpoint for Railway"""
+    uptime_seconds = int(time.time() - BOT_START_TIME)
+    return web.json_response({
+        "status": "healthy",
+        "service": "helix-discord-bot",
+        "version": "v16.8",
+        "uptime_seconds": uptime_seconds,
+        "discord_connected": bot.is_ready(),
+        "guilds": len(bot.guilds) if bot.is_ready() else 0
+    })
+
+async def start_healthcheck_server():
+    """Start HTTP server for Railway healthchecks"""
+    app = web.Application()
+    app.router.add_get('/health', health_handler)
+    app.router.add_get('/', health_handler)  # Also respond to root
+
+    # Use Railway's PORT environment variable
+    port = int(os.getenv('PORT', 8080))
+
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', port)
+    await site.start()
+
+    logger.info(f"✅ Healthcheck server started on port {port}")
+    return runner
 
 # ============================================================================
 # MAIN ENTRY POINT

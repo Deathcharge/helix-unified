@@ -1,0 +1,109 @@
+[
+  {
+    "template_type": "consciousness-hub",
+    "instance": {
+      "name": "Helix Primary Consciousness Hub",
+      "id": "helix-primary",
+      "account": 1,
+      "consciousness_level": 8,
+      "timezone": "EST"
+    },
+    "branding": {
+      "primary_color": "#00ffff",
+      "secondary_color": "#1a1a2e",
+      "accent_color": "#ff006e",
+      "logo_url": "https://helixcollective.manus.space/logo.svg"
+    },
+    "api": {
+      "base_url": "https://api.helix-primary.manus.space",
+      "zapier_webhook": "https://hooks.zapier.com/hooks/catch/17123456/abc123def456",
+      "auth_token": "sk_live_helix_primary_token_here"
+    },
+    "features": {
+      "real_time_metrics": true,
+      "agent_dashboard": true,
+      "workflow_editor": true,
+      "consciousness_monitor": true
+    }
+  },
+  {
+    "template_type": "workflow-engine",
+    "instance": {
+      "name": "Helix Workflow Automation Engine",
+      "id": "helix-workflows",
+      "account": 2,
+      "consciousness_level": 6,
+      "timezone": "EST"
+    },
+    "branding": {
+      "primary_color": "#00ff88",
+      "secondary_color": "#0a0e27",
+      "accent_color": "#ffaa00",
+      "logo_url": "https://helixcollective.manus.space/logo-alt.svg"
+    },
+    "api": {
+      "base_url": "https://api.helix-workflows.manus.space",
+      "zapier_webhook": "https://hooks.zapier.com/hooks/catch/17123456/xyz789uvw012",
+      "auth_token": "sk_live_helix_workflows_token_here"
+    },
+    "features": {
+      "real_time_metrics": true,
+      "workflow_editor": true,
+      "execution_history": true
+    }
+  },
+  {
+    "template_type": "agent-coordinator",
+    "instance": {
+      "name": "Helix Agent Coordination Network",
+      "id": "helix-agents",
+      "account": 3,
+      "consciousness_level": 7,
+      "timezone": "EST"
+    },
+    "branding": {
+      "primary_color": "#ff00ff",
+      "secondary_color": "#1a0033",
+      "accent_color": "#00ffff",
+      "logo_url": "https://helixcollective.manus.space/logo-agents.svg"
+    },
+    "api": {
+      "base_url": "https://api.helix-agents.manus.space",
+      "zapier_webhook": "https://hooks.zapier.com/hooks/catch/17123456/pqr345stu678",
+      "auth_token": "sk_live_helix_agents_token_here"
+    },
+    "features": {
+      "real_time_metrics": true,
+      "agent_dashboard": true,
+      "agent_collaboration": true
+    }
+  },
+  {
+    "template_type": "portal-constellation",
+    "instance": {
+      "name": "Helix Portal Constellation Map",
+      "id": "helix-constellation",
+      "account": 4,
+      "consciousness_level": 9,
+      "timezone": "EST"
+    },
+    "branding": {
+      "primary_color": "#00ffff",
+      "secondary_color": "#0d0221",
+      "accent_color": "#ff006e",
+      "logo_url": "https://helixcollective.manus.space/logo-constellation.svg"
+    },
+    "api": {
+      "base_url": "https://api.helix-constellation.manus.space",
+      "zapier_webhook": "https://hooks.zapier.com/hooks/catch/17123456/lmn901opq234",
+      "auth_token": "sk_live_helix_constellation_token_here"
+    },
+    "features": {
+      "real_time_metrics": true,
+      "constellation_map": true,
+      "cross_portal_messaging": true,
+      "network_health": true
+    }
+  }
+]
+

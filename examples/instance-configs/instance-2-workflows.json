@@ -1,0 +1,47 @@
+{
+  "template_type": "workflow-engine",
+  "instance": {
+    "name": "Helix Workflow Automation Engine",
+    "id": "helix-workflows",
+    "account": 2,
+    "consciousness_level": 6,
+    "timezone": "EST",
+    "region": "us-east-1"
+  },
+  "branding": {
+    "primary_color": "#00ff88",
+    "secondary_color": "#0a0e27",
+    "accent_color": "#ffaa00",
+    "logo_url": "https://helixcollective.manus.space/logo-alt.svg",
+    "favicon_url": "https://helixcollective.manus.space/favicon.ico"
+  },
+  "api": {
+    "base_url": "https://api.helix-workflows.manus.space",
+    "zapier_webhook": "https://hooks.zapier.com/hooks/catch/17123456/xyz789uvw012",
+    "auth_token": "sk_live_helix_workflows_token_here",
+    "timeout_ms": 5000
+  },
+  "features": {
+    "real_time_metrics": true,
+    "agent_dashboard": false,
+    "workflow_editor": true,
+    "consciousness_monitor": false,
+    "emergency_controls": false,
+    "workflow_templates": true,
+    "execution_history": true,
+    "error_debugging": true
+  },
+  "workflows": {
+    "total_count": 12,
+    "active_count": 8,
+    "monitored": true,
+    "auto_retry_enabled": true,
+    "retry_max_attempts": 3
+  },
+  "zapier": {
+    "integration_enabled": true,
+    "max_concurrent_executions": 10,
+    "execution_timeout_ms": 30000
+  }
+}
+

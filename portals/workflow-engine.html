@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manus Workflow Engine</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%); color: #e0e0e0; min-height: 100vh; }
+        .header { background: rgba(10, 14, 39, 0.8); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255, 100, 200, 0.2); padding: 20px 40px; }
+        .header-content { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 24px; font-weight: bold; background: linear-gradient(135deg, #ff64c8 0%, #ff00ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 40px 20px; }
+        .hero { text-align: center; margin-bottom: 60px; }
+        .hero h1 { font-size: 48px; margin-bottom: 16px; background: linear-gradient(135deg, #ff64c8 0%, #ff00ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .workflows { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+        .workflow-card { background: rgba(255, 100, 200, 0.05); border: 1px solid rgba(255, 100, 200, 0.2); border-radius: 12px; padding: 24px; }
+        .workflow-card:hover { background: rgba(255, 100, 200, 0.1); border-color: rgba(255, 100, 200, 0.4); }
+        .workflow-title { font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #ff64c8; }
+        .workflow-desc { font-size: 14px; color: #a0a0a0; margin-bottom: 16px; }
+        .status { display: inline-block; padding: 4px 12px; background: rgba(0, 255, 100, 0.2); border-radius: 4px; font-size: 11px; color: #00ff64; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">⚙️ Manus Workflow Engine</div>
+            <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: rgba(255, 100, 200, 0.1); border: 1px solid rgba(255, 100, 200, 0.3); border-radius: 20px; font-size: 12px;">
+                <div style="width: 8px; height: 8px; background: #ff64c8; border-radius: 50%;"></div>
+                <span>ACTIVE</span>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="hero">
+            <h1>Manus Workflow Engine</h1>
+            <p>Zapier automation and cross-platform synchronization</p>
+        </div>
+        <div class="workflows">
+            <div class="workflow-card">
+                <div class="workflow-title">🔄 Data Sync</div>
+                <div class="workflow-desc">Real-time synchronization between Railway, Zapier, and Discord</div>
+                <div class="status">Active</div>
+            </div>
+            <div class="workflow-card">
+                <div class="workflow-title">🤖 Agent Routing</div>
+                <div class="workflow-desc">Intelligent task routing across 14-agent network</div>
+                <div class="status">Active</div>
+            </div>
+            <div class="workflow-card">
+                <div class="workflow-title">🚨 Escalation</div>
+                <div class="workflow-desc">Emergency alert and escalation workflows</div>
+                <div class="status">Active</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

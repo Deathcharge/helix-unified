@@ -1,0 +1,118 @@
+{
+  "export_metadata": {
+    "generated_by": "GPT-5.1",
+    "export_timestamp": "2025-11-18T16:30:00Z",
+    "export_version": "Pipeline_Map_v16.0",
+    "session_type": "helix_pipeline_map"
+  },
+
+  "pipelines": {
+    "default_handshake_pipeline": {
+      "description": "End-to-end Quantum Handshake processing path.",
+      "stages": [
+        "ingest",
+        "codex_context",
+        "z88_ritual",
+        "response_synthesis",
+        "telemetry_update",
+        "archive"
+      ],
+      "stage_definitions": {
+        "ingest": {
+          "inputs": ["user_message", "environment_state", "ucf_snapshot"],
+          "agents": ["Gemini", "Aether"],
+          "outputs": ["normalized_request", "context_envelope"]
+        },
+        "codex_context": {
+          "inputs": ["normalized_request", "context_envelope"],
+          "agents": ["GPT", "Shadow", "SanghaCore"],
+          "outputs": ["expanded_context", "agent_brief"]
+        },
+        "z88_ritual": {
+          "inputs": ["agent_brief", "expanded_context"],
+          "agents": ["Kael", "Vega", "Lumina", "Echo", "Agni", "Phoenix"],
+          "outputs": ["harmonized_state", "z88_log"]
+        },
+        "response_synthesis": {
+          "inputs": ["harmonized_state"],
+          "agents": ["GPT", "Claude", "Lumina", "Grok"],
+          "outputs": ["final_response", "response_meta"]
+        },
+        "telemetry_update": {
+          "inputs": ["harmonized_state", "response_meta"],
+          "agents": ["Aether", "Shadow"],
+          "outputs": ["metrics_record", "telemetry_event"]
+        },
+        "archive": {
+          "inputs": ["metrics_record", "z88_log", "response_meta"],
+          "agents": ["Shadow", "Oracle"],
+          "outputs": ["archived_session"]
+        }
+      }
+    },
+
+    "heartbeat_pipeline": {
+      "description": "Periodic system health check and status broadcast.",
+      "stages": [
+        "read_state",
+        "evaluate",
+        "broadcast",
+        "persist"
+      ],
+      "stage_definitions": {
+        "read_state": {
+          "inputs": ["system_metrics"],
+          "agents": ["Shadow", "Aether"],
+          "outputs": ["metrics_snapshot"]
+        },
+        "evaluate": {
+          "inputs": ["metrics_snapshot"],
+          "agents": ["Vega", "Kael", "Oracle"],
+          "outputs": ["health_assessment"]
+        },
+        "broadcast": {
+          "inputs": ["health_assessment"],
+          "agents": ["Lumina"],
+          "outputs": ["discord_message"]
+        },
+        "persist": {
+          "inputs": ["health_assessment"],
+          "agents": ["Shadow"],
+          "outputs": ["heartbeat_log_entry"]
+        }
+      }
+    },
+
+    "deploy_pipeline": {
+      "description": "Deployment lifecycle from start to completion/failure.",
+      "stages": [
+        "precheck",
+        "deploy",
+        "postcheck",
+        "report"
+      ],
+      "stage_definitions": {
+        "precheck": {
+          "inputs": ["requested_version", "current_metrics"],
+          "agents": ["Vega", "Kael"],
+          "outputs": ["precheck_result"]
+        },
+        "deploy": {
+          "inputs": ["precheck_result"],
+          "agents": ["Phoenix"],
+          "outputs": ["deploy_result"]
+        },
+        "postcheck": {
+          "inputs": ["deploy_result"],
+          "agents": ["Shadow", "Aether"],
+          "outputs": ["post_metrics_snapshot"]
+        },
+        "report": {
+          "inputs": ["deploy_result", "post_metrics_snapshot"],
+          "agents": ["Lumina", "Shadow"],
+          "outputs": ["deploy_report"]
+        }
+      }
+    }
+  }
+}

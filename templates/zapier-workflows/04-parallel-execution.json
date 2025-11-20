@@ -1,0 +1,114 @@
+{
+  "name": "Parallel Agent Execution",
+  "description": "Execute multiple agents in parallel, wait for all to complete",
+  "version": "1.0",
+  "trigger": {
+    "type": "webhook",
+    "event": "Catch Raw Hook",
+    "url_path": "parallel-execution"
+  },
+  "steps": [
+    {
+      "id": "trigger",
+      "action": "Webhooks by Zapier",
+      "event": "Catch Raw Hook"
+    },
+    {
+      "id": "generate_task_id",
+      "action": "Formatter by Zapier",
+      "transform": "Text",
+      "input": "{{guid()}}",
+      "description": "Generate unique task ID"
+    },
+    {
+      "id": "parallel_research",
+      "action": "HTTP by Zapier",
+      "method": "POST",
+      "url": "https://api.helix-primary.manus.space/api/agents/execute",
+      "headers": {
+        "Authorization": "Bearer {{env.API_TOKEN}}"
+      },
+      "body": {
+        "agent_id": "research-agent",
+        "task_type": "data_retrieval",
+        "task_id": "{{generate_task_id.output}}-research",
+        "payload": "{{raw_body.payload}}"
+      },
+      "description": "Research agent (parallel)"
+    },
+    {
+      "id": "parallel_analysis",
+      "action": "HTTP by Zapier",
+      "method": "POST",
+      "url": "https://api.helix-primary.manus.space/api/agents/execute",
+      "headers": {
+        "Authorization": "Bearer {{env.API_TOKEN}}"
+      },
+      "body": {
+        "agent_id": "analysis-agent",
+        "task_type": "analysis",
+        "task_id": "{{generate_task_id.output}}-analysis",
+        "payload": "{{raw_body.payload}}"
+      },
+      "description": "Analysis agent (parallel)"
+    },
+    {
+      "id": "parallel_validation",
+      "action": "HTTP by Zapier",
+      "method": "POST",
+      "url": "https://api.helix-primary.manus.space/api/agents/execute",
+      "headers": {
+        "Authorization": "Bearer {{env.API_TOKEN}}"
+      },
+      "body": {
+        "agent_id": "validation-agent",
+        "task_type": "validation",
+        "task_id": "{{generate_task_id.output}}-validation",
+        "payload": "{{raw_body.payload}}"
+      },
+      "description": "Validation agent (parallel)"
+    },
+    {
+      "id": "wait_for_completion",
+      "action": "Delay by Zapier",
+      "duration": 5,
+      "unit": "seconds",
+      "description": "Wait for all agents to complete"
+    },
+    {
+      "id": "collect_results",
+      "action": "HTTP by Zapier",
+      "method": "GET",
+      "url": "https://api.helix-primary.manus.space/api/tasks/{{generate_task_id.output}}/results",
+      "headers": {
+        "Authorization": "Bearer {{env.API_TOKEN}}"
+      },
+      "description": "Collect all results"
+    },
+    {
+      "id": "aggregate_results",
+      "action": "Formatter by Zapier",
+      "transform": "JSON",
+      "input": {
+        "task_id": "{{generate_task_id.output}}",
+        "status": "completed",
+        "parallel_results": {
+          "research": "{{parallel_research.response_body}}",
+          "analysis": "{{parallel_analysis.response_body}}",
+          "validation": "{{parallel_validation.response_body}}"
+        },
+        "aggregated_data": "{{collect_results.response_body}}"
+      },
+      "description": "Aggregate parallel results"
+    },
+    {
+      "id": "send_aggregated_result",
+      "action": "Webhooks by Zapier",
+      "event": "POST to URL",
+      "url": "{{raw_body.callback_url}}",
+      "body": "{{aggregate_results.output}}",
+      "description": "Send aggregated result"
+    }
+  ]
+}
+

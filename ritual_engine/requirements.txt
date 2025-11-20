@@ -2,7 +2,7 @@
 # Z-88 Ritual Engine with modern Streamlit and audio/visual processing
 
 # Web Framework
-streamlit==1.31.0
+streamlit==1.37.0
 
 # Audio Processing
 numpy==1.26.4
@@ -11,7 +11,7 @@ soundfile==0.12.1
 librosa==0.10.0
 
 # Image & Visualization
-Pillow==10.1.0
+Pillow==10.3.0
 matplotlib==3.8.3
 plotly==5.18.0
 

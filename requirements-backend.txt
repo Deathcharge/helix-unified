@@ -4,7 +4,7 @@
 fastapi==0.115.0
 uvicorn[standard]==0.32.0
 python-dotenv==1.0.1
-jinja2==3.1.2  # Template engine for web dashboard
+jinja2==3.1.6  # Template engine for web dashboard
 aiofiles==23.2.1  # For async file operations (moved up)
 sse-starlette==2.1.3  # Server-Sent Events for real-time streaming
 
@@ -32,13 +32,17 @@ matplotlib==3.8.0
 scikit-learn
 prophet
 
+# Dashboard Visualization (for Streamlit mode)
+streamlit==1.37.0
+plotly==5.18.0
+
 # Audio & Ritual Engine
 pydub==0.25.1
 
 # API Clients
 httpx==0.28.0
-aiohttp==3.11.0
-requests==2.31.0
+aiohttp==3.12.14
+requests==2.32.4
 
 # Monitoring & Observability
 sentry-sdk[fastapi]==2.19.0
@@ -46,7 +50,7 @@ sentry-sdk[fastapi]==2.19.0
 # Utilities
 pyyaml==6.0.1
 toml==0.10.2
-python-multipart==0.0.6
+python-multipart==0.0.18
 pydantic==2.5.3
 python-dateutil==2.8.2
 pytz==2023.3
@@ -54,18 +58,17 @@ pytz==2023.3
 # Notion Integration
 notion-client==2.5.0
 
-Pillow==10.1.0  # For Grok's fractal icon generation
+Pillow==10.3.0  # For Grok's fractal icon generation
 
 # Testing & Development
 pytest==7.4.3
 pytest-asyncio==0.21.1
 pytest-cov==4.1.0
 pytest-mock==3.12.0
-httpx==0.28.0  # For testing async HTTP (already listed above)
 
 # Database Migrations
 alembic==1.13.1
 
-# Optional Storage Dependencies (install separately if needed)
-# webdav3  # Not available for Python 3.11+ - install manually if using Nextcloud
+# Cloud Storage Dependencies
+webdavclient3==3.14.6  # Nextcloud/WebDAV integration (Python 3.11+ compatible)
 # boto3    # Optional - install if using Backblaze B2 storage
