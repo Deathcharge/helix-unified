@@ -632,6 +632,7 @@ async def on_ready() -> None:
         ('commands.monitoring_commands', 'Monitoring commands (status, health, discovery, storage, sync)'),
         ('commands.admin_commands', 'Admin commands (setup, webhooks, verify-setup, refresh, clean)'),
         ('commands.consciousness_commands_ext', 'Consciousness commands (consciousness, emotions, ethics, agent)'),
+        ('commands.portal_deployment_commands', 'Portal deployment commands (deploy, portal, join, leave)'),
     ]
 
     for module_name, description in command_modules:
