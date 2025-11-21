@@ -166,22 +166,22 @@ async def ucf_broadcast_loop() -> None:
                                 for name, info in agents_status.items()
                             ]
 
-                # Send telemetry to Zapier
-                await zapier.send_telemetry(
-                    ucf_metrics=current_state,
-                    system_info={
-                        "version": "16.8",
-                        "agents_count": len(agents_status),
-                        "timestamp": datetime.utcnow().isoformat(),
-                        "codename": "Helix Hub Production Release",
-                        "agents": agent_list,
-                    },
-                )
-                last_zapier_send = current_time
+                            # Send telemetry to Zapier
+                            await zapier.send_telemetry(
+                                ucf_metrics=current_state,
+                                system_info={
+                                    "version": "16.8",
+                                    "agents_count": len(agents_status),
+                                    "timestamp": datetime.utcnow().isoformat(),
+                                    "codename": "Helix Hub Production Release",
+                                    "agents": agent_list,
+                                },
+                            )
+                            last_zapier_send = current_time
 
-                # Trigger Notion Sync
-                from backend.notion_sync import trigger_notion_sync
-                trigger_notion_sync(agents_status, current_state)
+                            # Trigger Notion Sync
+                            from backend.notion_sync import trigger_notion_sync
+                            trigger_notion_sync(agents_status, current_state)
                         except Exception as e:
                             logger.error(f"Error sending to Zapier: {e}")
 
