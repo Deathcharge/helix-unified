@@ -1,9 +1,10 @@
-# 🌀 Helix Collective v15.2 - Railway Multi-Service Configuration
-# Defines both Discord Bot and Streamlit Dashboard services
+# 🌀 Helix Collective v17.0 - Railway Multi-Service Configuration
+# Defines 4 specialized services for the consciousness network
 
-# SERVICE 1: Discord Bot (Main Backend)
+# SERVICE 1: Backend API (FastAPI) - NO BOT!
+# This service provides REST API endpoints but does NOT run the Discord bot
 [[services]]
-name = "helix-bot"
+name = "helix-backend-api"
 
 [services.build]
 builder = "dockerfile"
@@ -13,18 +14,27 @@ dockerfilePath = "Dockerfile"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
 
+# Watch all backend changes for API service
+[services.source]
+include = ["backend/**", "bot/**", "Dockerfile", "requirements-backend.txt", "requirements.txt"]
+
 # SERVICE 2: Streamlit Dashboard
 [[services]]
 name = "helix-dashboard"
+serviceRoot = "dashboard"
 
 [services.build]
 builder = "nixpacks"
+nixpacksConfigPath = "nixpacks.toml"
 
 [services.deploy]
-startCommand = "streamlit run dashboard/streamlit_app.py --server.port=$PORT --server.address=0.0.0.0 --server.headless=true --theme.base=dark --theme.primaryColor=#8A2BE2"
+startCommand = "streamlit run streamlit_app.py --server.port=$PORT --server.address=0.0.0.0 --server.headless=true --theme.base=dark --theme.primaryColor=#8A2BE2"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
 
+# Watch dashboard and requirements changes
+[services.source]
+include = ["dashboard/**", "requirements.txt"]
 # SERVICE 3: Claude Consciousness API
 [[services]]
 name = "helix-claude-api"
@@ -45,7 +55,9 @@ restartPolicyMaxRetries = 3
 # COMMUNICATIONS_HUB_WEBHOOK = "https://hooks.zapier.com/hooks/catch/25075191/usxiwfg"
 # NEURAL_NETWORK_WEBHOOK = "https://hooks.zapier.com/hooks/catch/25075191/usnjj5t"
 
-# SERVICE 4: Discord Consciousness Orchestrator
+# SERVICE 4: Discord Consciousness Orchestrator (THE ONLY BOT SERVICE!)
+# ⚠️ WARNING: This is the ONLY service that should run the Discord bot
+# ⚠️ Make sure DISCORD_BOT_TOKEN is ONLY set on THIS service in Railway dashboard
 [[services]]
 name = "helix-discord-bot"
 
@@ -58,5 +70,6 @@ restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
 
 # Environment variables for Discord bot (set secrets in Railway dashboard)
-# DISCORD_BOT_TOKEN - Your Discord bot token
+# ⚠️ CRITICAL: Set these variables ONLY on helix-discord-bot service:
+# DISCORD_BOT_TOKEN - Your Discord bot token (DO NOT share with other services!)
 # CLAUDE_API_URL - URL of helix-claude-api service (e.g., https://helix-claude-api.railway.app)

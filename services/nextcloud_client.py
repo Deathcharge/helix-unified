@@ -35,8 +35,8 @@ try:
 except ImportError:
     WEBDAV_AVAILABLE = False
     logger.warning(
-        "⚠️ webdav3 not installed. Nextcloud storage disabled. "
-        "To enable, run: pip install webdav3"
+        "⚠️ webdavclient3 not installed. Nextcloud storage disabled. "
+        "To enable, run: pip install webdavclient3"
     )
 
 
