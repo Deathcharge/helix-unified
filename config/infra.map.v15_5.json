@@ -1,0 +1,133 @@
+{
+  "export_metadata": {
+    "generated_by": "GPT-5.1",
+    "export_timestamp": "2025-11-18T01:05:00Z",
+    "export_version": "Helix_Infrastructure_Map_v15.5",
+    "session_type": "helix_infrastructure_map"
+  },
+  "discord": {
+    "guild_label": "Helix Collective",
+    "channels": {
+      "helix_ops": {
+        "name": "helix-ops",
+        "purpose": "system status, heartbeat, errors, ops notifications",
+        "default_log_tags": ["ops", "heartbeat", "status"]
+      },
+      "shadow_storage": {
+        "name": "shadow-storage",
+        "purpose": "daily storage reports, archive events",
+        "default_log_tags": ["storage", "shadow"]
+      },
+      "weekly_digest": {
+        "name": "weekly-digest",
+        "purpose": "compiled weekly summary of activity and artifacts",
+        "default_log_tags": ["digest", "summary"]
+      },
+      "telemetry": {
+        "name": "telemetry",
+        "purpose": "metrics, harmony trends, z88 stats",
+        "default_log_tags": ["metrics", "harmony", "z88"]
+      },
+      "deployment": {
+        "name": "deployments",
+        "purpose": "Railway deploy reports, pre-deploy checks",
+        "default_log_tags": ["deploy", "railway"]
+      },
+      "commands": {
+        "name": "commands",
+        "purpose": "bot commands (!status, !heartbeat, !ritual, etc.)",
+        "default_log_tags": ["commands", "bot"]
+      },
+      "ritual": {
+        "name": "ritual",
+        "purpose": "Z-88 rituals, Quantum Handshake invocations",
+        "default_log_tags": ["ritual", "handshake"]
+      },
+      "codex": {
+        "name": "codex",
+        "purpose": "Codex updates, PDFs, JSON/YAML exports",
+        "default_log_tags": ["codex", "export"]
+      },
+      "fractal_lab": {
+        "name": "fractal-lab",
+        "purpose": "fractal/art/audio experiments",
+        "default_log_tags": ["fractal", "lab"]
+      },
+      "chai_link": {
+        "name": "chai-link",
+        "purpose": "Chai-related logs, companion resonance notes",
+        "default_log_tags": ["chai", "companion"]
+      }
+    },
+    "agent_channel_matrix": {
+      "Kael": ["helix-ops", "codex"],
+      "Lumina": ["telemetry", "chai-link"],
+      "Aether": ["helix-ops", "commands"],
+      "Vega": ["helix-ops", "deployments"],
+      "Echo": ["telemetry", "chai-link"],
+      "Phoenix": ["helix-ops", "deployments"],
+      "Grok": ["fractal-lab", "codex"],
+      "Gemini": ["fractal-lab", "helix-ops"],
+      "Agni": ["commands"],
+      "Kavach": ["helix-ops"],
+      "SanghaCore": ["weekly-digest", "codex"],
+      "Shadow": ["shadow-storage", "weekly-digest"],
+      "Oracle": ["helix-ops"],
+      "Chai": ["chai-link"],
+      "Claude": ["helix-ops", "telemetry"],
+      "GPT": ["codex", "helix-ops"]
+    }
+  },
+  "heartbeat": {
+    "enabled": true,
+    "interval_minutes": 30,
+    "target_channel": "helix-ops",
+    "active_reporters": [
+      "Shadow",
+      "Kael",
+      "Vega",
+      "Aether",
+      "Claude"
+    ],
+    "payload_schema": {
+      "timestamp": "ISO-8601 string",
+      "agent": "string",
+      "status": "ok|degraded|error",
+      "ucf_harmony_estimate": "float|null",
+      "klesha_estimate": "float|null",
+      "notes": "string|null"
+    },
+    "pre_deploy_checks": {
+      "enabled": true,
+      "required_status": "ok",
+      "required_harmony_min": 0.80,
+      "check_reporters": ["Shadow", "Vega", "Kael"]
+    }
+  },
+  "storage": {
+    "backends": [
+      {
+        "name": "google_drive",
+        "role": "primary_docs",
+        "used_for": ["pdf_codex", "json_exports", "yaml_exports"]
+      },
+      {
+        "name": "mega",
+        "role": "media_archive",
+        "used_for": ["audio_wav", "fractal_gif", "video"]
+      },
+      {
+        "name": "nextcloud",
+        "role": "redundant_sync",
+        "used_for": ["mirrored_codex", "backups"]
+      }
+    ],
+    "shadow_policies": {
+      "daily_report_channel": "shadow-storage",
+      "weekly_digest_channel": "weekly-digest",
+      "include_types": ["pdf", "json", "yaml", "gif", "wav"],
+      "max_items_per_digest": 50
+    }
+  }
+}
+
