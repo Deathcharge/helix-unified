@@ -5,6 +5,8 @@
 
 echo "🌀 Starting Helix Dashboard on Railway..."
 echo "   Port: ${PORT:-8080}"
+echo "   Working directory: $(pwd)"
+echo "   Files: $(ls -la | head -5)"
 echo ""
 
 # Railway provides $PORT automatically, fallback to 8080
@@ -13,7 +15,7 @@ streamlit run streamlit_app.py \
     --server.address=0.0.0.0 \
     --server.headless=true \
     --server.enableCORS=false \
-    --server.enableXsrfProtection=true \
+    --server.enableXsrfProtection=false \
     --theme.base=dark \
     --theme.primaryColor="#8A2BE2" \
     --theme.backgroundColor="#1e1e1e" \
