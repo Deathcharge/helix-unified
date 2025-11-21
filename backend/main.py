@@ -199,6 +199,7 @@ async def ucf_broadcast_loop() -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Start Discord bot and Manus loop on startup."""
+    global zapier_sender
     logger.info("🌀 Helix Collective v16.9 - Startup Sequence (Quantum Handshake)")
 
     # Initialize directories
@@ -304,7 +305,6 @@ async def lifespan(app: FastAPI):
         logger.info("✅ Zapier integration closed")
 
     # Close Zapier Sender client
-    global zapier_sender
     if zapier_sender.client:
         await zapier_sender.client.aclose()
         logger.info("✅ Zapier Sender client closed")
