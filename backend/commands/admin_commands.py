@@ -30,7 +30,6 @@ logger = logging.getLogger(__name__)
 # Path constants
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-
 async def setup(bot: 'Bot') -> None:
     """Setup function to register commands with the bot."""
     bot.add_command(setup_helix_server)
@@ -41,7 +40,6 @@ async def setup(bot: 'Bot') -> None:
     bot.add_command(refresh_server)
     bot.add_command(seed_channels)
     bot.add_command(notion_sync_manual)
-
 
 @commands.command(name="setup")
 @commands.has_permissions(manage_channels=True)
@@ -149,7 +147,6 @@ async def setup_helix_server(ctx: commands.Context) -> None:
         "• `!list-webhooks-live` - Get webhooks via DM (includes Railway env var format)"
     )
 
-
 @commands.command(name="webhooks", aliases=["get-webhooks", "list-webhooks"])
 @commands.has_permissions(manage_channels=True)
 async def get_channel_webhooks(ctx: commands.Context) -> None:
@@ -224,7 +221,6 @@ async def get_channel_webhooks(ctx: commands.Context) -> None:
 
     except Exception as e:
         await ctx.send(f"❌ **Error loading webhooks:**\n```{str(e)[:200]}```")
-
 
 @commands.command(name="list-webhooks-live", aliases=["webhooks-live", "get-webhooks-live"])
 @commands.has_permissions(administrator=True)
@@ -340,7 +336,6 @@ async def list_webhooks_live(ctx: commands.Context) -> None:
         logger.error(f"Error in list_webhooks_live: {e}", exc_info=True)
         await ctx.send(f"❌ **Error fetching webhooks:**\n```{str(e)[:200]}```")
 
-
 @commands.command(name="verify-setup", aliases=["verify", "check-setup"])
 @commands.has_permissions(manage_channels=True)
 async def verify_setup(ctx: commands.Context) -> None:
@@ -448,7 +443,6 @@ async def verify_setup(ctx: commands.Context) -> None:
     embed.set_footer(text="🤲 Manus v16.7 — Setup Verification System")
 
     await ctx.send(embed=embed)
-
 
 # Seed channels command - fully restored from v15.3
 @commands.command(name="seed", aliases=["seed_channels", "init_channels"])
@@ -820,7 +814,6 @@ async def seed_channels(ctx: commands.Context) -> None:
     result_embed.set_footer(text="All channels now have pinned explanations! 🙏")
     await ctx.send(embed=result_embed)
 
-
 @commands.command(name="notion-sync")
 @commands.has_permissions(administrator=True)
 async def notion_sync_manual(ctx: commands.Context) -> None:
@@ -844,7 +837,6 @@ async def notion_sync_manual(ctx: commands.Context) -> None:
     except Exception as e:
         await ctx.send(f"❌ Sync failed with error: {str(e)}")
         logger.error(f"Manual notion-sync command failed: {e}", exc_info=True)
-
 
 @commands.command(name="refresh")
 @commands.has_permissions(administrator=True)
@@ -932,7 +924,6 @@ async def refresh_server(ctx: commands.Context, confirm: str = None) -> None:
     # Delete temp category after setup
     await asyncio.sleep(5)
     await temp_category.delete()
-
 
 @commands.command(name="clean")
 @commands.has_permissions(administrator=True)
