@@ -221,16 +221,18 @@ Railway only allows **one volume mount per service**. Choose the most critical d
 - **Size:** 500MB - 1GB
 
 #### 🔹 helix-claude-api
-**Recommended Mount:** `/app/logs`
-- **What it stores:** API request logs, error logs
-- **Why:** Helps with debugging and monitoring
-- **Size:** 1-2GB
+**Recommended Mount:** `/app/cache`
+- **What it stores:** Cached API responses, conversation context, rate limit data
+- **Why:** Reduces API costs by caching Claude responses, improves performance
+- **Size:** 2-5GB
+- **Note:** Caching Claude API responses can save significant costs on repeated queries
 
 #### 🔹 helix-discord-bot
 **Recommended Mount:** `/app/logs`
-- **What it stores:** Bot activity logs, event logs
-- **Why:** Debugging Discord interactions
+- **What it stores:** Bot activity logs, event logs, command history
+- **Why:** Critical for debugging Discord interactions and tracking bot behavior
 - **Size:** 1-2GB
+- **Note:** Discord bot logs are essential for troubleshooting user interactions
 
 ### How to Add a Volume in Railway
 
