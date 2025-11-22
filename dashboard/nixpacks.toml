@@ -1,6 +1,0 @@
-# Force Nixpacks to build as Python app
-[phases.setup]
-nixPkgs = ['python311']
-
-[phases.install]
-cmds = ['python3 -m pip install -r ../requirements.txt']
