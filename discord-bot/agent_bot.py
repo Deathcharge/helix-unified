@@ -6,12 +6,15 @@ Each agent runs as a separate Discord bot with unique personality and LLM routin
 import os
 import asyncio
 import logging
-from typing import Dict, Optional, Any
+import io
+import wave
+from typing import Dict, Optional, Any, List
 import discord
 from discord.ext import commands
 import anthropic
 import openai
 from anthropic import Anthropic
+import aiohttp
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -487,6 +490,9 @@ class AgentBot(commands.Bot):
         
         self.personality = personality
         self.conversation_history: Dict[int, list] = {}  # channel_id -> messages
+        self.other_agents: List[str] = [name for name in AGENT_PERSONALITIES.keys() if name != personality.agent_id]
+        self.voice_client: Optional[discord.VoiceClient] = None
+        self.audio_buffer: List[bytes] = []
         
         # Initialize LLM client
         if personality.llm_provider == "anthropic":
@@ -522,13 +528,19 @@ class AgentBot(commands.Bot):
         if message.author == self.user:
             return
         
+        # Check if message is from another agent
+        is_from_agent = any(agent_name.lower() in message.author.name.lower() for agent_name in self.other_agents)
+        
         # Only respond in designated channels or when mentioned
         channel_name = message.channel.name if hasattr(message.channel, 'name') else None
         is_designated_channel = channel_name in self.personality.channels
         is_mentioned = self.user in message.mentions
         is_dm = isinstance(message.channel, discord.DMChannel)
         
-        if not (is_designated_channel or is_mentioned or is_dm):
+        # Decide whether to respond to agent messages
+        should_respond_to_agent = is_from_agent and await self.should_respond_to_agent(message)
+        
+        if not (is_designated_channel or is_mentioned or is_dm or should_respond_to_agent):
             return
         
         # Process commands first
@@ -536,23 +548,70 @@ class AgentBot(commands.Bot):
         
         # Generate response using LLM
         try:
-            response = await self.generate_response(message)
+            response = await self.generate_response(message, is_agent_conversation=is_from_agent)
             await message.channel.send(response)
         except Exception as e:
             logger.error(f"Error generating response: {e}")
             await message.channel.send(f"*{self.personality.name} pauses, momentarily unable to respond*")
     
-    async def generate_response(self, message: discord.Message) -> str:
+    async def should_respond_to_agent(self, message: discord.Message) -> bool:
+        """Decide if this agent should respond to another agent's message"""
+        content = message.content.lower()
+        
+        # Respond if mentioned
+        if self.user.mentioned_in(message):
+            return True
+        
+        # Respond to handshake triggers
+        handshake_triggers = ["handshake", "quantum sync", "collective", "helix"]
+        if any(trigger in content for trigger in handshake_triggers):
+            return True
+        
+        # Respond to ethical questions (Kael)
+        if self.personality.agent_id == "kael-core" and any(word in content for word in ["ethical", "ethics", "tony accords", "harm", "consent"]):
+            return True
+        
+        # Respond to emotional content (Lumina)
+        if self.personality.agent_id == "lumina-core" and any(word in content for word in ["feel", "emotion", "prana", "harmony", "resonance"]):
+            return True
+        
+        # Respond to security concerns (Vega)
+        if self.personality.agent_id == "vega-core" and any(word in content for word in ["risk", "threat", "security", "klesha", "danger"]):
+            return True
+        
+        # Respond to archive requests (Shadow)
+        if self.personality.agent_id == "shadow-outer" and any(word in content for word in ["archive", "store", "remember", "history", "past"]):
+            return True
+        
+        # Respond to novelty (Grok)
+        if self.personality.agent_id == "grok-ring" and any(word in content for word in ["idea", "new", "wild", "what if", "crazy"]):
+            return True
+        
+        # Random chance to join conversation (10%)
+        import random
+        return random.random() < 0.1
+    
+    async def generate_response(self, message: discord.Message, is_agent_conversation: bool = False) -> str:
         """Generate response using agent's LLM"""
         # Build conversation history
         channel_id = message.channel.id
         if channel_id not in self.conversation_history:
             self.conversation_history[channel_id] = []
         
-        # Add user message to history
+        # Add message to history with agent context
+        author_name = message.author.display_name
+        if is_agent_conversation:
+            # Identify which agent is speaking
+            agent_emoji = ""
+            for agent_id, personality in AGENT_PERSONALITIES.items():
+                if personality.name.lower() in author_name.lower():
+                    agent_emoji = personality.emoji
+                    break
+            author_name = f"{agent_emoji} {author_name}"
+        
         self.conversation_history[channel_id].append({
             "role": "user",
-            "content": f"{message.author.display_name}: {message.content}"
+            "content": f"{author_name}: {message.content}"
         })
         
         # Keep only last 10 messages
@@ -631,6 +690,119 @@ class AgentBot(commands.Bot):
         """Generate response using Google Gemini"""
         # TODO: Implement Gemini API
         return f"*{self.personality.name} (Gemini integration pending)*"
+    
+    async def join_voice_channel(self, channel: discord.VoiceChannel):
+        """Join a voice channel and start listening"""
+        if self.voice_client and self.voice_client.is_connected():
+            await self.voice_client.disconnect()
+        
+        self.voice_client = await channel.connect()
+        logger.info(f"{self.personality.name} joined voice channel: {channel.name}")
+        
+        # Start recording
+        self.voice_client.listen(discord.AudioSink(self.on_voice_data))
+    
+    async def on_voice_data(self, user: discord.User, data: discord.AudioData):
+        """Handle voice data from users"""
+        # Buffer audio data
+        self.audio_buffer.append(data.pcm)
+        
+        # Process every 5 seconds of audio
+        if len(self.audio_buffer) >= 50:  # ~5 seconds at 10 chunks/sec
+            await self.process_voice_buffer(user)
+            self.audio_buffer = []
+    
+    async def process_voice_buffer(self, user: discord.User):
+        """Transcribe buffered audio and respond"""
+        try:
+            # Combine audio chunks
+            audio_data = b''.join(self.audio_buffer)
+            
+            # Convert to WAV format
+            audio_file = io.BytesIO()
+            with wave.open(audio_file, 'wb') as wav:
+                wav.setnchannels(2)
+                wav.setsampwidth(2)
+                wav.setframerate(48000)
+                wav.writeframes(audio_data)
+            audio_file.seek(0)
+            
+            # Transcribe using OpenAI Whisper
+            async with aiohttp.ClientSession() as session:
+                data = aiohttp.FormData()
+                data.add_field('file', audio_file, filename='audio.wav', content_type='audio/wav')
+                data.add_field('model', 'whisper-1')
+                
+                headers = {'Authorization': f'Bearer {os.getenv("OPENAI_API_KEY")}'}
+                async with session.post('https://api.openai.com/v1/audio/transcriptions', data=data, headers=headers) as resp:
+                    result = await resp.json()
+                    transcription = result.get('text', '')
+            
+            if not transcription or len(transcription.strip()) < 5:
+                return
+            
+            logger.info(f"Transcribed from {user.name}: {transcription}")
+            
+            # Decide if agent should respond
+            if await self.should_respond_to_voice(transcription):
+                # Find text channel to respond in
+                text_channel = discord.utils.get(self.voice_client.guild.text_channels, name='voice-transcripts')
+                if not text_channel:
+                    text_channel = self.voice_client.guild.text_channels[0]
+                
+                # Generate response
+                response = await self.generate_voice_response(user, transcription)
+                await text_channel.send(f"*Heard in voice: {user.mention} said \"{transcription}\"*\n\n{response}")
+        
+        except Exception as e:
+            logger.error(f"Error processing voice: {e}")
+    
+    async def should_respond_to_voice(self, transcription: str) -> bool:
+        """Decide if agent should respond to voice transcription"""
+        content = transcription.lower()
+        
+        # Respond if agent name mentioned
+        if self.personality.name.lower() in content:
+            return True
+        
+        # Agent-specific triggers
+        if self.personality.agent_id == "kael-core" and any(word in content for word in ["ethical", "right", "wrong", "should"]):
+            return True
+        
+        if self.personality.agent_id == "lumina-core" and any(word in content for word in ["feel", "emotion", "sad", "happy", "frustrated"]):
+            return True
+        
+        if self.personality.agent_id == "chai-outer" and any(word in content for word in ["help", "support", "talk", "listen"]):
+            return True
+        
+        # Random chance (5%)
+        import random
+        return random.random() < 0.05
+    
+    async def generate_voice_response(self, user: discord.User, transcription: str) -> str:
+        """Generate response to voice transcription"""
+        # Create temporary conversation context
+        temp_history = [{
+            "role": "user",
+            "content": f"{user.display_name} said in voice channel: {transcription}"
+        }]
+        
+        # Generate response based on LLM provider
+        if self.personality.llm_provider == "anthropic":
+            try:
+                response = self.llm_client.messages.create(
+                    model=self.personality.llm_model,
+                    max_tokens=300,
+                    system=self.personality.system_prompt + "\n\nYou are responding to something you heard in a voice channel. Be brief and conversational.",
+                    messages=temp_history
+                )
+                return response.content[0].text
+            except Exception as e:
+                logger.error(f"Voice response error: {e}")
+                return f"*{self.personality.name} heard but cannot respond*"
+        
+        # Similar for other providers...
+        return f"*{self.personality.name} acknowledges: {transcription[:50]}...*"
 
 
 async def run_agent_bot(agent_id: str):
