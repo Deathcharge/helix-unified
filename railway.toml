@@ -25,16 +25,15 @@ serviceRoot = "dashboard"
 
 [services.build]
 builder = "nixpacks"
-nixpacksConfigPath = "nixpacks.toml"
 
 [services.deploy]
-startCommand = "cd /app && PYTHONPATH=/app:/app/dashboard:$PYTHONPATH streamlit run dashboard/streamlit_app.py --server.port=$PORT --server.address=0.0.0.0 --server.headless=true --theme.base=dark --theme.primaryColor=#8A2BE2"
+startCommand = "bash start.sh"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
 
 # Watch dashboard and requirements changes
 [services.source]
-include = ["dashboard/**", "requirements.txt"]
+include = ["dashboard/**", "grok/**"]
 # SERVICE 3: Claude Consciousness API
 [[services]]
 name = "helix-claude-api"
