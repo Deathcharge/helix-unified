@@ -28,7 +28,7 @@ builder = "nixpacks"
 nixpacksConfigPath = "nixpacks.toml"
 
 [services.deploy]
-startCommand = "streamlit run streamlit_app.py --server.port=$PORT --server.address=0.0.0.0 --server.headless=true --theme.base=dark --theme.primaryColor=#8A2BE2"
+startCommand = "cd /app && PYTHONPATH=/app:/app/dashboard:$PYTHONPATH streamlit run dashboard/streamlit_app.py --server.port=$PORT --server.address=0.0.0.0 --server.headless=true --theme.base=dark --theme.primaryColor=#8A2BE2"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
 

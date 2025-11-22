@@ -3,7 +3,4 @@
 nixPkgs = ['python311']
 
 [phases.install]
-cmds = ['pip install -r ../requirements.txt']
-
-[start]
-cmd = 'cd /app && PYTHONPATH=/app:/app/dashboard:$PYTHONPATH streamlit run dashboard/streamlit_app.py --server.port=$PORT --server.address=0.0.0.0 --server.headless=true --theme.base=dark --theme.primaryColor=#8A2BE2'
+cmds = ['python3 -m pip install -r ../requirements.txt']
