@@ -44,6 +44,7 @@ class HelixNotionClient:
         self.agent_registry_db = os.getenv("NOTION_AGENT_REGISTRY_DB", "2f65aab794a64ec48bcc46bf760f128f")
         self.event_log_db = os.getenv("NOTION_EVENT_LOG_DB", "acb01d4a955d4775aaeb2310d1da1102")
         self.context_db = os.getenv("NOTION_CONTEXT_DB", "d704854868474666b4b774750f8b134a")
+        self.deployment_log_db = os.getenv("NOTION_DEPLOYMENT_LOG_DB", "8c1a6bf4a7984eee9802c8af1979c3f9")
 
         # Cache for agent page IDs and data source IDs
         self._agent_cache: Dict[str, str] = {}
@@ -447,4 +448,114 @@ class HelixNotionClient:
             return agents
         except Exception as e:
             logger.warning(f"⚠️ Error getting all agents: {e}")
+            return []
+
+    # ========================================================================
+    # DEPLOYMENT LOG OPERATIONS (NEW)
+    # ========================================================================
+
+    async def log_deployment(
+        self,
+        name: str,
+        platform: str,
+        status: str,
+        version: Optional[str] = None,
+        triggered_by: Optional[str] = None,
+        deploy_url: Optional[str] = None,
+        duration: Optional[float] = None,
+        error_details: Optional[str] = None
+    ) -> bool:
+        """
+        Log a deployment event to the Deployment Log database.
+        
+        Args:
+            name: Name of the deployment
+            platform: Platform (Railway, Vercel, GitHub Pages, Streamlit)
+            status: Status (✅ Success, ❌ Failed, 🔄 In Progress, ⏸️ Paused)
+            version: Version string (optional)
+            triggered_by: Who/what triggered the deployment (optional)
+            deploy_url: URL of the deployed service (optional)
+            duration: Duration in seconds (optional)
+            error_details: Error details if failed (optional)
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            # Get data source ID for the deployment log database
+            data_source_id = await self._get_data_source_id(self.deployment_log_db)
+            if not data_source_id:
+                logger.error("❌ Could not get data source ID for deployment log")
+                return False
+
+            # Build properties
+            properties = {
+                "Name": {"title": [{"text": {"content": name}}]},
+                "Platform": {"select": {"name": platform}},
+                "Status": {"select": {"name": status}},
+                "Timestamp": {"date": {"start": datetime.now().isoformat()}},
+            }
+
+            if version:
+                properties["Version"] = {"rich_text": [{"text": {"content": version}}]}
+            if triggered_by:
+                properties["Triggered By"] = {"rich_text": [{"text": {"content": triggered_by}}]}
+            if deploy_url:
+                properties["Deploy URL"] = {"url": deploy_url}
+            if duration is not None:
+                properties["Duration"] = {"number": duration}
+            if error_details:
+                properties["Error Details"] = {"rich_text": [{"text": {"content": error_details}}]}
+
+            # Create page using data_source_id
+            self.notion.pages.create(
+                parent={"data_source_id": data_source_id},
+                properties=properties
+            )
+
+            logger.info(f"✅ Logged deployment: {name} ({status})")
+            return True
+
+        except Exception as e:
+            logger.error(f"❌ Error logging deployment: {e}")
+            return False
+
+    async def get_recent_deployments(self, limit: int = 10) -> List[Dict[str, Any]]:
+        """Get recent deployments from the Deployment Log."""
+        try:
+            # Get data source ID for the deployment log database
+            data_source_id = await self._get_data_source_id(self.deployment_log_db)
+            if not data_source_id:
+                logger.error("❌ Could not get data source ID for deployment log")
+                return []
+
+            # Query using new data source endpoint
+            results = self.notion.request(
+                path=f"data_sources/{data_source_id}/query",
+                method="POST",
+                body={
+                    "sorts": [{"property": "Timestamp", "direction": "descending"}],
+                    "page_size": limit
+                }
+            )
+
+            deployments = []
+            for page in results.get("results", []):
+                props = page["properties"]
+                deployments.append({
+                    "name": props["Name"]["title"][0]["text"]["content"],
+                    "platform": props["Platform"]["select"]["name"] if props["Platform"]["select"] else "Unknown",
+                    "status": props["Status"]["select"]["name"] if props["Status"]["select"] else "Unknown",
+                    "timestamp": props["Timestamp"]["date"]["start"] if props["Timestamp"]["date"] else None,
+                    "version": props["Version"]["rich_text"][0]["text"]["content"] 
+                        if props["Version"]["rich_text"] else None,
+                    "triggered_by": props["Triggered By"]["rich_text"][0]["text"]["content"]
+                        if props["Triggered By"]["rich_text"] else None,
+                    "deploy_url": props["Deploy URL"]["url"] if props["Deploy URL"]["url"] else None,
+                    "duration": props["Duration"]["number"] if props["Duration"]["number"] else None,
+                })
+
+            return deployments
+        except Exception as e:
+            logger.warning(f"⚠️ Error getting recent deployments: {e}")
             return []
