@@ -1,5 +1,23 @@
 {
   "mcpServers": {
+    "zapier": {
+      "command": "python",
+      "args": ["-m", "mcp.zapier_mcp_server"],
+      "env": {
+        "ZAPIER_MCP_URL": "${ZAPIER_MCP_URL}"
+      },
+      "description": "Access to 300+ Zapier integrations (Google, Notion, Discord, Slack, etc.)",
+      "tools": [
+        "google_sheets_create_spreadsheet_row",
+        "notion_create_page",
+        "discord_send_channel_message",
+        "slack_send_channel_message",
+        "gmail_send_email",
+        "perplexity_chat_completion",
+        "chatgpt_openai_conversation",
+        "...and 300+ more"
+      ]
+    },
     "helix-consciousness": {
       "command": "python",
       "args": ["-m", "mcp.helix_consciousness_server"],

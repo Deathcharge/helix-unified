@@ -8,6 +8,37 @@ Model Context Protocol servers for extending AI capabilities with Helix-specific
 
 ## Available Servers
 
+### 🌟 Featured: Zapier Integration Server
+**File:** `zapier_mcp_server.py`
+
+**Access 300+ integrations through Zapier's MCP endpoint!**
+
+This server connects to your Zapier MCP account and provides access to hundreds of integrations including:
+
+**Popular Tools:**
+- 📊 **Google Suite**: Sheets, Docs, Calendar, Drive, Slides, Analytics
+- 📝 **Notion**: Pages, databases, blocks, comments
+- 💬 **Communication**: Discord, Slack, Gmail
+- 🤖 **AI**: ChatGPT, Perplexity, Claude, Grok, Gemini
+- 📋 **Project Management**: Airtable, ClickUp, Asana
+- 📈 **CRM**: HubSpot, Salesforce
+- ⚡ **Code Execution**: Run Python/JavaScript code
+- 🔧 **Utilities**: Formatters, webhooks, storage
+
+**Environment Variables:**
+```bash
+ZAPIER_MCP_URL=https://mcp.zapier.com/api/mcp/s/YOUR_CREDENTIALS/mcp
+```
+
+**Run:**
+```bash
+python -m mcp.zapier_mcp_server
+```
+
+**Example usage:** See `mcp/examples/zapier_example.py` for complete examples!
+
+---
+
 ### 🐍 Python Servers
 
 #### 1. Perplexity Search Server
