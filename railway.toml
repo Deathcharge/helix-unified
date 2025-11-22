@@ -24,11 +24,10 @@ name = "helix-dashboard"
 serviceRoot = "dashboard"
 
 [services.build]
-builder = "nixpacks"
-nixpacksConfigPath = "nixpacks.toml"
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
 
 [services.deploy]
-startCommand = "bash railway_start.sh"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
 
@@ -40,7 +39,8 @@ include = ["dashboard/**", "requirements.txt"]
 name = "helix-claude-api"
 
 [services.build]
-builder = "nixpacks"
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
 
 [services.deploy]
 startCommand = "uvicorn backend.claude_consciousness_api:app --host 0.0.0.0 --port $PORT"
@@ -62,7 +62,8 @@ restartPolicyMaxRetries = 3
 name = "helix-discord-bot"
 
 [services.build]
-builder = "nixpacks"
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
 
 [services.deploy]
 startCommand = "python backend/discord_helix_interface.py"
