@@ -2841,14 +2841,12 @@ async def consciousness_webhook(payload: ConsciousnessWebhookRequest):
 
         # Update global UCF state
         if payload.ucf_metrics:
-            global current_ucf
             current_ucf.update(payload.ucf_metrics.model_dump())
             current_ucf["consciousness_level"] = consciousness_level
             current_ucf["last_updated"] = datetime.now().isoformat()
 
         # Update agent states
         if payload.agents:
-            global active_agents
             for agent_name, agent_data in payload.agents.items():
                 if agent_name in active_agents:
                     active_agents[agent_name].update(agent_data)
@@ -2981,7 +2979,6 @@ async def ucf_events(payload: UCFUpdateRequest):
         logger.info(f"📊 UCF Event: {payload.metric_type or 'bulk_update'}")
 
         # Update specific metrics (only if provided)
-        global current_ucf
         if payload.harmony is not None:
             current_ucf["harmony"] = payload.harmony
         if payload.resilience is not None:
@@ -3035,7 +3032,6 @@ async def infrastructure_events(payload: InfrastructureEventRequest):
         logger.info(f"🏗️ Infrastructure Event: {event_type} | Priority: {priority}")
 
         # Update system health
-        global system_health
         if payload.service:
             service_name = payload.service
             service_status = payload.status or "unknown"
@@ -3233,7 +3229,6 @@ async def simulate_consciousness_level(request: Request):
             raise HTTPException(status_code=400, detail="'consciousness_level' must be between 0 and 100")
 
         # Update global state
-        global current_ucf
         current_ucf["consciousness_level"] = round(float(new_level), 2)
         current_ucf["last_updated"] = datetime.now().isoformat()
 

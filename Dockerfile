@@ -25,12 +25,13 @@ RUN python3 -c "from Crypto.Cipher import AES; print('✅ AES import works')"
 
 # Install lightweight dependencies first (reduces memory pressure)
 RUN pip install --no-cache-dir \
-    fastapi==0.115.0 \
-    uvicorn[standard]==0.32.0 \
+    fastapi==0.115.6 \
+    uvicorn[standard]==0.34.0 \
     python-dotenv==1.0.1 \
     jinja2==3.1.6 \
     aiofiles==23.2.1 \
-    sse-starlette==2.1.3
+    sse-starlette==2.2.1 \
+    websockets==13.0
 
 # Install API clients and utilities
 RUN pip install --no-cache-dir \
@@ -40,9 +41,9 @@ RUN pip install --no-cache-dir \
     pyyaml==6.0.1 \
     toml==0.10.2 \
     python-multipart==0.0.18 \
-    pydantic==2.5.3 \
+    pydantic==2.10.3 \
     python-dateutil==2.8.2 \
-    pytz==2023.3
+    pytz==2024.1
 
 # Install Discord and integrations
 RUN pip install --no-cache-dir \
@@ -54,18 +55,19 @@ RUN pip install --no-cache-dir \
 RUN pip install --no-cache-dir \
     sentry-sdk[fastapi]==2.19.0 \
     pydub==0.25.1 \
-    Pillow==10.3.0
+    Pillow==10.4.0 \
+    loguru==0.7.2
 
 # Install heavy ML dependencies LAST (one at a time to reduce memory spikes)
 RUN pip install --no-cache-dir numpy==1.26.4
-RUN pip install --no-cache-dir pandas
+RUN pip install --no-cache-dir pandas==2.2.3
 RUN pip install --no-cache-dir scikit-learn
 RUN pip install --no-cache-dir cmdstanpy==1.2.2
 RUN pip install --no-cache-dir prophet
 
 # Install visualization libraries
 RUN pip install --no-cache-dir \
-    streamlit==1.37.0 \
+    streamlit==1.40.0 \
     plotly==5.18.0
 
 # CACHE BUSTER: Force rebuild from this point (v16.8 - 2025-11-07)

@@ -25,9 +25,9 @@
 # Web Framework
 # Z-88 Ritual Engine with modern Streamlit and audio/visual processing
 # Core Dependencies - Python 3.13 Compatible
-Pillow==10.3.0  # Updated for Python 3.13 support
+Pillow==10.4.0  # Updated for Python 3.13 support + security fixes
 aiohttp==3.12.14
-fastapi==0.115.0
+fastapi==0.115.6
 httpx==0.28.0
 librosa==0.10.0
 matplotlib==3.8.3
@@ -38,10 +38,10 @@ numpy==1.26.4
 openai
 anthropic>=0.39.0  # Claude API for consciousness processing
 discord.py>=2.3.2  # Discord bot for consciousness orchestration
-pandas==2.2.0
+pandas==2.2.3
 plotly==5.18.0
 pycryptodome==3.20.0
-pydantic>=2.9.0  # Python 3.13 compatible
+pydantic==2.10.3  # Python 3.13 compatible + security fixes
 python-dotenv==1.0.1
 python-json-logger==2.0.7
 loguru==0.7.2  # Advanced logging for Zapier integration
@@ -50,8 +50,8 @@ requests==2.32.4
 scipy==1.13.0
 seaborn==0.13.1
 soundfile==0.12.1
-streamlit==1.37.0
+streamlit==1.40.0
 streamlit-option-menu==0.3.12
 toml==0.10.2
 websockets==13.0  # For WebSocket connections in Live Stream and Discovery Protocol
-sse-starlette==1.6.5  # Server-Sent Events for real-time consciousness streaming
+sse-starlette==2.2.1  # Server-Sent Events for real-time consciousness streaming
