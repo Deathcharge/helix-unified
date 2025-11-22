@@ -3,11 +3,7 @@
 nixPkgs = ['python311']
 
 [phases.install]
-cmds = [
-  'python3.11 -m ensurepip --upgrade',
-  'python3.11 -m pip install --upgrade pip',
-  'python3.11 -m pip install -r ../requirements.txt'
-]
+cmds = ['pip install -r ../requirements.txt']
 
 [start]
-cmd = 'bash railway_start.sh'
+cmd = 'PYTHONPATH=/app:$PYTHONPATH streamlit run streamlit_app.py --server.port=$PORT --server.address=0.0.0.0 --server.headless=true --theme.base=dark --theme.primaryColor=#8A2BE2'
