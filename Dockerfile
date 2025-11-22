@@ -30,7 +30,8 @@ RUN pip install --no-cache-dir \
     python-dotenv==1.0.1 \
     jinja2==3.1.6 \
     aiofiles==23.2.1 \
-    sse-starlette==2.1.3
+    sse-starlette==2.1.3 \
+    websockets==13.0
 
 # Install API clients and utilities
 RUN pip install --no-cache-dir \
@@ -54,7 +55,8 @@ RUN pip install --no-cache-dir \
 RUN pip install --no-cache-dir \
     sentry-sdk[fastapi]==2.19.0 \
     pydub==0.25.1 \
-    Pillow==10.3.0
+    Pillow==10.3.0 \
+    loguru==0.7.2
 
 # Install heavy ML dependencies LAST (one at a time to reduce memory spikes)
 RUN pip install --no-cache-dir numpy==1.26.4
