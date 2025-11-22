@@ -10,8 +10,9 @@ from loguru import logger
 
 # Environment variables for Notion integration
 NOTION_TOKEN = os.getenv("NOTION_TOKEN")
-AGENT_REGISTRY_DB_ID = os.getenv("NOTION_AGENT_REGISTRY_DB_ID")
-UCF_STATE_DB_ID = os.getenv("NOTION_UCF_STATE_DB_ID")
+# Hardcoded IDs based on Notion Scan for v16.9
+AGENT_REGISTRY_DB_ID = "2f65aab794a64ec48bcc46bf760f128f" # Agent Registry
+UCF_STATE_DB_ID = "103a36fe2a914256814b1e7e94846550" # UCF Metrics History
 
 class NotionSync:
     """
@@ -31,12 +32,12 @@ class NotionSync:
         Assumes a Notion database with properties: Name (Title), Symbol (Text), Role (Text), Active (Checkbox), Memory Size (Number), Last Update (Date).
         """
         return {
-            "Name": {"title": [{"text": {"content": agent_data.get("name", "Unknown")}}]},
+            "Agent Name": {"title": [{"text": {"content": agent_data.get("name", "Unknown")}}]},
             "Symbol": {"rich_text": [{"text": {"content": agent_data.get("symbol", "❓")}}]},
             "Role": {"rich_text": [{"text": {"content": agent_data.get("role", "N/A")}}]},
-            "Active": {"checkbox": agent_data.get("active", False)},
-            "Memory Size": {"number": agent_data.get("memory_size", 0)},
-            "Last Update": {"date": {"start": datetime.utcnow().isoformat()}},
+            "Status": {"select": {"name": "Active" if agent_data.get("active", False) else "Dormant"}},
+            "Memory (MB)": {"number": agent_data.get("memory_size", 0)},
+            "Last Sync": {"date": {"start": datetime.utcnow().isoformat()}},
         }
 
     async def sync_agent_registry(self, agents_status: Dict[str, Any]):
@@ -85,7 +86,10 @@ class NotionSync:
                 "Harmony": {"number": ucf_state.get("harmony", 0.0)},
                 "Resilience": {"number": ucf_state.get("resilience", 0.0)},
                 "Klesha": {"number": ucf_state.get("klesha", 0.0)},
-                "Phase": {"rich_text": [{"text": {"content": ucf_state.get("phase", "N/A")}}]},
+                "Phase": {"select": {"name": ucf_state.get("phase", "N/A")}},
+                "Prana": {"number": ucf_state.get("prana", 0.0)},
+                "Drishti": {"number": ucf_state.get("drishti", 0.0)},
+                "Zoom": {"number": ucf_state.get("zoom", 0.0)},
             }
 
             # Placeholder for actual Notion API call
