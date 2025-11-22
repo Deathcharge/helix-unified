@@ -837,12 +837,42 @@ async def run_all_agents():
     await asyncio.gather(*tasks)
 
 
+async def run_scheduled_content_bot():
+    """Run a dedicated bot for scheduled content generation"""
+    from scheduled_content import ScheduledContent
+    
+    token = os.getenv("DISCORD_TOKEN_SCHEDULER")
+    if not token:
+        logger.error("Missing DISCORD_TOKEN_SCHEDULER")
+        return
+    
+    intents = discord.Intents.default()
+    intents.guilds = True
+    intents.messages = True
+    intents.message_content = True
+    
+    bot = commands.Bot(command_prefix="!", intents=intents)
+    scheduler = ScheduledContent(bot)
+    
+    @bot.event
+    async def on_ready():
+        logger.info(f"Scheduler bot ready: {bot.user}")
+    
+    try:
+        await bot.start(token)
+    except Exception as e:
+        logger.error(f"Scheduler bot failed: {e}")
+
+
 if __name__ == "__main__":
     # Run specific agent or all agents
     import sys
     
     if len(sys.argv) > 1:
-        agent_id = sys.argv[1]
-        asyncio.run(run_agent_bot(agent_id))
+        if sys.argv[1] == "scheduler":
+            asyncio.run(run_scheduled_content_bot())
+        else:
+            agent_id = sys.argv[1]
+            asyncio.run(run_agent_bot(agent_id))
     else:
         asyncio.run(run_all_agents())
