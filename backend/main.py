@@ -571,11 +571,35 @@ def health_check() -> Dict[str, Any]:
     # Integration status
     integrations = {}
 
+    # Database
+    database_url = os.getenv("DATABASE_URL")
+    integrations["database"] = {
+        "configured": bool(database_url),
+        "status": "configured" if database_url else "not_configured",
+        "warning": None if database_url else "DATABASE_URL not set - data persistence disabled"
+    }
+
+    # Redis Cache
+    redis_url = os.getenv("REDIS_URL")
+    integrations["redis"] = {
+        "configured": bool(redis_url),
+        "status": "configured" if redis_url else "not_configured",
+        "warning": None if redis_url else "REDIS_URL not set - caching disabled"
+    }
+
+    # Anthropic API
+    anthropic_key = os.getenv("ANTHROPIC_API_KEY")
+    integrations["anthropic_api"] = {
+        "configured": bool(anthropic_key),
+        "status": "configured" if anthropic_key else "not_configured",
+        "warning": None if anthropic_key else "ANTHROPIC_API_KEY not set - Claude features disabled"
+    }
+
     # Zapier Master Webhook
     zapier_webhook = os.getenv("ZAPIER_WEBHOOK_URL")
     integrations["zapier_master"] = {
-        "configured": bool(zapier_webhook),
-        "status": "configured" if zapier_webhook else "not_configured"
+        "configured": bool(zapier_webhook and zapier_webhook not in ['https://hooks.zapier.com/hooks/catch/xxxxx/xxxxxx']),
+        "status": "configured" if (zapier_webhook and 'xxxxx' not in zapier_webhook) else "not_configured"
     }
 
     # Zapier Context Vault Webhook
@@ -606,7 +630,7 @@ def health_check() -> Dict[str, Any]:
     }
 
     # Discord Bot
-    discord_token = os.getenv("DISCORD_TOKEN")
+    discord_token = os.getenv("DISCORD_TOKEN") or os.getenv("DISCORD_BOT_TOKEN")
     discord_guild_id = os.getenv("DISCORD_GUILD_ID")
     integrations["discord"] = {
         "configured": bool(discord_token and discord_guild_id),
@@ -643,14 +667,100 @@ def health_check() -> Dict[str, Any]:
     configured_count = len([i for i in integrations.values() if i.get("configured")])
     total_count = len(integrations)
 
+    # Collect warnings
+    warnings = [i.get("warning") for i in integrations.values() if i.get("warning")]
+
     health_data["summary"] = {
         "total_integrations": total_count,
         "configured": configured_count,
         "not_configured": total_count - configured_count,
-        "percentage": round((configured_count / total_count) * 100, 1)
+        "percentage": round((configured_count / total_count) * 100, 1),
+        "warnings": warnings
     }
 
     return health_data
+
+
+@app.get("/api/validate")
+async def validate_environment() -> Dict[str, Any]:
+    """
+    Deep validation endpoint that actually tests API keys and connections.
+
+    This endpoint:
+    - Checks all required environment variables
+    - Tests database connection
+    - Tests Redis connection
+    - Validates API keys (Anthropic, Discord, etc.)
+    - Tests webhook endpoints
+
+    Returns detailed validation report with errors and warnings.
+    """
+    from backend.core.env_validator import EnvironmentValidator
+
+    validator = EnvironmentValidator()
+
+    # Define required variables
+    validator.add_required('DATABASE_URL', 'PostgreSQL connection string')
+    validator.add_required('REDIS_URL', 'Redis connection string')
+
+    # Optional but recommended
+    validator.add_optional('ANTHROPIC_API_KEY', 'Claude API access')
+    validator.add_optional('PERPLEXITY_API_KEY', 'Perplexity multi-LLM and search')
+    validator.add_optional('DISCORD_BOT_TOKEN', 'Discord bot features')
+    validator.add_optional('ZAPIER_WEBHOOK_URL', 'UCF telemetry webhook')
+    validator.add_optional('ZAPIER_MASTER_HOOK_URL', 'Master webhook for integrations')
+    validator.add_optional('NOTION_API_KEY', 'Notion integration')
+
+    results = []
+
+    # Check environment variables
+    results.extend(validator.check_required_vars())
+    results.extend(validator.check_optional_vars())
+
+    # Validate connections
+    results.append(await validator.validate_database_connection())
+    results.append(await validator.validate_redis_connection())
+    results.append(await validator.validate_anthropic_api_key())
+    results.append(await validator.validate_perplexity_api_key())
+
+    # Validate Discord token if configured
+    if os.getenv('DISCORD_BOT_TOKEN'):
+        results.append(await validator.validate_discord_token())
+
+    # Validate webhooks if configured
+    zapier_url = os.getenv('ZAPIER_WEBHOOK_URL')
+    if zapier_url and 'xxxxx' not in zapier_url:
+        results.append(await validator.validate_webhook(zapier_url, 'Zapier UCF'))
+
+    master_hook = os.getenv('ZAPIER_MASTER_HOOK_URL')
+    if master_hook and 'xxxxx' not in master_hook:
+        results.append(await validator.validate_webhook(master_hook, 'Zapier Master'))
+
+    # Format results for API response
+    errors = [{"message": r.message, "timestamp": r.timestamp.isoformat()}
+              for r in results if not r.passed and r.severity == "error"]
+    warnings = [{"message": r.message, "timestamp": r.timestamp.isoformat()}
+                for r in results if r.severity == "warning"]
+    passed = [{"message": r.message, "timestamp": r.timestamp.isoformat()}
+              for r in results if r.passed and r.severity == "info"]
+
+    total = len(results)
+    passed_count = len([r for r in results if r.passed])
+
+    return {
+        "ok": len(errors) == 0,
+        "timestamp": datetime.now().isoformat(),
+        "summary": {
+            "total_checks": total,
+            "passed": passed_count,
+            "warnings": len(warnings),
+            "errors": len(errors),
+            "percentage": round((passed_count / total) * 100, 1) if total > 0 else 0
+        },
+        "passed": passed,
+        "warnings": warnings,
+        "errors": errors
+    }
 
 
 # ============================================================================

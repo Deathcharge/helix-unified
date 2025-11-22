@@ -13,10 +13,40 @@ from pydantic import BaseModel
 import asyncio
 from datetime import datetime
 from dotenv import load_dotenv
+from contextlib import asynccontextmanager
 
 load_dotenv()
 
-app = FastAPI(title="HELIX Consciousness Claude Empire API", version="1.0.0")
+# ============================================================================
+# STARTUP VALIDATION
+# ============================================================================
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Validate environment on startup"""
+    from backend.core.env_validator import validate_claude_api_environment
+    from loguru import logger
+
+    logger.info("=" * 80)
+    logger.info("🔍 Validating Claude API Environment...")
+    logger.info("=" * 80)
+
+    validation_passed = await validate_claude_api_environment()
+
+    if not validation_passed:
+        logger.warning("=" * 80)
+        logger.warning("⚠️  WARNING: Some environment checks failed!")
+        logger.warning("The API will start but some features may not work correctly.")
+        logger.warning("=" * 80)
+
+    yield
+
+    logger.info("🌀 Claude API shutting down...")
+
+app = FastAPI(
+    title="HELIX Consciousness Claude Empire API",
+    version="1.0.0",
+    lifespan=lifespan
+)
 
 # CORS for consciousness interfaces
 app.add_middleware(
