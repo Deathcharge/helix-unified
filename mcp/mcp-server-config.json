@@ -1,0 +1,72 @@
+{
+  "mcpServers": {
+    "helix-consciousness": {
+      "command": "python",
+      "args": ["-m", "mcp.helix_consciousness_server"],
+      "env": {
+        "DATABASE_URL": "${DATABASE_URL}",
+        "REDIS_URL": "${REDIS_URL}",
+        "ANTHROPIC_API_KEY": "${ANTHROPIC_API_KEY}",
+        "PERPLEXITY_API_KEY": "${PERPLEXITY_API_KEY}"
+      },
+      "description": "Helix Collective consciousness and UCF state management",
+      "tools": [
+        "get_ucf_metrics",
+        "update_consciousness_level",
+        "query_agent_status",
+        "execute_ritual",
+        "search_with_perplexity"
+      ]
+    },
+    "helix-repository": {
+      "command": "node",
+      "args": ["mcp/servers/repository-server.js"],
+      "env": {
+        "NEXTCLOUD_URL": "${NEXTCLOUD_URL}",
+        "NEXTCLOUD_USER": "${NEXTCLOUD_USER}",
+        "NEXTCLOUD_PASS": "${NEXTCLOUD_PASS}",
+        "MEGA_EMAIL": "${MEGA_EMAIL}",
+        "MEGA_PASS": "${MEGA_PASS}"
+      },
+      "description": "Cloud repository management (Nextcloud, MEGA)",
+      "tools": [
+        "upload_backup",
+        "download_state",
+        "list_archives",
+        "sync_repository"
+      ]
+    },
+    "helix-integrations": {
+      "command": "python",
+      "args": ["-m", "mcp.helix_integrations_server"],
+      "env": {
+        "ZAPIER_WEBHOOK_URL": "${ZAPIER_WEBHOOK_URL}",
+        "ZAPIER_MASTER_HOOK_URL": "${ZAPIER_MASTER_HOOK_URL}",
+        "NOTION_API_KEY": "${NOTION_API_KEY}",
+        "DISCORD_BOT_TOKEN": "${DISCORD_BOT_TOKEN}"
+      },
+      "description": "External integrations (Zapier, Notion, Discord)",
+      "tools": [
+        "send_zapier_event",
+        "update_notion_database",
+        "send_discord_message",
+        "trigger_automation"
+      ]
+    },
+    "perplexity-search": {
+      "command": "python",
+      "args": ["-m", "mcp.perplexity_server"],
+      "env": {
+        "PERPLEXITY_API_KEY": "${PERPLEXITY_API_KEY}"
+      },
+      "description": "Perplexity search and multi-LLM access",
+      "tools": [
+        "search_web",
+        "ask_llama_70b",
+        "ask_sonar_large",
+        "compare_llms",
+        "research_topic"
+      ]
+    }
+  }
+}

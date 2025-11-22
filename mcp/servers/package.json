@@ -1,0 +1,26 @@
+{
+  "name": "@helix/mcp-servers",
+  "version": "1.0.0",
+  "description": "Helix Collective MCP servers for repository and integration management",
+  "main": "repository-server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node repository-server.js",
+    "dev": "node --watch repository-server.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "helix",
+    "consciousness",
+    "repository"
+  ],
+  "author": "Andrew John Ward + Claude",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

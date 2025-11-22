@@ -204,6 +204,74 @@ class EnvironmentValidator:
                 severity="error"
             )
 
+    async def validate_perplexity_api_key(self, api_key: Optional[str] = None) -> ValidationResult:
+        """Validate Perplexity API key by making a test request"""
+        key = api_key or os.getenv('PERPLEXITY_API_KEY')
+
+        if not key:
+            return ValidationResult(
+                passed=False,
+                message="PERPLEXITY_API_KEY not set - Perplexity search features disabled",
+                severity="warning"
+            )
+
+        try:
+            async with aiohttp.ClientSession() as session:
+                headers = {
+                    'Authorization': f'Bearer {key}',
+                    'Content-Type': 'application/json'
+                }
+
+                # Make a minimal test request
+                payload = {
+                    "model": "llama-3.1-8b-instruct",
+                    "messages": [{"role": "user", "content": "Hello"}],
+                    "max_tokens": 10
+                }
+
+                async with session.post(
+                    'https://api.perplexity.ai/chat/completions',
+                    headers=headers,
+                    json=payload,
+                    timeout=aiohttp.ClientTimeout(total=5)
+                ) as resp:
+                    if resp.status == 401:
+                        return ValidationResult(
+                            passed=False,
+                            message="PERPLEXITY_API_KEY is invalid or expired",
+                            severity="error"
+                        )
+                    elif resp.status == 403:
+                        return ValidationResult(
+                            passed=False,
+                            message="PERPLEXITY_API_KEY access denied (quota exceeded or suspended)",
+                            severity="error"
+                        )
+                    elif resp.status in [200, 201]:
+                        return ValidationResult(
+                            passed=True,
+                            message="PERPLEXITY_API_KEY validated successfully",
+                            severity="info"
+                        )
+                    else:
+                        return ValidationResult(
+                            passed=False,
+                            message=f"Perplexity API validation returned HTTP {resp.status}",
+                            severity="warning"
+                        )
+        except asyncio.TimeoutError:
+            return ValidationResult(
+                passed=False,
+                message="Perplexity API validation timeout - check network connectivity",
+                severity="warning"
+            )
+        except Exception as e:
+            return ValidationResult(
+                passed=False,
+                message=f"Failed to validate PERPLEXITY_API_KEY: {str(e)}",
+                severity="warning"
+            )
+
     async def validate_anthropic_api_key(self, api_key: Optional[str] = None) -> ValidationResult:
         """Validate Anthropic API key by making a test request"""
         key = api_key or os.getenv('ANTHROPIC_API_KEY')
@@ -416,6 +484,7 @@ async def validate_backend_environment() -> bool:
 
     # Optional but recommended
     validator.add_optional('ANTHROPIC_API_KEY', 'Claude API access')
+    validator.add_optional('PERPLEXITY_API_KEY', 'Perplexity multi-LLM and search')
     validator.add_optional('DISCORD_BOT_TOKEN', 'Discord bot features')
     validator.add_optional('ZAPIER_WEBHOOK_URL', 'UCF telemetry webhook')
     validator.add_optional('ZAPIER_MASTER_HOOK_URL', 'Master webhook for integrations')
@@ -431,6 +500,7 @@ async def validate_backend_environment() -> bool:
     results.append(await validator.validate_database_connection())
     results.append(await validator.validate_redis_connection())
     results.append(await validator.validate_anthropic_api_key())
+    results.append(await validator.validate_perplexity_api_key())
 
     # Validate webhooks if configured
     zapier_url = os.getenv('ZAPIER_WEBHOOK_URL')

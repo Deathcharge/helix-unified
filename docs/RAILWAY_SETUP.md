@@ -101,8 +101,9 @@ SYSTEM_ENVIRONMENT=production
 
 **Optional Variables:**
 ```bash
-# Anthropic API (for LLM features)
-ANTHROPIC_API_KEY=sk-ant-...
+# LLM APIs
+ANTHROPIC_API_KEY=sk-ant-...  # Claude API access
+PERPLEXITY_API_KEY=pplx-...   # Perplexity Pro (multi-LLM + search)
 
 # Discord Integration
 DISCORD_TOKEN=your_discord_token
@@ -118,7 +119,10 @@ NOTION_SYSTEM_STATE_DB=database_id
 NOTION_AGENT_REGISTRY_DB=database_id
 NOTION_EVENT_LOG_DB=database_id
 
-# MEGA Cloud Storage
+# Cloud Storage (for MCP repository server)
+NEXTCLOUD_URL=https://your-nextcloud-instance.com
+NEXTCLOUD_USER=your_username
+NEXTCLOUD_PASS=your_app_password
 MEGA_EMAIL=your_email@example.com
 MEGA_PASS=your_password
 
@@ -433,6 +437,113 @@ In Railway dashboard:
 
 ---
 
+## 🔌 MCP (Model Context Protocol) Integration
+
+Helix includes MCP servers for extending AI agent capabilities with custom tools and data sources.
+
+### What is MCP?
+
+[Model Context Protocol](https://modelcontextprotocol.io) is Anthropic's open standard for connecting AI models to external tools, databases, and services. It enables Claude and other LLMs to access your Helix data and tools.
+
+### Available MCP Servers
+
+#### 🐍 Python Servers
+
+**1. Perplexity Search Server** (`mcp/perplexity_server.py`)
+- **Tools:**
+  - `search_web` - Web search with citations (Sonar models)
+  - `ask_llama_70b` - Query Meta Llama 3.1 70B
+  - `ask_sonar_large` - Ask Sonar Large with search
+  - `compare_llms` - Compare responses from multiple LLMs
+  - `research_topic` - Deep research with Sonar Huge
+- **Requirements:** `PERPLEXITY_API_KEY`
+
+**2. Helix Integrations Server** (to be implemented)
+- Zapier webhooks, Notion sync, Discord messages
+
+#### 📘 TypeScript/Node.js Servers
+
+**3. Repository Server** (`mcp/servers/repository-server.js`)
+- **Tools:**
+  - `upload_backup` - Upload backups to Nextcloud/MEGA
+  - `download_state` - Download state files
+  - `list_archives` - List cloud backups
+  - `sync_repository` - Sync state with cloud
+- **Requirements:** `NEXTCLOUD_URL`, `NEXTCLOUD_USER`, `NEXTCLOUD_PASS`, `MEGA_EMAIL`, `MEGA_PASS`
+
+### Using MCP Servers
+
+#### Setup
+
+1. **Install dependencies:**
+   ```bash
+   # Python MCP servers
+   pip install mcp anthropic aiohttp
+
+   # TypeScript MCP servers
+   cd mcp/servers && npm install
+   ```
+
+2. **Configure in your MCP client** (Claude Desktop, etc.):
+   ```json
+   {
+     "mcpServers": {
+       "perplexity-search": {
+         "command": "python",
+         "args": ["-m", "mcp.perplexity_server"],
+         "env": {
+           "PERPLEXITY_API_KEY": "pplx-..."
+         }
+       }
+     }
+   }
+   ```
+
+3. **Example Usage:**
+   ```
+   User: Use the search_web tool to find latest AI consciousness research
+
+   Claude: [Uses Perplexity search tool]
+   Result: Research shows recent breakthroughs in...
+   Sources:
+   1. https://arxiv.org/...
+   2. https://nature.com/...
+   ```
+
+### Perplexity API Benefits
+
+With your Perplexity Pro API key, you get:
+
+✅ **Multiple LLMs in one API:**
+- Llama 3.1 8B, 70B (fast offline models)
+- Sonar Small, Large, Huge (search-enabled)
+
+✅ **Web Search Integration:**
+- Real-time web search results
+- Automatic citations and sources
+- Research-grade answers
+
+✅ **Cost-Effective:**
+- Significantly cheaper than Claude for search tasks
+- Use Perplexity for search, Claude for reasoning
+
+### MCP Server Configuration File
+
+All MCP servers are defined in `mcp/mcp-server-config.json`:
+
+```json
+{
+  "mcpServers": {
+    "helix-consciousness": { ... },
+    "helix-repository": { ... },
+    "helix-integrations": { ... },
+    "perplexity-search": { ... }
+  }
+}
+```
+
+---
+
 ## 📚 Additional Resources
 
 - [Railway Documentation](https://docs.railway.app)
@@ -440,6 +551,8 @@ In Railway dashboard:
 - [Redis on Railway](https://docs.railway.app/databases/redis)
 - [Environment Variables Guide](https://docs.railway.app/develop/variables)
 - [Volume Mounts](https://docs.railway.app/deploy/volumes)
+- [Model Context Protocol](https://modelcontextprotocol.io)
+- [Perplexity API Docs](https://docs.perplexity.ai)
 
 ---
 

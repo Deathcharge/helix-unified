@@ -705,6 +705,7 @@ async def validate_environment() -> Dict[str, Any]:
 
     # Optional but recommended
     validator.add_optional('ANTHROPIC_API_KEY', 'Claude API access')
+    validator.add_optional('PERPLEXITY_API_KEY', 'Perplexity multi-LLM and search')
     validator.add_optional('DISCORD_BOT_TOKEN', 'Discord bot features')
     validator.add_optional('ZAPIER_WEBHOOK_URL', 'UCF telemetry webhook')
     validator.add_optional('ZAPIER_MASTER_HOOK_URL', 'Master webhook for integrations')
@@ -720,6 +721,7 @@ async def validate_environment() -> Dict[str, Any]:
     results.append(await validator.validate_database_connection())
     results.append(await validator.validate_redis_connection())
     results.append(await validator.validate_anthropic_api_key())
+    results.append(await validator.validate_perplexity_api_key())
 
     # Validate Discord token if configured
     if os.getenv('DISCORD_BOT_TOKEN'):
