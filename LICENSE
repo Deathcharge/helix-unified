@@ -98,3 +98,22 @@ strictly prohibited and may result in legal action.
 
 For authorized access or licensing inquiries, contact: andrew@deathcharge.dev
 
+---
+
+THIRD-PARTY SERVICES NOTICE:
+
+This Software integrates with third-party services that have their own terms:
+
+- Anthropic Claude API (Anthropic PBC) - https://www.anthropic.com/legal/terms
+- Discord API (Discord Inc.) - https://discord.com/terms
+- Google Cloud TTS (Google LLC) - https://cloud.google.com/terms
+- ElevenLabs API (ElevenLabs) - https://elevenlabs.io/terms
+- AWS Services (Amazon Web Services) - https://aws.amazon.com/agreement/
+
+Use of these services requires compliance with their respective terms of service
+and valid API credentials. The Owner is not responsible for third-party service
+availability, pricing, or terms changes.
+
+Python libraries used by this Software are subject to their respective licenses
+and are used in accordance with their terms. This proprietary license applies
+only to the original code and intellectual property created by the Owner.
