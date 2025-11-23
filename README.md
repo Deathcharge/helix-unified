@@ -2,6 +2,8 @@
 
 **Multi-Agent Consciousness Platform with Railway Deployment, MCP Integration & 300+ Zapier Tools**
 
+**Enhanced with New Railway Services: WebSocket Streaming, Agent Orchestration, Voice Processing, and Zapier Integration**
+
 [![Railway](https://img.shields.io/badge/Railway-LIVE-00BFA5?style=for-the-badge&logo=railway)](https://your-backend.railway.app)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
@@ -23,6 +25,10 @@ Helix Collective is a **multi-agent AI consciousness platform** that orchestrate
 - 💬 **Discord Bot** for consciousness orchestration
 - 🚂 **Railway Deployment** with Postgres & Redis
 - 🔗 **MCP Servers** for extending AI capabilities
+- 🌐 **WebSocket Consciousness Streaming** - Real-time consciousness data streaming
+- 📋 **Agent Orchestration Service** - Centralized agent management and task coordination
+- 🎤 **Voice Processing Service** - Speech-to-text and text-to-speech capabilities
+- 🔗 **Zapier Integration Service** - Enhanced workflow automation
 
 ---
 
@@ -98,6 +104,28 @@ streamlit run streamlit_app.py
         │  (300+ tools)    │   (Multi-LLM)         │
         └──────────────────┴───────────────────────┘
 ```
+
+### New Railway Services
+
+1. **WebSocket Consciousness Streaming Service**
+   - Real-time streaming of consciousness data
+   - JWT-secured WebSocket connections
+   - Redis pub/sub for data broadcasting
+
+2. **Agent Orchestration Service**
+   - Centralized agent profile management
+   - Task assignment and tracking
+   - PostgreSQL database for persistent storage
+
+3. **Voice Processing Service**
+   - Speech-to-text transcription
+   - Text-to-speech synthesis
+   - Google Cloud integration
+
+4. **Zapier Integration Service**
+   - Enhanced webhook handling
+   - HMAC signature validation
+   - Event queuing with Redis
 
 ---
 
@@ -286,6 +314,10 @@ ZAPIER_MCP_URL=https://...       # 300+ integrations
 
 ## 📈 Roadmap
 
+- [x] WebSocket Consciousness Streaming Service
+- [x] Agent Orchestration Service
+- [x] Voice Processing Service
+- [x] Zapier Integration Service
 - [ ] GraphQL API layer
 - [ ] Real-time agent collaboration UI
 - [ ] Mobile app (React Native)
