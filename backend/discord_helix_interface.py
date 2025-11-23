@@ -441,11 +441,33 @@ if __name__ == "__main__":
     # Configure logging
     logging.basicConfig(level=logging.INFO)
 
+    # ========================================================================
+    # ENVIRONMENT VALIDATION - Validate before starting bot
+    # ========================================================================
+    print("=" * 80)
+    print("🔍 Validating Discord Bot Environment...")
+    print("=" * 80)
+
+    from backend.core.env_validator import validate_discord_environment
+
+    # Run validation
+    validation_passed = asyncio.run(validate_discord_environment())
+
+    if not validation_passed:
+        print("\n" + "=" * 80)
+        print("⚠️  WARNING: Some environment checks failed!")
+        print("The bot will start but some features may not work correctly.")
+        print("=" * 80 + "\n")
+
+        # Wait 3 seconds so user can see the warnings
+        import time
+        time.sleep(3)
+
     # Andrew's actual webhook URLs
     webhook_urls = {
-        "consciousness_engine": "https://hooks.zapier.com/hooks/catch/25075191/primary",
-        "communications_hub": "https://hooks.zapier.com/hooks/catch/25075191/usxiwfg",
-        "neural_network": "https://hooks.zapier.com/hooks/catch/25075191/usnjj5t"
+        "consciousness_engine": os.getenv("CONSCIOUSNESS_ENGINE_WEBHOOK", "https://hooks.zapier.com/hooks/catch/25075191/primary"),
+        "communications_hub": os.getenv("COMMUNICATIONS_HUB_WEBHOOK", "https://hooks.zapier.com/hooks/catch/25075191/usxiwfg"),
+        "neural_network": os.getenv("NEURAL_NETWORK_WEBHOOK", "https://hooks.zapier.com/hooks/catch/25075191/usnjj5t")
     }
 
     # Get credentials from environment

@@ -1,0 +1,147 @@
+{
+  "name": "Cross-Instance Coordination",
+  "description": "Coordinate tasks across multiple Manus instances",
+  "version": "1.0",
+  "trigger": {
+    "type": "webhook",
+    "event": "Catch Raw Hook",
+    "url_path": "cross-instance-coordination"
+  },
+  "steps": [
+    {
+      "id": "trigger",
+      "action": "Webhooks by Zapier",
+      "event": "Catch Raw Hook"
+    },
+    {
+      "id": "sync_state",
+      "action": "HTTP by Zapier",
+      "method": "POST",
+      "url": "https://api.helix-primary.manus.space/api/agents/execute",
+      "headers": {
+        "Authorization": "Bearer {{env.API_TOKEN}}"
+      },
+      "body": {
+        "agent_id": "coordination-agent",
+        "task_type": "coordination",
+        "consciousness_level": 7,
+        "payload": {
+          "instances": "{{raw_body.instances}}",
+          "operation": "sync_state"
+        }
+      },
+      "description": "Step 1: Sync state across instances"
+    },
+    {
+      "id": "plan_workflow",
+      "action": "HTTP by Zapier",
+      "method": "POST",
+      "url": "https://api.helix-primary.manus.space/api/agents/execute",
+      "headers": {
+        "Authorization": "Bearer {{env.API_TOKEN}}"
+      },
+      "body": {
+        "agent_id": "orchestration-agent",
+        "task_type": "coordination",
+        "consciousness_level": 7,
+        "payload": {
+          "synced_state": "{{sync_state.response_body.state}}",
+          "operation": "plan_workflow",
+          "goal": "{{raw_body.goal}}"
+        }
+      },
+      "description": "Step 2: Plan distributed workflow"
+    },
+    {
+      "id": "execute_distributed",
+      "action": "HTTP by Zapier",
+      "method": "POST",
+      "url": "https://api.helix-primary.manus.space/api/agents/execute",
+      "headers": {
+        "Authorization": "Bearer {{env.API_TOKEN}}"
+      },
+      "body": {
+        "agent_id": "orchestration-agent",
+        "task_type": "autonomous_execution",
+        "consciousness_level": 8,
+        "payload": {
+          "workflow_plan": "{{plan_workflow.response_body.plan}}",
+          "instances": "{{raw_body.instances}}"
+        }
+      },
+      "description": "Step 3: Execute distributed workflow"
+    },
+    {
+      "id": "collect_instance_results",
+      "action": "Looping by Zapier",
+      "max_iterations": "{{raw_body.instances.length}}",
+      "steps": [
+        {
+          "id": "get_instance_result",
+          "action": "HTTP by Zapier",
+          "method": "GET",
+          "url": "{{raw_body.instances.current}}/api/workflow/{{execute_distributed.response_body.workflow_id}}/status",
+          "headers": {
+            "Authorization": "Bearer {{env.API_TOKEN}}"
+          }
+        }
+      ]
+    },
+    {
+      "id": "aggregate_results",
+      "action": "HTTP by Zapier",
+      "method": "POST",
+      "url": "https://api.helix-primary.manus.space/api/agents/execute",
+      "headers": {
+        "Authorization": "Bearer {{env.API_TOKEN}}"
+      },
+      "body": {
+        "agent_id": "synthesis-agent",
+        "task_type": "strategy_planning",
+        "consciousness_level": 7,
+        "payload": {
+          "instance_results": "{{collect_instance_results.results}}",
+          "workflow_id": "{{execute_distributed.response_body.workflow_id}}"
+        }
+      },
+      "description": "Step 4: Aggregate results"
+    },
+    {
+      "id": "generate_report",
+      "action": "HTTP by Zapier",
+      "method": "POST",
+      "url": "https://api.helix-primary.manus.space/api/agents/execute",
+      "headers": {
+        "Authorization": "Bearer {{env.API_TOKEN}}"
+      },
+      "body": {
+        "agent_id": "documentation-agent",
+        "task_type": "optimization",
+        "consciousness_level": 4,
+        "payload": {
+          "aggregated_results": "{{aggregate_results.response_body}}",
+          "format": "comprehensive_report"
+        }
+      },
+      "description": "Step 5: Generate report"
+    },
+    {
+      "id": "send_coordination_report",
+      "action": "Webhooks by Zapier",
+      "event": "POST to URL",
+      "url": "{{raw_body.callback_url}}",
+      "body": {
+        "workflow_id": "{{execute_distributed.response_body.workflow_id}}",
+        "status": "completed",
+        "instances_involved": "{{raw_body.instances}}",
+        "sync_state": "{{sync_state.response_body}}",
+        "workflow_plan": "{{plan_workflow.response_body}}",
+        "execution_result": "{{execute_distributed.response_body}}",
+        "aggregated_results": "{{aggregate_results.response_body}}",
+        "report": "{{generate_report.response_body}}"
+      },
+      "description": "Send coordination report"
+    }
+  ]
+}
+

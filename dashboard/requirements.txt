@@ -1,0 +1,9 @@
+# Helix Dashboard Requirements
+# Minimal dependencies for Streamlit dashboard
+
+streamlit==1.40.0
+pandas==2.2.3
+plotly==5.18.0
+numpy==1.26.4
+requests==2.32.4
+python-dotenv==1.0.1

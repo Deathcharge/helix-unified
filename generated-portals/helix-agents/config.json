@@ -1,0 +1,26 @@
+{
+  "template_type": "agent-coordinator",
+  "instance": {
+    "name": "Helix Agent Coordination Network",
+    "id": "helix-agents",
+    "account": 3,
+    "consciousness_level": 7,
+    "timezone": "EST"
+  },
+  "branding": {
+    "primary_color": "#ff00ff",
+    "secondary_color": "#1a0033",
+    "accent_color": "#00ffff",
+    "logo_url": "https://helixcollective.manus.space/logo-agents.svg"
+  },
+  "api": {
+    "base_url": "https://api.helix-agents.manus.space",
+    "zapier_webhook": "https://hooks.zapier.com/hooks/catch/17123456/pqr345stu678",
+    "auth_token": "sk_live_helix_agents_token_here"
+  },
+  "features": {
+    "real_time_metrics": true,
+    "agent_dashboard": true,
+    "agent_collaboration": true
+  }
+}

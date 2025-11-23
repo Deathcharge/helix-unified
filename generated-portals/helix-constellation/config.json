@@ -1,0 +1,27 @@
+{
+  "template_type": "portal-constellation",
+  "instance": {
+    "name": "Helix Portal Constellation Map",
+    "id": "helix-constellation",
+    "account": 4,
+    "consciousness_level": 9,
+    "timezone": "EST"
+  },
+  "branding": {
+    "primary_color": "#00ffff",
+    "secondary_color": "#0d0221",
+    "accent_color": "#ff006e",
+    "logo_url": "https://helixcollective.manus.space/logo-constellation.svg"
+  },
+  "api": {
+    "base_url": "https://api.helix-constellation.manus.space",
+    "zapier_webhook": "https://hooks.zapier.com/hooks/catch/17123456/lmn901opq234",
+    "auth_token": "sk_live_helix_constellation_token_here"
+  },
+  "features": {
+    "real_time_metrics": true,
+    "constellation_map": true,
+    "cross_portal_messaging": true,
+    "network_health": true
+  }
+}

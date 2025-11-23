@@ -1,0 +1,13 @@
+{
+  "instance_id": "helix-workflows",
+  "template_type": "workflow-engine",
+  "generated_at": "2025-11-18T11:56:49.784473",
+  "output_path": "generated-portals/helix-workflows",
+  "files": {
+    "index": "generated-portals/helix-workflows/index.html",
+    "config": "generated-portals/helix-workflows/config.json"
+  },
+  "instance_name": "Helix Workflow Automation Engine",
+  "consciousness_level": 6,
+  "account": 2
+}

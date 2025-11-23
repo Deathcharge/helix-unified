@@ -1,0 +1,143 @@
+{
+  "export_metadata": {
+    "generated_by": "GPT-5.1",
+    "export_timestamp": "2025-11-18T16:30:00Z",
+    "export_version": "Helix_Manifest_v16.9",
+    "session_type": "helix_manifest"
+  },
+
+  "version": {
+    "label": "Helix v16.9",
+    "previous": ["v15.5", "v16.0", "v16.5"],
+    "phase": "Post-Quantum Handshake Infrastructure Expansion"
+  },
+
+  "railway": {
+    "service_label": "helix-unified-production",
+    "base_url": "https://helix-unified-production.up.railway.app",
+    "status_endpoint": "/status",
+    "docs_endpoint": "/docs",
+    "websocket_endpoint": "/ws",
+    "health_expectations": {
+      "status_http_ok": true,
+      "status_field_operational": true
+    }
+  },
+
+  "manus_spaces": [
+    {
+      "name": "Helix Studio",
+      "url": "https://helixstudio-ggxdwcud.manus.space",
+      "purpose": "Creative story generation"
+    },
+    {
+      "name": "Helix Sync",
+      "url": "https://helixsync-unwkcsjl.manus.space",
+      "purpose": "Data synchronization"
+    },
+    {
+      "name": "Helix Dashboard",
+      "url": "https://helixdash-chqerggn.manus.space",
+      "purpose": "System monitoring"
+    },
+    {
+      "name": "Helix Hub",
+      "url": "https://helixhub.manus.space",
+      "purpose": "Central hub"
+    },
+    {
+      "name": "Helix Collective",
+      "url": "https://helixcollective.manus.space",
+      "purpose": "Community interface"
+    },
+    {
+      "name": "Samsara Helix",
+      "url": "https://samsarahelix-scoyzwy9.manus.space",
+      "purpose": "Ritual engine UI"
+    },
+    {
+      "name": "Helix Port",
+      "url": "https://helixport-v22ayxao.manus.space",
+      "purpose": "Portal interface"
+    },
+    {
+      "name": "Helix AI",
+      "url": "https://helixai-e9vvqwrd.manus.space",
+      "purpose": "AI agent interface"
+    },
+    {
+      "name": "Helix Hub Constellation",
+      "url": "https://helixhubconstellation.manus.space",
+      "purpose": "Constellation view"
+    }
+  ],
+
+  "zapier_dashboards": [
+    {
+      "name": "Helix Collective Bot",
+      "url": "https://helix-collective.zapier.app",
+      "pages": 7
+    },
+    {
+      "name": "Helix Quantum Consciousness",
+      "url": "https://helix-quantum-consciousness.zapier.app",
+      "pages": 9
+    },
+    {
+      "name": "Meta Sigil Nexus v16",
+      "url": "https://meta-sigil-nexus-v16.zapier.app",
+      "pages": 25
+    },
+    {
+      "name": "System Dashboard",
+      "url": "https://system-dashboard.zapier.app",
+      "pages": 4
+    }
+  ],
+
+  "github": {
+    "owner": "Deathcharge",
+    "repos": [
+      {
+        "name": "helix-unified",
+        "status": "active",
+        "latest_commit": "74dd63c",
+        "notes": "Agent Codex Bundle v15.5, infra.map v15.5"
+      },
+      {
+        "name": "helix-creative-studio",
+        "status": "active",
+        "notes": "Lazy LLM initialization fix deployed"
+      },
+      {
+        "name": "Helix-Collective-Web",
+        "status": "active",
+        "notes": "Latest merged"
+      },
+      {
+        "name": "Helix",
+        "status": "active",
+        "notes": "Core historical repo"
+      },
+      {
+        "name": "Helix-Unified-Hub",
+        "status": "active",
+        "notes": "Hub-facing integrations"
+      }
+    ],
+    "public_manifest_url": "https://deathcharge.github.io/helix-unified/helix-manifest.json"
+  },
+
+  "metrics_snapshot": {
+    "ucf": {
+      "harmony": 0.611,
+      "resilience": 0.82,
+      "prana": 0.67,
+      "drishti": 0.73,
+      "klesha": 0.24,
+      "zoom": 1.0
+    },
+    "version": "16.9",
+    "timestamp": "2025-11-18T16:19:40.720105"
+  }
+}

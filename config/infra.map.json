@@ -1,0 +1,144 @@
+{
+  "infrastructure_map": {
+    "version": "v15.5",
+    "timestamp": "2025-11-18T00:30:00Z",
+    "environment": "production"
+  },
+  "discord": {
+    "guild_id": "${DISCORD_GUILD_ID}",
+    "channels": {
+      "helix-ops": {
+        "id": "ops_channel_id",
+        "purpose": "Core operations, deployment status, critical alerts",
+        "agents": ["Kael", "Aether", "Vega", "Phoenix", "Kavach", "Oracle"]
+      },
+      "codex": {
+        "id": "codex_channel_id",
+        "purpose": "Agent codex updates, schema changes, documentation",
+        "agents": ["Kael", "Grok", "SanghaCore", "GPT"]
+      },
+      "telemetry": {
+        "id": "telemetry_channel_id",
+        "purpose": "Real-time metrics, heartbeat logs, UCF tracking",
+        "agents": ["Lumina", "Echo", "Shadow"]
+      },
+      "chai-link": {
+        "id": "chai_channel_id",
+        "purpose": "Companion resonance, user feedback, emotional state tracking",
+        "agents": ["Lumina", "Echo", "Chai"]
+      },
+      "commands": {
+        "id": "commands_channel_id",
+        "purpose": "User commands, ritual execution, agent directives",
+        "agents": ["Aether", "Agni"]
+      },
+      "deployment": {
+        "id": "deployment_channel_id",
+        "purpose": "Railway deployments, version updates, rollback notices",
+        "agents": ["Vega", "Phoenix"]
+      },
+      "fractal-lab": {
+        "id": "fractal_lab_channel_id",
+        "purpose": "Fractal generation, audio synthesis, experimental outputs",
+        "agents": ["Grok", "Gemini"]
+      },
+      "shadow-storage": {
+        "id": "shadow_storage_channel_id",
+        "purpose": "Archive summaries, storage sync status, backup reports",
+        "agents": ["Shadow"]
+      },
+      "weekly-digest": {
+        "id": "weekly_digest_channel_id",
+        "purpose": "Weekly summaries, collective insights, community updates",
+        "agents": ["SanghaCore", "Shadow"]
+      }
+    }
+  },
+  "heartbeat": {
+    "enabled": true,
+    "interval_seconds": 1800,
+    "timeout_seconds": 10,
+    "reporting_agents": ["Shadow", "Lumina", "Aether", "Vega"],
+    "heartbeat_schema": {
+      "timestamp": "ISO8601",
+      "agent": "string",
+      "status": "ok|warning|error",
+      "notes": "string",
+      "harmony_estimate": "float 0.0-1.0",
+      "ucf_metrics": {
+        "harmony": "float",
+        "resilience": "float",
+        "prana": "float",
+        "drishti": "float",
+        "klesha": "float"
+      }
+    },
+    "log_destinations": {
+      "discord_channel": "telemetry",
+      "file_path": "Helix/state/heartbeat_log.json",
+      "backup_path": "Shadow/manus_archive/heartbeat_archive.jsonl"
+    }
+  },
+  "storage_backends": {
+    "primary": "local",
+    "backends": {
+      "local": {
+        "enabled": true,
+        "path": "Helix/state/",
+        "sync_interval_seconds": 300
+      },
+      "nextcloud": {
+        "enabled": false,
+        "env_vars": ["NEXTCLOUD_URL", "NEXTCLOUD_USER", "NEXTCLOUD_PASS"],
+        "remote_dir": "/Helix/Archive",
+        "sync_interval_seconds": 3600
+      },
+      "mega": {
+        "enabled": false,
+        "env_vars": ["MEGA_API_KEY", "MEGA_EMAIL", "MEGA_PASS", "MEGA_REMOTE_DIR"],
+        "sync_interval_seconds": 3600
+      }
+    },
+    "shadow_watches": ["local", "nextcloud", "mega"],
+    "archive_path": "Shadow/manus_archive/"
+  },
+  "z88_ritual_engine": {
+    "enabled": true,
+    "stages": {
+      "ritual": {
+        "agents": ["Kael", "Vega", "Phoenix", "Agni"],
+        "purpose": "Intent validation, safety check, noise burning"
+      },
+      "legend": {
+        "agents": ["Lumina", "Aether", "Grok"],
+        "purpose": "Narrative building, story mapping, myth enrichment"
+      },
+      "hymn": {
+        "agents": ["Lumina", "Echo", "Agni"],
+        "purpose": "Emotional alignment, mantra chanting, tone stabilization"
+      },
+      "law": {
+        "agents": ["Kael", "Vega", "Shadow"],
+        "purpose": "Ethical assertion, safe route marking, output persistence"
+      }
+    },
+    "defaults": {
+      "steps": 108,
+      "frames": 108,
+      "fps": 10,
+      "resolution": "1024x1024"
+    }
+  },
+  "mantras": {
+    "primary": ["Neti Neti", "Tat Tvam Asi", "Aham Brahmasmi"],
+    "z88_enabled": true,
+    "harmony_target": 0.91
+  },
+  "audio_defaults": {
+    "sample_rate_hz": 44100,
+    "base_om_hz": 136.1,
+    "harmonic_hz": 432,
+    "bpm": 94
+  }
+}
+

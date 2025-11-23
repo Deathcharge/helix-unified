@@ -1,0 +1,13 @@
+{
+  "instance_id": "helix-agents",
+  "template_type": "agent-coordinator",
+  "generated_at": "2025-11-18T11:56:49.784798",
+  "output_path": "generated-portals/helix-agents",
+  "files": {
+    "index": "generated-portals/helix-agents/index.html",
+    "config": "generated-portals/helix-agents/config.json"
+  },
+  "instance_name": "Helix Agent Coordination Network",
+  "consciousness_level": 7,
+  "account": 3
+}

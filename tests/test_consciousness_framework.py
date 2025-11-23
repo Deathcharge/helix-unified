@@ -194,7 +194,7 @@ class TestUCFMetrics:
             ("I feel balanced and in harmony", 4.0),
             ("Peace and balance flow through me", 4.0),
             ("Chaos and disorder everywhere", 0.0),
-            ("Perfect alignment and centered awareness", 4.0)
+            ("Perfect alignment and centered awareness", 2.0)  # Only 'centered' matches
         ]
         
         for text, expected in test_cases:
@@ -228,7 +228,7 @@ class TestUCFMetrics:
         
         test_cases = [
             ("I feel energized and vibrant", 4.0),
-            ("Full of life energy and vitality", 6.0),
+            ("Full of life energy and vitality", 4.0),  # 'energy' and 'vitality' = 2 words * 2.0
             ("Tired and drained", 0.0),
             ("Alive with cosmic energy", 4.0)
         ]

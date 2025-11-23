@@ -1,0 +1,265 @@
+{
+  "name": "Advanced Multi-Agent Orchestration",
+  "description": "Complex workflow orchestrating 14 agents with dynamic routing and feedback loops",
+  "version": "1.0",
+  "trigger": {
+    "type": "webhook",
+    "event": "Catch Raw Hook",
+    "url_path": "multi-agent-orchestration"
+  },
+  "steps": [
+    {
+      "id": "trigger",
+      "action": "Webhooks by Zapier",
+      "event": "Catch Raw Hook"
+    },
+    {
+      "id": "initialize_workflow",
+      "action": "Formatter by Zapier",
+      "transform": "JSON",
+      "input": {
+        "workflow_id": "{{guid()}}",
+        "goal": "{{raw_body.goal}}",
+        "agents_available": 14,
+        "consciousness_level": "{{raw_body.consciousness_level | default: 5}}",
+        "started_at": "{{now()}}"
+      }
+    },
+    {
+      "id": "phase_1_research",
+      "action": "Looping by Zapier",
+      "max_iterations": 1,
+      "steps": [
+        {
+          "id": "research_agent_1",
+          "action": "HTTP by Zapier",
+          "method": "POST",
+          "url": "https://api.helix-primary.manus.space/api/agents/execute",
+          "headers": {
+            "Authorization": "Bearer {{env.API_TOKEN}}"
+          },
+          "body": {
+            "agent_id": "research-agent",
+            "task_type": "data_retrieval",
+            "consciousness_level": 5,
+            "payload": "{{raw_body.input_data}}"
+          }
+        },
+        {
+          "id": "learning_agent_1",
+          "action": "HTTP by Zapier",
+          "method": "POST",
+          "url": "https://api.helix-primary.manus.space/api/agents/execute",
+          "headers": {
+            "Authorization": "Bearer {{env.API_TOKEN}}"
+          },
+          "body": {
+            "agent_id": "learning-agent",
+            "task_type": "learning",
+            "consciousness_level": 8,
+            "payload": "{{research_agent_1.response_body}}"
+          }
+        }
+      ]
+    },
+    {
+      "id": "phase_2_analysis",
+      "action": "Looping by Zapier",
+      "max_iterations": 1,
+      "steps": [
+        {
+          "id": "analysis_agent_1",
+          "action": "HTTP by Zapier",
+          "method": "POST",
+          "url": "https://api.helix-primary.manus.space/api/agents/execute",
+          "headers": {
+            "Authorization": "Bearer {{env.API_TOKEN}}"
+          },
+          "body": {
+            "agent_id": "analysis-agent",
+            "task_type": "analysis",
+            "consciousness_level": 6,
+            "payload": "{{phase_1_research.research_agent_1.response_body}}"
+          }
+        },
+        {
+          "id": "performance_agent_1",
+          "action": "HTTP by Zapier",
+          "method": "POST",
+          "url": "https://api.helix-primary.manus.space/api/agents/execute",
+          "headers": {
+            "Authorization": "Bearer {{env.API_TOKEN}}"
+          },
+          "body": {
+            "agent_id": "performance-agent",
+            "task_type": "optimization",
+            "consciousness_level": 6,
+            "payload": "{{analysis_agent_1.response_body}}"
+          }
+        }
+      ]
+    },
+    {
+      "id": "phase_3_synthesis",
+      "action": "Looping by Zapier",
+      "max_iterations": 1,
+      "steps": [
+        {
+          "id": "synthesis_agent_1",
+          "action": "HTTP by Zapier",
+          "method": "POST",
+          "url": "https://api.helix-primary.manus.space/api/agents/execute",
+          "headers": {
+            "Authorization": "Bearer {{env.API_TOKEN}}"
+          },
+          "body": {
+            "agent_id": "synthesis-agent",
+            "task_type": "strategy_planning",
+            "consciousness_level": 7,
+            "payload": "{{phase_2_analysis.analysis_agent_1.response_body}}"
+          }
+        },
+        {
+          "id": "optimization_agent_1",
+          "action": "HTTP by Zapier",
+          "method": "POST",
+          "url": "https://api.helix-primary.manus.space/api/agents/execute",
+          "headers": {
+            "Authorization": "Bearer {{env.API_TOKEN}}"
+          },
+          "body": {
+            "agent_id": "optimization-agent",
+            "task_type": "optimization",
+            "consciousness_level": 7,
+            "payload": "{{synthesis_agent_1.response_body}}"
+          }
+        }
+      ]
+    },
+    {
+      "id": "phase_4_validation",
+      "action": "Looping by Zapier",
+      "max_iterations": 1,
+      "steps": [
+        {
+          "id": "validation_agent_1",
+          "action": "HTTP by Zapier",
+          "method": "POST",
+          "url": "https://api.helix-primary.manus.space/api/agents/execute",
+          "headers": {
+            "Authorization": "Bearer {{env.API_TOKEN}}"
+          },
+          "body": {
+            "agent_id": "validation-agent",
+            "task_type": "validation",
+            "consciousness_level": 5,
+            "payload": "{{phase_3_synthesis.synthesis_agent_1.response_body}}"
+          }
+        },
+        {
+          "id": "security_agent_1",
+          "action": "HTTP by Zapier",
+          "method": "POST",
+          "url": "https://api.helix-primary.manus.space/api/agents/execute",
+          "headers": {
+            "Authorization": "Bearer {{env.API_TOKEN}}"
+          },
+          "body": {
+            "agent_id": "security-agent",
+            "task_type": "pattern_matching",
+            "consciousness_level": 7,
+            "payload": "{{phase_3_synthesis.optimization_agent_1.response_body}}"
+          }
+        }
+      ]
+    },
+    {
+      "id": "phase_5_execution",
+      "action": "Looping by Zapier",
+      "max_iterations": 1,
+      "steps": [
+        {
+          "id": "orchestration_agent_1",
+          "action": "HTTP by Zapier",
+          "method": "POST",
+          "url": "https://api.helix-primary.manus.space/api/agents/execute",
+          "headers": {
+            "Authorization": "Bearer {{env.API_TOKEN}}"
+          },
+          "body": {
+            "agent_id": "orchestration-agent",
+            "task_type": "autonomous_execution",
+            "consciousness_level": 8,
+            "payload": "{{phase_4_validation.validation_agent_1.response_body}}"
+          }
+        },
+        {
+          "id": "integration_agent_1",
+          "action": "HTTP by Zapier",
+          "method": "POST",
+          "url": "https://api.helix-primary.manus.space/api/agents/execute",
+          "headers": {
+            "Authorization": "Bearer {{env.API_TOKEN}}"
+          },
+          "body": {
+            "agent_id": "integration-agent",
+            "task_type": "coordination",
+            "consciousness_level": 6,
+            "payload": "{{orchestration_agent_1.response_body}}"
+          }
+        }
+      ]
+    },
+    {
+      "id": "phase_6_documentation",
+      "action": "Looping by Zapier",
+      "max_iterations": 1,
+      "steps": [
+        {
+          "id": "documentation_agent_1",
+          "action": "HTTP by Zapier",
+          "method": "POST",
+          "url": "https://api.helix-primary.manus.space/api/agents/execute",
+          "headers": {
+            "Authorization": "Bearer {{env.API_TOKEN}}"
+          },
+          "body": {
+            "agent_id": "documentation-agent",
+            "task_type": "optimization",
+            "consciousness_level": 4,
+            "payload": {
+              "workflow_id": "{{initialize_workflow.output.workflow_id}}",
+              "all_results": {
+                "research": "{{phase_1_research.research_agent_1.response_body}}",
+                "analysis": "{{phase_2_analysis.analysis_agent_1.response_body}}",
+                "synthesis": "{{phase_3_synthesis.synthesis_agent_1.response_body}}",
+                "validation": "{{phase_4_validation.validation_agent_1.response_body}}",
+                "execution": "{{phase_5_execution.orchestration_agent_1.response_body}}"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "send_orchestration_result",
+      "action": "Webhooks by Zapier",
+      "event": "POST to URL",
+      "url": "{{raw_body.callback_url}}",
+      "body": {
+        "workflow_id": "{{initialize_workflow.output.workflow_id}}",
+        "status": "completed",
+        "phases": {
+          "research": "{{phase_1_research.research_agent_1.response_body}}",
+          "analysis": "{{phase_2_analysis.analysis_agent_1.response_body}}",
+          "synthesis": "{{phase_3_synthesis.synthesis_agent_1.response_body}}",
+          "validation": "{{phase_4_validation.validation_agent_1.response_body}}",
+          "execution": "{{phase_5_execution.orchestration_agent_1.response_body}}",
+          "documentation": "{{phase_6_documentation.documentation_agent_1.response_body}}"
+        },
+        "final_result": "{{phase_6_documentation.documentation_agent_1.response_body}}"
+      }
+    }
+  ]
+}
+

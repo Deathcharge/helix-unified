@@ -590,7 +590,3 @@ export default function NetiNetiHarmonyMantra() {
     </div>
   );
 }
-_______
-"
-Z-88 Ritual Engine - Folklore Evolution & Hallucination Tracking
-=================================================================

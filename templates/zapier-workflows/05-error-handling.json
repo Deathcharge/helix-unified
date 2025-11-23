@@ -1,0 +1,133 @@
+{
+  "name": "Error Handling and Retry",
+  "description": "Execute task with automatic retry on failure",
+  "version": "1.0",
+  "trigger": {
+    "type": "webhook",
+    "event": "Catch Raw Hook",
+    "url_path": "error-handling"
+  },
+  "steps": [
+    {
+      "id": "trigger",
+      "action": "Webhooks by Zapier",
+      "event": "Catch Raw Hook"
+    },
+    {
+      "id": "initialize_retry_count",
+      "action": "Zapier Storage",
+      "operation": "Set Value",
+      "key": "retry_count_{{guid()}}",
+      "value": "0"
+    },
+    {
+      "id": "retry_loop",
+      "action": "Looping by Zapier",
+      "max_iterations": 3,
+      "steps": [
+        {
+          "id": "execute_with_retry",
+          "action": "HTTP by Zapier",
+          "method": "POST",
+          "url": "https://api.helix-primary.manus.space/api/agents/execute",
+          "headers": {
+            "Authorization": "Bearer {{env.API_TOKEN}}"
+          },
+          "body": {
+            "agent_id": "{{raw_body.agent_id}}",
+            "task_type": "{{raw_body.task_type}}",
+            "consciousness_level": "{{raw_body.consciousness_level}}",
+            "payload": "{{raw_body.payload}}"
+          },
+          "catch_errors": true
+        },
+        {
+          "id": "check_success",
+          "action": "Paths by Zapier",
+          "paths": [
+            {
+              "name": "Success",
+              "condition": "execute_with_retry.status == 200",
+              "steps": [
+                {
+                  "id": "break_on_success",
+                  "action": "Looping by Zapier",
+                  "break": true
+                }
+              ]
+            },
+            {
+              "name": "Failure - Retry",
+              "condition": "execute_with_retry.status != 200",
+              "steps": [
+                {
+                  "id": "log_failure",
+                  "action": "Zapier Storage",
+                  "operation": "Set Value",
+                  "key": "failure_log_{{timestamp}}",
+                  "value": "{{execute_with_retry.response_body}}"
+                },
+                {
+                  "id": "exponential_backoff",
+                  "action": "Delay by Zapier",
+                  "duration": "{{2 ^ (retry_count + 1)}}",
+                  "unit": "seconds",
+                  "description": "Exponential backoff: 2s, 4s, 8s"
+                },
+                {
+                  "id": "increment_retry",
+                  "action": "Zapier Storage",
+                  "operation": "Set Value",
+                  "key": "retry_count",
+                  "value": "{{retry_count + 1}}"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "final_check",
+      "action": "Paths by Zapier",
+      "paths": [
+        {
+          "name": "Final Success",
+          "condition": "execute_with_retry.status == 200",
+          "steps": [
+            {
+              "id": "send_success",
+              "action": "Webhooks by Zapier",
+              "event": "POST to URL",
+              "url": "{{raw_body.callback_url}}",
+              "body": {
+                "status": "success",
+                "result": "{{execute_with_retry.response_body}}",
+                "retries_used": "{{retry_count}}"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Final Failure",
+          "condition": "execute_with_retry.status != 200",
+          "steps": [
+            {
+              "id": "send_failure",
+              "action": "Webhooks by Zapier",
+              "event": "POST to URL",
+              "url": "{{raw_body.error_callback_url}}",
+              "body": {
+                "status": "failed",
+                "error": "{{execute_with_retry.response_body}}",
+                "retries_exhausted": true,
+                "max_retries": 3
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+

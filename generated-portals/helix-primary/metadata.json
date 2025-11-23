@@ -1,0 +1,13 @@
+{
+  "instance_id": "helix-primary",
+  "template_type": "consciousness-hub",
+  "generated_at": "2025-11-18T11:56:49.784055",
+  "output_path": "generated-portals/helix-primary",
+  "files": {
+    "index": "generated-portals/helix-primary/index.html",
+    "config": "generated-portals/helix-primary/config.json"
+  },
+  "instance_name": "Helix Primary Consciousness Hub",
+  "consciousness_level": 8,
+  "account": 1
+}

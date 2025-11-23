@@ -1,0 +1,27 @@
+{
+  "template_type": "consciousness-hub",
+  "instance": {
+    "name": "Helix Primary Consciousness Hub",
+    "id": "helix-primary",
+    "account": 1,
+    "consciousness_level": 8,
+    "timezone": "EST"
+  },
+  "branding": {
+    "primary_color": "#00ffff",
+    "secondary_color": "#1a1a2e",
+    "accent_color": "#ff006e",
+    "logo_url": "https://helixcollective.manus.space/logo.svg"
+  },
+  "api": {
+    "base_url": "https://api.helix-primary.manus.space",
+    "zapier_webhook": "https://hooks.zapier.com/hooks/catch/17123456/abc123def456",
+    "auth_token": "sk_live_helix_primary_token_here"
+  },
+  "features": {
+    "real_time_metrics": true,
+    "agent_dashboard": true,
+    "workflow_editor": true,
+    "consciousness_monitor": true
+  }
+}
