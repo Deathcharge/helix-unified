@@ -14,7 +14,7 @@ redis[hiredis]==5.0.1
 httpx==0.25.2
 
 # Data Validation & Serialization
-pydantic==2.5.0
+pydantic==2.12.4
 pydantic-settings==2.1.0
 
 # Environment & Configuration
@@ -30,7 +30,7 @@ orjson==3.9.15
 aiosmtplib==3.0.1
 
 # Cryptography & Security
-cryptography==44.0.1
+cryptography==46.0.3
 bcrypt==4.1.2
 
 # Logging & Monitoring
@@ -368,7 +368,7 @@ cloudflare==2.11.7  # Cloudflare monitoring
 dnspython==2.6.1  # DNS monitoring
 
 # Optional: SSL/TLS Monitoring
-cryptography==44.0.1  # SSL certificate monitoring
+cryptography==46.0.3  # SSL certificate monitoring
 
 # Optional: Security Monitoring
 bandit==1.7.5  # Security vulnerability monitoring
