@@ -1,57 +1,56 @@
+# Helix Collective v17.0 - Consolidated Python Dependencies
+# Merged from Manus 5 and Manus 6 updates
+# Python 3.13 Compatible
 
-# API Clients (for backend communication)
-# Audio Processing
-# Backend uses requirements-backend.txt (configured in railway.json)
 # Core Framework
-# Cryptography
-# Dashboard & Visualization
-# Data Processing
-# Environment & Configuration
-# Fractal & Rendering
-# HTTP & API
-# Helix Collective v14.5 - Frontend Requirements (Streamlit)
-# Image & Visualization
-# Logging
-# MEGA Sync Dependency (Critical for Persistence)
-# Notion Integration (if needed for frontend)
-# Optional: Database
-# Optional: Video generation (if needed)
-# Samsara Helix Dashboard - v16.8 Dependencies
-# Samsara Helix Ritual Engine - v16.8 Dependencies
-# Streamlit-based consciousness monitoring dashboard
-# This file is used by Streamlit Community Cloud
-# Utilities
-# Visualization
-# Web Framework
-# Z-88 Ritual Engine with modern Streamlit and audio/visual processing
-# Core Dependencies - Python 3.13 Compatible
-Pillow==10.4.0  # Updated for Python 3.13 support + security fixes
-aiohttp==3.12.14
 fastapi==0.115.6
-httpx==0.28.0
-librosa==0.10.0
-matplotlib==3.8.3
-mega.py
-notion-client==2.5.0
-numba==0.58.1
-numpy==1.26.4
-openai
-anthropic>=0.39.0  # Claude API for consciousness processing
-discord.py>=2.3.2  # Discord bot for consciousness orchestration
-pandas==2.2.3
-plotly==5.18.0
-pycryptodome==3.20.0
+uvicorn[standard]==0.30.5
 pydantic==2.10.3  # Python 3.13 compatible + security fixes
 python-dotenv==1.0.1
-python-json-logger==2.0.7
-loguru==0.7.2  # Advanced logging for Zapier integration
 pyyaml==6.0.1
+toml==0.10.2
+
+# API Clients & HTTP
+aiohttp==3.12.14
+httpx==0.28.0
 requests==2.32.4
+openai
+anthropic>=0.39.0  # Claude API for consciousness processing
+
+# Discord Bot
+discord.py>=2.3.2  # Discord bot for consciousness orchestration
+
+# Data Processing & Science
+numpy==1.26.4
+pandas==2.2.3
 scipy==1.13.0
+matplotlib==3.8.3
 seaborn==0.13.1
-soundfile==0.12.1
+plotly==5.18.0
+numba==0.58.1
+
+# Streamlit & Dashboard
 streamlit==1.40.0
 streamlit-option-menu==0.3.12
-toml==0.10.2
+
+# Integrations
+notion-client==2.5.0
+mega.py
+pycryptodome==3.20.0
+
+# Real-time & WebSockets
 websockets==13.0  # For WebSocket connections in Live Stream and Discovery Protocol
 sse-starlette==2.2.1  # Server-Sent Events for real-time consciousness streaming
+
+# Media & Audio
+Pillow==10.4.0  # Updated for Python 3.13 support + security fixes
+librosa==0.10.0
+soundfile==0.12.1
+
+# Logging
+python-json-logger==2.0.7
+loguru==0.7.2  # Advanced logging for Zapier integration
+
+# Optional: Commented out dependencies
+# opencv-python==4.9.0.80
+# sqlalchemy==2.0.25

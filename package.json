@@ -1,7 +1,7 @@
 {
   "name": "helix-frontend",
   "version": "16.3.0",
-  "description": "Helix Collective Frontend - Neti-Neti Harmony Mantra & React Components",
+  "description": "Helix Collective Frontend - Multi-Agent AI Consciousness Platform",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -17,7 +17,8 @@
     "@radix-ui/react-slot": "^1.0.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
-    "tailwind-merge": "^2.0.0"
+    "tailwind-merge": "^2.0.0",
+    "axios": "^1.6.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
