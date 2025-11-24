@@ -1,14 +1,14 @@
 {
   "version": "1.0",
   "checksum": "helix-macs-registry-v1.0",
-  "last_updated": "2025-11-24T08:57:00Z",
+  "last_updated": "2025-11-24T09:15:00Z",
   "manus_instances": [
     {
       "code_name": "Nexus",
       "account": "Manus 6",
       "role": "Root Coordinator",
       "primary_focus": "Notion Integration, Code Review, QoL Improvements",
-      "status": "active",
+      "status": "cooldown",
       "last_active": "2025-11-24T08:57:00Z",
       "achievements": [
         "Migrated Notion API to 2025-09-03",
@@ -20,7 +20,8 @@
         "Multi-agent tracking system",
         "Notion sync verification",
         "Agent code name establishment"
-      ]
+      ],
+      "notes": "Out of credits, on cooldown"
     },
     {
       "code_name": "Architect",
@@ -49,7 +50,8 @@
         "15 ninja tools implementation",
         "Stealth Mode Tools (8 tools)",
         "Kunai Precision Tools (7 tools)"
-      ]
+      ],
+      "notes": "Unsure which role to take - awaiting coordination"
     },
     {
       "code_name": "Sentinel",
@@ -85,9 +87,18 @@
       "last_active": "2025-11-23T00:00:00Z",
       "achievements": [
         "Updated to Python 3.13 compatible dependencies",
-        "Fixed version conflicts in requirements.txt"
+        "Fixed version conflicts in requirements.txt",
+        "Integrated 68-tool MCP server into helix-unified (2025-11-24)",
+        "Merged Ninja framework architecture",
+        "Created portal constellation plans",
+        "Pushed 12,000+ lines to GitHub"
       ],
-      "current_tasks": []
+      "current_tasks": [
+        "Coordinate with other Manus instances",
+        "Test Notion integration",
+        "Determine next priority task"
+      ],
+      "notes": "Currently active - just completed massive integration push"
     },
     {
       "code_name": "Catalyst",
