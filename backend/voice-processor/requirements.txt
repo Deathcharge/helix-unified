@@ -1,0 +1,8 @@
+fastapi==0.68.0
+uvicorn==0.15.0
+redis==3.5.3
+pydantic==1.8.2
+python-jose==3.3.0
+google-cloud-speech==2.10.0
+google-cloud-texttospeech==2.10.0
+pydub==0.25.1

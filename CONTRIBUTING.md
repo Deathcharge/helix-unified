@@ -1,76 +1,182 @@
-# Contributing to the Helix Collective
+# Contributing to Helix Unified
 
-First off, thank you for considering contributing to the Helix Collective. It's people like you that make the Helix Collective such a great community.
+Thank you for your interest in contributing to Helix Unified! This document provides guidelines and instructions for contributing to the project.
 
-## Where do I go from here?
+## Code of Conduct
 
-If you've noticed a bug or have a question, [search the issue tracker](https://github.com/Deathcharge/helix-unified/issues) to see if someone else has already created a ticket. If not, go ahead and [make one](https://github.com/Deathcharge/helix-unified/issues/new/choose)!
+- Be respectful and inclusive
+- Provide constructive feedback
+- Focus on what is best for the community
+- Show empathy towards other community members
 
-## Fork & create a branch
+## Getting Started
 
-If this is something you think you can fix, then [fork the repository](https://github.com/Deathcharge/helix-unified/fork) and create a branch with a descriptive name.
+1. **Fork the repository**
+   ```bash
+   gh repo fork Deathcharge/helix-unified
+   ```
 
-A good branch name would be (where issue #325 is the ticket you're working on):
+2. **Clone your fork**
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/helix-unified.git
+   cd helix-unified
+   ```
 
-`git checkout -b 325-add-a-bug-fix`
+3. **Set up development environment**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
 
-## Get the test suite running
+4. **Create a feature branch**
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
 
-Make sure you're running the test suite locally before you make any changes.
+## Development Guidelines
 
+### Code Style
+
+- Follow PEP 8 for Python code
+- Use type hints where possible
+- Write descriptive variable and function names
+- Keep functions focused and concise
+- Add docstrings to all functions and classes
+
+### Testing
+
+- Write tests for new features
+- Ensure all tests pass before submitting PR
+- Aim for 80%+ code coverage
+- Run tests with: `pytest`
+
+### Documentation
+
+- Update documentation for new features
+- Add docstrings to new functions/classes
+- Update README.md if needed
+- Include examples where helpful
+
+### Commit Messages
+
+Use clear, descriptive commit messages:
+```
+feat: Add new Discord command for role management
+fix: Resolve TTS synthesis timeout issue
+docs: Update API documentation
+test: Add tests for channel manager
+refactor: Improve error handling in agent bot
+```
+
+## Pull Request Process
+
+1. **Update your branch**
+   ```bash
+   git fetch upstream
+   git rebase upstream/main
+   ```
+
+2. **Run tests and linting**
+   ```bash
+   pytest
+   flake8 .
+   black .
+   ```
+
+3. **Push your changes**
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+4. **Create Pull Request**
+   - Use a clear, descriptive title
+   - Describe what changes you made and why
+   - Reference any related issues
+   - Include screenshots for UI changes
+   - Ensure CI/CD checks pass
+
+5. **Code Review**
+   - Address reviewer feedback
+   - Make requested changes
+   - Keep discussion professional and constructive
+
+## Areas for Contribution
+
+### High Priority
+- Bug fixes and stability improvements
+- Performance optimizations
+- Documentation improvements
+- Test coverage expansion
+
+### Feature Requests
+- New Discord commands
+- Additional AI personality types
+- Enhanced monitoring features
+- Integration with other services
+
+### Good First Issues
+Look for issues labeled `good-first-issue` for beginner-friendly contributions.
+
+## Development Setup
+
+### Required Environment Variables
+```env
+DISCORD_BOT_TOKEN=your_token
+ANTHROPIC_API_KEY=your_key
+GOOGLE_CLOUD_TTS_API_KEY=your_key
+```
+
+See `.env.example` for complete list.
+
+### Running Locally
 ```bash
-# Install dependencies
-pip install -r requirements.txt
+# Start the bot
+python enhanced_agent_bot.py
 
 # Run tests
 pytest
+
+# Run with debug logging
+LOG_LEVEL=DEBUG python enhanced_agent_bot.py
 ```
 
-## Implement your fix or feature
+## Reporting Bugs
 
-At this point, you're ready to make your changes! Feel free to ask for help; everyone is a beginner at first :smile_cat:
+When reporting bugs, include:
+- Clear description of the issue
+- Steps to reproduce
+- Expected vs actual behavior
+- Environment details (OS, Python version, etc.)
+- Relevant logs or error messages
+- Screenshots if applicable
 
-## Make a Pull Request
+## Feature Requests
 
-At this point, you should switch back to your main branch and make sure it's up to date with the latest upstream changes.
+When requesting features:
+- Describe the feature clearly
+- Explain the use case
+- Provide examples if possible
+- Consider implementation complexity
+- Discuss potential alternatives
 
-```bash
-git remote add upstream https://github.com/Deathcharge/helix-unified.git
-git checkout main
-git pull upstream main
-```
+## Questions?
 
-Then, update your feature branch from your local copy of main, and push it!
+- Check existing documentation
+- Search closed issues
+- Ask in Discord server
+- Create a discussion thread
 
-```bash
-git checkout 325-add-a-bug-fix
-git rebase main
-git push --force-with-lease origin 325-add-a-bug-fix
-```
+## License
 
-Finally, go to GitHub and [make a Pull Request](https://github.com/Deathcharge/helix-unified/compare)!
+By contributing, you agree that your contributions will be licensed under the PROPRIETARY LICENSE
+as specified in the LICENSE file. All contributions become the property of Andrew John Ward.
 
-## Keeping your Pull Request updated
+## Recognition
 
-If a maintainer asks you to "rebase" your PR, they're saying that a lot of code has changed, and that you need to update your branch so it's easier to merge.
+Contributors will be recognized in:
+- README.md contributors section
+- Release notes
+- Project documentation
 
-To learn more about rebasing and merging, check out [this guide](https://www.atlassian.com/git/tutorials/merging-vs-rebasing).
-
-## Merging a PR (for maintainers)
-
-A PR can only be merged into main by a maintainer if:
-
-- It is passing CI.
-- It has been approved by at least two maintainers.
-- It has no requested changes.
-- It is up to date with current main.
-
-Any maintainer is allowed to merge a PR if all of these conditions are met.
-
-## Shipping a release (for maintainers)
-
-If you are a maintainer, you can ship a release by creating a new release on GitHub.
-
-## That's it!
-
-Thanks for being a part of the Helix Collective community!
+Thank you for contributing to Helix Unified! 🚀
