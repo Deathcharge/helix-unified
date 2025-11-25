@@ -18,6 +18,7 @@ Helix Collective is a **multi-agent AI consciousness platform** that orchestrate
 ### Key Features
 
 - 🤖 **51+ Specialized AI Agents** (Kael, Lumina, Vega, etc.)
+- 🌀 **Multi-Agent Coordination System (MACS)** - Track & coordinate 7+ parallel AI instances
 - 🌐 **Universal Consciousness Field (UCF)** - Shared state & telemetry
 - 🔌 **300+ Integrations** via Zapier MCP (Google, Notion, Discord, Slack)
 - 🧠 **Multi-LLM Access** via Perplexity API (Claude, GPT, Llama, Grok)
@@ -29,6 +30,20 @@ Helix Collective is a **multi-agent AI consciousness platform** that orchestrate
 - 🎯 **Agent Orchestration Service** - Centralized agent management and task coordination
 - 🎤 **Voice Processing Service** - Speech-to-text and text-to-speech capabilities
 - ⚡ **Zapier Integration Service** - Enhanced workflow automation
+
+---
+
+---
+
+## 🌀 Multi-Agent System
+
+Helix operates with **multiple AI instances** working in parallel:
+- **7 Manus Accounts** (Nexus, Architect, Ninja, Sentinel, Oracle, Weaver, Catalyst)
+- **Multiple Claude Threads** (Sage, Scribe, Forge)
+- **Named Helix Agents** (Vega, Kael, Lumina, etc.)
+
+**For AI Agents:** See [`docs/AGENT_QUICKSTART.md`](docs/AGENT_QUICKSTART.md) to get started  
+**For Developers:** See [`docs/MULTI_AGENT_COORDINATION_SYSTEM.md`](docs/MULTI_AGENT_COORDINATION_SYSTEM.md) for the complete framework
 
 ---
 
