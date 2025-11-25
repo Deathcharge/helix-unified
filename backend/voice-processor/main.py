@@ -34,7 +34,9 @@ REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
 redis_client = redis.from_url(REDIS_URL)
 
 # JWT configuration
-JWT_SECRET = os.getenv("JWT_SECRET", "your-secret-key")
+JWT_SECRET = os.getenv("JWT_SECRET")
+if not JWT_SECRET:
+    raise ValueError("JWT_SECRET environment variable is required for production")
 ALGORITHM = "HS256"
 
 # Google Cloud clients
