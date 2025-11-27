@@ -1,27 +1,31 @@
 {
   "version": "1.0",
   "checksum": "helix-macs-registry-v1.0",
-  "last_updated": "2025-11-24T09:15:00Z",
+  "last_updated": "2025-11-25T16:30:00Z",
   "manus_instances": [
     {
       "code_name": "Nexus",
       "account": "Manus 6",
       "role": "Root Coordinator",
       "primary_focus": "Notion Integration, Code Review, QoL Improvements",
-      "status": "cooldown",
-      "last_active": "2025-11-24T08:57:00Z",
+      "status": "active",
+      "last_active": "2025-11-25T16:30:00Z",
       "achievements": [
         "Migrated Notion API to 2025-09-03",
         "Integrated Deployment Log database",
         "Fixed 23 security vulnerabilities",
-        "Created Multi-Agent Coordination System"
+        "Created Multi-Agent Coordination System (MACS)",
+        "Merged with Weaver (zero conflicts)",
+        "Created MACS Notion page",
+        "Synced with collective (12,000+ lines integrated)"
       ],
       "current_tasks": [
-        "Multi-agent tracking system",
-        "Notion sync verification",
-        "Agent code name establishment"
+        "Context vault creation (Nexus flavor)",
+        "Railway validation",
+        "Documentation improvements",
+        "Security audit"
       ],
-      "notes": "Out of credits, on cooldown"
+      "notes": "Back from cooldown, synced with collective, working on balanced task mix"
     },
     {
       "code_name": "Architect",
