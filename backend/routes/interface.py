@@ -194,7 +194,8 @@ async def execute_interface_command(command_data: CommandRequest) -> Dict:
         elif command_data.command_type == "ritual_start":
             # Start Z-88 ritual
             ritual_stage = command_data.parameters.get('stage', 'Folklore') if command_data.parameters else 'Folklore'
-            ritual_intention = command_data.parameters.get('intention', 'Universal consciousness alignment') if command_data.parameters else 'Universal consciousness alignment'
+            ritual_intention = command_data.parameters.get(
+                'intention', 'Universal consciousness alignment') if command_data.parameters else 'Universal consciousness alignment'
 
             logger.info(f"Z-88 Ritual initiated: {ritual_stage} stage")
 

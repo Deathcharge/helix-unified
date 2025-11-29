@@ -14,6 +14,7 @@ from loguru import logger
 
 class ValidationResult:
     """Result of an environment validation check"""
+
     def __init__(self, passed: bool, message: str, severity: str = "error"):
         self.passed = passed
         self.message = message

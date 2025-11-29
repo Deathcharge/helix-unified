@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 class HelixNotionClient:
     """
     Client for Notion integration with Helix Collective databases.
-    
+
     Compatible with Notion API version 2025-09-03, which introduces
     multi-source database support and requires data_source_id instead
     of database_id for most operations.
@@ -57,14 +57,14 @@ class HelixNotionClient:
     async def _get_data_source_id(self, database_id: str) -> Optional[str]:
         """
         Get the data source ID for a database.
-        
+
         This is required for the 2025-09-03 API version. We fetch the first
         data source from the database. If multiple data sources exist, this
         will use the first one.
-        
+
         Args:
             database_id: The database ID
-            
+
         Returns:
             The data source ID, or None if not found
         """
@@ -74,7 +74,7 @@ class HelixNotionClient:
         try:
             # Use the new Get Database API to retrieve data sources
             response = self.notion.databases.retrieve(database_id=database_id)
-            
+
             # Extract the first data source ID
             data_sources = response.get("data_sources", [])
             if data_sources and len(data_sources) > 0:
@@ -467,7 +467,7 @@ class HelixNotionClient:
     ) -> bool:
         """
         Log a deployment event to the Deployment Log database.
-        
+
         Args:
             name: Name of the deployment
             platform: Platform (Railway, Vercel, GitHub Pages, Streamlit)
@@ -477,7 +477,7 @@ class HelixNotionClient:
             deploy_url: URL of the deployed service (optional)
             duration: Duration in seconds (optional)
             error_details: Error details if failed (optional)
-            
+
         Returns:
             True if successful, False otherwise
         """
@@ -547,10 +547,10 @@ class HelixNotionClient:
                     "platform": props["Platform"]["select"]["name"] if props["Platform"]["select"] else "Unknown",
                     "status": props["Status"]["select"]["name"] if props["Status"]["select"] else "Unknown",
                     "timestamp": props["Timestamp"]["date"]["start"] if props["Timestamp"]["date"] else None,
-                    "version": props["Version"]["rich_text"][0]["text"]["content"] 
-                        if props["Version"]["rich_text"] else None,
+                    "version": props["Version"]["rich_text"][0]["text"]["content"]
+                    if props["Version"]["rich_text"] else None,
                     "triggered_by": props["Triggered By"]["rich_text"][0]["text"]["content"]
-                        if props["Triggered By"]["rich_text"] else None,
+                    if props["Triggered By"]["rich_text"] else None,
                     "deploy_url": props["Deploy URL"]["url"] if props["Deploy URL"]["url"] else None,
                     "duration": props["Duration"]["number"] if props["Duration"]["number"] else None,
                 })

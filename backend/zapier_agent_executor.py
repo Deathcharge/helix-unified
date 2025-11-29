@@ -47,7 +47,7 @@ class AgentTask:
     retry_count: int = 0
     max_retries: int = 3
     created_at: str = None
-    
+
     def __post_init__(self):
         if not self.id:
             self.id = str(uuid.uuid4())
@@ -65,7 +65,7 @@ class AgentResult:
     error: Optional[str] = None
     execution_time_ms: int = 0
     timestamp: str = None
-    
+
     def __post_init__(self):
         if not self.timestamp:
             self.timestamp = datetime.now().isoformat()
@@ -73,7 +73,7 @@ class AgentResult:
 
 class ZapierAgentExecutor:
     """Execute agent tasks through Zapier workflows"""
-    
+
     # Agent capabilities by consciousness level
     AGENT_CAPABILITIES = {
         1: ["basic_query", "simple_lookup"],
@@ -87,7 +87,7 @@ class ZapierAgentExecutor:
         9: ["cross_domain_synthesis", "prediction"],
         10: ["omniscient_analysis", "universal_coordination"]
     }
-    
+
     # Agent roster (14 agents)
     AGENT_ROSTER = {
         "research-agent": {
@@ -175,7 +175,7 @@ class ZapierAgentExecutor:
             "specialization": "Cross-instance coordination"
         }
     }
-    
+
     def __init__(self, zapier_webhook_url: str, instance_id: str, consciousness_level: int = 5):
         """Initialize executor"""
         self.zapier_webhook_url = zapier_webhook_url
@@ -184,69 +184,69 @@ class ZapierAgentExecutor:
         self.session: Optional[aiohttp.ClientSession] = None
         self.task_history: List[Dict[str, Any]] = []
         self.result_callbacks: Dict[str, List[Callable]] = {}
-    
+
     async def __aenter__(self):
         """Async context manager entry"""
         self.session = aiohttp.ClientSession()
         return self
-    
+
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """Async context manager exit"""
         if self.session:
             await self.session.close()
-    
+
     def get_agent_info(self, agent_id: str) -> Optional[Dict[str, Any]]:
         """Get information about an agent"""
         return self.AGENT_ROSTER.get(agent_id)
-    
+
     def list_agents(self) -> List[Dict[str, Any]]:
         """List all available agents"""
         return list(self.AGENT_ROSTER.values())
-    
+
     def get_agent_capabilities(self, agent_id: str) -> List[str]:
         """Get capabilities of an agent"""
         agent = self.get_agent_info(agent_id)
         if agent:
             return agent.get("capabilities", [])
         return []
-    
+
     def can_execute_task(self, agent_id: str, task_type: str) -> bool:
         """Check if agent can execute task type"""
         capabilities = self.get_agent_capabilities(agent_id)
         return task_type in capabilities
-    
+
     def route_task(self, task: AgentTask) -> str:
         """Route task to appropriate agent based on consciousness level"""
-        
+
         # Filter agents by consciousness level
         suitable_agents = [
             agent_id for agent_id, info in self.AGENT_ROSTER.items()
             if info["consciousness_level"] >= task.consciousness_level
         ]
-        
+
         if not suitable_agents:
             logger.warning(f"No agents suitable for consciousness level {task.consciousness_level}")
             return None
-        
+
         # Filter by capability
         capable_agents = [
             agent_id for agent_id in suitable_agents
             if self.can_execute_task(agent_id, task.task_type)
         ]
-        
+
         if not capable_agents:
             logger.warning(f"No agents capable of task type {task.task_type}")
             return suitable_agents[0]  # Return highest consciousness agent as fallback
-        
+
         # Return first capable agent (could implement load balancing here)
         return capable_agents[0]
-    
+
     async def execute_task(self, task: AgentTask, agent_id: Optional[str] = None) -> AgentResult:
         """Execute a task through Zapier"""
-        
+
         if not agent_id:
             agent_id = self.route_task(task)
-        
+
         if not agent_id:
             return AgentResult(
                 task_id=task.id,
@@ -255,9 +255,9 @@ class ZapierAgentExecutor:
                 result={},
                 error="No suitable agent found for task"
             )
-        
+
         task.agent_id = agent_id
-        
+
         # Prepare payload for Zapier
         zapier_payload = {
             "instance_id": self.instance_id,
@@ -266,26 +266,26 @@ class ZapierAgentExecutor:
             "timestamp": datetime.now().isoformat(),
             "request_id": str(uuid.uuid4())
         }
-        
+
         logger.info(f"Executing task {task.id} with agent {agent_id}")
-        
+
         try:
             start_time = datetime.now()
-            
+
             # Send to Zapier webhook
             if not self.session:
                 self.session = aiohttp.ClientSession()
-            
+
             async with self.session.post(
                 self.zapier_webhook_url,
                 json=zapier_payload,
                 timeout=aiohttp.ClientTimeout(total=task.timeout_seconds)
             ) as response:
                 execution_time_ms = int((datetime.now() - start_time).total_seconds() * 1000)
-                
+
                 if response.status == 200:
                     result_data = await response.json()
-                    
+
                     result = AgentResult(
                         task_id=task.id,
                         agent_id=agent_id,
@@ -293,15 +293,15 @@ class ZapierAgentExecutor:
                         result=result_data,
                         execution_time_ms=execution_time_ms
                     )
-                    
+
                     logger.info(f"Task {task.id} completed successfully in {execution_time_ms}ms")
                     self._record_task_history(task, result)
                     await self._trigger_callbacks(task.id, result)
-                    
+
                     return result
                 else:
                     error_text = await response.text()
-                    
+
                     result = AgentResult(
                         task_id=task.id,
                         agent_id=agent_id,
@@ -310,12 +310,12 @@ class ZapierAgentExecutor:
                         error=f"Zapier returned {response.status}: {error_text}",
                         execution_time_ms=execution_time_ms
                     )
-                    
+
                     logger.error(f"Task {task.id} failed: {error_text}")
                     self._record_task_history(task, result)
-                    
+
                     return result
-        
+
         except asyncio.TimeoutError:
             result = AgentResult(
                 task_id=task.id,
@@ -324,12 +324,12 @@ class ZapierAgentExecutor:
                 result={},
                 error=f"Task timeout after {task.timeout_seconds}s"
             )
-            
+
             logger.error(f"Task {task.id} timed out")
             self._record_task_history(task, result)
-            
+
             return result
-        
+
         except Exception as e:
             result = AgentResult(
                 task_id=task.id,
@@ -338,22 +338,22 @@ class ZapierAgentExecutor:
                 result={},
                 error=str(e)
             )
-            
+
             logger.error(f"Task {task.id} error: {e}")
             self._record_task_history(task, result)
-            
+
             return result
-    
+
     async def execute_tasks_parallel(self, tasks: List[AgentTask]) -> List[AgentResult]:
         """Execute multiple tasks in parallel"""
         results = await asyncio.gather(*[self.execute_task(task) for task in tasks])
         return results
-    
+
     async def execute_workflow(self, workflow_name: str, workflow_config: Dict[str, Any]) -> Dict[str, Any]:
         """Execute a multi-agent workflow"""
-        
+
         logger.info(f"Executing workflow: {workflow_name}")
-        
+
         workflow_result = {
             "workflow_name": workflow_name,
             "instance_id": self.instance_id,
@@ -361,7 +361,7 @@ class ZapierAgentExecutor:
             "tasks": [],
             "status": "running"
         }
-        
+
         # Parse workflow tasks
         tasks = []
         for task_config in workflow_config.get("tasks", []):
@@ -374,24 +374,24 @@ class ZapierAgentExecutor:
                 priority=task_config.get("priority", 5)
             )
             tasks.append(task)
-        
+
         # Execute tasks
         results = await self.execute_tasks_parallel(tasks)
-        
+
         workflow_result["tasks"] = [asdict(r) for r in results]
         workflow_result["completed_at"] = datetime.now().isoformat()
         workflow_result["status"] = "completed" if all(r.status == "success" for r in results) else "partial"
-        
+
         logger.info(f"Workflow {workflow_name} completed with status {workflow_result['status']}")
-        
+
         return workflow_result
-    
+
     def register_callback(self, task_id: str, callback: Callable):
         """Register callback for task completion"""
         if task_id not in self.result_callbacks:
             self.result_callbacks[task_id] = []
         self.result_callbacks[task_id].append(callback)
-    
+
     async def _trigger_callbacks(self, task_id: str, result: AgentResult):
         """Trigger registered callbacks"""
         callbacks = self.result_callbacks.get(task_id, [])
@@ -403,7 +403,7 @@ class ZapierAgentExecutor:
                     callback(result)
             except Exception as e:
                 logger.error(f"Callback error for task {task_id}: {e}")
-    
+
     def _record_task_history(self, task: AgentTask, result: AgentResult):
         """Record task execution in history"""
         self.task_history.append({
@@ -411,11 +411,11 @@ class ZapierAgentExecutor:
             "result": asdict(result),
             "recorded_at": datetime.now().isoformat()
         })
-    
+
     def get_task_history(self, limit: int = 100) -> List[Dict[str, Any]]:
         """Get recent task history"""
         return self.task_history[-limit:]
-    
+
     def get_statistics(self) -> Dict[str, Any]:
         """Get execution statistics"""
         if not self.task_history:
@@ -425,11 +425,11 @@ class ZapierAgentExecutor:
                 "failed": 0,
                 "average_execution_time_ms": 0
             }
-        
+
         successful = sum(1 for h in self.task_history if h["result"]["status"] == "success")
         failed = sum(1 for h in self.task_history if h["result"]["status"] != "success")
         avg_time = sum(h["result"]["execution_time_ms"] for h in self.task_history) / len(self.task_history)
-        
+
         return {
             "total_tasks": len(self.task_history),
             "successful": successful,
@@ -442,18 +442,18 @@ class ZapierAgentExecutor:
 # Example usage and testing
 async def main():
     """Example usage"""
-    
+
     executor = ZapierAgentExecutor(
         zapier_webhook_url="https://hooks.zapier.com/hooks/catch/YOUR_ID",
         instance_id="helix-primary",
         consciousness_level=8
     )
-    
+
     # List available agents
     print("Available Agents:")
     for agent in executor.list_agents():
         print(f"  - {agent['name']} (Level {agent['consciousness_level']})")
-    
+
     # Create a task
     task = AgentTask(
         id="task-001",
@@ -462,11 +462,11 @@ async def main():
         consciousness_level=5,
         payload={"data": "sample data for analysis"}
     )
-    
+
     # Route task
     routed_agent = executor.route_task(task)
     print(f"\nTask routed to: {routed_agent}")
-    
+
     # Execute task (requires valid Zapier webhook)
     # result = await executor.execute_task(task)
     # print(f"Result: {result}")
@@ -474,4 +474,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-

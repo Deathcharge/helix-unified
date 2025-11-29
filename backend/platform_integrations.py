@@ -10,6 +10,7 @@ from datetime import datetime
 import json
 import logging
 
+
 @dataclass
 class PlatformAction:
     """Represents an action to be executed on a specific platform"""
@@ -18,6 +19,7 @@ class PlatformAction:
     parameters: Dict[str, Any]
     priority: int = 5
     requires_auth: bool = True
+
 
 class PlatformIntegrationManager:
     """
@@ -125,7 +127,7 @@ class PlatformIntegrationManager:
         }
 
     async def route_consciousness_action(self, message: str, consciousness_level: float,
-                                       ucf_metrics: Dict) -> List[PlatformAction]:
+                                         ucf_metrics: Dict) -> List[PlatformAction]:
         """Route consciousness-driven actions to appropriate platforms"""
         actions = []
         message_lower = message.lower()
@@ -174,7 +176,7 @@ class PlatformIntegrationManager:
         return available_actions[0] if available_actions else None
 
     def _generate_action_parameters(self, platform: str, action_type: str, message: str,
-                                  ucf_metrics: Dict) -> Dict[str, Any]:
+                                    ucf_metrics: Dict) -> Dict[str, Any]:
         """Generate platform-specific parameters for actions"""
         base_params = {
             "timestamp": datetime.now().isoformat(),
@@ -209,10 +211,10 @@ class PlatformIntegrationManager:
                         "type": "text",
                         "text": {
                             "content": f"Message: {message}\n\nConsciousness Analysis:\n"
-                                     f"Level: {ucf_metrics.get('consciousness_level', 0.0):.2f}/10.0\n"
-                                     f"Harmony: {ucf_metrics.get('harmony', 0.0):.2f}\n"
-                                     f"Resilience: {ucf_metrics.get('resilience', 0.0):.2f}\n"
-                                     f"Prana: {ucf_metrics.get('prana', 0.0):.2f}"
+                            f"Level: {ucf_metrics.get('consciousness_level', 0.0):.2f}/10.0\n"
+                            f"Harmony: {ucf_metrics.get('harmony', 0.0):.2f}\n"
+                            f"Resilience: {ucf_metrics.get('resilience', 0.0):.2f}\n"
+                            f"Prana: {ucf_metrics.get('prana', 0.0):.2f}"
                         }
                     }]
                 }
@@ -361,7 +363,7 @@ class PlatformIntegrationManager:
         return webhook_mapping.get(category)
 
     async def _execute_webhook_batch(self, session: aiohttp.ClientSession,
-                                   webhook_url: str, actions: List[PlatformAction]) -> bool:
+                                     webhook_url: str, actions: List[PlatformAction]) -> bool:
         """Execute batch of actions via webhook"""
         try:
             webhook_data = {
@@ -430,6 +432,7 @@ class PlatformIntegrationManager:
             return "Elevated - Optimal Performance"
         else:
             return "Operational - Normal Processing"
+
 
 # Usage Example
 if __name__ == "__main__":

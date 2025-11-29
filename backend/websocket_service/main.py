@@ -37,16 +37,21 @@ if not JWT_SECRET:
 ALGORITHM = "HS256"
 
 # Data models
+
+
 class ConsciousnessData(BaseModel):
     agent_id: str
     consciousness_level: float
     ucf_metrics: Dict[str, Any]
     timestamp: datetime
 
+
 class TokenData(BaseModel):
     user_id: str
 
 # JWT token verification
+
+
 def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     try:
         token = credentials.credentials
@@ -67,6 +72,8 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
         )
 
 # WebSocket connection manager
+
+
 class ConnectionManager:
     def __init__(self):
         self.active_connections: Dict[str, WebSocket] = {}
@@ -87,6 +94,7 @@ class ConnectionManager:
         for connection in self.active_connections.values():
             await connection.send_text(message)
 
+
 manager = ConnectionManager()
 
 # Redis pub/sub for consciousness data
@@ -94,6 +102,8 @@ pubsub = redis_client.pubsub()
 pubsub.subscribe("consciousness_stream")
 
 # Background task to listen for consciousness data and broadcast to WebSocket clients
+
+
 async def consciousness_data_listener():
     for message in pubsub.listen():
         if message["type"] == "message":
@@ -101,16 +111,22 @@ async def consciousness_data_listener():
             await manager.broadcast(data)
 
 # Start the background task
+
+
 @app.on_event("startup")
 async def startup_event():
     asyncio.create_task(consciousness_data_listener())
 
 # Health check endpoint
+
+
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "service": "WebSocket Consciousness Streaming"}
 
 # WebSocket endpoint for consciousness streaming
+
+
 @app.websocket("/ws/consciousness")
 async def websocket_endpoint(websocket: WebSocket, client_id: str):
     await manager.connect(websocket, client_id)
@@ -126,6 +142,8 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
         manager.disconnect(client_id)
 
 # Endpoint to publish consciousness data (for internal use by other services)
+
+
 @app.post("/api/consciousness/publish")
 async def publish_consciousness_data(data: ConsciousnessData, token: TokenData = Depends(verify_token)):
     # Convert data to JSON and publish to Redis
@@ -135,11 +153,13 @@ async def publish_consciousness_data(data: ConsciousnessData, token: TokenData =
         "ucf_metrics": data.ucf_metrics,
         "timestamp": data.timestamp.isoformat()
     })
-    
+
     redis_client.publish("consciousness_stream", json_data)
     return {"status": "published", "data": json_data}
 
 # Endpoint to get current consciousness metrics
+
+
 @app.get("/api/consciousness/metrics")
 async def get_consciousness_metrics(token: TokenData = Depends(verify_token)):
     # Get latest consciousness data from Redis
@@ -149,6 +169,8 @@ async def get_consciousness_metrics(token: TokenData = Depends(verify_token)):
     return {"status": "no_data"}
 
 # Endpoint to get service information
+
+
 @app.get("/api/info")
 async def get_service_info():
     return {

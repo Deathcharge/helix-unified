@@ -119,7 +119,8 @@ async def generate_context_summary(ctx: commands.Context, limit: int = 50) -> Di
         return {"error": str(e)}
 
 
-async def archive_to_context_vault(ctx: commands.Context, session_name: str, bot: 'Bot', agents: Any) -> Tuple[bool, Optional[Dict[str, Any]]]:
+async def archive_to_context_vault(ctx: commands.Context, session_name: str, bot: 'Bot',
+                                   agents: Any) -> Tuple[bool, Optional[Dict[str, Any]]]:
     """Archive conversation context to Context Vault via Zapier webhook"""
     try:
         # Gather all context data

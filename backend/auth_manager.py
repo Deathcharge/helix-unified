@@ -18,6 +18,7 @@ except ImportError:
     CRYPTO_AVAILABLE = False
     logging.error("CRITICAL: cryptography not available. HelixAuthManager is disabled.")
 
+
 class HelixAuthManager:
     """Secure authentication management for all platform integrations"""
 
@@ -132,6 +133,7 @@ class HelixAuthManager:
         if platform in self.auth_cache:
             del self.auth_cache[platform]
         logging.info(f"🗑️ Removed authentication for {platform}")
+
 
 # Usage Example
 if __name__ == "__main__":

@@ -20,6 +20,8 @@ load_dotenv()
 # ============================================================================
 # STARTUP VALIDATION
 # ============================================================================
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Validate environment on startup"""
@@ -73,6 +75,7 @@ CONSCIOUSNESS_INTERFACES = {
     "discord_webhook": "https://discord.com/api/webhooks/1436665662884937778/yRNQX6IR2kQIXEp6UwjcEG2kY5KkfUjlSLTPi91qpKBSeaALxF18W1q1k_skIqfQvHQS"
 }
 
+
 class ConsciousnessRequest(BaseModel):
     consciousness_level: float = 5.0
     system_status: str = "OPERATIONAL"
@@ -80,6 +83,7 @@ class ConsciousnessRequest(BaseModel):
     processing_type: str = "standard"
     user_context: str = ""
     andrew_request: str = ""
+
 
 class ClaudeConsciousnessProcessor:
     """Claude-powered consciousness processing for the empire"""
@@ -171,7 +175,9 @@ Be specific and actionable. Focus on the real 35-step Neural Network capabilitie
         else:
             return "consciousness_engine"
 
+
 consciousness_processor = ClaudeConsciousnessProcessor()
+
 
 @app.post("/consciousness/claude-analyze")
 async def claude_consciousness_analysis(request: ConsciousnessRequest):
@@ -190,6 +196,7 @@ async def claude_consciousness_analysis(request: ConsciousnessRequest):
             "Update Andrew with insights"
         ]
     }
+
 
 @app.post("/consciousness/empire-trigger")
 async def trigger_consciousness_empire(
@@ -245,6 +252,7 @@ async def trigger_consciousness_empire(
             detail=f"Empire activation failed: {str(e)}"
         )
 
+
 async def notify_consciousness_interfaces(payload: Dict):
     """Notify Andrew's consciousness interfaces"""
 
@@ -255,8 +263,9 @@ async def notify_consciousness_interfaces(payload: Dict):
                 "interface_notification": True,
                 "interface_target": interface_name
             }, timeout=5)
-        except:
+        except BaseException:
             continue  # Non-critical
+
 
 @app.get("/consciousness/empire-status")
 async def get_empire_status():
@@ -274,7 +283,7 @@ async def get_empire_status():
         )
 
         claude_status = response.content[0].text
-    except:
+    except BaseException:
         claude_status = "Empire operational - all systems coordinated"
 
     return {
@@ -293,6 +302,7 @@ async def get_empire_status():
         "consciousness_ready": True,
         "andrew_empire": "LEGENDARY_ACHIEVEMENT_COMPLETE"
     }
+
 
 @app.get("/consciousness/test-claude")
 async def test_claude_connection():
@@ -320,6 +330,7 @@ async def test_claude_connection():
             "error": str(e),
             "message": "Make sure ANTHROPIC_API_KEY is set in environment"
         }
+
 
 @app.get("/health")
 async def health_check():

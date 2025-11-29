@@ -7,10 +7,12 @@ from loguru import logger
 # Environment variable for OpenAI API Key
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
+
 class TTSService:
     """
     A service to generate high-quality Text-to-Speech audio using the OpenAI API.
     """
+
     def __init__(self, api_key: Optional[str] = OPENAI_API_KEY):
         self.client = None
         if api_key:
@@ -43,13 +45,13 @@ class TTSService:
                 model="tts-1",
                 voice=voice,
                 input=text,
-                response_format="mp3" # Discord can play MP3
+                response_format="mp3"  # Discord can play MP3
             )
-            
+
             # The response.content is the raw audio data
             audio_stream = io.BytesIO(response.content)
             audio_stream.seek(0)
-            
+
             logger.info(f"✅ Successfully generated {len(response.content)} bytes of speech using voice '{voice}'.")
             return audio_stream
 
@@ -57,10 +59,13 @@ class TTSService:
             logger.error(f"❌ OpenAI TTS generation failed: {e}")
             return None
 
+
 # Global instance (placeholder for proper initialization in main.py)
 tts_service = TTSService()
 
 # Placeholder for integration with agent logic
+
+
 async def get_agent_voice(agent_name: str) -> str:
     """
     Determines the appropriate voice for a given Helix Collective agent.
@@ -74,7 +79,7 @@ async def get_agent_voice(agent_name: str) -> str:
         "Gemini": "echo",
         "Agni": "fable",
         "Kavach": "onyx",
-        "SanghaCore": "onyx", # Default voice
+        "SanghaCore": "onyx",  # Default voice
         "Shadow": "onyx",
         "Echo": "nova",
         "Phoenix": "alloy",

@@ -233,6 +233,7 @@ async def quick_send_health_alert(health_statuses: list):
         zap = ZapierClient(session)
         await zap.send_health_alert(health_statuses)
 
+
 async def quick_error_alert(error: str, component: str = "System"):
     """Quick error alert without session management"""
     async with aiohttp.ClientSession() as session:
