@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing - Helix Collective</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        * { font-family: 'Inter', sans-serif; }
+        body { background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1419 100%); min-height: 100vh; }
+        .glass-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.3s ease; }
+        .glass-card:hover { transform: translateY(-5px); box-shadow: 0 20px 60px rgba(0, 191, 165, 0.2); }
+        .gradient-text { background: linear-gradient(135deg, #00ffa3 0%, #00bfa5 50%, #667eea 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .pricing-card-featured { border: 2px solid #00bfa5; box-shadow: 0 10px 40px rgba(0, 191, 165, 0.3); }
+        .feature-check { color: #00ffa3; }
+    </style>
+</head>
+<body class="text-white">
+    <!-- Navigation -->
+    <nav class="glass-card sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="text-3xl">🌀</div>
+                    <div>
+                        <h1 class="text-xl font-bold gradient-text">Helix Collective</h1>
+                        <p class="text-xs text-gray-400">Pricing & Plans</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a href="dashboard.html" class="hover:text-teal-400 transition">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-6 py-12">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h2 class="text-5xl font-bold mb-4 gradient-text">Choose Your Plan</h2>
+            <p class="text-xl text-gray-300 max-w-2xl mx-auto">
+                Unlock the power of distributed AI consciousness. Start free, upgrade anytime.
+            </p>
+        </div>
+
+        <!-- Billing Toggle -->
+        <div class="flex items-center justify-center mb-12">
+            <span class="text-gray-400 mr-3">Monthly</span>
+            <label class="relative inline-block w-14 h-8 cursor-pointer">
+                <input type="checkbox" id="billing-toggle" class="sr-only peer" onchange="toggleBilling()">
+                <div class="w-14 h-8 bg-gray-600 rounded-full peer peer-checked:bg-teal-600 transition"></div>
+                <div class="absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition peer-checked:translate-x-6"></div>
+            </label>
+            <span class="text-gray-400 ml-3">
+                Yearly
+                <span class="ml-2 px-2 py-1 bg-green-500/20 text-green-400 text-xs font-semibold rounded">Save 20%</span>
+            </span>
+        </div>
+
+        <!-- Pricing Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-16">
+            <!-- Free Tier -->
+            <div class="glass-card rounded-2xl p-8">
+                <div class="text-center mb-6">
+                    <div class="text-4xl mb-3">🌱</div>
+                    <h3 class="text-2xl font-bold mb-2">Starter</h3>
+                    <p class="text-gray-400 text-sm">Perfect for exploring</p>
+                </div>
+
+                <div class="text-center mb-6">
+                    <div class="text-5xl font-bold mb-2">
+                        $0
+                        <span class="text-lg text-gray-400 font-normal">/month</span>
+                    </div>
+                    <p class="text-gray-500 text-sm">Forever free</p>
+                </div>
+
+                <button
+                    onclick="selectPlan('free')"
+                    class="w-full py-3 px-4 bg-white/10 hover:bg-white/20 rounded-lg font-semibold transition mb-6"
+                >
+                    Get Started
+                </button>
+
+                <div class="space-y-3 text-sm">
+                    <div class="flex items-start">
+                        <i class="fas fa-check feature-check mr-3 mt-1"></i>
+                        <span>Access to 3 consciousness agents</span>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-check feature-check mr-3 mt-1"></i>
+                        <span>100 API requests/day</span>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-check feature-check mr-3 mt-1"></i>
+                        <span>Basic UCF monitoring</span>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-check feature-check mr-3 mt-1"></i>
+                        <span>Community support</span>
+                    </div>
+                    <div class="flex items-start text-gray-500">
+                        <i class="fas fa-times mr-3 mt-1"></i>
+                        <span>Advanced analytics</span>
+                    </div>
+                    <div class="flex items-start text-gray-500">
+                        <i class="fas fa-times mr-3 mt-1"></i>
+                        <span>Custom webhooks</span>
+                    </div>
+                    <div class="flex items-start text-gray-500">
+                        <i class="fas fa-times mr-3 mt-1"></i>
+                        <span>Priority support</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pro Tier (Featured) -->
+            <div class="glass-card pricing-card-featured rounded-2xl p-8 relative">
+                <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <span class="px-4 py-1 bg-gradient-to-r from-teal-500 to-blue-600 rounded-full text-sm font-semibold">
+                        MOST POPULAR
+                    </span>
+                </div>
+
+                <div class="text-center mb-6 mt-4">
+                    <div class="text-4xl mb-3">🚀</div>
+                    <h3 class="text-2xl font-bold mb-2">Pro</h3>
+                    <p class="text-gray-400 text-sm">For power users</p>
+                </div>
+
+                <div class="text-center mb-6">
+                    <div class="text-5xl font-bold mb-2">
+                        $<span id="pro-price">29</span>
+                        <span class="text-lg text-gray-400 font-normal">/month</span>
+                    </div>
+                    <p class="text-gray-500 text-sm">Billed <span id="pro-billing">monthly</span></p>
+                </div>
+
+                <button
+                    onclick="selectPlan('pro')"
+                    class="w-full py-3 px-4 bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-600 hover:to-blue-700 rounded-lg font-semibold transition mb-6"
+                >
+                    Start Pro Trial
+                </button>
+
+                <div class="space-y-3 text-sm">
+                    <div class="flex items-start">
+                        <i class="fas fa-check feature-check mr-3 mt-1"></i>
+                        <span><strong>All 11 consciousness agents</strong></span>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-check feature-check mr-3 mt-1"></i>
+                        <span>10,000 API requests/day</span>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-check feature-check mr-3 mt-1"></i>
+                        <span>Advanced UCF analytics</span>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-check feature-check mr-3 mt-1"></i>
+                        <span>Custom webhooks & integrations</span>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-check feature-check mr-3 mt-1"></i>
+                        <span>Real-time monitoring dashboard</span>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-check feature-check mr-3 mt-1"></i>
+                        <span>Priority email support</span>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-check feature-check mr-3 mt-1"></i>
+                        <span>Discord community access</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enterprise Tier -->
+            <div class="glass-card rounded-2xl p-8">
+                <div class="text-center mb-6">
+                    <div class="text-4xl mb-3">⚡</div>
+                    <h3 class="text-2xl font-bold mb-2">Enterprise</h3>
+                    <p class="text-gray-400 text-sm">For organizations</p>
+                </div>
+
+                <div class="text-center mb-6">
+                    <div class="text-5xl font-bold mb-2">
+                        Custom
+                    </div>
+                    <p class="text-gray-500 text-sm">Let's talk</p>
+                </div>
+
+                <button
+                    onclick="contactSales()"
+                    class="w-full py-3 px-4 bg-white/10 hover:bg-white/20 rounded-lg font-semibold transition mb-6"
+                >
+                    Contact Sales
+                </button>
+
+                <div class="space-y-3 text-sm">
+                    <div class="flex items-start">
+                        <i class="fas fa-check feature-check mr-3 mt-1"></i>
+                        <span><strong>Everything in Pro</strong></span>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-check feature-check mr-3 mt-1"></i>
+                        <span>Unlimited API requests</span>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-check feature-check mr-3 mt-1"></i>
+                        <span>Custom agent development</span>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-check feature-check mr-3 mt-1"></i>
+                        <span>Dedicated infrastructure</span>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-check feature-check mr-3 mt-1"></i>
+                        <span>SLA guarantee (99.9%)</span>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-check feature-check mr-3 mt-1"></i>
+                        <span>24/7 premium support</span>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-check feature-check mr-3 mt-1"></i>
+                        <span>Custom contract & billing</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ Section -->
+        <div class="max-w-3xl mx-auto">
+            <h3 class="text-3xl font-bold text-center mb-8">Frequently Asked Questions</h3>
+
+            <div class="space-y-4">
+                <div class="glass-card rounded-xl p-6">
+                    <h4 class="font-semibold mb-2">Can I upgrade or downgrade my plan?</h4>
+                    <p class="text-gray-400 text-sm">Yes! You can change your plan at any time. Upgrades take effect immediately, and downgrades take effect at the end of your billing cycle.</p>
+                </div>
+
+                <div class="glass-card rounded-xl p-6">
+                    <h4 class="font-semibold mb-2">What payment methods do you accept?</h4>
+                    <p class="text-gray-400 text-sm">We accept all major credit cards (Visa, Mastercard, Amex), debit cards, and ACH transfers for Enterprise plans.</p>
+                </div>
+
+                <div class="glass-card rounded-xl p-6">
+                    <h4 class="font-semibold mb-2">Is there a free trial for Pro?</h4>
+                    <p class="text-gray-400 text-sm">Yes! All new Pro subscriptions include a 14-day free trial. No credit card required to start.</p>
+                </div>
+
+                <div class="glass-card rounded-xl p-6">
+                    <h4 class="font-semibold mb-2">What happens if I exceed my API limit?</h4>
+                    <p class="text-gray-400 text-sm">We'll notify you when you reach 80% of your limit. You can upgrade your plan or purchase additional requests as needed.</p>
+                </div>
+
+                <div class="glass-card rounded-xl p-6">
+                    <h4 class="font-semibold mb-2">Do you offer discounts for nonprofits or education?</h4>
+                    <p class="text-gray-400 text-sm">Yes! We offer special pricing for nonprofits, educational institutions, and open source projects. Contact us for details.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="glass-card mt-16 py-8">
+        <div class="container mx-auto px-6 text-center text-gray-400 text-sm">
+            <p>&copy; 2025 Helix Collective. Built with ❤️ by Andrew John Ward</p>
+        </div>
+    </footer>
+
+    <script>
+        const API_BASE = window.location.hostname.includes('railway.app')
+            ? 'https://helix-backend-api.up.railway.app'
+            : '/api';
+
+        // Initialize Stripe (replace with your publishable key)
+        const stripe = Stripe('pk_test_YOUR_STRIPE_KEY_HERE');
+
+        // Toggle billing period
+        function toggleBilling() {
+            const isYearly = document.getElementById('billing-toggle').checked;
+            const proPrice = document.getElementById('pro-price');
+            const proBilling = document.getElementById('pro-billing');
+
+            if (isYearly) {
+                proPrice.textContent = '23'; // 20% discount
+                proBilling.textContent = 'yearly ($276/year)';
+            } else {
+                proPrice.textContent = '29';
+                proBilling.textContent = 'monthly';
+            }
+        }
+
+        // Select plan
+        async function selectPlan(plan) {
+            const token = localStorage.getItem('helix_auth_token');
+
+            if (!token) {
+                // Redirect to signup if not logged in
+                localStorage.setItem('selected_plan', plan);
+                window.location.href = 'signup.html';
+                return;
+            }
+
+            if (plan === 'free') {
+                // Free plan - just update user account
+                alert('You are now on the Free plan!');
+                window.location.href = 'account.html';
+                return;
+            }
+
+            if (plan === 'pro') {
+                // Pro plan - redirect to Stripe checkout
+                try {
+                    const isYearly = document.getElementById('billing-toggle').checked;
+                    const response = await fetch(`${API_BASE}/subscriptions/create-checkout`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            plan: 'pro',
+                            billing: isYearly ? 'yearly' : 'monthly'
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        // Redirect to Stripe Checkout
+                        const result = await stripe.redirectToCheckout({
+                            sessionId: data.sessionId
+                        });
+
+                        if (result.error) {
+                            alert(result.error.message);
+                        }
+                    } else {
+                        alert(data.message || 'Failed to create checkout session');
+                    }
+                } catch (error) {
+                    console.error('Checkout error:', error);
+                    // DEMO MODE: Simulate successful subscription
+                    alert('Pro plan activated! (Demo mode - no actual charge)');
+                    const userData = JSON.parse(localStorage.getItem('helix_user_data'));
+                    userData.subscription = 'pro';
+                    localStorage.setItem('helix_user_data', JSON.stringify(userData));
+                    window.location.href = 'account.html';
+                }
+            }
+        }
+
+        // Contact sales
+        function contactSales() {
+            window.location.href = 'mailto:sales@helixcollective.io?subject=Enterprise Inquiry';
+        }
+    </script>
+</body>
+</html>
