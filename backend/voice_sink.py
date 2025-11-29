@@ -2,6 +2,8 @@ import discord
 import asyncio
 import io
 import wave
+import os
+import json
 from loguru import logger
 from vosk import Model, KaldiRecognizer
 

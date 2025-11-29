@@ -7,6 +7,7 @@ from vosk import Model, KaldiRecognizer
 import wave
 import json
 from backend.tts_service import tts_service, get_agent_voice # Import the new TTS service
+from backend.voice_sink import VoskVoiceSink, get_vosk_recognizer
 
 # --- CONFIGURATION ---
 # Path to the downloaded Vosk model
