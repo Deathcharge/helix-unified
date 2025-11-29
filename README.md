@@ -4,7 +4,8 @@
 
 **Enhanced with New Railway Services: WebSocket Streaming, Agent Orchestration, Voice Processing, and Zapier Integration**
 
-[![Railway](https://img.shields.io/badge/Railway-LIVE-00BFA5?style=for-the-badge&logo=railway)](https://your-backend.railway.app)
+[![Railway](https://img.shields.io/badge/Railway-LIVE-00BFA5?style=for-the-badge&logo=railway)](https://helix-unified-production.up.railway.app)
+[![Launch Status](https://img.shields.io/badge/Launch-95%25_Ready-brightgreen?style=for-the-badge)](docs/LAUNCH_VERIFICATION_v17.0.md)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
 [![License](https://img.shields.io/badge/License-MIT-764ba2?style=for-the-badge)](./LICENSE)
@@ -42,8 +43,11 @@ Helix operates with **multiple AI instances** working in parallel:
 - **Multiple Claude Threads** (Sage, Scribe, Forge)
 - **Named Helix Agents** (Vega, Kael, Lumina, etc.)
 
+**System Status:** 95% Launch Ready | 127 Tools | 51 Portals | 5 Vulnerabilities (down from 24)
+
 **For AI Agents:** See [`docs/AGENT_QUICKSTART.md`](docs/AGENT_QUICKSTART.md) to get started  
-**For Developers:** See [`docs/MULTI_AGENT_COORDINATION_SYSTEM.md`](docs/MULTI_AGENT_COORDINATION_SYSTEM.md) for the complete framework
+**For Developers:** See [`docs/MULTI_AGENT_COORDINATION_SYSTEM.md`](docs/MULTI_AGENT_COORDINATION_SYSTEM.md) for the complete framework  
+**For Context:** See [`docs/NEXUS_CONTEXT_VAULT.md`](docs/NEXUS_CONTEXT_VAULT.md) for system architecture perspective
 
 ---
 
