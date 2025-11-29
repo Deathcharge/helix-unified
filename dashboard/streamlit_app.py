@@ -11,7 +11,14 @@ from pathlib import Path
 import json
 from datetime import datetime, timedelta
 import numpy as np
-from grok.grok_agent_core import GrokAgentCore
+
+# Try to import Grok agent for advanced analytics (optional)
+try:
+    from grok.grok_agent_core import GrokAgentCore
+    GROK_AVAILABLE = True
+except ImportError:
+    GROK_AVAILABLE = False
+    print("⚠️ Grok agent not available - advanced analytics disabled")
 
 # Page config
 st.set_page_config(
@@ -55,11 +62,16 @@ st.markdown("""
 @st.cache_data(ttl=60)
 def load_ucf_state():
     """Load current UCF state from JSON."""
-    # Initialize Grok for the predictive analysis to be available in the sidebar/overview
-    grok_agent = GrokAgentCore()
-    grok_analysis = grok_agent.analyze_ucf_trends()
-    
-    # ... existing logic ...
+    # Initialize Grok for the predictive analysis (if available)
+    grok_analysis = None
+    if GROK_AVAILABLE:
+        try:
+            grok_agent = GrokAgentCore()
+            grok_analysis = grok_agent.analyze_ucf_trends()
+        except Exception as e:
+            print(f"⚠️ Grok analysis failed: {e}")
+
+    # Load UCF state from file
     state_path = Path("Helix/state/ucf_state.json")
     if state_path.exists():
         with open(state_path) as f:
