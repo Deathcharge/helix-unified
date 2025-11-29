@@ -238,8 +238,7 @@ async def health_check(ctx: commands.Context) -> None:
         embed.add_field(
             name="📚 Documentation",
             value="[Z-88 Ritual Guide](https://github.com/Deathcharge/helix-unified/blob/main/README.md) | Use `!update_ritual_guide` to post guide to Discord",
-            inline=False
-        )
+            inline=False)
         embed.set_footer(text="🜂 Kael v3.4 Enhanced - Ethical monitoring active | v16.7")
 
     else:

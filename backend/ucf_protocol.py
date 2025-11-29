@@ -105,8 +105,7 @@ class UCFProtocol:
                 f"║ Klesha:      {klesha:6.4f}                    (target: {UCFProtocol.TARGETS['klesha']:.2f}) ║",
                 f"║ Zoom:        {zoom:6.4f}                    (target: {UCFProtocol.TARGETS['zoom']:.2f}) ║",
                 "╚═══════════════════════════════════════════════════════════╝",
-            ]
-        )
+            ])
 
         return "\n".join(lines)
 

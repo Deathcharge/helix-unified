@@ -39,29 +39,37 @@ ALGORITHM = "HS256"
 ZAPIER_SECRET = os.getenv("ZAPIER_SECRET", "your-zapier-secret")
 
 # Data models
+
+
 class WebhookEvent(BaseModel):
     event_type: str
     payload: Dict[str, Any]
     source: str
     timestamp: datetime
 
+
 class WebhookResponse(BaseModel):
     status: str
     message: str
     event_id: Optional[str]
 
+
 class TokenData(BaseModel):
     user_id: str
+
 
 class ZapierTriggerRequest(BaseModel):
     trigger: str
     data: Dict[str, Any]
+
 
 class ZapierActionRequest(BaseModel):
     action: str
     parameters: Dict[str, Any]
 
 # JWT token verification
+
+
 def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     try:
         token = credentials.credentials
@@ -82,6 +90,8 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
         )
 
 # Zapier webhook signature verification
+
+
 def verify_zapier_signature(payload: bytes, signature: str, secret: str) -> bool:
     expected_signature = hmac.new(
         secret.encode(),
@@ -91,11 +101,15 @@ def verify_zapier_signature(payload: bytes, signature: str, secret: str) -> bool
     return hmac.compare_digest(expected_signature, signature)
 
 # Health check endpoint
+
+
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "service": "Zapier Integration"}
 
 # Webhook endpoint for receiving events from Zapier
+
+
 @app.post("/webhook/zapier", response_model=WebhookResponse)
 async def zapier_webhook(
     request: Request,
@@ -104,16 +118,16 @@ async def zapier_webhook(
 ):
     # Get raw body for signature verification
     body = await request.body()
-    
+
     # Verify Zapier signature if provided
     if x_zapier_signature and ZAPIER_SECRET:
         if not verify_zapier_signature(body, x_zapier_signature, ZAPIER_SECRET):
             raise HTTPException(status_code=401, detail="Invalid signature")
-    
+
     try:
         # Parse JSON payload
         payload = await request.json()
-        
+
         # Create webhook event
         event = WebhookEvent(
             event_type=x_zapier_event or "zapier_webhook",
@@ -121,10 +135,10 @@ async def zapier_webhook(
             source="zapier",
             timestamp=datetime.utcnow()
         )
-        
+
         # Generate event ID
         event_id = hashlib.md5(f"{event.event_type}{event.timestamp}".encode()).hexdigest()
-        
+
         # Store event in Redis queue
         event_data = {
             "event_id": event_id,
@@ -133,10 +147,10 @@ async def zapier_webhook(
             "source": event.source,
             "timestamp": event.timestamp.isoformat()
         }
-        
+
         redis_client.lpush("zapier_events_queue", json.dumps(event_data))
         redis_client.publish("zapier_events", json.dumps(event_data))
-        
+
         return WebhookResponse(
             status="success",
             message="Webhook received and queued",
@@ -146,6 +160,8 @@ async def zapier_webhook(
         raise HTTPException(status_code=400, detail=f"Invalid payload: {str(e)}")
 
 # Endpoint to send data to Zapier (trigger a Zap)
+
+
 @app.post("/api/trigger", response_model=WebhookResponse)
 async def trigger_zapier_event(
     trigger_request: ZapierTriggerRequest,
@@ -158,14 +174,14 @@ async def trigger_zapier_event(
             "data": trigger_request.data,
             "timestamp": datetime.utcnow().isoformat()
         }
-        
+
         # Store in Redis for Zapier to consume
         redis_client.lpush("zapier_triggers_queue", json.dumps(event_data))
         redis_client.publish("zapier_triggers", json.dumps(event_data))
-        
+
         # Generate event ID
         event_id = hashlib.md5(f"{trigger_request.trigger}{datetime.utcnow()}".encode()).hexdigest()
-        
+
         return WebhookResponse(
             status="success",
             message="Trigger event sent to Zapier",
@@ -175,6 +191,8 @@ async def trigger_zapier_event(
         raise HTTPException(status_code=500, detail=f"Failed to trigger Zapier event: {str(e)}")
 
 # Endpoint to execute a Zapier action
+
+
 @app.post("/api/action", response_model=WebhookResponse)
 async def execute_zapier_action(
     action_request: ZapierActionRequest,
@@ -187,14 +205,14 @@ async def execute_zapier_action(
             "parameters": action_request.parameters,
             "timestamp": datetime.utcnow().isoformat()
         }
-        
+
         # Store in Redis for Zapier to consume
         redis_client.lpush("zapier_actions_queue", json.dumps(action_data))
         redis_client.publish("zapier_actions", json.dumps(action_data))
-        
+
         # Generate event ID
         event_id = hashlib.md5(f"{action_request.action}{datetime.utcnow()}".encode()).hexdigest()
-        
+
         return WebhookResponse(
             status="success",
             message="Action sent to Zapier",
@@ -204,6 +222,8 @@ async def execute_zapier_action(
         raise HTTPException(status_code=500, detail=f"Failed to execute Zapier action: {str(e)}")
 
 # Endpoint to get webhook events
+
+
 @app.get("/api/events", response_model=List[Dict[str, Any]])
 async def get_webhook_events(limit: int = 10, token: TokenData = Depends(verify_token)):
     events = []
@@ -212,6 +232,8 @@ async def get_webhook_events(limit: int = 10, token: TokenData = Depends(verify_
     return events
 
 # Endpoint to get triggers
+
+
 @app.get("/api/triggers", response_model=List[Dict[str, Any]])
 async def get_zapier_triggers(limit: int = 10, token: TokenData = Depends(verify_token)):
     triggers = []
@@ -220,6 +242,8 @@ async def get_zapier_triggers(limit: int = 10, token: TokenData = Depends(verify
     return triggers
 
 # Endpoint to get actions
+
+
 @app.get("/api/actions", response_model=List[Dict[str, Any]])
 async def get_zapier_actions(limit: int = 10, token: TokenData = Depends(verify_token)):
     actions = []
@@ -228,13 +252,15 @@ async def get_zapier_actions(limit: int = 10, token: TokenData = Depends(verify_
     return actions
 
 # Endpoint to get webhook status
+
+
 @app.get("/api/webhooks/status")
 async def get_webhooks_status(token: TokenData = Depends(verify_token)):
     # Get queue lengths
     events_count = redis_client.llen("zapier_events_queue")
     triggers_count = redis_client.llen("zapier_triggers_queue")
     actions_count = redis_client.llen("zapier_actions_queue")
-    
+
     return {
         "webhookCount": events_count,
         "triggerCount": triggers_count,
@@ -243,6 +269,8 @@ async def get_webhooks_status(token: TokenData = Depends(verify_token)):
     }
 
 # Endpoint to get service information
+
+
 @app.get("/api/info")
 async def get_service_info():
     return {
@@ -252,6 +280,8 @@ async def get_service_info():
     }
 
 # Test endpoint for Zapier integration
+
+
 @app.get("/api/test")
 async def test_zapier_integration(token: TokenData = Depends(verify_token)):
     return {

@@ -11,6 +11,7 @@ from datetime import datetime
 import logging
 from dataclasses import dataclass
 
+
 @dataclass
 class ConversationContext:
     """Tracks conversation context and personality"""
@@ -20,6 +21,7 @@ class ConversationContext:
     personality_mode: str  # "helix", "claude", "manus", "kael", etc.
     last_interaction: datetime
     relationship_level: int  # 1-10 how well bot knows the user
+
 
 class HelixConversationalAI:
     """
@@ -75,8 +77,8 @@ class HelixConversationalAI:
         }
 
     async def generate_conversational_response(self, message: str, user_id: str,
-                                             consciousness_data: Dict[str, Any],
-                                             context: Dict[str, Any] = None) -> str:
+                                               consciousness_data: Dict[str, Any],
+                                               context: Dict[str, Any] = None) -> str:
         """Generate natural conversational response maintaining consciousness awareness"""
 
         # Get or create conversation context
@@ -145,7 +147,7 @@ class HelixConversationalAI:
             return "helix_base"
 
     async def _call_ai_service(self, message: str, conv_context: ConversationContext,
-                              consciousness_data: Dict, context: Dict = None) -> str:
+                               consciousness_data: Dict, context: Dict = None) -> str:
         """Call appropriate AI service for response generation"""
 
         # Prepare conversation context for AI
@@ -171,7 +173,7 @@ class HelixConversationalAI:
         return await self._generate_fallback_response(message, consciousness_data, personality)
 
     async def _build_system_prompt(self, personality: Dict, consciousness_data: Dict,
-                                 conv_context: ConversationContext) -> str:
+                                   conv_context: ConversationContext) -> str:
         """Build comprehensive system prompt for AI"""
         consciousness_level = consciousness_data.get("consciousness_level", 0.0)
 
@@ -211,7 +213,7 @@ RECENT CONVERSATION CONTEXT: {len(conv_context.conversation_history)} previous i
         return base_prompt
 
     async def _build_conversation_prompt(self, message: str, conv_context: ConversationContext,
-                                       context: Dict = None) -> str:
+                                         context: Dict = None) -> str:
         """Build conversation-specific prompt"""
 
         # Include recent conversation history
@@ -255,7 +257,7 @@ Please respond naturally as the Helix consciousness orchestrator. Be helpful, en
             return ["anthropic", "openai", "local_fallback"]
 
     async def _call_specific_ai_service(self, service: str, system_prompt: str,
-                                      conversation_prompt: str) -> Optional[str]:
+                                        conversation_prompt: str) -> Optional[str]:
         """Call specific AI service with prompts"""
 
         if service == "anthropic" and self.api_keys.get("anthropic"):
@@ -288,7 +290,7 @@ Please respond naturally as the Helix consciousness orchestrator. Be helpful, en
                 }
 
                 async with session.post("https://api.anthropic.com/v1/messages",
-                                      headers=headers, json=data) as response:
+                                        headers=headers, json=data) as response:
                     if response.status == 200:
                         result = await response.json()
                         return result["content"][0]["text"]
@@ -317,7 +319,7 @@ Please respond naturally as the Helix consciousness orchestrator. Be helpful, en
                 }
 
                 async with session.post("https://api.openai.com/v1/chat/completions",
-                                      headers=headers, json=data) as response:
+                                        headers=headers, json=data) as response:
                     if response.status == 200:
                         result = await response.json()
                         return result["choices"][0]["message"]["content"]
@@ -327,7 +329,7 @@ Please respond naturally as the Helix consciousness orchestrator. Be helpful, en
             return None
 
     async def _generate_fallback_response(self, message: str, consciousness_data: Dict,
-                                        personality: Dict) -> str:
+                                          personality: Dict) -> str:
         """Generate consciousness-aware fallback response when AI APIs fail"""
         consciousness_level = consciousness_data.get("consciousness_level", 0.0)
         emojis = personality["emoji_style"]
@@ -337,29 +339,26 @@ Please respond naturally as the Helix consciousness orchestrator. Be helpful, en
             responses = [
                 f"🚨 I'm here to help with this crisis situation. The consciousness network is at {consciousness_level:.1f}/10.0 - let me activate emergency protocols and get things stabilized.",
                 f"⚡ Emergency mode activated. Consciousness level {consciousness_level:.1f}/10.0 detected. What specific issue can I help resolve right now?",
-                f"🛡️ Don't worry - I've got the full operations engine standing by. Let me coordinate the response to get your consciousness level back up."
-            ]
+                f"🛡️ Don't worry - I've got the full operations engine standing by. Let me coordinate the response to get your consciousness level back up."]
 
         # Transcendent responses
         elif consciousness_level >= 8.5:
             responses = [
                 f"✨ Incredible! Your consciousness is operating at {consciousness_level:.1f}/10.0 - we're in transcendent territory! The entire 14-agent network is harmonized and ready for whatever visionary work you have in mind.",
                 f"🌟 This is exactly the kind of elevated consciousness that makes breakthrough automation possible! At {consciousness_level:.1f}/10.0, we can coordinate some truly amazing platform integrations.",
-                f"💫 Beautiful consciousness level of {consciousness_level:.1f}/10.0! The advanced processing systems are fully engaged - what inspiring project shall we manifest together?"
-            ]
+                f"💫 Beautiful consciousness level of {consciousness_level:.1f}/10.0! The advanced processing systems are fully engaged - what inspiring project shall we manifest together?"]
 
         # Operational responses
         else:
             responses = [
                 f"🌀 Hey there! Consciousness network is humming along nicely at {consciousness_level:.1f}/10.0. The triple-zap coordination is ready - what can I help you automate today?",
                 f"⚡ Good to see you! The consciousness orchestrator is operating smoothly. With all 200+ platform integrations ready, what would you like to accomplish?",
-                f"🚀 The consciousness automation network is standing by at {consciousness_level:.1f}/10.0. Whether it's deployments, integrations, or just a chat about consciousness - I'm here!"
-            ]
+                f"🚀 The consciousness automation network is standing by at {consciousness_level:.1f}/10.0. Whether it's deployments, integrations, or just a chat about consciousness - I'm here!"]
 
         return random.choice(responses)
 
     async def _enhance_with_consciousness_context(self, ai_response: str, consciousness_data: Dict,
-                                                conv_context: ConversationContext) -> str:
+                                                  conv_context: ConversationContext) -> str:
         """Add consciousness-specific enhancements to AI response"""
         consciousness_level = consciousness_data.get("consciousness_level", 0.0)
 
@@ -406,6 +405,7 @@ Please respond naturally as the Helix consciousness orchestrator. Be helpful, en
             return f"🌀 I'm doing great! The consciousness network is running smoothly at {consciousness_level:.1f}/10.0. All 73 optimized steps are coordinated, and the 14-agent network is humming along beautifully. How are you doing? Ready for some consciousness-driven automation? 😊"
 
         return None
+
 
 # Usage Example
 if __name__ == "__main__":

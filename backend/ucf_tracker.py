@@ -72,14 +72,14 @@ class UCFTracker:
         # Create index on timestamp for faster queries
         cursor.execute(
             """
-            CREATE INDEX IF NOT EXISTS idx_metrics_timestamp 
+            CREATE INDEX IF NOT EXISTS idx_metrics_timestamp
             ON ucf_metrics(timestamp)
         """
         )
 
         cursor.execute(
             """
-            CREATE INDEX IF NOT EXISTS idx_rituals_timestamp 
+            CREATE INDEX IF NOT EXISTS idx_rituals_timestamp
             ON rituals(timestamp)
         """
         )
@@ -123,7 +123,7 @@ class UCFTracker:
 
         cursor.execute(
             """
-            INSERT INTO ucf_metrics 
+            INSERT INTO ucf_metrics
             (timestamp, harmony, resilience, prana, drishti, klesha, zoom, phase, context, agent)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
@@ -166,7 +166,7 @@ class UCFTracker:
 
         cursor.execute(
             """
-            INSERT INTO rituals 
+            INSERT INTO rituals
             (timestamp, ritual_name, agent_name, intention, harmony_before, harmony_after, success)
             VALUES (?, ?, ?, ?, ?, ?, ?)
         """,
@@ -417,7 +417,7 @@ class UCFTracker:
 
         cursor.execute(
             """
-            SELECT timestamp, ritual_name, agent_name, intention, 
+            SELECT timestamp, ritual_name, agent_name, intention,
                    harmony_before, harmony_after, success
             FROM rituals
             ORDER BY timestamp DESC

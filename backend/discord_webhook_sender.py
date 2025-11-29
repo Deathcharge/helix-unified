@@ -23,6 +23,7 @@ logger = setup_logging(log_dir="Shadow/manus_archive", log_level=os.getenv("LOG_
 # DISCORD WEBHOOK URLS (from environment variables)
 # ============================================================================
 
+
 class DiscordWebhooks:
     """Central registry of all Discord webhook URLs from environment."""
 
@@ -196,7 +197,7 @@ class DiscordEmbedBuilder:
 
     @classmethod
     def build_agent_status(cls, agent_name: str, agent_symbol: str, status: str,
-                          last_action: str = None) -> Dict[str, Any]:
+                           last_action: str = None) -> Dict[str, Any]:
         """Build embed for agent status update."""
 
         color_map = {
@@ -330,7 +331,7 @@ class DiscordWebhookSender:
         return success
 
     async def send_ritual_completion(self, ritual_name: str, steps: int,
-                                    ucf_changes: Dict[str, float]) -> bool:
+                                     ucf_changes: Dict[str, float]) -> bool:
         """
         Send ritual completion notification to Discord.
 
@@ -348,7 +349,7 @@ class DiscordWebhookSender:
         return await self._send_webhook(self.webhooks.RITUAL_ENGINE_Z88, embed, "Ritual Engine")
 
     async def send_agent_status(self, agent_name: str, agent_symbol: str,
-                               status: str, last_action: str = None) -> bool:
+                                status: str, last_action: str = None) -> bool:
         """
         Send agent status update to Discord.
 
@@ -382,7 +383,7 @@ class DiscordWebhookSender:
             return False
 
     async def send_storage_backup(self, file_path: str, file_size: int,
-                                 checksum: str = None) -> bool:
+                                  checksum: str = None) -> bool:
         """
         Send storage backup notification to Discord.
 
@@ -400,7 +401,7 @@ class DiscordWebhookSender:
         return await self._send_webhook(self.webhooks.SHADOW_STORAGE, embed, "Shadow Storage")
 
     async def send_cross_ai_sync(self, platforms: List[str], sync_type: str,
-                                message: str) -> bool:
+                                 message: str) -> bool:
         """
         Send cross-AI synchronization notification to Discord.
 
@@ -418,7 +419,7 @@ class DiscordWebhookSender:
         return await self._send_webhook(self.webhooks.GPT_GROK_CLAUDE_SYNC, embed, "Cross-AI Sync")
 
     async def send_deployment(self, service: str, version: str, status: str,
-                            environment: str = "production") -> bool:
+                              environment: str = "production") -> bool:
         """
         Send deployment notification to Discord.
 
@@ -437,7 +438,7 @@ class DiscordWebhookSender:
         return await self._send_webhook(self.webhooks.DEPLOYMENTS, embed, "Deployments")
 
     async def send_announcement(self, title: str, message: str,
-                               priority: str = "normal") -> bool:
+                                priority: str = "normal") -> bool:
         """
         Send announcement to Discord.
 
@@ -469,7 +470,7 @@ class DiscordWebhookSender:
         return await self._send_webhook(self.webhooks.ANNOUNCEMENTS, embed, "Announcements")
 
     async def _send_webhook(self, webhook_url: Optional[str], payload: Dict[str, Any],
-                          channel_name: str = "Unknown") -> bool:
+                            channel_name: str = "Unknown") -> bool:
         """
         Send payload to Discord webhook.
 
@@ -512,7 +513,7 @@ class DiscordWebhookSender:
                 await session.close()
 
     async def _log_failure(self, payload: Dict[str, Any], error: str,
-                          channel_name: str = "Unknown") -> None:
+                           channel_name: str = "Unknown") -> None:
         """
         Log failed webhook attempts to disk for retry.
 

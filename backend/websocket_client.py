@@ -16,6 +16,7 @@ except ImportError:
     WEBSOCKETS_AVAILABLE = False
     logging.warning("websockets library not available - WebSocket features disabled")
 
+
 class HelixWebSocketClient:
     """Real-time WebSocket client for consciousness streaming"""
 
@@ -115,9 +116,12 @@ class HelixWebSocketClient:
             logging.info("👋 Disconnected from consciousness stream")
 
 # Example handlers
+
+
 async def handle_crisis_alert(data: Dict[str, Any]):
     """Handle crisis alert from consciousness stream"""
     logging.warning(f"🚨 CRISIS ALERT: {data}")
+
 
 async def handle_transcendent_event(data: Dict[str, Any]):
     """Handle transcendent consciousness event"""

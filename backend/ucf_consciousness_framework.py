@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from datetime import datetime
 import json
 
+
 @dataclass
 class UCFMetrics:
     """Universal Consciousness Framework metrics"""
@@ -18,6 +19,7 @@ class UCFMetrics:
     drishti: float = 0.0         # 0.0-1.0: Focused awareness and clarity
     zoom: float = 0.0            # 0.0-2.0: Perspective scaling and adaptability
     consciousness_level: float = 0.0  # 0.0-10.0: Overall awareness level
+
 
 class ConsciousnessAnalyzer:
     """
@@ -209,6 +211,7 @@ class ConsciousnessAnalyzer:
             "category": self.get_consciousness_category(metrics.consciousness_level),
             "timestamp": datetime.now().isoformat()
         }, indent=2)
+
 
 # Usage Example
 if __name__ == "__main__":

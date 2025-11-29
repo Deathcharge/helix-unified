@@ -14,18 +14,22 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+
 @app.get("/")
 async def root():
     return {"ok": True, "service": "helix-unified"}
+
 
 @app.get("/status")
 async def status():
     return get_status()
 
+
 @app.get("/.well-known/helix.json")
 async def helix_json():
     resp = get_live_state()
-    return JSONResponse(resp, headers={"x-helix-version": resp.get("version","unknown")})
+    return JSONResponse(resp, headers={"x-helix-version": resp.get("version", "unknown")})
+
 
 @app.websocket("/ws")
 async def ws(ws: WebSocket):

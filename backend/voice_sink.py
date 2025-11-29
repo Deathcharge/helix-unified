@@ -12,10 +12,12 @@ SAMPLE_RATE = 16000
 CHANNELS = 1
 VOSK_MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "vosk-model")
 
+
 class VoskVoiceSink(discord.Sink):
     """
     A custom Discord voice sink that processes raw audio data and feeds it to the Vosk STT engine.
     """
+
     def __init__(self, recognizer: KaldiRecognizer, voice_commands_cog):
         super().__init__()
         self.recognizer = recognizer
@@ -65,10 +67,10 @@ class VoskVoiceSink(discord.Sink):
             # NOTE: Vosk expects 16-bit PCM mono at 16kHz. Discord is 16-bit PCM stereo at 48kHz.
             # This will likely fail or produce poor results without resampling/downmixing.
             # We will proceed with the conceptual implementation, assuming a working audio pipeline.
-            
+
             # In a real scenario, we would use a library like 'resampy' or 'librosa' here.
             # Since we cannot install complex dependencies, we will rely on Vosk's partial result.
-            
+
             if self.recognizer.AcceptWaveform(audio_data):
                 result = json.loads(self.recognizer.Result())
                 text = result.get("text")
@@ -83,7 +85,7 @@ class VoskVoiceSink(discord.Sink):
                 if partial_text:
                     logger.debug(f"Vosk Partial: {partial_text}")
 
-            await asyncio.sleep(0.1) # Yield control
+            await asyncio.sleep(0.1)  # Yield control
 
         self.is_processing = False
 
@@ -94,6 +96,8 @@ class VoskVoiceSink(discord.Sink):
         logger.info("VoskVoiceSink cleaned up.")
 
 # Helper function to get the correct recognizer instance
+
+
 def get_vosk_recognizer():
     """Initializes and returns the Vosk recognizer."""
     try:

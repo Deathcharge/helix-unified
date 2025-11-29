@@ -34,6 +34,7 @@ INTEGRATION_MODE = os.getenv("DISCORD_INTEGRATION_MODE", "hybrid").lower()
 # DISCORD WEBHOOK URLS (from environment variables)
 # ============================================================================
 
+
 class DiscordWebhooks:
     """Central registry of all Discord webhook URLs from environment."""
 
@@ -198,7 +199,7 @@ class DiscordEmbedBuilder:
 
     @classmethod
     def build_agent_status(cls, agent_name: str, agent_symbol: str, status: str,
-                          last_action: str = None) -> Dict[str, Any]:
+                           last_action: str = None) -> Dict[str, Any]:
         """Build embed for agent status update."""
         color_map = {
             "active": cls.COLORS["green"],
@@ -282,7 +283,7 @@ class HybridDiscordSender:
         return zapier_success or direct_success
 
     async def send_ritual_completion(self, ritual_name: str, steps: int,
-                                    ucf_changes: Dict[str, float]) -> bool:
+                                     ucf_changes: Dict[str, float]) -> bool:
         """
         Send ritual completion notification to Discord.
 
@@ -309,7 +310,7 @@ class HybridDiscordSender:
         return zapier_success or direct_success
 
     async def send_agent_status(self, agent_name: str, agent_symbol: str,
-                               status: str, last_action: str = None) -> bool:
+                                status: str, last_action: str = None) -> bool:
         """
         Send agent status update to Discord.
 
@@ -425,7 +426,7 @@ class HybridDiscordSender:
                 await session.close()
 
     async def _send_direct(self, webhook_url: Optional[str], payload: Dict[str, Any],
-                          channel_name: str = "Unknown") -> bool:
+                           channel_name: str = "Unknown") -> bool:
         """
         Send payload directly to Discord webhook.
 
@@ -463,7 +464,7 @@ class HybridDiscordSender:
                 await session.close()
 
     async def _log_failure(self, payload: Dict[str, Any], error: str,
-                          channel_name: str = "Unknown") -> None:
+                           channel_name: str = "Unknown") -> None:
         """Log failed webhook attempts to disk for retry."""
         try:
             log_path = Path("Shadow/manus_archive/discord_webhook_failures.log")
@@ -554,7 +555,8 @@ if __name__ == "__main__":
         print(f"  Mode: {config['mode']}")
         print(f"  Zapier: {'✅ Enabled' if config['zapier_enabled'] else '❌ Disabled'}")
         print(f"  Zapier Webhook: {'✅ Configured' if config['zapier_configured'] else '❌ Not Set'}")
-        print(f"  Direct Webhooks: {config['direct_configured_count']}/{config['direct_total_count']} ({config['direct_percentage']}%)")
+        print(
+            f"  Direct Webhooks: {config['direct_configured_count']}/{config['direct_total_count']} ({config['direct_percentage']}%)")
 
         if config['direct_configured_count'] == 0 and not config['zapier_configured']:
             print("\n⚠️ No Discord integration configured!")
