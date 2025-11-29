@@ -633,6 +633,8 @@ async def on_ready() -> None:
         ('commands.admin_commands', 'Admin commands (setup, webhooks, verify-setup, refresh, clean)'),
         ('commands.consciousness_commands_ext', 'Consciousness commands (consciousness, emotions, ethics, agent)'),
         ('commands.portal_deployment_commands', 'Portal deployment commands (deploy, portal, join, leave)'),
+        ('commands.fun_minigames', 'Fun commands (8ball, horoscope, coinflip, wisdom, fortune, agent-advice)'),
+        ('commands.role_system', 'Role management (roles, subscribe, my-roles, setup-roles, setup-all-roles)'),
     ]
 
     for module_name, description in command_modules:
