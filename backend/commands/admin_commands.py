@@ -22,6 +22,11 @@ import discord
 from discord.ext import commands
 from backend.notion_sync_daemon import trigger_manual_sync
 
+# Import ServerSetup for channel creation
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "discord-bot"))
+from server_setup import ServerSetup
+
 if TYPE_CHECKING:
     from discord.ext.commands import Bot
 
@@ -45,21 +50,36 @@ async def setup(bot: 'Bot') -> None:
 @commands.has_permissions(manage_channels=True)
 async def setup_helix_server(ctx: commands.Context) -> None:
     """
-    🌀 Setup Helix Webhooks - Creates webhooks for all existing channels.
+    🌀 Complete Helix Server Setup - Creates channels and webhooks.
 
     This command will:
-    - Scan all text channels in the server
-    - Create webhooks for channels that don't have them
+    - Create all missing categories and channels from the canonical structure
+    - Create webhooks for all channels
     - Save webhook URLs to Helix/state/channel_webhooks.json
     - Display all webhook URLs for Zapier configuration
 
-    ARCHITECT-ONLY. Run this to set up webhooks for Zapier integration.
+    ARCHITECT-ONLY. Run this to set up the complete Helix server structure.
 
     Usage: !setup
     """
-    await ctx.send("🔧 **Starting Helix Webhook Setup...**\nThis may take a moment...")
+    await ctx.send("🔧 **Starting Complete Helix Server Setup...**\nThis may take a moment...")
 
     guild = ctx.guild
+
+    # Step 1: Create all channels using ServerSetup
+    await ctx.send("📁 **Phase 1/2: Creating missing channels...**")
+
+    try:
+        server_setup = ServerSetup(ctx.bot)
+        await server_setup.setup_server(guild)
+        await ctx.send("✅ **Channel creation complete!**")
+    except Exception as e:
+        logger.error(f"Error during channel creation: {e}")
+        await ctx.send(f"⚠️ **Error during channel creation:** {str(e)[:200]}\nContinuing with webhook setup...")
+
+    # Step 2: Create webhooks for all channels
+    await ctx.send("🔗 **Phase 2/2: Setting up webhooks...**")
+
     webhooks_created = 0
     webhooks_existing = 0
     webhook_urls = {}
@@ -116,12 +136,14 @@ async def setup_helix_server(ctx: commands.Context) -> None:
 
     # Create summary embed
     embed = discord.Embed(
-        title="✅ Helix Webhook Setup Complete!",
-        description="Created webhooks for Zapier integration",
+        title="✅ Helix Server Setup Complete!",
+        description="Created all missing channels and webhooks for Zapier integration",
         color=0x00FF00,
         timestamp=datetime.datetime.utcnow()
     )
 
+    total_channels = len([ch for ch in guild.text_channels if isinstance(ch, discord.TextChannel)])
+    embed.add_field(name="Total Channels", value=str(total_channels), inline=True)
     embed.add_field(name="Webhooks Created", value=str(webhooks_created), inline=True)
     embed.add_field(name="Webhooks Existing", value=str(webhooks_existing), inline=True)
     embed.add_field(name="Total Webhooks", value=str(len(webhook_urls)), inline=True)
