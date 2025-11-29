@@ -10,12 +10,12 @@ Commands:
 - seed: Seed all channels with explanatory messages and pin them
 - notion-sync: Manually triggers the Notion sync for UCF State and Agent Registry
 """
-from server_setup import ServerSetup
 import asyncio
 import datetime
 import json
 import logging
 import os
+import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -23,9 +23,9 @@ import discord
 from discord.ext import commands
 from backend.notion_sync_daemon import trigger_manual_sync
 
-# Import ServerSetup for channel creation
-import sys
+# Import ServerSetup for channel creation (add path first)
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "discord-bot"))
+from server_setup import ServerSetup
 
 if TYPE_CHECKING:
     from discord.ext.commands import Bot
