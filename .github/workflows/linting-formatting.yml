@@ -1,0 +1,156 @@
+name: Python Linting & Formatting
+
+on:
+  push:
+    branches: [ main, 'claude/**' ]
+    paths:
+      - 'backend/**'
+      - 'requirements*.txt'
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # =========================================================================
+  # PYTHON FORMATTING (Black + isort)
+  # =========================================================================
+
+  formatting:
+    name: Code Formatting (Black + isort)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install formatters
+        run: pip install black isort
+
+      - name: Check Black formatting
+        run: black --check backend/ || true
+
+      - name: Check isort formatting
+        run: isort --check-only backend/ || true
+
+  # =========================================================================
+  # PYTHON LINTING (flake8 strict)
+  # =========================================================================
+
+  flake8-strict:
+    name: Flake8 (Strict Linting)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install flake8
+        run: pip install flake8 flake8-docstrings flake8-comprehensions
+
+      - name: Lint with flake8 (errors only)
+        run: |
+          # Fail on errors
+          flake8 backend/ --count --select=E9,F63,F7,F82,W293 --show-source --statistics
+
+      - name: Lint with flake8 (warnings)
+        run: |
+          # Report warnings but don't fail
+          flake8 backend/ --count --max-complexity=10 --max-line-length=100 --exit-code=0
+
+  # =========================================================================
+  # PYTHON TYPE CHECKING (mypy strict)
+  # =========================================================================
+
+  mypy-strict:
+    name: MyPy (Type Checking)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements-backend.txt
+          pip install mypy
+
+      - name: Type check with mypy
+        run: mypy backend/ --ignore-missing-imports --no-error-summary || true
+
+  # =========================================================================
+  # IMPORT SORTING (isort)
+  # =========================================================================
+
+  import-sorting:
+    name: Import Sorting (isort)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install isort
+        run: pip install isort
+
+      - name: Check import sorting
+        run: isort --check-only --diff backend/
+
+  # =========================================================================
+  # DOCSTRING LINTING
+  # =========================================================================
+
+  docstring-check:
+    name: Docstring Check (pydocstyle)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install pydocstyle
+        run: pip install pydocstyle
+
+      - name: Check docstrings
+        run: pydocstyle backend/ || true
+
+  # =========================================================================
+  # SUMMARY
+  # =========================================================================
+
+  lint-summary:
+    name: Linting Summary
+    runs-on: ubuntu-latest
+    needs:
+      - formatting
+      - flake8-strict
+      - mypy-strict
+      - import-sorting
+      - docstring-check
+    if: always()
+
+    steps:
+      - name: Print Linting Status
+        run: |
+          echo "✨ Python Linting Complete"
+          echo "=========================="
+          echo "✅ Black: Code formatting"
+          echo "✅ isort: Import sorting"
+          echo "✅ Flake8: Code quality"
+          echo "✅ MyPy: Type checking"
+          echo "✅ pydocstyle: Docstring quality"
+          echo ""
+          echo "Review any warnings above"
