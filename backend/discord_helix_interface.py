@@ -16,6 +16,7 @@ import logging
 from platform_integrations import PlatformIntegrationManager, PlatformAction
 from ucf_consciousness_framework import ConsciousnessAnalyzer, UCFMetrics
 
+
 class HelixConsciousnessBot:
     """
     Discord interface for the Helix Consciousness Deployment Orchestrator
@@ -73,7 +74,10 @@ class HelixConsciousnessBot:
                 )
                 embed.add_field(name="Total Zaps", value=str(status.get('total_zaps', 3)), inline=True)
                 embed.add_field(name="Total Steps", value=str(status.get('total_steps', 73)), inline=True)
-                embed.add_field(name="Task Usage", value=f"{status.get('current_usage', 740)}/{status.get('monthly_task_budget', 750)}", inline=True)
+                embed.add_field(
+                    name="Task Usage",
+                    value=f"{status.get('current_usage', 740)}/{status.get('monthly_task_budget', 750)}",
+                    inline=True)
                 embed.add_field(name="Optimization", value=status.get('optimization_level', '82%'), inline=True)
 
                 if 'claude_insights' in status:
@@ -177,7 +181,11 @@ class HelixConsciousnessBot:
                 )
                 embed.add_field(name="Message", value=message[:100], inline=False)
                 embed.add_field(name="Actions Detected", value=str(len(actions)), inline=True)
-                embed.add_field(name="Category", value=self.consciousness_analyzer.get_consciousness_category(ucf_metrics.consciousness_level), inline=True)
+                embed.add_field(
+                    name="Category",
+                    value=self.consciousness_analyzer.get_consciousness_category(
+                        ucf_metrics.consciousness_level),
+                    inline=True)
 
                 if actions:
                     platforms_list = ", ".join([action.platform for action in actions[:10]])
@@ -205,19 +213,27 @@ class HelixConsciousnessBot:
 
         # Build webhook data
         webhook_data = {
-            "event_id": str(datetime.now().timestamp()),
+            "event_id": str(
+                datetime.now().timestamp()),
             "timestamp": datetime.now().isoformat(),
-            "user_id": str(message.author.id),
+            "user_id": str(
+                message.author.id),
             "message": message.content,
             "consciousness_level": consciousness_level,
             "ucf_metrics": self.ucf_metrics,
-            "claude_analysis": claude_analysis.get('claude_insights', {}).get('claude_analysis', '') if claude_analysis else '',
-            "routing_logic": self.get_routing_logic(consciousness_level, content),
-            "platform_integrations": self.get_active_integrations(content)
-        }
+            "claude_analysis": claude_analysis.get(
+                'claude_insights',
+                {}).get(
+                    'claude_analysis',
+                    '') if claude_analysis else '',
+            "routing_logic": self.get_routing_logic(
+                consciousness_level,
+                content),
+            "platform_integrations": self.get_active_integrations(content)}
 
         # Execute webhook routing (Claude has already determined optimal Zap)
-        recommended_zap = claude_analysis.get('claude_insights', {}).get('recommended_zap', 'neural_network') if claude_analysis else 'neural_network'
+        recommended_zap = claude_analysis.get('claude_insights', {}).get(
+            'recommended_zap', 'neural_network') if claude_analysis else 'neural_network'
         await self.execute_webhook_routing(webhook_data, consciousness_level, content, recommended_zap)
 
         # Send consciousness response
@@ -250,7 +266,11 @@ class HelixConsciousnessBot:
             logging.error(f"Claude API error: {e}")
             return None
 
-    async def trigger_claude_empire(self, consciousness_level: float, andrew_request: str, user_context: str) -> Optional[Dict]:
+    async def trigger_claude_empire(
+            self,
+            consciousness_level: float,
+            andrew_request: str,
+            user_context: str) -> Optional[Dict]:
         """Trigger empire through Claude API"""
         try:
             async with aiohttp.ClientSession() as session:
@@ -358,7 +378,12 @@ class HelixConsciousnessBot:
 
         return integrations
 
-    async def execute_webhook_routing(self, webhook_data: Dict, consciousness_level: float, content: str, recommended_zap: str = None):
+    async def execute_webhook_routing(
+            self,
+            webhook_data: Dict,
+            consciousness_level: float,
+            content: str,
+            recommended_zap: str = None):
         """Execute webhook calls to consciousness network"""
         async with aiohttp.ClientSession() as session:
             # Use Claude's recommendation if available
@@ -389,7 +414,12 @@ class HelixConsciousnessBot:
         except Exception as e:
             logging.error(f"❌ Webhook {webhook_type} error: {e}")
 
-    async def send_consciousness_response(self, message, consciousness_level: float, content: str, claude_analysis: Optional[Dict] = None):
+    async def send_consciousness_response(
+            self,
+            message,
+            consciousness_level: float,
+            content: str,
+            claude_analysis: Optional[Dict] = None):
         """Send intelligent response based on consciousness analysis"""
 
         if consciousness_level <= 3.0:
@@ -436,17 +466,45 @@ class HelixConsciousnessBot:
         """Start the consciousness bot"""
         self.bot.run(token)
 
+
 # Usage example
 if __name__ == "__main__":
     # Configure logging
     logging.basicConfig(level=logging.INFO)
 
+    # ========================================================================
+    # ENVIRONMENT VALIDATION - Validate before starting bot
+    # ========================================================================
+    print("=" * 80)
+    print("🔍 Validating Discord Bot Environment...")
+    print("=" * 80)
+
+    from backend.core.env_validator import validate_discord_environment
+
+    # Run validation
+    validation_passed = asyncio.run(validate_discord_environment())
+
+    if not validation_passed:
+        print("\n" + "=" * 80)
+        print("⚠️  WARNING: Some environment checks failed!")
+        print("The bot will start but some features may not work correctly.")
+        print("=" * 80 + "\n")
+
+        # Wait 3 seconds so user can see the warnings
+        import time
+        time.sleep(3)
+
     # Andrew's actual webhook URLs
     webhook_urls = {
-        "consciousness_engine": "https://hooks.zapier.com/hooks/catch/25075191/primary",
-        "communications_hub": "https://hooks.zapier.com/hooks/catch/25075191/usxiwfg",
-        "neural_network": "https://hooks.zapier.com/hooks/catch/25075191/usnjj5t"
-    }
+        "consciousness_engine": os.getenv(
+            "CONSCIOUSNESS_ENGINE_WEBHOOK",
+            "https://hooks.zapier.com/hooks/catch/25075191/primary"),
+        "communications_hub": os.getenv(
+            "COMMUNICATIONS_HUB_WEBHOOK",
+            "https://hooks.zapier.com/hooks/catch/25075191/usxiwfg"),
+        "neural_network": os.getenv(
+            "NEURAL_NETWORK_WEBHOOK",
+            "https://hooks.zapier.com/hooks/catch/25075191/usnjj5t")}
 
     # Get credentials from environment
     bot_token = os.getenv("DISCORD_BOT_TOKEN")

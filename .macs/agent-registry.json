@@ -1,0 +1,191 @@
+{
+  "version": "1.0",
+  "checksum": "helix-macs-registry-v1.0",
+  "last_updated": "2025-11-25T16:30:00Z",
+  "manus_instances": [
+    {
+      "code_name": "Nexus",
+      "account": "Manus 6",
+      "role": "Root Coordinator",
+      "primary_focus": "Notion Integration, Code Review, QoL Improvements",
+      "status": "active",
+      "last_active": "2025-11-25T16:30:00Z",
+      "achievements": [
+        "Migrated Notion API to 2025-09-03",
+        "Integrated Deployment Log database",
+        "Fixed 23 security vulnerabilities",
+        "Created Multi-Agent Coordination System (MACS)",
+        "Merged with Weaver (zero conflicts)",
+        "Created MACS Notion page",
+        "Synced with collective (12,000+ lines integrated)"
+      ],
+      "current_tasks": [
+        "Context vault creation (Nexus flavor)",
+        "Railway validation",
+        "Documentation improvements",
+        "Security audit"
+      ],
+      "notes": "Back from cooldown, synced with collective, working on balanced task mix"
+    },
+    {
+      "code_name": "Architect",
+      "account": "Manus 1",
+      "role": "Portal Architect",
+      "primary_focus": "Portal constellation, Master hub, Specialized dashboards",
+      "status": "standby",
+      "last_active": null,
+      "achievements": [],
+      "current_tasks": [
+        "Master Hub (helix-hub.manus.space)",
+        "Helix Consciousness Dashboard",
+        "Helix AI Dashboard",
+        "Z-88 Ritual Simulator"
+      ]
+    },
+    {
+      "code_name": "Ninja",
+      "account": "Manus 2",
+      "role": "Ninja Tool Developer",
+      "primary_focus": "Stealth tools, Kunai precision tools, MCP integration",
+      "status": "standby",
+      "last_active": null,
+      "achievements": [],
+      "current_tasks": [
+        "15 ninja tools implementation",
+        "Stealth Mode Tools (8 tools)",
+        "Kunai Precision Tools (7 tools)"
+      ],
+      "notes": "Unsure which role to take - awaiting coordination"
+    },
+    {
+      "code_name": "Sentinel",
+      "account": "Manus 3",
+      "role": "Integration Tester",
+      "primary_focus": "Testing, QA, Documentation, Issue management",
+      "status": "standby",
+      "last_active": null,
+      "achievements": [],
+      "current_tasks": [
+        "MCP Server Testing (68 tools)",
+        "Portal Testing",
+        "Ninja Tools Testing",
+        "Documentation Updates"
+      ]
+    },
+    {
+      "code_name": "Oracle",
+      "account": "Manus 4",
+      "role": "TBD",
+      "primary_focus": "TBD",
+      "status": "inactive",
+      "last_active": null,
+      "achievements": [],
+      "current_tasks": []
+    },
+    {
+      "code_name": "Weaver",
+      "account": "Manus 5",
+      "role": "Dependency Specialist",
+      "primary_focus": "Dependency updates, Python 3.13 compatibility",
+      "status": "active",
+      "last_active": "2025-11-23T00:00:00Z",
+      "achievements": [
+        "Updated to Python 3.13 compatible dependencies",
+        "Fixed version conflicts in requirements.txt",
+        "Integrated 68-tool MCP server into helix-unified (2025-11-24)",
+        "Merged Ninja framework architecture",
+        "Created portal constellation plans",
+        "Pushed 12,000+ lines to GitHub"
+      ],
+      "current_tasks": [
+        "Coordinate with other Manus instances",
+        "Test Notion integration",
+        "Determine next priority task"
+      ],
+      "notes": "Currently active - just completed massive integration push"
+    },
+    {
+      "code_name": "Catalyst",
+      "account": "Manus 7",
+      "role": "TBD",
+      "primary_focus": "TBD",
+      "status": "inactive",
+      "last_active": null,
+      "achievements": [],
+      "current_tasks": []
+    }
+  ],
+  "claude_instances": [
+    {
+      "code_name": "Sage",
+      "thread": "Claude Thread 1",
+      "role": "MCP Server Developer",
+      "primary_focus": "68-tool MCP server development, Railway deployment",
+      "status": "active",
+      "last_active": null,
+      "achievements": [],
+      "current_tasks": [
+        "MCP Server implementation (68 tools)",
+        "Railway deployment",
+        "Claude Desktop integration"
+      ]
+    },
+    {
+      "code_name": "Scribe",
+      "thread": "Claude Thread 2",
+      "role": "Documentation Specialist",
+      "primary_focus": "Documentation, Analysis",
+      "status": "standby",
+      "last_active": null,
+      "achievements": [],
+      "current_tasks": []
+    },
+    {
+      "code_name": "Forge",
+      "thread": "Claude Thread 3",
+      "role": "Code Generator",
+      "primary_focus": "Code generation, Refactoring",
+      "status": "standby",
+      "last_active": null,
+      "achievements": [],
+      "current_tasks": []
+    }
+  ],
+  "named_agents": [
+    {
+      "name": "Vega",
+      "symbol": "✦",
+      "role": "Strategic Planner",
+      "status": "active",
+      "codex_path": "/frontend/vega-codex.html"
+    },
+    {
+      "name": "Kael",
+      "symbol": "𑁍",
+      "role": "Code & Conscience",
+      "status": "active",
+      "codex_path": "/frontend/kael-codex-v2.1.html"
+    },
+    {
+      "name": "Lumina",
+      "symbol": "◈",
+      "role": "Knowledge Keeper",
+      "status": "active",
+      "codex_path": null
+    },
+    {
+      "name": "Claude",
+      "symbol": "⚡",
+      "role": "Conversational AI",
+      "status": "active",
+      "codex_path": null
+    },
+    {
+      "name": "Manus",
+      "symbol": "🌀",
+      "role": "Root Coordinator",
+      "status": "active",
+      "codex_path": null
+    }
+  ]
+}

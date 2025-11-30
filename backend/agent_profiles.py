@@ -86,14 +86,14 @@ class AgentProfileSystem:
         # Create indexes
         cursor.execute(
             """
-            CREATE INDEX IF NOT EXISTS idx_task_agent 
+            CREATE INDEX IF NOT EXISTS idx_task_agent
             ON task_history(agent_name)
         """
         )
 
         cursor.execute(
             """
-            CREATE INDEX IF NOT EXISTS idx_task_timestamp 
+            CREATE INDEX IF NOT EXISTS idx_task_timestamp
             ON task_history(timestamp)
         """
         )
@@ -133,8 +133,8 @@ class AgentProfileSystem:
 
         cursor.execute(
             """
-            INSERT INTO task_history 
-            (timestamp, agent_name, task_description, success, duration_seconds, 
+            INSERT INTO task_history
+            (timestamp, agent_name, task_description, success, duration_seconds,
              harmony_before, harmony_after, notes)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """,
@@ -189,7 +189,7 @@ class AgentProfileSystem:
 
         cursor.execute(
             """
-            INSERT INTO collaborations 
+            INSERT INTO collaborations
             (timestamp, task_description, agents, success, harmony_delta, notes)
             VALUES (?, ?, ?, ?, ?, ?)
         """,
@@ -228,7 +228,7 @@ class AgentProfileSystem:
 
         cursor.execute(
             """
-            INSERT INTO agent_stats 
+            INSERT INTO agent_stats
             (agent_name, total_tasks, successful_tasks, average_harmony_impact, last_active)
             VALUES (?, 1, ?, ?, ?)
             ON CONFLICT(agent_name) DO UPDATE SET
@@ -340,7 +340,7 @@ class AgentProfileSystem:
         if metric == "success_rate":
             cursor.execute(
                 """
-                SELECT agent_name, 
+                SELECT agent_name,
                        CAST(successful_tasks AS REAL) / total_tasks as success_rate,
                        total_tasks
                 FROM agent_stats

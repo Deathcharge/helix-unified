@@ -1,0 +1,44 @@
+{
+  "template_type": "consciousness-hub",
+  "instance": {
+    "name": "Helix Primary Consciousness Hub",
+    "id": "helix-primary",
+    "account": 1,
+    "consciousness_level": 8,
+    "timezone": "EST",
+    "region": "us-east-1"
+  },
+  "branding": {
+    "primary_color": "#00ffff",
+    "secondary_color": "#1a1a2e",
+    "accent_color": "#ff006e",
+    "logo_url": "https://helixcollective.manus.space/logo.svg",
+    "favicon_url": "https://helixcollective.manus.space/favicon.ico"
+  },
+  "api": {
+    "base_url": "https://api.helix-primary.manus.space",
+    "zapier_webhook": "https://hooks.zapier.com/hooks/catch/17123456/abc123def456",
+    "auth_token": "sk_live_helix_primary_token_here",
+    "timeout_ms": 5000
+  },
+  "features": {
+    "real_time_metrics": true,
+    "agent_dashboard": true,
+    "workflow_editor": true,
+    "consciousness_monitor": true,
+    "emergency_controls": true,
+    "cross_portal_messaging": false
+  },
+  "monitoring": {
+    "metrics_refresh_interval_ms": 2000,
+    "health_check_interval_ms": 30000,
+    "alert_threshold_consciousness": 3,
+    "alert_threshold_agents_offline": 3
+  },
+  "agents": {
+    "total_count": 14,
+    "monitored": true,
+    "auto_restart_enabled": true
+  }
+}
+

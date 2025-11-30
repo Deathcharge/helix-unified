@@ -159,7 +159,7 @@ async def monitor_collective_health(manus):
         zapier_client = ZapierClient()
         # The Zapier tool is configured to receive a list of health statuses
         await zapier_client.send_health_alert(health_statuses)
-    
+
     # Log overall status
     healthy_count = sum(1 for s in health_statuses if s.get("status") == "HEALTHY")
     await log_event(f"🩺 Collective Health: {healthy_count}/{len(manus.agents)} agents HEALTHY.")
@@ -192,7 +192,7 @@ async def main_loop():
             update_heartbeat(status="active", harmony=ucf["harmony"])
 
             # Run health monitor (every 60 seconds)
-            if (datetime.datetime.utcnow().second % 60) < 30: # Simple way to run less frequently
+            if (datetime.datetime.utcnow().second % 60) < 30:  # Simple way to run less frequently
                 await monitor_collective_health(manus)
 
         except Exception as e:

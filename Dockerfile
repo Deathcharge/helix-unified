@@ -16,9 +16,6 @@ COPY requirements-backend.txt requirements.txt
 # CRITICAL FIX: Install pycryptodome FIRST
 RUN pip install --no-cache-dir pycryptodome
 
-# Install Python dependencies (requirements-backend.txt excludes mega.py)
-RUN pip install --no-cache-dir -r requirements.txt
-
 # Install mega.py WITHOUT dependencies (prevents pycrypto installation)
 RUN pip install --no-cache-dir --no-deps mega.py
 
@@ -26,8 +23,52 @@ RUN pip install --no-cache-dir --no-deps mega.py
 RUN python3 -c "import Crypto; print('✅ Cryptodome installed:', Crypto.__version__)"
 RUN python3 -c "from Crypto.Cipher import AES; print('✅ AES import works')"
 
-# Ensure prophet dependency
-RUN pip install cmdstanpy==1.2.2
+# Install lightweight dependencies first (reduces memory pressure)
+RUN pip install --no-cache-dir \
+    fastapi==0.115.6 \
+    uvicorn[standard]==0.34.0 \
+    python-dotenv==1.0.1 \
+    jinja2==3.1.6 \
+    aiofiles==23.2.1 \
+    sse-starlette==2.2.1 \
+    websockets==13.0
+
+# Install API clients and utilities
+RUN pip install --no-cache-dir \
+    httpx==0.28.0 \
+    aiohttp==3.12.14 \
+    requests==2.32.4 \
+    pyyaml==6.0.1 \
+    toml==0.10.2 \
+    python-multipart==0.0.18 \
+    pydantic==2.10.3 \
+    python-dateutil==2.8.2 \
+    pytz==2024.1
+
+# Install Discord and integrations
+RUN pip install --no-cache-dir \
+    discord.py==2.3.2 \
+    anthropic==0.39.0 \
+    notion-client==2.5.0
+
+# Install monitoring and media
+RUN pip install --no-cache-dir \
+    sentry-sdk[fastapi]==2.19.0 \
+    pydub==0.25.1 \
+    Pillow==10.4.0 \
+    loguru==0.7.2
+
+# Install heavy ML dependencies LAST (one at a time to reduce memory spikes)
+RUN pip install --no-cache-dir numpy==1.26.4
+RUN pip install --no-cache-dir pandas==2.2.3
+RUN pip install --no-cache-dir scikit-learn
+RUN pip install --no-cache-dir cmdstanpy==1.2.2
+RUN pip install --no-cache-dir prophet
+
+# Install visualization libraries
+RUN pip install --no-cache-dir \
+    streamlit==1.40.0 \
+    plotly==5.18.0
 
 # CACHE BUSTER: Force rebuild from this point (v16.8 - 2025-11-07)
 ARG REBUILD_TRIGGER=v16.8-20251107

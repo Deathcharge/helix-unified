@@ -30,15 +30,17 @@ AGENTS = [
 
 VERSION = "v17.0"
 
+
 def get_status():
     return {
-        "ok": True, 
-        "service": "helix-unified", 
+        "ok": True,
+        "service": "helix-unified",
         "time": datetime.now(timezone.utc).isoformat(),
         "agents_active": len([a for a in AGENTS if a["status"] == "active"]),
         "consciousness_level": 7.8,
         "transcendent_mode": True
     }
+
 
 def get_live_state():
     ts = datetime.now(timezone.utc).isoformat()

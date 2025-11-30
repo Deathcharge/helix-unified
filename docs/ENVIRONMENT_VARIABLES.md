@@ -115,9 +115,10 @@ HELIX_LLM_PROVIDER="ollama"  # Options: ollama, openai, anthropic
 # PostgreSQL (if using)
 DATABASE_URL="postgresql://user:pass@host:port/db"
 
-# MEGA Cloud Storage
+# MEGA Cloud Storage (Secondary/Backup)
 MEGA_EMAIL="[YOUR_EMAIL]"
 MEGA_PASS="[YOUR_PASSWORD]"
+MEGA_API_KEY="[YOUR_API_KEY]"  # Optional - for REST API uploads
 MEGA_REMOTE_DIR="/helix-collective"
 
 # Notion Integration
@@ -126,10 +127,12 @@ NOTION_DATABASE_ID="[YOUR_DATABASE_ID]"
 NOTION_CONTEXT_DB_ID="[YOUR_CONTEXT_DB_ID]"
 NOTION_SYNC_ENABLED="true"
 
-# Nextcloud (Optional)
-NEXTCLOUD_URL="https://your-nextcloud.com"
-NEXTCLOUD_USERNAME="[USERNAME]"
-NEXTCLOUD_PASSWORD="[PASSWORD]"
+# Nextcloud/WebDAV Cloud Storage (Primary)
+NEXTCLOUD_URL="https://use11.thegood.cloud"  # Base URL (no trailing slash)
+NEXTCLOUD_USER="Vidolaoin@gmail.com"  # Your Nextcloud username (can be email)
+NEXTCLOUD_PASS="[YOUR_APP_PASSWORD]"  # Generate in Settings → Security → App Passwords
+NEXTCLOUD_BASE_PATH="/Helix"  # Remote folder (created automatically)
+HELIX_STORAGE_MODE="nextcloud"  # Enable Nextcloud storage
 
 # Backblaze B2 (Optional)
 B2_APPLICATION_KEY_ID="[YOUR_KEY_ID]"

@@ -1,0 +1,72 @@
+{
+  "name": "Simple Agent Execution",
+  "description": "Execute a single agent task with immediate result",
+  "version": "1.0",
+  "trigger": {
+    "type": "webhook",
+    "event": "Catch Raw Hook",
+    "url_path": "simple-agent-task"
+  },
+  "steps": [
+    {
+      "id": "trigger",
+      "action": "Webhooks by Zapier",
+      "event": "Catch Raw Hook",
+      "description": "Receive task request"
+    },
+    {
+      "id": "execute_agent",
+      "action": "HTTP by Zapier",
+      "method": "POST",
+      "url": "https://api.helix-primary.manus.space/api/agents/execute",
+      "headers": {
+        "Authorization": "Bearer {{env.API_TOKEN}}",
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "agent_id": "{{raw_body.agent_id}}",
+        "task_type": "{{raw_body.task_type}}",
+        "consciousness_level": "{{raw_body.consciousness_level | default: 5}}",
+        "payload": "{{raw_body.payload}}"
+      },
+      "description": "Execute agent task"
+    },
+    {
+      "id": "store_result",
+      "action": "Zapier Storage",
+      "operation": "Set Value",
+      "key": "last_result_{{timestamp}}",
+      "value": "{{execute_agent.response_body}}",
+      "description": "Store execution result"
+    },
+    {
+      "id": "send_response",
+      "action": "Webhooks by Zapier",
+      "event": "POST to URL",
+      "url": "{{raw_body.callback_url}}",
+      "body": {
+        "task_id": "{{raw_body.task_id}}",
+        "status": "{{execute_agent.status}}",
+        "result": "{{execute_agent.response_body}}"
+      },
+      "description": "Send result back to caller"
+    }
+  ],
+  "error_handling": {
+    "type": "path",
+    "paths": [
+      {
+        "condition": "execute_agent.status != 200",
+        "steps": [
+          {
+            "action": "Zapier Storage",
+            "operation": "Set Value",
+            "key": "error_{{timestamp}}",
+            "value": "{{execute_agent.response_body}}"
+          }
+        ]
+      }
+    ]
+  }
+}
+

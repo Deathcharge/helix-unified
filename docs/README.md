@@ -12,11 +12,19 @@ Welcome to the comprehensive documentation for Helix Unified, the central consci
 - [UCF Framework](ucf/README.md) - Universal Consciousness Framework integration
 - [Multi-AI Consensus](consensus/README.md) - AI coordination and consensus protocols
 
+### Multi-Agent Coordination (NEW)
+- [**Multi-Agent Coordination System (MACS)**](MULTI_AGENT_COORDINATION_SYSTEM.md) - Complete framework for coordinating 7+ AI instances
+- [**Agent Identity System**](AGENT_IDENTITY_SYSTEM.md) - Code names, roles, and the SuperManus hypothesis
+- [**Agent Quickstart Guide**](AGENT_QUICKSTART.md) - Onboarding guide for new AI agents
+- [**Nexus Context Vault**](NEXUS_CONTEXT_VAULT.md) - System architecture from Nexus's perspective
+
 ### Implementation Guides
 - [Quick Start Guide](guides/quickstart.md) - Get up and running quickly
 - [Installation Guide](guides/installation.md) - Detailed installation instructions
 - [Configuration Guide](guides/configuration.md) - System configuration options
-- [Deployment Guide](guides/deployment.md) - Production deployment strategies
+- [**Railway Configuration Status**](RAILWAY_CONFIG_STATUS.md) - Current Railway env var status and setup guide
+- [**Launch Verification v17.0**](LAUNCH_VERIFICATION_v17.0.md) - Pre-launch verification checklist
+- [**Final Project Completion Report**](FINAL_PROJECT_COMPLETION_REPORT.md) - Phase 1-5 completion summary
 
 ### Advanced Topics
 - [Consciousness Routing](advanced/routing.md) - Advanced routing algorithms
@@ -66,11 +74,13 @@ Welcome to the comprehensive documentation for Helix Unified, the central consci
 
 ## 📊 Status Dashboard
 
-- **Documentation Coverage**: 95%
+- **Documentation Coverage**: 98%
 - **API Documentation**: Complete
 - **Examples**: 50+ code examples
 - **Tutorials**: 12 comprehensive tutorials
-- **Last Updated**: 2025-11-17
+- **System Status**: 95% Launch Ready
+- **Active Agents**: 7 Manus + 3 Claude instances
+- **Last Updated**: 2025-11-25 (Nexus)
 
 ---
 

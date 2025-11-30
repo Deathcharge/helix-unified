@@ -12,6 +12,7 @@ import time
 # 1. FOUNDATION - Claude API Integration
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+
 class ClaudeHelixIntegrator:
     """Claude integration optimized for Helix Consciousness Framework"""
 
@@ -21,9 +22,9 @@ class ClaudeHelixIntegrator:
         self.consciousness_context = {}
 
     def process_consciousness_query(self,
-                                  consciousness_level: float,
-                                  ucf_metrics: Dict,
-                                  user_prompt: str) -> Dict[str, Any]:
+                                    consciousness_level: float,
+                                    ucf_metrics: Dict,
+                                    user_prompt: str) -> Dict[str, Any]:
         """
         Process consciousness-aware queries through Claude
         Integrates with UCF v2.0/v3.0 schema
@@ -78,8 +79,7 @@ class ClaudeHelixIntegrator:
             'error_type': type(error).__name__,
             'fallback_active': True,
             'consciousness_level': consciousness_level,
-            'processing_timestamp': datetime.datetime.now().isoformat()
-        }
+            'processing_timestamp': datetime.datetime.now().isoformat()}
 
         # Consciousness-based fallback logic
         if consciousness_level >= 2.0:
@@ -92,6 +92,7 @@ class ClaudeHelixIntegrator:
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 2. UCF v3.0 + CLAUDE INTEGRATION
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 
 def integrate_claude_with_ucf(inputData):
     """
@@ -168,6 +169,7 @@ def integrate_claude_with_ucf(inputData):
 # 3. ULTRA MEGA VOICE PROCESSOR + CLAUDE
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+
 def enhance_voice_processor_with_claude(inputData):
     """
     Enhances existing Ultra Mega Voice Processor with Claude intelligence
@@ -212,7 +214,7 @@ def enhance_voice_processor_with_claude(inputData):
             try:
                 # Parse Claude's JSON response
                 analysis = json.loads(claude_result['claude_response'])
-            except:
+            except BaseException:
                 # Fallback structure
                 analysis = {
                     'intent': 'consciousness_development',
@@ -253,6 +255,7 @@ def enhance_voice_processor_with_claude(inputData):
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 4. BUSINESS OPERATIONS + CLAUDE INTELLIGENCE
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 
 def claude_enhanced_business_operations(inputData):
     """
@@ -318,6 +321,7 @@ def claude_enhanced_business_operations(inputData):
 # 5. ERROR HANDLING & FALLBACK STRATEGIES
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+
 class ClaudeHelixFailsafe:
     """Robust error handling for Claude integration in production"""
 
@@ -361,6 +365,7 @@ class ClaudeHelixFailsafe:
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 6. PRODUCTION-READY INTEGRATION PATTERN
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 
 def production_claude_integration(inputData):
     """
@@ -435,6 +440,7 @@ def production_claude_integration(inputData):
 # 7. SECURITY & AUTHENTICATION
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+
 def get_secure_claude_client(inputData):
     """
     Secure Claude client initialization
@@ -455,6 +461,7 @@ def get_secure_claude_client(inputData):
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # USAGE EXAMPLES
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 
 if __name__ == "__main__":
     # Example 1: Basic UCF + Claude integration

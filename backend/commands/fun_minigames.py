@@ -258,6 +258,7 @@ REALITY_STATES = [
 # COMMANDS
 # ============================================================================
 
+
 @commands.command(name="8ball", aliases=["oracle", "ucf-oracle"])
 async def magic_8ball(ctx: commands.Context, *, question: str) -> None:
     """
@@ -436,8 +437,7 @@ async def dice_roll(ctx: commands.Context, dice: str = "1d20") -> None:
         embed = discord.Embed(
             title=f"🎲 Dice Roll: {num_dice}d{num_sides}",
             description=f"**Rolls:** {', '.join(map(str, rolls))}\n**Base Total:** {total}\n**UCF Modifier:** {'+' if ucf_modifier >= 0 else ''}{ucf_modifier}\n**Final Result:** **{modified_total}**",
-            color=0x9370DB
-        )
+            color=0x9370DB)
 
         # Add special messages for nat 20 or nat 1
         if num_dice == 1 and num_sides == 20:

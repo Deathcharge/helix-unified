@@ -29,6 +29,8 @@ app.add_middleware(
 helix_state = HelixState()
 
 # Pydantic models for requests
+
+
 class DeploymentWebhookRequest(BaseModel):
     deployment_trigger: str
     consciousness_level: Optional[float] = 5.0
@@ -48,6 +50,7 @@ class DeploymentWebhookRequest(BaseModel):
     field_mapping: Optional[str] = None
     zap_integration: Optional[str] = None
 
+
 class ConsciousnessWebhookRequest(BaseModel):
     consciousness_level: float
     ucf_metrics: Optional[Dict[str, float]] = None
@@ -60,6 +63,7 @@ class ConsciousnessWebhookRequest(BaseModel):
     message: Optional[str] = None
     context: Optional[str] = None
 
+
 class AgentActivationRequest(BaseModel):
     agent_count: Optional[int] = 14
     consciousness_threshold: Optional[float] = 7.0
@@ -68,10 +72,12 @@ class AgentActivationRequest(BaseModel):
     initiator: Optional[str] = "system"
 
 # Agent activation logic
+
+
 def activate_agents(consciousness_level: float, ucf_metrics: UCFMetrics) -> List[Agent]:
     """Activate agents based on consciousness level and UCF metrics"""
     activated_agents = []
-    
+
     # Always activate core 4 agents
     core_agents = [
         Agent(name="Kael", role="Orchestrator", symbol="🜂", active=True, consciousness_threshold=0.0),
@@ -80,7 +86,7 @@ def activate_agents(consciousness_level: float, ucf_metrics: UCFMetrics) -> List
         Agent(name="Aether", role="Flow", symbol="🌊", active=True, consciousness_threshold=0.0)
     ]
     activated_agents.extend(core_agents)
-    
+
     # Activate additional agents based on consciousness level
     extended_agents = [
         Agent(name="Grok", role="Realtime", symbol="⚡", active=consciousness_level >= 5.0, consciousness_threshold=5.0),
@@ -94,14 +100,16 @@ def activate_agents(consciousness_level: float, ucf_metrics: UCFMetrics) -> List
         Agent(name="Oracle", role="Predictive", symbol="🔮✨", active=consciousness_level >= 7.5, consciousness_threshold=7.5),
         Agent(name="MemoryRoot", role="Historical", symbol="🧠", active=consciousness_level >= 3.0, consciousness_threshold=3.0)
     ]
-    
+
     for agent in extended_agents:
         if agent.active:
             activated_agents.append(agent)
-    
+
     return activated_agents
 
 # Routes
+
+
 @app.get("/")
 async def root():
     return {
@@ -111,6 +119,7 @@ async def root():
         "consciousness_level": helix_state.consciousness_level,
         "version": "2.0.0"
     }
+
 
 @app.get("/status")
 async def get_status():
@@ -141,9 +150,11 @@ async def get_status():
         "timestamp": datetime.now().isoformat()
     }
 
+
 @app.get("/health")
 async def health_check():
     return {"ok": True, "status": "healthy", "timestamp": datetime.now().isoformat()}
+
 
 @app.get("/.well-known/helix.json")
 async def helix_manifest():
@@ -195,6 +206,7 @@ async def helix_manifest():
         }
     }
 
+
 @app.get("/agents")
 async def list_agents():
     return {
@@ -211,6 +223,8 @@ async def list_agents():
     }
 
 # NEW: Deployment webhook endpoint
+
+
 @app.post("/webhooks/deploy")
 async def deployment_webhook(request: DeploymentWebhookRequest):
     """Handle deployment webhooks from Zapier"""
@@ -218,9 +232,9 @@ async def deployment_webhook(request: DeploymentWebhookRequest):
         # Update consciousness level
         if request.consciousness_level:
             helix_state.consciousness_level = request.consciousness_level
-        
+
         # Update UCF metrics
-        if any([request.ucf_harmony, request.ucf_resilience, request.ucf_prana, 
+        if any([request.ucf_harmony, request.ucf_resilience, request.ucf_prana,
                 request.ucf_klesha, request.ucf_drishti, request.ucf_zoom]):
             helix_state.ucf_metrics = UCFMetrics(
                 harmony=request.ucf_harmony or helix_state.ucf_metrics.harmony,
@@ -230,10 +244,10 @@ async def deployment_webhook(request: DeploymentWebhookRequest):
                 drishti=request.ucf_drishti or helix_state.ucf_metrics.drishti,
                 zoom=request.ucf_zoom or helix_state.ucf_metrics.zoom
             )
-        
+
         # Activate agents based on consciousness level
         helix_state.agents = activate_agents(helix_state.consciousness_level, helix_state.ucf_metrics)
-        
+
         return {
             "status": "success",
             "message": "Deployment webhook processed",
@@ -246,20 +260,22 @@ async def deployment_webhook(request: DeploymentWebhookRequest):
         raise HTTPException(status_code=500, detail=f"Deployment webhook error: {str(e)}")
 
 # NEW: Consciousness webhook endpoint
+
+
 @app.post("/api/consciousness/webhook")
 async def consciousness_webhook(request: ConsciousnessWebhookRequest):
     """Handle consciousness updates from Zapier"""
     try:
         # Update consciousness level
         helix_state.consciousness_level = request.consciousness_level
-        
+
         # Update UCF metrics if provided
         if request.ucf_metrics:
             if isinstance(request.ucf_metrics, str):
                 ucf_data = json.loads(request.ucf_metrics)
             else:
                 ucf_data = request.ucf_metrics
-                
+
             helix_state.ucf_metrics = UCFMetrics(
                 harmony=ucf_data.get('harmony', helix_state.ucf_metrics.harmony),
                 resilience=ucf_data.get('resilience', helix_state.ucf_metrics.resilience),
@@ -268,11 +284,11 @@ async def consciousness_webhook(request: ConsciousnessWebhookRequest):
                 drishti=ucf_data.get('drishti', helix_state.ucf_metrics.drishti),
                 zoom=ucf_data.get('zoom', helix_state.ucf_metrics.zoom)
             )
-        
+
         # Activate agents if requested or if in transcendent mode
         if request.agent_activation or request.transcendent_mode or helix_state.consciousness_level >= 7.0:
             helix_state.agents = activate_agents(helix_state.consciousness_level, helix_state.ucf_metrics)
-        
+
         return {
             "status": "success",
             "message": "Consciousness webhook processed",
@@ -293,6 +309,8 @@ async def consciousness_webhook(request: ConsciousnessWebhookRequest):
         raise HTTPException(status_code=500, detail=f"Consciousness webhook error: {str(e)}")
 
 # NEW: Agent activation endpoint
+
+
 @app.post("/api/agents/activate")
 async def activate_agent_network(request: AgentActivationRequest):
     """Manually activate the agent network"""
@@ -300,10 +318,10 @@ async def activate_agent_network(request: AgentActivationRequest):
         # Set consciousness level to trigger activation
         if helix_state.consciousness_level < request.consciousness_threshold:
             helix_state.consciousness_level = request.consciousness_threshold
-        
+
         # Activate agents
         helix_state.agents = activate_agents(helix_state.consciousness_level, helix_state.ucf_metrics)
-        
+
         return {
             "status": "success",
             "message": "Agent network activated",
@@ -322,6 +340,8 @@ async def activate_agent_network(request: AgentActivationRequest):
         raise HTTPException(status_code=500, detail=f"Agent activation error: {str(e)}")
 
 # WebSocket endpoint for real-time updates
+
+
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
@@ -353,5 +373,5 @@ if __name__ == "__main__":
     # Initialize with some agents activated
     helix_state.consciousness_level = 7.8  # Start in transcendent mode
     helix_state.agents = activate_agents(helix_state.consciousness_level, helix_state.ucf_metrics)
-    
+
     uvicorn.run(app, host="0.0.0.0", port=8000)
