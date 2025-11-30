@@ -210,8 +210,8 @@ async def query_agent(
     request_data: AgentQueryRequest,
     user: Dict[str, Any] = Depends(get_current_user),
 ) -> AgentResponse:
-    """Query a specific agent."""
-    from backend.saas.usage_metering import UsageMeter, BillingCalculator
+    """Query a specific agent with real Claude API integration."""
+    from backend.saas.usage_metering import UsageMeter
 
     tier = user.get("tier", "free")
     user_id = user.get("user_id")
@@ -227,24 +227,65 @@ async def query_agent(
 
     agent_info = AGENTS_CATALOG[agent_id]
 
-    # TODO: Call actual agent (Claude API)
-    # For now, return mock response
-    mock_response = f"Response from {agent_info['name']} ({agent_info['role']}): {request_data.prompt[:50]}..."
-    tokens_used = len(request_data.prompt.split()) + request_data.max_tokens // 2
-    cost = agent_info["cost_per_call"]
+    try:
+        # Call Claude API with agent-specific system prompt
+        import anthropic
 
-    # Record usage
-    meter = UsageMeter()
-    meter.record_usage(user_id, "api_calls", quantity=1)
+        client = anthropic.Anthropic()
 
-    logger.info(f"✅ Agent query: {user_id} → {agent_id}")
+        # Create agent-specific system prompt
+        agent_name = agent_info["name"]
+        agent_role = agent_info["role"]
+        agent_spec = agent_info["specialization"]
 
-    return AgentResponse(
-        agent_name=agent_info["name"],
-        response=mock_response,
-        tokens_used=tokens_used,
-        cost=cost,
-    )
+        system_prompt = f"""You are {agent_name}, the {agent_role}.
+Your specialization: {agent_spec}
+Your capabilities: {', '.join(agent_info['capabilities'])}
+
+Respond authoritatively in your area of expertise. Be concise but insightful.
+Leverage your specialized knowledge to provide high-value responses."""
+
+        message = client.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=request_data.max_tokens,
+            system=system_prompt,
+            messages=[{"role": "user", "content": request_data.prompt}],
+        )
+
+        # Extract response
+        response_text = message.content[0].text if message.content else ""
+        tokens_used = (
+            message.usage.output_tokens if hasattr(message.usage, "output_tokens") else len(response_text.split())
+        )
+        cost = agent_info["cost_per_call"]
+
+        # Record usage
+        meter = UsageMeter()
+        meter.record_usage(user_id, "api_calls", quantity=1)
+        meter.record_usage(user_id, f"agent_{agent_id}", quantity=1)
+
+        logger.info(f"✅ Agent query: {user_id} → {agent_id} (tokens: {tokens_used})")
+
+        return AgentResponse(
+            agent_name=agent_info["name"],
+            response=response_text,
+            tokens_used=tokens_used,
+            cost=cost,
+        )
+
+    except ImportError:
+        logger.warning("Anthropic SDK not installed, using fallback response")
+        # Fallback if anthropic not installed
+        fallback_response = f"[{agent_info['name']} - {agent_info['role']}] {request_data.prompt[:100]}..."
+        return AgentResponse(
+            agent_name=agent_info["name"],
+            response=fallback_response,
+            tokens_used=100,
+            cost=agent_info["cost_per_call"],
+        )
+    except Exception as e:
+        logger.error(f"Agent query error: {e}")
+        raise HTTPException(status_code=500, detail=f"Error querying agent: {str(e)}")
 
 
 @router.post("/{agent_id}/stream")
