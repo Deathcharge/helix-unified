@@ -1,9 +1,10 @@
 /**
  * 📁 File Explorer Component
- * Browser-based file explorer
+ * Browser-based file explorer with real backend
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Loader, AlertCircle } from 'lucide-react';
 
 interface FileEntry {
   name: string;
@@ -12,36 +13,39 @@ interface FileEntry {
   size?: number;
 }
 
-const mockFiles: Record<string, FileEntry[]> = {
-  '/': [
-    { name: 'backend', type: 'folder', path: '/backend' },
-    { name: 'frontend', type: 'folder', path: '/frontend' },
-    { name: 'docs', type: 'folder', path: '/docs' },
-    { name: 'README.md', type: 'file', path: '/README.md', size: 5240 },
-    { name: 'package.json', type: 'file', path: '/package.json', size: 1200 },
-  ],
-  '/backend': [
-    { name: 'saas', type: 'folder', path: '/backend/saas' },
-    { name: 'app.py', type: 'file', path: '/backend/app.py', size: 3200 },
-    { name: 'main.py', type: 'file', path: '/backend/main.py', size: 2100 },
-  ],
-  '/backend/saas': [
-    { name: 'stripe_service.py', type: 'file', path: '/backend/saas/stripe_service.py', size: 4200 },
-    { name: 'auth_service.py', type: 'file', path: '/backend/saas/auth_service.py', size: 3800 },
-    { name: 'dashboard_api.py', type: 'file', path: '/backend/saas/dashboard_api.py', size: 2900 },
-  ],
-  '/frontend': [
-    { name: 'pages', type: 'folder', path: '/frontend/pages' },
-    { name: 'components', type: 'folder', path: '/frontend/components' },
-    { name: 'package.json', type: 'file', path: '/frontend/package.json', size: 890 },
-  ],
-};
-
 export default function FileExplorer() {
-  const [currentPath, setCurrentPath] = useState('/');
+  const [currentPath, setCurrentPath] = useState('');
+  const [files, setFiles] = useState<FileEntry[]>([]);
   const [selectedFile, setSelectedFile] = useState<FileEntry | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const files = mockFiles[currentPath] || [];
+  // Load files when path changes
+  useEffect(() => {
+    loadDirectory(currentPath);
+  }, [currentPath]);
+
+  const loadDirectory = async (path: string) => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const url = `/api/web-os/files/list${path ? '?path=' + encodeURIComponent(path) : ''}`;
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error('Failed to load directory');
+      }
+
+      const data = await response.json();
+      setFiles(data.files || []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error loading directory');
+      setFiles([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleDoubleClick = (entry: FileEntry) => {
     if (entry.type === 'folder') {
@@ -53,10 +57,13 @@ export default function FileExplorer() {
   };
 
   const handleBack = () => {
-    if (currentPath !== '/') {
-      const parent = currentPath.split('/').slice(0, -1).join('/') || '/';
-      setCurrentPath(parent);
-      setSelectedFile(null);
+    if (currentPath) {
+      const parts = currentPath.split('/').filter(Boolean);
+      if (parts.length > 0) {
+        parts.pop();
+        setCurrentPath(parts.length ? '/' + parts.join('/') : '');
+        setSelectedFile(null);
+      }
     }
   };
 
@@ -67,6 +74,8 @@ export default function FileExplorer() {
     return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
   };
 
+  const displayPath = currentPath || '/home/helix';
+
   return (
     <div className="w-full h-full flex flex-col bg-slate-900 text-slate-100">
       {/* Address Bar */}
@@ -74,47 +83,68 @@ export default function FileExplorer() {
         <div className="flex gap-2">
           <button
             onClick={handleBack}
-            disabled={currentPath === '/'}
+            disabled={!currentPath}
             className="px-3 py-1 rounded bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-sm"
           >
             ← Back
           </button>
           <div className="flex-1 px-3 py-1 rounded bg-slate-800 border border-slate-700 font-mono text-sm">
-            {currentPath}
+            {displayPath}
           </div>
         </div>
       </div>
 
+      {/* Error State */}
+      {error && (
+        <div className="p-3 border-b border-red-700/50 bg-red-950/30 text-red-300 text-sm flex items-center gap-2">
+          <AlertCircle className="w-4 h-4" />
+          {error}
+        </div>
+      )}
+
       {/* File List */}
       <div className="flex-1 overflow-auto">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="border-b border-slate-700 bg-slate-800/50 sticky top-0">
-              <th className="px-4 py-2 text-left text-sm">Name</th>
-              <th className="px-4 py-2 text-right text-sm w-20">Size</th>
-            </tr>
-          </thead>
-          <tbody>
-            {files.map((file) => (
-              <tr
-                key={file.path}
-                onDoubleClick={() => handleDoubleClick(file)}
-                onClick={() => setSelectedFile(file)}
-                className={`border-b border-slate-700/30 hover:bg-slate-800/50 cursor-pointer transition ${
-                  selectedFile?.path === file.path ? 'bg-purple-900/30' : ''
-                }`}
-              >
-                <td className="px-4 py-2 text-sm flex items-center gap-2">
-                  <span>{file.type === 'folder' ? '📁' : '📄'}</span>
-                  {file.name}
-                </td>
-                <td className="px-4 py-2 text-sm text-right text-slate-400">
-                  {formatSize(file.size)}
-                </td>
+        {loading ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <Loader className="w-8 h-8 animate-spin text-purple-400 mx-auto mb-2" />
+              <p className="text-slate-400">Loading files...</p>
+            </div>
+          </div>
+        ) : files.length > 0 ? (
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="border-b border-slate-700 bg-slate-800/50 sticky top-0">
+                <th className="px-4 py-2 text-left text-sm">Name</th>
+                <th className="px-4 py-2 text-right text-sm w-20">Size</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {files.map((file) => (
+                <tr
+                  key={file.path}
+                  onDoubleClick={() => handleDoubleClick(file)}
+                  onClick={() => setSelectedFile(file)}
+                  className={`border-b border-slate-700/30 hover:bg-slate-800/50 cursor-pointer transition ${
+                    selectedFile?.path === file.path ? 'bg-purple-900/30' : ''
+                  }`}
+                >
+                  <td className="px-4 py-2 text-sm flex items-center gap-2">
+                    <span>{file.type === 'folder' ? '📁' : '📄'}</span>
+                    {file.name}
+                  </td>
+                  <td className="px-4 py-2 text-sm text-right text-slate-400">
+                    {formatSize(file.size)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-slate-400">(empty directory)</p>
+          </div>
+        )}
       </div>
 
       {/* Status Bar */}

@@ -1,36 +1,121 @@
 /**
  * 🖥️ Terminal Component
- * Browser-based terminal using xterm.js
+ * Real WebSocket-based terminal with backend execution
  */
 
 import React, { useEffect, useRef } from 'react';
 
+interface TerminalResult {
+  command: string;
+  output: string;
+  error: string;
+  exit_code: number;
+  success: boolean;
+  current_dir: string;
+}
+
 export default function Terminal() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const wsRef = useRef<WebSocket | null>(null);
   const [input, setInput] = React.useState('');
-  const [output, setOutput] = React.useState<string[]>(['Helix Terminal v1.0', '$ ']);
+  const [output, setOutput] = React.useState<string[]>(['Helix Terminal v1.0', 'Connecting to backend...', '$ ']);
+  const [connected, setConnected] = React.useState(false);
+  const [currentDir, setCurrentDir] = React.useState('/home/helix');
+
+  useEffect(() => {
+    // Connect to WebSocket
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const userId = localStorage.getItem('session_id') || 'default';
+    const wsUrl = `${protocol}//${window.location.host}/api/web-os/ws/terminal/${userId}`;
+
+    try {
+      wsRef.current = new WebSocket(wsUrl);
+
+      wsRef.current.onopen = () => {
+        setConnected(true);
+        setOutput(['Helix Terminal v1.0', '✅ Connected to backend', '$ ']);
+      };
+
+      wsRef.current.onmessage = (event) => {
+        const result: TerminalResult = JSON.parse(event.data);
+
+        setOutput((prev) => {
+          const newOutput = [...prev];
+          // Remove the last "$ " prompt
+          newOutput.pop();
+
+          // Add command
+          newOutput.push(`$ ${result.command}`);
+
+          // Add output or error
+          if (result.error) {
+            newOutput.push(result.error);
+          }
+          if (result.output) {
+            newOutput.push(result.output);
+          }
+
+          // Add new prompt
+          newOutput.push('$ ');
+          return newOutput;
+        });
+
+        setCurrentDir(result.current_dir);
+      };
+
+      wsRef.current.onerror = (error) => {
+        setOutput((prev) => [...prev, '❌ WebSocket error, falling back to REST API']);
+        setConnected(false);
+      };
+
+      wsRef.current.onclose = () => {
+        setConnected(false);
+      };
+    } catch (error) {
+      setOutput((prev) => [...prev, `❌ Connection error: ${error}`]);
+    }
+
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+    };
+  }, []);
 
   const handleCommand = (cmd: string) => {
+    if (!cmd.trim()) return;
+
+    if (connected && wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      // Send via WebSocket
+      wsRef.current.send(JSON.stringify({ command: cmd }));
+      setInput('');
+    } else {
+      // Fallback to REST API
+      handleCommandRest(cmd);
+    }
+  };
+
+  const handleCommandRest = async (cmd: string) => {
     const newOutput = [...output];
     newOutput[newOutput.length - 1] = `$ ${cmd}`;
 
-    // Simple mock commands
-    if (cmd === 'help') {
-      newOutput.push('Available commands:');
-      newOutput.push('  ls - List files');
-      newOutput.push('  pwd - Print working directory');
-      newOutput.push('  help - Show this help');
-      newOutput.push('  clear - Clear screen');
-    } else if (cmd === 'clear') {
-      newOutput.length = 0;
-    } else if (cmd === 'ls') {
-      newOutput.push('backend/  frontend/  docs/  README.md');
-    } else if (cmd === 'pwd') {
-      newOutput.push('/home/helix');
-    } else if (cmd.startsWith('cd ')) {
-      newOutput.push(`Changed directory to ${cmd.slice(3)}`);
-    } else if (cmd) {
-      newOutput.push(`Command not found: ${cmd}`);
+    try {
+      const response = await fetch('/api/web-os/terminal/execute?command=' + encodeURIComponent(cmd) + '&user_id=default', {
+        method: 'POST',
+      });
+
+      const result: TerminalResult = await response.json();
+
+      if (result.error) {
+        newOutput.push(result.error);
+      }
+      if (result.output) {
+        newOutput.push(result.output);
+      }
+
+      setCurrentDir(result.current_dir);
+    } catch (error) {
+      newOutput.push(`❌ Error: ${error}`);
     }
 
     newOutput.push('$ ');
