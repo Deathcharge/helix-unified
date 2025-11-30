@@ -1,0 +1,4 @@
+error: the following file has staged content different from both the
+file and the HEAD:
+    helix-unified-fresh
+(use -f to force removal)
