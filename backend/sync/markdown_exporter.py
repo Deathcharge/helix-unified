@@ -62,8 +62,8 @@ class MarkdownExporter:
 
         return f"""# 🌀 Helix Ecosystem Sync Report
 
-**Generated:** {timestamp}  
-**Version:** v15.3 Dual Resonance  
+**Generated:** {timestamp}
+**Version:** v15.3 Dual Resonance
 **Status:** Production
 
 > *"Tat Tvam Asi - That Thou Art"*"""

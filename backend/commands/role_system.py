@@ -247,7 +247,12 @@ ALL_ROLES = {
 # HELPER FUNCTIONS
 # ============================================================================
 
-async def ensure_roles_from_dict(guild: discord.Guild, role_dict: Dict[str, Dict[str, Any]], reason: str = "Helix self-assignable role") -> Dict[str, discord.Role]:
+async def ensure_roles_from_dict(guild: discord.Guild,
+                                 role_dict: Dict[str,
+                                                 Dict[str,
+                                                      Any]],
+                                 reason: str = "Helix self-assignable role") -> Dict[str,
+                                                                                     discord.Role]:
     """
     Ensure all roles from a role dictionary exist in the guild.
 

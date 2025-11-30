@@ -11,13 +11,15 @@ from loguru import logger
 # Environment variables for Notion integration
 NOTION_TOKEN = os.getenv("NOTION_TOKEN")
 # Hardcoded IDs based on Notion Scan for v16.9
-AGENT_REGISTRY_DB_ID = "2f65aab794a64ec48bcc46bf760f128f" # Agent Registry
-UCF_STATE_DB_ID = "103a36fe2a914256814b1e7e94846550" # UCF Metrics History
+AGENT_REGISTRY_DB_ID = "2f65aab794a64ec48bcc46bf760f128f"  # Agent Registry
+UCF_STATE_DB_ID = "103a36fe2a914256814b1e7e94846550"  # UCF Metrics History
+
 
 class NotionSync:
     """
     A service to synchronize Helix Collective data (Agents, UCF State) with Notion databases.
     """
+
     def __init__(self, token: Optional[str] = NOTION_TOKEN):
         self.token = token
         self.client = None
@@ -53,11 +55,11 @@ class NotionSync:
         try:
             # Simplified: Query for existing pages to find the page to update
             # In a real scenario, this would be a more complex query
-            
+
             # For demonstration, we will just log the intent to sync
             for agent_name, agent_data in agents_status.items():
                 properties = self._get_agent_properties(agent_data)
-                
+
                 # Placeholder for actual Notion API call
                 # self.client.pages.create(parent={"database_id": AGENT_REGISTRY_DB_ID}, properties=properties)
                 logger.debug(f"Notion: Would sync/update page for agent {agent_name}")
@@ -101,10 +103,13 @@ class NotionSync:
         except Exception as e:
             logger.error(f"Notion Unknown Error during UCF State sync: {e}")
 
+
 # Global instance (placeholder for proper initialization in main.py)
 notion_sync = NotionSync()
 
 # Placeholder for integration with system events (e.g., from agents_loop)
+
+
 def trigger_notion_sync(agents_status: Dict[str, Any], ucf_state: Dict[str, Any]):
     """
     Triggers the Notion sync in a non-blocking background task.
