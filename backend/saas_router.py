@@ -20,6 +20,7 @@ from fastapi import HTTPException
 import time
 import os
 from datetime import datetime
+from backend.security_middleware import SafeErrorResponse
 
 # Import existing orchestrator if available
 try:
@@ -272,7 +273,8 @@ async def call_anthropic(
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Anthropic API error: {str(e)}")
+        status_code, error_response = SafeErrorResponse.sanitize_error(e, "anthropic_api_error")
+        raise HTTPException(status_code=status_code, detail=error_response)
 
 async def call_openai(
     model: str,
@@ -307,7 +309,8 @@ async def call_openai(
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"OpenAI API error: {str(e)}")
+        status_code, error_response = SafeErrorResponse.sanitize_error(e, "openai_api_error")
+        raise HTTPException(status_code=status_code, detail=error_response)
 
 async def call_xai(
     model: str,
@@ -346,7 +349,8 @@ async def call_xai(
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"xAI API error: {str(e)}")
+        status_code, error_response = SafeErrorResponse.sanitize_error(e, "xai_api_error")
+        raise HTTPException(status_code=status_code, detail=error_response)
 
 async def call_perplexity(
     model: str,
@@ -385,7 +389,8 @@ async def call_perplexity(
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Perplexity API error: {str(e)}")
+        status_code, error_response = SafeErrorResponse.sanitize_error(e, "perplexity_api_error")
+        raise HTTPException(status_code=status_code, detail=error_response)
 
 # ============================================================================
 # COST CALCULATION
