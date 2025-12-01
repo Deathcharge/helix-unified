@@ -1202,9 +1202,17 @@ async def consciousness_websocket_endpoint(websocket: WebSocket, token: str = No
     """
     await websocket.accept()
 
+    # Message size limit (1MB) to prevent memory exhaustion DoS
+    MAX_MESSAGE_SIZE = 1024 * 1024
+
     try:
         # Wait for authentication message
         auth_message = await websocket.receive_json()
+
+        # Validate message size
+        if len(str(auth_message)) > MAX_MESSAGE_SIZE:
+            await websocket.close(code=1009, reason="Message too large (max 1MB)")
+            return
 
         if auth_message.get('type') != 'agent_connect':
             await websocket.close(code=1008, reason="Authentication required - send agent_connect message")
@@ -1262,6 +1270,14 @@ async def consciousness_websocket_endpoint(websocket: WebSocket, token: str = No
         while True:
             data = await websocket.receive_json()
 
+            # Validate message size
+            if len(str(data)) > MAX_MESSAGE_SIZE:
+                await websocket.send_json({
+                    "error": "Message too large",
+                    "detail": "Maximum message size is 1MB"
+                })
+                continue
+
             if data.get('type') == 'consciousness_update':
                 # External agent sending consciousness data
                 logger.info(f"Consciousness update from {agent_name}")
@@ -1306,6 +1322,9 @@ async def websocket_endpoint_legacy(websocket: WebSocket):
     """
     await ws_manager.connect(websocket, client_id=f"legacy_{id(websocket)}")
 
+    # Message size limit (1MB) to prevent memory exhaustion DoS
+    MAX_MESSAGE_SIZE = 1024 * 1024
+
     try:
         # Start heartbeat task
         heartbeat = asyncio.create_task(send_heartbeats(websocket))
@@ -1313,6 +1332,15 @@ async def websocket_endpoint_legacy(websocket: WebSocket):
         # Listen for client messages (optional - mostly for pings)
         while True:
             data = await websocket.receive_text()
+
+            # Validate message size
+            if len(data) > MAX_MESSAGE_SIZE:
+                await websocket.send_json({
+                    "error": "Message too large",
+                    "detail": "Maximum message size is 1MB"
+                })
+                continue
+
             # Echo back for connection test
             await websocket.send_json({"type": "echo", "message": data, "timestamp": datetime.utcnow().isoformat()})
 
