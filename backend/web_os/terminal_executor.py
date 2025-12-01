@@ -236,7 +236,7 @@ class TerminalExecutor:
                     try:
                         size = os.path.getsize(item_path)
                         output_lines.append(f"📄 {item} ({size}B)")
-                    except:
+                    except (OSError, IOError):
                         output_lines.append(f"📄 {item}")
 
             output = '\n'.join(output_lines) if output_lines else "(empty directory)"

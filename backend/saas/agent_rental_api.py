@@ -350,5 +350,3 @@ async def get_current_user(request: Request) -> Dict[str, Any]:
 # ============================================================================
 
 __all__ = ["router", "AGENTS_CATALOG", "TIER_LIMITS"]
-
-from typing import Any, Dict
