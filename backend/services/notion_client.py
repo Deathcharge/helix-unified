@@ -31,7 +31,12 @@ class HelixNotionClient:
         """Initialize Notion client with database IDs and API version."""
         notion_token = os.getenv("NOTION_API_KEY")
         if not notion_token:
-            raise ValueError("NOTION_API_KEY environment variable not set")
+            logger.warning("⚠️ NOTION_API_KEY not set. Notion integration will be disabled.")
+            self.notion = None
+            self._disabled = True
+            return
+        
+        self._disabled = False
 
         # Initialize client with 2025-09-03 API version
         self.notion = Client(
@@ -68,6 +73,9 @@ class HelixNotionClient:
         Returns:
             The data source ID, or None if not found
         """
+        if getattr(self, '_disabled', False):
+            return None
+        
         if database_id in self._data_source_cache:
             return self._data_source_cache[database_id]
 
@@ -559,3 +567,31 @@ class HelixNotionClient:
         except Exception as e:
             logger.warning(f"⚠️ Error getting recent deployments: {e}")
             return []
+
+
+# ============================================================================
+# HELPER FUNCTIONS
+# ============================================================================
+
+_notion_client_instance: Optional[HelixNotionClient] = None
+
+def get_notion_client() -> Optional[HelixNotionClient]:
+    """
+    Get or create a singleton Notion client instance.
+    
+    Returns None if NOTION_API_KEY is not set, allowing graceful degradation.
+    """
+    global _notion_client_instance
+    
+    if _notion_client_instance is not None:
+        return _notion_client_instance
+    
+    try:
+        _notion_client_instance = HelixNotionClient()
+        return _notion_client_instance
+    except ValueError as e:
+        logger.warning(f"⚠️ Notion client not available: {e}")
+        return None
+    except Exception as e:
+        logger.error(f"❌ Error creating Notion client: {e}")
+        return None
