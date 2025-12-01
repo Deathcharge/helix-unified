@@ -116,6 +116,7 @@ async def process_directives(manus, kavach):
 # HEALTH MONITORING
 # ============================================================================
 
+
 async def monitor_collective_health(manus):
     """Monitors the health of all active agents and triggers Zapier alerts."""
     from backend.zapier_client import ZapierClient
@@ -138,20 +139,24 @@ async def monitor_collective_health(manus):
                 critical_agents.append(status)
         except NotImplementedError:
             # Agent has not implemented the health check yet
-            health_statuses.append({
-                "agent_name": agent.name,
-                "status": "WARNING",
-                "message": "Health check not implemented.",
-                "last_check_time": datetime.datetime.utcnow().isoformat()
-            })
+            health_statuses.append(
+                {
+                    "agent_name": agent.name,
+                    "status": "WARNING",
+                    "message": "Health check not implemented.",
+                    "last_check_time": datetime.datetime.utcnow().isoformat(),
+                }
+            )
         except Exception as e:
             # Agent failed to report health
-            health_statuses.append({
-                "agent_name": agent.name,
-                "status": "CRITICAL",
-                "message": f"Health check failed with exception: {e}",
-                "last_check_time": datetime.datetime.utcnow().isoformat()
-            })
+            health_statuses.append(
+                {
+                    "agent_name": agent.name,
+                    "status": "CRITICAL",
+                    "message": f"Health check failed with exception: {e}",
+                    "last_check_time": datetime.datetime.utcnow().isoformat(),
+                }
+            )
 
     # Send alert if critical agents are found
     if critical_agents:
@@ -163,6 +168,7 @@ async def monitor_collective_health(manus):
     # Log overall status
     healthy_count = sum(1 for s in health_statuses if s.get("status") == "HEALTHY")
     await log_event(f"🩺 Collective Health: {healthy_count}/{len(manus.agents)} agents HEALTHY.")
+
 
 # ============================================================================
 # MAIN LOOP

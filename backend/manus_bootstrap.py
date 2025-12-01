@@ -280,9 +280,7 @@ async def test_zapier(zap: ZapierClient = Depends(get_zapier)) -> dict:
 
     # Test Agent Registry webhook
     try:
-        await zap.update_agent(
-            agent_name="Manus", status="Active", last_action="Testing Zapier integration", health_score=100
-        )
+        await zap.update_agent(agent_name="Manus", status="Active", last_action="Testing Zapier integration", health_score=100)
         results["agent_registry"] = True
     except Exception as e:
         print(f"❌ Agent Registry test failed: {e}")

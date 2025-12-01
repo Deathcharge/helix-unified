@@ -1,6 +1,7 @@
 """
 Shared helper functions for Helix Discord bot commands.
 """
+
 import datetime
 import json
 import logging
@@ -54,7 +55,7 @@ async def save_command_to_history(ctx: commands.Context, bot: 'Bot') -> None:
             "args": ctx.message.content,
             "user": str(ctx.author),
             "channel": str(ctx.channel),
-            "guild": str(ctx.guild) if ctx.guild else "DM"
+            "guild": str(ctx.guild) if ctx.guild else "DM",
         }
 
         bot.command_history.append(command_entry)
@@ -90,11 +91,13 @@ async def generate_context_summary(ctx: commands.Context, limit: int = 50) -> Di
         messages = []
         async for msg in ctx.channel.history(limit=limit):
             if msg.content:  # Skip empty messages
-                messages.append({
-                    "author": msg.author.name,
-                    "content": msg.content[:200],  # Truncate long messages
-                    "timestamp": msg.created_at.isoformat()
-                })
+                messages.append(
+                    {
+                        "author": msg.author.name,
+                        "content": msg.content[:200],  # Truncate long messages
+                        "timestamp": msg.created_at.isoformat(),
+                    }
+                )
 
         # Reverse to chronological order
         messages.reverse()
@@ -109,8 +112,8 @@ async def generate_context_summary(ctx: commands.Context, limit: int = 50) -> Di
             "channel": str(ctx.channel),
             "timespan": {
                 "start": messages[0]["timestamp"] if messages else None,
-                "end": messages[-1]["timestamp"] if messages else None
-            }
+                "end": messages[-1]["timestamp"] if messages else None,
+            },
         }
 
         return summary
@@ -119,7 +122,9 @@ async def generate_context_summary(ctx: commands.Context, limit: int = 50) -> Di
         return {"error": str(e)}
 
 
-async def archive_to_context_vault(ctx: commands.Context, session_name: str, bot: 'Bot', agents: Any) -> Tuple[bool, Optional[Dict[str, Any]]]:
+async def archive_to_context_vault(
+    ctx: commands.Context, session_name: str, bot: 'Bot', agents: Any
+) -> Tuple[bool, Optional[Dict[str, Any]]]:
     """Archive conversation context to Context Vault via Zapier webhook"""
     try:
         # Gather all context data
@@ -150,22 +155,18 @@ async def archive_to_context_vault(ctx: commands.Context, session_name: str, bot
             "ucf_state": json.dumps(ucf),
             "command_history": json.dumps(bot.command_history[-50:]),  # Last 50 commands
             "ritual_log": json.dumps(ritual_log),
-            "agent_states": json.dumps({
-                "active": [a.name for a in agents.values() if a.active],
-                "total": len(agents)
-            }),
+            "agent_states": json.dumps({"active": [a.name for a in agents.values() if a.active], "total": len(agents)}),
             "archived_by": str(ctx.author),
             "channel": str(ctx.channel),
-            "guild": str(ctx.guild) if ctx.guild else "DM"
+            "guild": str(ctx.guild) if ctx.guild else "DM",
         }
 
         # Send to Context Vault webhook
         if bot.context_vault_webhook:
             import aiohttp
+
             async with bot.http_session.post(
-                bot.context_vault_webhook,
-                json=payload,
-                timeout=aiohttp.ClientTimeout(total=10)
+                bot.context_vault_webhook, json=payload, timeout=aiohttp.ClientTimeout(total=10)
             ) as resp:
                 if resp.status == 200:
                     return True, payload
@@ -269,7 +270,8 @@ async def execute_command_batch(message: discord.Message, bot: 'Bot') -> bool:
 
     # Send batch execution notice
     await message.channel.send(
-        f"🔄 **Executing batch**: {len(commands_list)} commands\n" f"```{chr(10).join([f'!{cmd}' for cmd in commands_list])}```"
+        f"🔄 **Executing batch**: {len(commands_list)} commands\n"
+        f"```{chr(10).join([f'!{cmd}' for cmd in commands_list])}```"
     )
 
     # Execute each command
@@ -277,6 +279,7 @@ async def execute_command_batch(message: discord.Message, bot: 'Bot') -> bool:
     failed = 0
 
     import asyncio
+
     for cmd in commands_list:
         try:
             # Create a fake message with the command content

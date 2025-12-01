@@ -9,6 +9,7 @@ Supports multiple LLM providers:
 
 Each agent personality has a unique system prompt and response style.
 """
+
 import logging
 import os
 from typing import Dict, List, Optional, Any
@@ -23,8 +24,10 @@ logger = logging.getLogger(__name__)
 # LLM PROVIDER CONFIGURATION
 # ============================================================================
 
+
 class LLMProvider(str, Enum):
     """Supported LLM providers."""
+
     ANTHROPIC = "anthropic"
     OPENAI = "openai"
     OLLAMA = "ollama"
@@ -43,7 +46,7 @@ DEFAULT_MODELS = {
     LLMProvider.ANTHROPIC: "claude-3-5-sonnet-20241022",
     LLMProvider.OPENAI: "gpt-4-turbo-preview",
     LLMProvider.OLLAMA: "llama2:7b",
-    LLMProvider.CUSTOM: "custom-model"
+    LLMProvider.CUSTOM: "custom-model",
 }
 
 LLM_MODEL = os.getenv("HELIX_LLM_MODEL", DEFAULT_MODELS.get(LLM_PROVIDER, "llama2:7b"))
@@ -299,6 +302,7 @@ Keep responses concise (2-3 sentences) with light/clarity language.""",
 # LLM CLIENT
 # ============================================================================
 
+
 class LLMAgentEngine:
     """Engine for generating intelligent agent responses using LLMs."""
 
@@ -322,11 +326,7 @@ class LLMAgentEngine:
             self.session = None
 
     async def generate_agent_response(
-        self,
-        agent_id: str,
-        user_message: str,
-        session_id: str,
-        context: Optional[Dict[str, Any]] = None
+        self, agent_id: str, user_message: str, session_id: str, context: Optional[Dict[str, Any]] = None
     ) -> str:
         """
         Generate intelligent response from an agent using LLM.
@@ -387,11 +387,7 @@ class LLMAgentEngine:
             return f"[{agent_id}] Processing: {user_message[:50]}..."
 
     async def _anthropic_generate(
-        self,
-        system_prompt: str,
-        user_message: str,
-        history_key: str,
-        config: Dict[str, Any]
+        self, system_prompt: str, user_message: str, history_key: str, config: Dict[str, Any]
     ) -> str:
         """Generate response using Anthropic Claude API."""
         if not ANTHROPIC_API_KEY:
@@ -418,11 +414,7 @@ class LLMAgentEngine:
             "messages": messages,
         }
 
-        async with self.session.post(
-            "https://api.anthropic.com/v1/messages",
-            headers=headers,
-            json=payload
-        ) as resp:
+        async with self.session.post("https://api.anthropic.com/v1/messages", headers=headers, json=payload) as resp:
             if resp.status != 200:
                 error_text = await resp.text()
                 raise Exception(f"Anthropic API error: {resp.status} - {error_text}")
@@ -430,13 +422,7 @@ class LLMAgentEngine:
             data = await resp.json()
             return data["content"][0]["text"]
 
-    async def _openai_generate(
-        self,
-        system_prompt: str,
-        user_message: str,
-        history_key: str,
-        config: Dict[str, Any]
-    ) -> str:
+    async def _openai_generate(self, system_prompt: str, user_message: str, history_key: str, config: Dict[str, Any]) -> str:
         """Generate response using OpenAI GPT API."""
         if not OPENAI_API_KEY:
             raise ValueError("OPENAI_API_KEY not configured")
@@ -461,11 +447,7 @@ class LLMAgentEngine:
             "messages": messages,
         }
 
-        async with self.session.post(
-            "https://api.openai.com/v1/chat/completions",
-            headers=headers,
-            json=payload
-        ) as resp:
+        async with self.session.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload) as resp:
             if resp.status != 200:
                 error_text = await resp.text()
                 raise Exception(f"OpenAI API error: {resp.status} - {error_text}")
@@ -473,13 +455,7 @@ class LLMAgentEngine:
             data = await resp.json()
             return data["choices"][0]["message"]["content"]
 
-    async def _ollama_generate(
-        self,
-        system_prompt: str,
-        user_message: str,
-        history_key: str,
-        config: Dict[str, Any]
-    ) -> str:
+    async def _ollama_generate(self, system_prompt: str, user_message: str, history_key: str, config: Dict[str, Any]) -> str:
         """Generate response using Ollama (local LLM)."""
         await self.initialize()
 
@@ -496,13 +472,10 @@ class LLMAgentEngine:
             "options": {
                 "temperature": config.get("temperature", 0.7),
                 "num_predict": config.get("max_tokens", 150),
-            }
+            },
         }
 
-        async with self.session.post(
-            f"{OLLAMA_BASE_URL}/api/chat",
-            json=payload
-        ) as resp:
+        async with self.session.post(f"{OLLAMA_BASE_URL}/api/chat", json=payload) as resp:
             if resp.status != 200:
                 error_text = await resp.text()
                 raise Exception(f"Ollama API error: {resp.status} - {error_text}")
@@ -510,13 +483,7 @@ class LLMAgentEngine:
             data = await resp.json()
             return data["message"]["content"]
 
-    async def _custom_generate(
-        self,
-        system_prompt: str,
-        user_message: str,
-        history_key: str,
-        config: Dict[str, Any]
-    ) -> str:
+    async def _custom_generate(self, system_prompt: str, user_message: str, history_key: str, config: Dict[str, Any]) -> str:
         """Generate response using custom LLM endpoint."""
         if not CUSTOM_LLM_ENDPOINT:
             raise ValueError("CUSTOM_LLM_ENDPOINT not configured")
@@ -535,10 +502,7 @@ class LLMAgentEngine:
             "temperature": config.get("temperature", 0.7),
         }
 
-        async with self.session.post(
-            CUSTOM_LLM_ENDPOINT,
-            json=payload
-        ) as resp:
+        async with self.session.post(CUSTOM_LLM_ENDPOINT, json=payload) as resp:
             if resp.status != 200:
                 error_text = await resp.text()
                 raise Exception(f"Custom LLM API error: {resp.status} - {error_text}")

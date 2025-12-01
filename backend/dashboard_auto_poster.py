@@ -119,13 +119,9 @@ def generate_daily_trend_chart():
     # 2. Prana & Klesha Trend
     if not ritual_history.empty and "time" in ritual_history.columns:
         if "prana" in ritual_history.columns:
-            ax2.plot(
-                ritual_history["time"], ritual_history["prana"], label="Prana", color="magenta", marker="^", linewidth=2
-            )
+            ax2.plot(ritual_history["time"], ritual_history["prana"], label="Prana", color="magenta", marker="^", linewidth=2)
         if "klesha" in ritual_history.columns:
-            ax2.plot(
-                ritual_history["time"], ritual_history["klesha"], label="Klesha", color="red", marker="v", linewidth=2
-            )
+            ax2.plot(ritual_history["time"], ritual_history["klesha"], label="Klesha", color="red", marker="v", linewidth=2)
         ax2.axhline(y=0.5, color="yellow", linestyle="--", label="Balance")
         ax2.set_title("Prana & Klesha Balance", fontsize=14, color="white")
         ax2.set_xlabel("Date", color="white")

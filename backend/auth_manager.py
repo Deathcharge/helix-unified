@@ -12,9 +12,11 @@ import logging
 # Try to import cryptography, fallback to base64 if not available
 try:
     from cryptography.fernet import Fernet
+
     CRYPTO_AVAILABLE = True
 except ImportError:
     import base64
+
     CRYPTO_AVAILABLE = False
     logging.warning("cryptography not available, using base64 encoding (NOT SECURE for production!)")
 
@@ -54,7 +56,7 @@ class HelixAuthManager:
             "api_key": api_key,
             "platform": platform,
             "created_at": datetime.now().isoformat(),
-            **(additional_data or {})
+            **(additional_data or {}),
         }
 
         if CRYPTO_AVAILABLE and self.cipher_suite:
@@ -109,7 +111,7 @@ class HelixAuthManager:
             "anthropic": os.getenv("ANTHROPIC_API_KEY"),
             "railway": os.getenv("RAILWAY_TOKEN"),
             "dropbox": os.getenv("DROPBOX_ACCESS_TOKEN"),
-            "calendly": os.getenv("CALENDLY_API_KEY")
+            "calendly": os.getenv("CALENDLY_API_KEY"),
         }
 
         configured_count = 0

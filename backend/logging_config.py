@@ -83,9 +83,7 @@ def setup_logging(log_dir: str = "Shadow/manus_archive", log_level: str = "INFO"
     # ========================================================================
     # JSON HANDLER (for structured logs)
     # ========================================================================
-    json_handler = JSONFileHandler(
-        filename=log_path / "structured.jsonl", max_bytes=50 * 1024 * 1024, backup_count=3  # 50MB
-    )
+    json_handler = JSONFileHandler(filename=log_path / "structured.jsonl", max_bytes=50 * 1024 * 1024, backup_count=3)  # 50MB
     json_handler.setLevel(logging.INFO)
     logger.addHandler(json_handler)
 

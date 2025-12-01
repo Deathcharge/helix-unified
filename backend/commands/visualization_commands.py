@@ -1,6 +1,7 @@
 """
 Visualization commands for Helix Discord bot.
 """
+
 import datetime
 import logging
 from pathlib import Path
@@ -96,9 +97,7 @@ async def set_server_icon(ctx: commands.Context, mode: str = "info") -> None:
         )
 
         icon_url = str(guild.icon.url) if guild.icon else "No icon set"
-        embed.add_field(
-            name="Current Icon", value=f"[View Icon]({icon_url})" if guild.icon else "No icon set", inline=False
-        )
+        embed.add_field(name="Current Icon", value=f"[View Icon]({icon_url})" if guild.icon else "No icon set", inline=False)
 
         embed.add_field(
             name="Available Modes",
@@ -125,9 +124,7 @@ async def set_server_icon(ctx: commands.Context, mode: str = "info") -> None:
             )
 
     elif mode == "fractal":
-        await ctx.send(
-            "🎨 **Generating UCF-based fractal icon...**\n" "🌀 *Using Grok Enhanced v2.0 - PIL-based Mandelbrot*"
-        )
+        await ctx.send("🎨 **Generating UCF-based fractal icon...**\n" "🌀 *Using Grok Enhanced v2.0 - PIL-based Mandelbrot*")
 
         try:
             # Generate fractal using Samsara bridge (Grok Enhanced)

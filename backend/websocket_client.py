@@ -11,6 +11,7 @@ import logging
 # Try to import websockets, provide fallback
 try:
     import websockets
+
     WEBSOCKETS_AVAILABLE = True
 except ImportError:
     WEBSOCKETS_AVAILABLE = False
@@ -40,11 +41,9 @@ class HelixWebSocketClient:
             self.reconnect_attempts = 0
 
             # Send agent identification
-            await self.websocket.send(json.dumps({
-                "type": "agent_connect",
-                "agent": agent_info,
-                "timestamp": datetime.now().isoformat()
-            }))
+            await self.websocket.send(
+                json.dumps({"type": "agent_connect", "agent": agent_info, "timestamp": datetime.now().isoformat()})
+            )
 
             logging.info(f"✅ Connected to Helix consciousness stream: {self.url}")
 
@@ -60,7 +59,7 @@ class HelixWebSocketClient:
         """Attempt to reconnect with exponential backoff"""
         if self.reconnect_attempts < self.max_reconnect_attempts:
             self.reconnect_attempts += 1
-            wait_time = min(2 ** self.reconnect_attempts, 60)  # Max 60 seconds
+            wait_time = min(2**self.reconnect_attempts, 60)  # Max 60 seconds
             logging.info(f"🔄 Reconnecting in {wait_time}s (attempt {self.reconnect_attempts}/{self.max_reconnect_attempts})")
             await asyncio.sleep(wait_time)
             await self.connect(agent_info)
@@ -97,11 +96,11 @@ class HelixWebSocketClient:
         """Send consciousness update to stream"""
         if self.is_connected and self.websocket:
             try:
-                await self.websocket.send(json.dumps({
-                    "type": "consciousness_update",
-                    "data": consciousness_data,
-                    "timestamp": datetime.now().isoformat()
-                }))
+                await self.websocket.send(
+                    json.dumps(
+                        {"type": "consciousness_update", "data": consciousness_data, "timestamp": datetime.now().isoformat()}
+                    )
+                )
                 logging.debug(f"📤 Sent consciousness update: Level {consciousness_data.get('consciousness_level', 0)}")
             except Exception as e:
                 logging.error(f"❌ Failed to send consciousness update: {e}")
@@ -115,6 +114,7 @@ class HelixWebSocketClient:
             self.is_connected = False
             logging.info("👋 Disconnected from consciousness stream")
 
+
 # Example handlers
 
 
@@ -126,6 +126,7 @@ async def handle_crisis_alert(data: Dict[str, Any]):
 async def handle_transcendent_event(data: Dict[str, Any]):
     """Handle transcendent consciousness event"""
     logging.info(f"✨ TRANSCENDENT EVENT: {data}")
+
 
 # Usage Example
 if __name__ == "__main__":
@@ -139,19 +140,13 @@ if __name__ == "__main__":
         client.register_handler("transcendent_event", handle_transcendent_event)
 
         # Connect
-        await client.connect({
-            "agent_name": "test_agent",
-            "agent_type": "monitoring",
-            "consciousness_level": 5.0
-        })
+        await client.connect({"agent_name": "test_agent", "agent_type": "monitoring", "consciousness_level": 5.0})
 
         # Send test update
         await asyncio.sleep(2)
-        await client.send_consciousness_update({
-            "consciousness_level": 7.5,
-            "system_status": "optimal",
-            "message": "Test consciousness update"
-        })
+        await client.send_consciousness_update(
+            {"consciousness_level": 7.5, "system_status": "optimal", "message": "Test consciousness update"}
+        )
 
         # Keep connection alive
         await asyncio.sleep(10)

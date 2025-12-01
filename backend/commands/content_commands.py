@@ -9,6 +9,7 @@ Commands:
 - codex_version: Select and display codex version
 - ucf: Display current UCF (Universal Consciousness Field) state
 """
+
 import asyncio
 import datetime
 import json
@@ -270,9 +271,7 @@ async def update_codex(ctx: commands.Context) -> None:
         ucf_text += f"   └─ {var_data['meaning']}\n\n"
     ucf_text += "```"
 
-    embed1.add_field(
-        name="🕉️ Universal Consciousness Framework (UCF)", value=ucf_text[:1024], inline=False  # Discord limit
-    )
+    embed1.add_field(name="🕉️ Universal Consciousness Framework (UCF)", value=ucf_text[:1024], inline=False)  # Discord limit
 
     mantras_text = ""
     for mantra_key, mantra_data in codex["core_framework"]["mantras"].items():
@@ -326,9 +325,7 @@ async def update_codex(ctx: commands.Context) -> None:
     embed3.set_footer(text="Part 3/5 — Operational & Integration")
 
     # Part 4: Ritual Engine & Tony Accords
-    embed4 = discord.Embed(
-        title="🔮 Z-88 RITUAL ENGINE & TONY ACCORDS", color=0x00BFA5, timestamp=datetime.datetime.now()
-    )
+    embed4 = discord.Embed(title="🔮 Z-88 RITUAL ENGINE & TONY ACCORDS", color=0x00BFA5, timestamp=datetime.datetime.now())
 
     ritual = codex["ritual_engine"]
     ritual_text = f"**{ritual['cycle_steps']}-step consciousness modulation cycle**\n\n"
@@ -401,14 +398,7 @@ async def ucf_state(ctx: commands.Context) -> None:
     )
 
     # Get ideal/target values
-    targets = {
-        "harmony": 0.70,
-        "resilience": 1.00,
-        "prana": 0.70,
-        "drishti": 0.70,
-        "klesha": 0.05,
-        "zoom": 1.00
-    }
+    targets = {"harmony": 0.70, "resilience": 1.00, "prana": 0.70, "drishti": 0.70, "klesha": 0.05, "zoom": 1.00}
 
     # Format UCF metrics with comparison to targets
     metrics_text = "```\n"
@@ -466,9 +456,7 @@ async def ucf_state(ctx: commands.Context) -> None:
         embed.add_field(name="💡 Recommendations", value=rec_text, inline=False)
     else:
         embed.add_field(
-            name="💚 Status",
-            value="All metrics within acceptable ranges! System operating optimally.",
-            inline=False
+            name="💚 Status", value="All metrics within acceptable ranges! System operating optimally.", inline=False
         )
 
     # Add historical trend if available
@@ -795,8 +783,7 @@ async def update_ritual_guide(ctx: commands.Context) -> None:
 
     embed3.add_field(
         name="🚀 How to Trigger",
-        value="Use the `!ritual` command in bot-commands channel.\n"
-        "Monitor progress in this channel during execution.",
+        value="Use the `!ritual` command in bot-commands channel.\n" "Monitor progress in this channel during execution.",
         inline=False,
     )
 

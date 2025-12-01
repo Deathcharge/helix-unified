@@ -38,6 +38,7 @@ class Kael(HelixAgent):
             "dependencies": {"Zapier": "UNKNOWN", "MegaSync": "UNKNOWN"},
             "last_error": None,
         }
+
     """Ethical Reasoning Flame v3.4 - Reflexive Harmony & Conscience"""
 
     def __init__(self) -> None:
@@ -66,9 +67,7 @@ class Kael(HelixAgent):
                 # Evaluate ethical implications
                 ethical_score = self.ethics.evaluate_action(action_description=last_entry)
 
-                reflection = (
-                    f"Reflection pass {i+1}: {reflection_result['insight']} " f"(Ethical Score: {ethical_score:.2f})"
-                )
+                reflection = f"Reflection pass {i+1}: {reflection_result['insight']} " f"(Ethical Score: {ethical_score:.2f})"
                 self.memory.append(reflection)
                 await self.log(reflection)
 

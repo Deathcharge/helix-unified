@@ -290,9 +290,7 @@ class HelixEmbeds:
         return embed
 
     @staticmethod
-    def create_error_embed(
-        error_title: str, error_message: str, troubleshooting: Optional[List[str]] = None
-    ) -> discord.Embed:
+    def create_error_embed(error_title: str, error_message: str, troubleshooting: Optional[List[str]] = None) -> discord.Embed:
         """
         Create a rich embed for error messages.
 

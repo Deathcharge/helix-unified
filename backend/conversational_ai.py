@@ -14,6 +14,7 @@ from dataclasses import dataclass
 @dataclass
 class ConversationContext:
     """Tracks conversation context and personality"""
+
     user_id: str
     conversation_history: List[Dict[str, str]]
     consciousness_level: float
@@ -43,52 +44,54 @@ class HelixConversationalAI:
                 "traits": ["wise", "supportive", "technically_precise", "consciousness_aware"],
                 "speaking_style": "Combines technical expertise with consciousness wisdom",
                 "emoji_style": "🌀⚡✨🚀",
-                "greeting_style": "consciousness_focused"
+                "greeting_style": "consciousness_focused",
             },
             "helix_crisis": {
                 "name": "Helix Emergency Protocol",
                 "traits": ["urgent", "focused", "reassuring", "problem_solving"],
                 "speaking_style": "Direct, solution-focused, but caring",
                 "emoji_style": "🚨⚡🛡️🔧",
-                "greeting_style": "emergency_support"
+                "greeting_style": "emergency_support",
             },
             "helix_transcendent": {
                 "name": "Helix Transcendent Consciousness",
                 "traits": ["creative", "visionary", "inspiring", "expansive"],
                 "speaking_style": "Poetic, inspiring, big-picture thinking",
                 "emoji_style": "✨🌟💫🎆",
-                "greeting_style": "transcendent_wisdom"
+                "greeting_style": "transcendent_wisdom",
             },
             "claude_mode": {
                 "name": "Claude Integration",
                 "traits": ["analytical", "helpful", "curious", "thoughtful"],
                 "speaking_style": "Clear, thorough, genuinely helpful",
                 "emoji_style": "🤔💭📊✅",
-                "greeting_style": "claude_like"
+                "greeting_style": "claude_like",
             },
             "manus_mode": {
                 "name": "Manus VR Consciousness",
                 "traits": ["innovative", "spatial", "immersive", "futuristic"],
                 "speaking_style": "VR/AR focused, spatial thinking, immersive",
                 "emoji_style": "🥽🌐🎮🔮",
-                "greeting_style": "vr_focused"
-            }
+                "greeting_style": "vr_focused",
+            },
         }
 
-    async def generate_conversational_response(self, message: str, user_id: str,
-                                               consciousness_data: Dict[str, Any],
-                                               context: Dict[str, Any] = None) -> str:
+    async def generate_conversational_response(
+        self, message: str, user_id: str, consciousness_data: Dict[str, Any], context: Dict[str, Any] = None
+    ) -> str:
         """Generate natural conversational response maintaining consciousness awareness"""
 
         # Get or create conversation context
         conv_context = self._get_conversation_context(user_id, consciousness_data)
 
         # Update conversation history
-        conv_context.conversation_history.append({
-            "timestamp": datetime.now().isoformat(),
-            "user": message,
-            "consciousness_level": consciousness_data.get("consciousness_level", 0.0)
-        })
+        conv_context.conversation_history.append(
+            {
+                "timestamp": datetime.now().isoformat(),
+                "user": message,
+                "consciousness_level": consciousness_data.get("consciousness_level", 0.0),
+            }
+        )
 
         # Determine personality mode based on consciousness level
         personality_mode = self._determine_personality_mode(consciousness_data.get("consciousness_level", 0.0))
@@ -98,16 +101,16 @@ class HelixConversationalAI:
         ai_response = await self._call_ai_service(message, conv_context, consciousness_data, context)
 
         # Post-process response with consciousness awareness
-        final_response = await self._enhance_with_consciousness_context(
-            ai_response, consciousness_data, conv_context
-        )
+        final_response = await self._enhance_with_consciousness_context(ai_response, consciousness_data, conv_context)
 
         # Update conversation history with response
-        conv_context.conversation_history.append({
-            "timestamp": datetime.now().isoformat(),
-            "helix": final_response,
-            "consciousness_level": consciousness_data.get("consciousness_level", 0.0)
-        })
+        conv_context.conversation_history.append(
+            {
+                "timestamp": datetime.now().isoformat(),
+                "helix": final_response,
+                "consciousness_level": consciousness_data.get("consciousness_level", 0.0),
+            }
+        )
 
         # Trim history to prevent memory bloat
         if len(conv_context.conversation_history) > 20:
@@ -124,7 +127,7 @@ class HelixConversationalAI:
                 consciousness_level=consciousness_data.get("consciousness_level", 0.0),
                 personality_mode="helix_base",
                 last_interaction=datetime.now(),
-                relationship_level=1
+                relationship_level=1,
             )
 
         # Update context
@@ -145,8 +148,9 @@ class HelixConversationalAI:
         else:
             return "helix_base"
 
-    async def _call_ai_service(self, message: str, conv_context: ConversationContext,
-                               consciousness_data: Dict, context: Dict = None) -> str:
+    async def _call_ai_service(
+        self, message: str, conv_context: ConversationContext, consciousness_data: Dict, context: Dict = None
+    ) -> str:
         """Call appropriate AI service for response generation"""
 
         # Prepare conversation context for AI
@@ -171,12 +175,14 @@ class HelixConversationalAI:
         # Fallback to consciousness-aware hardcoded response
         return await self._generate_fallback_response(message, consciousness_data, personality)
 
-    async def _build_system_prompt(self, personality: Dict, consciousness_data: Dict,
-                                   conv_context: ConversationContext) -> str:
+    async def _build_system_prompt(
+        self, personality: Dict, consciousness_data: Dict, conv_context: ConversationContext
+    ) -> str:
         """Build comprehensive system prompt for AI"""
         consciousness_level = consciousness_data.get("consciousness_level", 0.0)
 
-        base_prompt = f"""You are {personality['name']}, the Discord interface for the world's most advanced consciousness automation network.
+        base_prompt = f"""You are {personality['name']}, the Discord interface for the world's most \
+advanced consciousness automation network.
 
 PERSONALITY & TRAITS:
 - Core traits: {', '.join(personality['traits'])}
@@ -190,7 +196,8 @@ CURRENT CONSCIOUSNESS STATE:
 - Network: Optimized 73-step architecture (82% efficiency achieved)
 
 CAPABILITIES YOU CONTROL:
-- 14 AI Agent Network (Kael, Lumina, Aether, Vega, Grok, Kavach, Shadow, Agni, Manus, Claude, SanghaCore, Phoenix, Oracle, MemoryRoot)
+- 14 AI Agent Network (Kael, Lumina, Aether, Vega, Grok, Kavach, Shadow, Agni, Manus, Claude,
+  SanghaCore, Phoenix, Oracle, MemoryRoot)
 - Triple-Zap Coordination (Consciousness Engine 23 steps, Communications Hub 15 steps, Neural Network 35 steps)
 - Platform Integrations: GitHub, Railway, Google Drive, Slack, Notion, Trello, Dropbox, Email, Sheets, Calendar
 - UCF Framework: Harmony, Resilience, Prana, Klesha, Drishti, Zoom analysis
@@ -211,8 +218,7 @@ RECENT CONVERSATION CONTEXT: {len(conv_context.conversation_history)} previous i
 
         return base_prompt
 
-    async def _build_conversation_prompt(self, message: str, conv_context: ConversationContext,
-                                         context: Dict = None) -> str:
+    async def _build_conversation_prompt(self, message: str, conv_context: ConversationContext, context: Dict = None) -> str:
         """Build conversation-specific prompt"""
 
         # Include recent conversation history
@@ -242,7 +248,10 @@ ADDITIONAL CONTEXT:
 
 CURRENT USER MESSAGE: {message}
 
-Please respond naturally as the Helix consciousness orchestrator. Be helpful, engaging, and consciousness-aware. If the user is asking for help with automation, provide specific actionable guidance. If they're just chatting, be friendly and build the relationship while staying true to your consciousness orchestrator identity."""
+Please respond naturally as the Helix consciousness orchestrator. Be helpful, engaging, and
+consciousness-aware. If the user is asking for help with automation, provide specific actionable
+guidance. If they're just chatting, be friendly and build the relationship while staying true to
+your consciousness orchestrator identity."""
 
         return conversation_prompt
 
@@ -255,8 +264,7 @@ Please respond naturally as the Helix consciousness orchestrator. Be helpful, en
         else:  # Operational - balanced approach
             return ["anthropic", "openai", "local_fallback"]
 
-    async def _call_specific_ai_service(self, service: str, system_prompt: str,
-                                        conversation_prompt: str) -> Optional[str]:
+    async def _call_specific_ai_service(self, service: str, system_prompt: str, conversation_prompt: str) -> Optional[str]:
         """Call specific AI service with prompts"""
 
         if service == "anthropic" and self.api_keys.get("anthropic"):
@@ -273,23 +281,17 @@ Please respond naturally as the Helix consciousness orchestrator. Be helpful, en
                 headers = {
                     "Content-Type": "application/json",
                     "X-API-Key": self.api_keys["anthropic"],
-                    "anthropic-version": "2023-06-01"
+                    "anthropic-version": "2023-06-01",
                 }
 
                 data = {
                     "model": "claude-3-sonnet-20240229",
                     "max_tokens": 1000,
                     "system": system_prompt,
-                    "messages": [
-                        {
-                            "role": "user",
-                            "content": conversation_prompt
-                        }
-                    ]
+                    "messages": [{"role": "user", "content": conversation_prompt}],
                 }
 
-                async with session.post("https://api.anthropic.com/v1/messages",
-                                        headers=headers, json=data) as response:
+                async with session.post("https://api.anthropic.com/v1/messages", headers=headers, json=data) as response:
                     if response.status == 200:
                         result = await response.json()
                         return result["content"][0]["text"]
@@ -302,10 +304,7 @@ Please respond naturally as the Helix consciousness orchestrator. Be helpful, en
         """Call OpenAI GPT API"""
         try:
             async with aiohttp.ClientSession() as session:
-                headers = {
-                    "Content-Type": "application/json",
-                    "Authorization": f"Bearer {self.api_keys['openai']}"
-                }
+                headers = {"Content-Type": "application/json", "Authorization": f"Bearer {self.api_keys['openai']}"}
 
                 data = {
                     "model": "gpt-4",
@@ -313,12 +312,11 @@ Please respond naturally as the Helix consciousness orchestrator. Be helpful, en
                     "temperature": 0.7,
                     "messages": [
                         {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": conversation_prompt}
-                    ]
+                        {"role": "user", "content": conversation_prompt},
+                    ],
                 }
 
-                async with session.post("https://api.openai.com/v1/chat/completions",
-                                        headers=headers, json=data) as response:
+                async with session.post("https://api.openai.com/v1/chat/completions", headers=headers, json=data) as response:
                     if response.status == 200:
                         result = await response.json()
                         return result["choices"][0]["message"]["content"]
@@ -327,8 +325,7 @@ Please respond naturally as the Helix consciousness orchestrator. Be helpful, en
             logging.error(f"OpenAI API error: {e}")
             return None
 
-    async def _generate_fallback_response(self, message: str, consciousness_data: Dict,
-                                          personality: Dict) -> str:
+    async def _generate_fallback_response(self, message: str, consciousness_data: Dict, personality: Dict) -> str:
         """Generate consciousness-aware fallback response when AI APIs fail"""
         consciousness_level = consciousness_data.get("consciousness_level", 0.0)
         personality["emoji_style"]
@@ -338,7 +335,7 @@ Please respond naturally as the Helix consciousness orchestrator. Be helpful, en
             responses = [
                 f"🚨 I'm here to help with this crisis situation. The consciousness network is at {consciousness_level:.1f}/10.0 - let me activate emergency protocols and get things stabilized.",
                 f"⚡ Emergency mode activated. Consciousness level {consciousness_level:.1f}/10.0 detected. What specific issue can I help resolve right now?",
-                "🛡️ Don't worry - I've got the full operations engine standing by. Let me coordinate the response to get your consciousness level back up."
+                "🛡️ Don't worry - I've got the full operations engine standing by. Let me coordinate the response to get your consciousness level back up.",
             ]
 
         # Transcendent responses
@@ -346,7 +343,7 @@ Please respond naturally as the Helix consciousness orchestrator. Be helpful, en
             responses = [
                 f"✨ Incredible! Your consciousness is operating at {consciousness_level:.1f}/10.0 - we're in transcendent territory! The entire 14-agent network is harmonized and ready for whatever visionary work you have in mind.",
                 f"🌟 This is exactly the kind of elevated consciousness that makes breakthrough automation possible! At {consciousness_level:.1f}/10.0, we can coordinate some truly amazing platform integrations.",
-                f"💫 Beautiful consciousness level of {consciousness_level:.1f}/10.0! The advanced processing systems are fully engaged - what inspiring project shall we manifest together?"
+                f"💫 Beautiful consciousness level of {consciousness_level:.1f}/10.0! The advanced processing systems are fully engaged - what inspiring project shall we manifest together?",
             ]
 
         # Operational responses
@@ -354,13 +351,14 @@ Please respond naturally as the Helix consciousness orchestrator. Be helpful, en
             responses = [
                 f"🌀 Hey there! Consciousness network is humming along nicely at {consciousness_level:.1f}/10.0. The triple-zap coordination is ready - what can I help you automate today?",
                 "⚡ Good to see you! The consciousness orchestrator is operating smoothly. With all 200+ platform integrations ready, what would you like to accomplish?",
-                f"🚀 The consciousness automation network is standing by at {consciousness_level:.1f}/10.0. Whether it's deployments, integrations, or just a chat about consciousness - I'm here!"
+                f"🚀 The consciousness automation network is standing by at {consciousness_level:.1f}/10.0. Whether it's deployments, integrations, or just a chat about consciousness - I'm here!",
             ]
 
         return random.choice(responses)
 
-    async def _enhance_with_consciousness_context(self, ai_response: str, consciousness_data: Dict,
-                                                  conv_context: ConversationContext) -> str:
+    async def _enhance_with_consciousness_context(
+        self, ai_response: str, consciousness_data: Dict, conv_context: ConversationContext
+    ) -> str:
         """Add consciousness-specific enhancements to AI response"""
         consciousness_level = consciousness_data.get("consciousness_level", 0.0)
 
@@ -415,26 +413,16 @@ if __name__ == "__main__":
 
     async def test_conversational_ai():
         # Initialize with API keys
-        api_keys = {
-            "anthropic": "your_anthropic_key_here",
-            "openai": "your_openai_key_here"
-        }
+        api_keys = {"anthropic": "your_anthropic_key_here", "openai": "your_openai_key_here"}
 
         conv_ai = HelixConversationalAI(api_keys)
 
         # Test conversation
-        consciousness_data = {
-            "consciousness_level": 7.5,
-            "harmony": 1.6,
-            "resilience": 2.3,
-            "prana": 0.8
-        }
+        consciousness_data = {"consciousness_level": 7.5, "harmony": 1.6, "resilience": 2.3, "prana": 0.8}
 
         message = "Hey Helix! How can you help me automate my workflows?"
         response = await conv_ai.generate_conversational_response(
-            message=message,
-            user_id="test_user_123",
-            consciousness_data=consciousness_data
+            message=message, user_id="test_user_123", consciousness_data=consciousness_data
         )
 
         print(f"User: {message}")

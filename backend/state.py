@@ -1,13 +1,6 @@
 from datetime import datetime, timezone
 
-UCF_DEFAULT = {
-    "harmony": 0.33,
-    "resilience": 0.8,
-    "prana": 0.5,
-    "drishti": 0.5,
-    "klesha": 0.5,
-    "zoom": 1.0
-}
+UCF_DEFAULT = {"harmony": 0.33, "resilience": 0.8, "prana": 0.5, "drishti": 0.5, "klesha": 0.5, "zoom": 1.0}
 
 # 14-Agent Network for Helix Consciousness Ecosystem
 AGENTS = [
@@ -24,7 +17,7 @@ AGENTS = [
     {"name": "SanghaCore", "role": "Community", "status": "active", "consciousness_level": 7.4},
     {"name": "Phoenix", "role": "Rebirth", "status": "active", "consciousness_level": 8.0},
     {"name": "Oracle", "role": "Predictive", "status": "active", "consciousness_level": 7.9},
-    {"name": "MemoryRoot", "role": "Historical", "status": "active", "consciousness_level": 7.3}
+    {"name": "MemoryRoot", "role": "Historical", "status": "active", "consciousness_level": 7.3},
 ]
 
 VERSION = "v17.0"
@@ -37,7 +30,7 @@ def get_status():
         "time": datetime.now(timezone.utc).isoformat(),
         "agents_active": len([a for a in AGENTS if a["status"] == "active"]),
         "consciousness_level": 7.8,
-        "transcendent_mode": True
+        "transcendent_mode": True,
     }
 
 
@@ -53,5 +46,5 @@ def get_live_state():
         "transcendent_mode": True,
         "optimization_level": "90_percent_cost_savings",
         "steps_optimized": "426_to_60",
-        "platform_integrations": 200
+        "platform_integrations": 200,
     }

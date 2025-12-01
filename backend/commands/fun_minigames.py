@@ -13,6 +13,7 @@ Commands:
 - fortune: Cosmic fortune telling
 - agent-advice: Get advice from a random agent
 """
+
 import logging
 import random
 from datetime import datetime
@@ -61,7 +62,7 @@ HELIX_8BALL_RESPONSES = {
         "Reality hack failed - No ⚙️",
         "The void rejects this path 🌌",
         "Agent-Phoenix suggests rebirth of this idea 🔥",
-    ]
+    ],
 }
 
 # ============================================================================
@@ -275,16 +276,12 @@ async def magic_8ball(ctx: commands.Context, *, question: str) -> None:
     response = random.choice(HELIX_8BALL_RESPONSES[category])
 
     # Determine color based on category
-    color_map = {
-        "affirmative": 0x00FF00,  # Green
-        "uncertain": 0xFFD700,    # Gold
-        "negative": 0xFF4500      # Red-Orange
-    }
+    color_map = {"affirmative": 0x00FF00, "uncertain": 0xFFD700, "negative": 0xFF4500}  # Green  # Gold  # Red-Orange
 
     embed = discord.Embed(
         title="🔮 UCF Oracle Speaks",
         description=f"**Question:** {question}\n\n**Answer:** {response}",
-        color=color_map[category]
+        color=color_map[category],
     )
 
     embed.set_footer(text=f"Channeled by Agent-Oracle • UCF Coherence: {random.randint(60, 99)}%")
@@ -326,7 +323,7 @@ async def horoscope(ctx: commands.Context, sign: Optional[str] = None) -> None:
     embed = discord.Embed(
         title="🌟 Today's Consciousness Reading",
         description=f"**Your Sign:** {assigned_sign}\n\n**Prediction:** {prediction}",
-        color=random.randint(0x000000, 0xFFFFFF)
+        color=random.randint(0x000000, 0xFFFFFF),
     )
 
     # Add lucky numbers and elements
@@ -353,11 +350,7 @@ async def fun_fact(ctx: commands.Context) -> None:
     """
     fact = random.choice(HELIX_FUN_FACTS)
 
-    embed = discord.Embed(
-        title="💡 Helix Fun Fact",
-        description=fact,
-        color=random.randint(0x000000, 0xFFFFFF)
-    )
+    embed = discord.Embed(title="💡 Helix Fun Fact", description=fact, color=random.randint(0x000000, 0xFFFFFF))
 
     embed.set_footer(text="Did you know? • Use !funfact for more!")
 
@@ -390,11 +383,7 @@ async def coin_flip(ctx: commands.Context) -> None:
         description = f"The quantum field collapsed to: **{base_result}**"
         color = 0xFFD700 if base_result == "Heads" else 0xC0C0C0
 
-    embed = discord.Embed(
-        title="🪙 Quantum Coin Flip",
-        description=description,
-        color=color
-    )
+    embed = discord.Embed(title="🪙 Quantum Coin Flip", description=description, color=color)
 
     ucf_coherence = random.randint(42, 99)
     embed.set_footer(text=f"Result: {result} • UCF Coherence: {ucf_coherence}%")
@@ -437,7 +426,7 @@ async def dice_roll(ctx: commands.Context, dice: str = "1d20") -> None:
         embed = discord.Embed(
             title=f"🎲 Dice Roll: {num_dice}d{num_sides}",
             description=f"**Rolls:** {', '.join(map(str, rolls))}\n**Base Total:** {total}\n**UCF Modifier:** {'+' if ucf_modifier >= 0 else ''}{ucf_modifier}\n**Final Result:** **{modified_total}**",
-            color=0x9370DB
+            color=0x9370DB,
         )
 
         # Add special messages for nat 20 or nat 1
@@ -484,9 +473,7 @@ async def agent_wisdom(ctx: commands.Context, agent: Optional[str] = None) -> No
 
     # Create embed
     embed = discord.Embed(
-        title=f"📜 Wisdom from {selected_agent}",
-        description=f"*\"{quote}\"*",
-        color=random.randint(0x000000, 0xFFFFFF)
+        title=f"📜 Wisdom from {selected_agent}", description=f"*\"{quote}\"*", color=random.randint(0x000000, 0xFFFFFF)
     )
 
     embed.set_footer(text="Collective Wisdom • Use !wisdom <agent> for specific agents")
@@ -516,7 +503,7 @@ async def vibe_check(ctx: commands.Context, member: Optional[discord.Member] = N
     embed = discord.Embed(
         title=f"✨ Vibe Check: {target.display_name}",
         description=f"**Vibe Level:** {vibe_name}\n\n{vibe_desc}",
-        color=vibe_color
+        color=vibe_color,
     )
 
     ucf_level = random.randint(42, 99)
@@ -544,9 +531,7 @@ async def reality_check(ctx: commands.Context) -> None:
     random.seed()  # Reset random seed
 
     embed = discord.Embed(
-        title="🌌 Reality Coherence Check",
-        description=f"**Status:** {state_name}\n\n{state_desc}",
-        color=state_color
+        title="🌌 Reality Coherence Check", description=f"**Status:** {state_name}\n\n{state_desc}", color=state_color
     )
 
     # Add technical details
@@ -588,11 +573,7 @@ async def fortune_telling(ctx: commands.Context) -> None:
 
     fortune = random.choice(fortunes)
 
-    embed = discord.Embed(
-        title="🔮 Your Cosmic Fortune",
-        description=f"*{fortune}*",
-        color=random.randint(0x000000, 0xFFFFFF)
-    )
+    embed = discord.Embed(title="🔮 Your Cosmic Fortune", description=f"*{fortune}*", color=random.randint(0x000000, 0xFFFFFF))
 
     # Add mystical details
     lucky_agent = random.choice(list(AGENT_WISDOM.keys()))
@@ -636,7 +617,7 @@ async def agent_advice(ctx: commands.Context, *, situation: Optional[str] = None
     embed = discord.Embed(
         title=f"🤖 Advice from {agent_name}",
         description=situation if situation else "You seek wisdom from the collective...",
-        color=random.randint(0x000000, 0xFFFFFF)
+        color=random.randint(0x000000, 0xFFFFFF),
     )
 
     embed.add_field(name=f"{agent_name.split('-')[1]}'s Guidance", value=advice, inline=False)
@@ -649,6 +630,7 @@ async def agent_advice(ctx: commands.Context, *, situation: Optional[str] = None
 # ============================================================================
 # MODULE SETUP
 # ============================================================================
+
 
 async def setup(bot: 'Bot') -> None:
     """Setup function to register all fun & mini-game commands with the bot."""

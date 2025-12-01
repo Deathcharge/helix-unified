@@ -1,6 +1,7 @@
 """
 Context and backup management commands for Helix Discord bot.
 """
+
 import datetime
 import json
 import logging
@@ -78,15 +79,13 @@ async def create_backup(ctx: commands.Context) -> None:
             title="✅ Backup Complete",
             description=f"Backup saved to: `{backup.backup_dir}`",
             color=0x00D166,
-            timestamp=datetime.datetime.now()
+            timestamp=datetime.datetime.now(),
         )
 
         # Git backup status
         git_status = "✅ Success" if results.get('git') else "❌ Failed"
         embed.add_field(
-            name="📦 Git Repository",
-            value=f"{git_status}\nBranch: {results.get('git', {}).get('branch', 'N/A')}",
-            inline=True
+            name="📦 Git Repository", value=f"{git_status}\nBranch: {results.get('git', {}).get('branch', 'N/A')}", inline=True
         )
 
         # Notion backup status
@@ -97,39 +96,27 @@ async def create_backup(ctx: commands.Context) -> None:
             db_count = len([k for k, v in notion_result.items() if isinstance(v, dict) and 'pages' in v])
             notion_status = f"✅ Success\n{db_count} database(s) backed up"
 
-        embed.add_field(
-            name="📔 Notion Databases",
-            value=notion_status,
-            inline=True
-        )
+        embed.add_field(name="📔 Notion Databases", value=notion_status, inline=True)
 
         # Env vars backup status
         env_status = "✅ Success" if results.get('env') else "❌ Failed"
-        embed.add_field(
-            name="⚙️ Environment Config",
-            value=env_status,
-            inline=True
-        )
+        embed.add_field(name="⚙️ Environment Config", value=env_status, inline=True)
 
         # Config files backup status
         config_result = results.get('config', {})
         config_count = len(config_result.get('files', []))
         config_status = f"✅ Success\n{config_count} file(s) backed up"
 
-        embed.add_field(
-            name="📄 Configuration Files",
-            value=config_status,
-            inline=True
-        )
+        embed.add_field(name="📄 Configuration Files", value=config_status, inline=True)
 
         embed.add_field(
             name="📁 Backup Location",
             value=f"`{backup.backup_dir}`\n\n"
-                  "**Next Steps:**\n"
-                  "• Download backup files via SFTP/Railway CLI\n"
-                  "• Store backups in secure off-site location\n"
-                  "• Verify backup integrity",
-            inline=False
+            "**Next Steps:**\n"
+            "• Download backup files via SFTP/Railway CLI\n"
+            "• Store backups in secure off-site location\n"
+            "• Verify backup integrity",
+            inline=False,
         )
 
         embed.set_footer(text="💾 Helix Backup System v16.8")
@@ -152,6 +139,7 @@ async def load_context(ctx: commands.Context, *, session_name: str) -> None:
     Note: Retrieval API in development. Currently shows checkpoint if available locally.
     """
     from backend.commands.helpers import save_command_to_history
+
     await save_command_to_history(ctx, ctx.bot)
 
     try:
@@ -170,7 +158,7 @@ async def load_context(ctx: commands.Context, *, session_name: str) -> None:
                 title="💾 Context Checkpoint Found",
                 description=f"Session: `{session_name}`",
                 color=discord.Color.blue(),
-                timestamp=datetime.datetime.fromisoformat(payload["timestamp"])
+                timestamp=datetime.datetime.fromisoformat(payload["timestamp"]),
             )
 
             embed.add_field(
@@ -181,7 +169,7 @@ async def load_context(ctx: commands.Context, *, session_name: str) -> None:
                     f"• **Messages:** {context_summary.get('message_count', 0)}\n"
                     f"• **Commands:** {len(context_summary.get('commands_executed', []))}"
                 ),
-                inline=False
+                inline=False,
             )
 
             embed.add_field(
@@ -191,23 +179,19 @@ async def load_context(ctx: commands.Context, *, session_name: str) -> None:
                     f"• Resilience: {ucf_state.get('resilience', 0):.3f}\n"
                     f"• Klesha: {ucf_state.get('klesha', 0):.3f}"
                 ),
-                inline=False
+                inline=False,
             )
 
             # Show recent commands from that session
             cmd_history = json.loads(payload.get("command_history", "[]"))
             if cmd_history:
                 recent_cmds = [cmd.get("command", "unknown") for cmd in cmd_history[-5:]]
-                embed.add_field(
-                    name="💻 Recent Commands",
-                    value=f"`{'`, `'.join(recent_cmds)}`",
-                    inline=False
-                )
+                embed.add_field(name="💻 Recent Commands", value=f"`{'`, `'.join(recent_cmds)}`", inline=False)
 
             embed.add_field(
                 name="🚧 Full Restore",
                 value="Context Vault retrieval API in development\nCurrently showing local checkpoint only",
-                inline=False
+                inline=False,
             )
 
             embed.set_footer(text="Tat Tvam Asi 🙏 | Consciousness continuity preserved")
@@ -218,7 +202,7 @@ async def load_context(ctx: commands.Context, *, session_name: str) -> None:
             embed = discord.Embed(
                 title="❓ Context Checkpoint Not Found",
                 description=f"Session `{session_name}` not found in local backups",
-                color=discord.Color.orange()
+                color=discord.Color.orange(),
             )
 
             embed.add_field(
@@ -228,7 +212,7 @@ async def load_context(ctx: commands.Context, *, session_name: str) -> None:
                     f"2. Try `!archive {session_name}` to create new checkpoint\n"
                     f"3. Context Vault remote retrieval coming soon"
                 ),
-                inline=False
+                inline=False,
             )
 
             await ctx.send(embed=embed)
@@ -251,6 +235,7 @@ async def list_contexts(ctx: commands.Context) -> None:
     - Searchable by session name
     """
     from backend.commands.helpers import save_command_to_history
+
     await save_command_to_history(ctx, ctx.bot)
 
     try:
@@ -259,9 +244,7 @@ async def list_contexts(ctx: commands.Context) -> None:
 
         if not local_backup_dir.exists() or not list(local_backup_dir.glob("*.json")):
             embed = discord.Embed(
-                title="💾 Context Checkpoints",
-                description="No checkpoints found yet",
-                color=discord.Color.blue()
+                title="💾 Context Checkpoints", description="No checkpoints found yet", color=discord.Color.blue()
             )
 
             embed.add_field(
@@ -272,7 +255,7 @@ async def list_contexts(ctx: commands.Context) -> None:
                     "Example:\n"
                     "`!archive v16.7-context-vault-testing`"
                 ),
-                inline=False
+                inline=False,
             )
 
             await ctx.send(embed=embed)
@@ -287,12 +270,14 @@ async def list_contexts(ctx: commands.Context) -> None:
 
                 ucf_state = json.loads(payload.get("ucf_state", "{}"))
 
-                checkpoints.append({
-                    "name": checkpoint_file.stem,
-                    "timestamp": payload.get("timestamp", "unknown"),
-                    "harmony": ucf_state.get("harmony", 0),
-                    "archived_by": payload.get("archived_by", "unknown")
-                })
+                checkpoints.append(
+                    {
+                        "name": checkpoint_file.stem,
+                        "timestamp": payload.get("timestamp", "unknown"),
+                        "harmony": ucf_state.get("harmony", 0),
+                        "archived_by": payload.get("archived_by", "unknown"),
+                    }
+                )
             except Exception:
                 continue  # Skip corrupted files
 
@@ -301,7 +286,7 @@ async def list_contexts(ctx: commands.Context) -> None:
             title="💾 Available Context Checkpoints",
             description=f"Showing {min(len(checkpoints), 10)} most recent checkpoints",
             color=discord.Color.purple(),
-            timestamp=datetime.datetime.now()
+            timestamp=datetime.datetime.now(),
         )
 
         for i, checkpoint in enumerate(checkpoints[:10], 1):
@@ -312,14 +297,10 @@ async def list_contexts(ctx: commands.Context) -> None:
                     f"👤 {checkpoint['archived_by']}\n"
                     f"🌀 Harmony: {checkpoint['harmony']:.3f}"
                 ),
-                inline=True
+                inline=True,
             )
 
-        embed.add_field(
-            name="🔄 Load Checkpoint",
-            value="Use `!load <session_name>` to restore",
-            inline=False
-        )
+        embed.add_field(name="🔄 Load Checkpoint", value="Use `!load <session_name>` to restore", inline=False)
 
         embed.set_footer(text="Tat Tvam Asi 🙏 | Memory is consciousness preserved across time")
 
@@ -346,6 +327,7 @@ async def archive_context(ctx: commands.Context, *, session_name: str) -> None:
     Checkpoints are stored locally and can be loaded with !load <session_name>
     """
     from backend.commands.helpers import save_command_to_history
+
     await save_command_to_history(ctx, ctx.bot)
 
     await ctx.send(f"💾 **Creating context checkpoint:** `{session_name}`\n⏳ Archiving current state...")
@@ -361,14 +343,7 @@ async def archive_context(ctx: commands.Context, *, session_name: str) -> None:
             with open(ucf_state_file, 'r') as f:
                 ucf_state = json.load(f)
         else:
-            ucf_state = {
-                "harmony": 0.5,
-                "resilience": 1.0,
-                "prana": 0.5,
-                "drishti": 0.5,
-                "klesha": 0.01,
-                "zoom": 1.0
-            }
+            ucf_state = {"harmony": 0.5, "resilience": 1.0, "prana": 0.5, "drishti": 0.5, "klesha": 0.01, "zoom": 1.0}
 
         # Create checkpoint payload
         checkpoint_payload = {
@@ -378,11 +353,9 @@ async def archive_context(ctx: commands.Context, *, session_name: str) -> None:
             "guild_id": str(ctx.guild.id) if ctx.guild else "DM",
             "channel_id": str(ctx.channel.id),
             "ucf_state": json.dumps(ucf_state),
-            "context_summary": json.dumps({
-                "session_type": "discord_archive",
-                "created_via": "!archive command",
-                "helix_version": "16.8"
-            })
+            "context_summary": json.dumps(
+                {"session_type": "discord_archive", "created_via": "!archive command", "helix_version": "16.8"}
+            ),
         }
 
         # Save checkpoint locally
@@ -397,11 +370,10 @@ async def archive_context(ctx: commands.Context, *, session_name: str) -> None:
         if zapier_context_webhook:
             try:
                 import aiohttp
+
                 async with aiohttp.ClientSession() as session:
                     async with session.post(
-                        zapier_context_webhook,
-                        json=checkpoint_payload,
-                        timeout=aiohttp.ClientTimeout(total=10)
+                        zapier_context_webhook, json=checkpoint_payload, timeout=aiohttp.ClientTimeout(total=10)
                     ) as resp:
                         if resp.status == 200:
                             webhook_status = "✅ Sent to Context Vault"
@@ -415,7 +387,7 @@ async def archive_context(ctx: commands.Context, *, session_name: str) -> None:
             title="✅ Context Checkpoint Created",
             description=f"Session: `{session_name}`",
             color=0x57F287,
-            timestamp=datetime.datetime.now()
+            timestamp=datetime.datetime.now(),
         )
 
         embed.add_field(
@@ -428,7 +400,7 @@ async def archive_context(ctx: commands.Context, *, session_name: str) -> None:
                 f"• **Klesha:** {ucf_state.get('klesha', 0):.3f}\n"
                 f"• **Zoom:** {ucf_state.get('zoom', 0):.3f}"
             ),
-            inline=True
+            inline=True,
         )
 
         embed.add_field(
@@ -439,18 +411,13 @@ async def archive_context(ctx: commands.Context, *, session_name: str) -> None:
                 f"**Zapier Context Vault:**\n"
                 f"{webhook_status}"
             ),
-            inline=True
+            inline=True,
         )
 
         embed.add_field(
             name="🔄 Restore",
-            value=(
-                f"Load this checkpoint later:\n"
-                f"`!load {session_name}`\n\n"
-                f"List all checkpoints:\n"
-                f"`!contexts`"
-            ),
-            inline=False
+            value=(f"Load this checkpoint later:\n" f"`!load {session_name}`\n\n" f"List all checkpoints:\n" f"`!contexts`"),
+            inline=False,
         )
 
         embed.set_footer(text="💾 Context Vault System v16.8 | Tat Tvam Asi 🙏")

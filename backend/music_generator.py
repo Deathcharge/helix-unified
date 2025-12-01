@@ -27,11 +27,7 @@ def load_music_synthesiser():
             print(f"Loading MusicGen model on device: {DEVICE}")
             # Use device=0 for CUDA, or -1 for CPU
             device_id = 0 if DEVICE.type == 'cuda' else -1
-            music_synthesiser = pipeline(
-                "text-to-audio",
-                model=MODEL_NAME,
-                device=device_id
-            )
+            music_synthesiser = pipeline("text-to-audio", model=MODEL_NAME, device=device_id)
             print("MusicGen model loaded successfully.")
         except Exception as e:
             print(f"Failed to load MusicGen model: {e}")
@@ -41,6 +37,7 @@ def load_music_synthesiser():
 
 class MusicRequest(BaseModel):
     """Schema for the music generation request."""
+
     prompt: str
     duration: int = 10  # Default to 10 seconds
     tracks: int = 1  # Default to 1 track
@@ -48,6 +45,7 @@ class MusicRequest(BaseModel):
 
 class MusicResponse(BaseModel):
     """Schema for the music generation response."""
+
     status: str
     message: str
     output_files: list[str]
@@ -60,10 +58,7 @@ def generate_music_track(prompt: str, duration: int) -> tuple[int, list[int]]:
 
     # Generate audio
     # max_length is roughly duration * 50 for MusicGen
-    music = music_synthesiser(
-        prompt,
-        forward_params={"do_sample": True, "max_length": duration * 50}
-    )
+    music = music_synthesiser(prompt, forward_params={"do_sample": True, "max_length": duration * 50})
 
     return music["sampling_rate"], music["audio"]
 
@@ -97,9 +92,7 @@ def generate_music_service(request: MusicRequest) -> MusicResponse:
             output_files.append(output_path)
 
         return MusicResponse(
-            status="success",
-            message=f"Successfully generated {len(output_files)} music track(s).",
-            output_files=output_files
+            status="success", message=f"Successfully generated {len(output_files)} music track(s).", output_files=output_files
         )
 
     except Exception as e:
@@ -118,9 +111,7 @@ load_music_synthesiser()
 if __name__ == '__main__':
     # Example usage (for local testing)
     test_request = MusicRequest(
-        prompt="a serene, ambient electronic track with a slow tempo and deep bass",
-        duration=10,
-        tracks=1
+        prompt="a serene, ambient electronic track with a slow tempo and deep bass", duration=10, tracks=1
     )
     try:
         response = generate_music_service(test_request)

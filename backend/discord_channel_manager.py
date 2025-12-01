@@ -128,9 +128,7 @@ class ChannelManager:
 
         return channel
 
-    async def create_agent_workspace(
-        self, agent_name: str, purpose: str, temporary: bool = False
-    ) -> discord.TextChannel:
+    async def create_agent_workspace(self, agent_name: str, purpose: str, temporary: bool = False) -> discord.TextChannel:
         """
         Create a workspace channel for an agent.
 

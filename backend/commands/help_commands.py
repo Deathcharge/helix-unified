@@ -5,6 +5,7 @@ Commands:
 - commands: Display comprehensive list of all available commands
 - agents: Display Helix Collective agents with rich embeds
 """
+
 import datetime
 from typing import TYPE_CHECKING, Optional
 

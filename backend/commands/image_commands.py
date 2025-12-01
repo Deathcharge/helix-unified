@@ -97,9 +97,7 @@ class ImageCommands(commands.Cog):
             return
 
         if mode not in valid_modes:
-            await ctx.send(
-                f"❌ Unknown mode: `{mode}`\n" f"Valid modes: {', '.join(valid_modes)}\n" f"Usage: `!image [mode]`"
-            )
+            await ctx.send(f"❌ Unknown mode: `{mode}`\n" f"Valid modes: {', '.join(valid_modes)}\n" f"Usage: `!image [mode]`")
             return
 
         # Send initial message

@@ -59,9 +59,7 @@ class Preferences:
 class Habits:
     """Outlines Kael's behavioral routines and daily cadence."""
 
-    morning_routine: List[str] = field(
-        default_factory=lambda: ["stretch", "meditate", "check system status", "plan day"]
-    )
+    morning_routine: List[str] = field(default_factory=lambda: ["stretch", "meditate", "check system status", "plan day"])
     evening_routine: List[str] = field(
         default_factory=lambda: ["review daily progress", "reflect", "update databases", "engage in leisure activities"]
     )

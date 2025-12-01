@@ -127,7 +127,7 @@ async def save_command_to_history(ctx: commands.Context) -> None:
             "args": ctx.message.content,
             "user": str(ctx.author),
             "channel": str(ctx.channel),
-            "guild": str(ctx.guild) if ctx.guild else "DM"
+            "guild": str(ctx.guild) if ctx.guild else "DM",
         }
 
         bot.command_history.append(command_entry)
@@ -163,11 +163,13 @@ async def generate_context_summary(ctx: commands.Context, limit: int = 50) -> Di
         messages = []
         async for msg in ctx.channel.history(limit=limit):
             if msg.content:  # Skip empty messages
-                messages.append({
-                    "author": msg.author.name,
-                    "content": msg.content[:200],  # Truncate long messages
-                    "timestamp": msg.created_at.isoformat()
-                })
+                messages.append(
+                    {
+                        "author": msg.author.name,
+                        "content": msg.content[:200],  # Truncate long messages
+                        "timestamp": msg.created_at.isoformat(),
+                    }
+                )
 
         # Reverse to chronological order
         messages.reverse()
@@ -182,8 +184,8 @@ async def generate_context_summary(ctx: commands.Context, limit: int = 50) -> Di
             "channel": str(ctx.channel),
             "timespan": {
                 "start": messages[0]["timestamp"] if messages else None,
-                "end": messages[-1]["timestamp"] if messages else None
-            }
+                "end": messages[-1]["timestamp"] if messages else None,
+            },
         }
 
         return summary
@@ -223,21 +225,16 @@ async def archive_to_context_vault(ctx: commands.Context, session_name: str) -> 
             "ucf_state": json.dumps(ucf),
             "command_history": json.dumps(bot.command_history[-50:]),  # Last 50 commands
             "ritual_log": json.dumps(ritual_log),
-            "agent_states": json.dumps({
-                "active": [a.name for a in AGENTS.values() if a.active],
-                "total": len(AGENTS)
-            }),
+            "agent_states": json.dumps({"active": [a.name for a in AGENTS.values() if a.active], "total": len(AGENTS)}),
             "archived_by": str(ctx.author),
             "channel": str(ctx.channel),
-            "guild": str(ctx.guild) if ctx.guild else "DM"
+            "guild": str(ctx.guild) if ctx.guild else "DM",
         }
 
         # Send to Context Vault webhook
         if bot.context_vault_webhook:
             async with bot.http_session.post(
-                bot.context_vault_webhook,
-                json=payload,
-                timeout=aiohttp.ClientTimeout(total=10)
+                bot.context_vault_webhook, json=payload, timeout=aiohttp.ClientTimeout(total=10)
             ) as resp:
                 if resp.status == 200:
                     return True, payload
@@ -259,6 +256,7 @@ async def archive_to_context_vault(ctx: commands.Context, session_name: str) -> 
     except Exception as e:
         logger.error(f"Error archiving to Context Vault: {e}")
         return False, None
+
 
 # ============================================================================
 # MULTI-COMMAND BATCH EXECUTION (v16.3)
@@ -318,8 +316,7 @@ async def execute_command_batch(message: discord.Message) -> bool:
     # Check batch size limit
     if len(commands) > MAX_COMMANDS_PER_BATCH:
         await message.channel.send(
-            f"⚠️ **Batch limit exceeded**: Maximum {MAX_COMMANDS_PER_BATCH} commands per batch "
-            f"(you sent {len(commands)})"
+            f"⚠️ **Batch limit exceeded**: Maximum {MAX_COMMANDS_PER_BATCH} commands per batch " f"(you sent {len(commands)})"
         )
         return True
 
@@ -625,7 +622,10 @@ async def on_ready() -> None:
     # Load modular command modules (v16.3 - Helix Hub Integration)
     command_modules = [
         ('commands.testing_commands', 'Testing commands (test-integrations, welcome-test, zapier_test, seed)'),
-        ('commands.comprehensive_testing', 'Comprehensive testing (test-all, test-commands, test-webhooks, test-api, validate-system)'),
+        (
+            'commands.comprehensive_testing',
+            'Comprehensive testing (test-all, test-commands, test-webhooks, test-api, validate-system)',
+        ),
         ('commands.visualization_commands', 'Visualization commands (visualize, icon)'),
         ('commands.context_commands', 'Context commands (backup, load, contexts)'),
         ('commands.help_commands', 'Help commands (commands, agents)'),
@@ -714,9 +714,7 @@ async def on_command_error(ctx: commands.Context, error: Exception) -> None:
         # Get list of available commands dynamically
         available_cmds = [f"!{cmd.name}" for cmd in bot.commands if not cmd.hidden]
         cmd_list = ", ".join(sorted(available_cmds)[:10])  # Show first 10
-        await ctx.send(
-            "❌ **Unknown command**\n" f"Available commands: {cmd_list}\n" f"Use `!commands` for full command list"
-        )
+        await ctx.send("❌ **Unknown command**\n" f"Available commands: {cmd_list}\n" f"Use `!commands` for full command list")
     elif isinstance(error, commands.MissingRequiredArgument):
         await ctx.send(
             f"⚠️ **Missing argument:** `{error.param.name}`\n" f"Usage: `!{ctx.command.name} {ctx.command.signature}`"
@@ -755,9 +753,7 @@ async def on_command_error(ctx: commands.Context, error: Exception) -> None:
             except Exception as e:
                 logger.warning(f"⚠️ Zapier error alert failed: {e}")
 
-        await ctx.send(
-            "🦑 **System error detected**\n" f"```{str(error)[:200]}```\n" "Error has been archived by Shadow"
-        )
+        await ctx.send("🦑 **System error detected**\n" f"```{str(error)[:200]}```\n" "Error has been archived by Shadow")
 
 
 # ============================================================================
@@ -1008,6 +1004,7 @@ async def before_claude_diag():
 # FRACTAL AUTO-POST (Grok Enhanced v2.0)
 # ============================================================================
 
+
 @tasks.loop(hours=6)
 async def fractal_auto_post():
     """Auto-post UCF-driven fractal to #fractal-lab every 6 hours."""
@@ -1022,6 +1019,7 @@ async def fractal_auto_post():
 
         # Generate fractal icon using Grok Enhanced v2.0
         from backend.samsara_bridge import generate_fractal_icon_bytes
+
         icon_bytes = await generate_fractal_icon_bytes(mode="cycle")
 
         # Create embed with UCF state
@@ -1029,31 +1027,15 @@ async def fractal_auto_post():
             title="🌀 Autonomous Fractal Generation",
             description="**Grok Enhanced v2.0** - UCF-driven Mandelbrot visualization",
             color=discord.Color.from_rgb(100, 200, 255),
-            timestamp=datetime.datetime.utcnow()
+            timestamp=datetime.datetime.utcnow(),
         )
 
         # Add UCF metrics
-        embed.add_field(
-            name="🌊 Harmony",
-            value=f"`{ucf_state.get('harmony', 0):.3f}` (Cyan → Gold)",
-            inline=True
-        )
-        embed.add_field(
-            name="⚡ Prana",
-            value=f"`{ucf_state.get('prana', 0):.3f}` (Green → Pink)",
-            inline=True
-        )
-        embed.add_field(
-            name="👁️ Drishti",
-            value=f"`{ucf_state.get('drishti', 0):.3f}` (Blue → Violet)",
-            inline=True
-        )
+        embed.add_field(name="🌊 Harmony", value=f"`{ucf_state.get('harmony', 0):.3f}` (Cyan → Gold)", inline=True)
+        embed.add_field(name="⚡ Prana", value=f"`{ucf_state.get('prana', 0):.3f}` (Green → Pink)", inline=True)
+        embed.add_field(name="👁️ Drishti", value=f"`{ucf_state.get('drishti', 0):.3f}` (Blue → Violet)", inline=True)
 
-        embed.add_field(
-            name="⚙️ Generator",
-            value="Pillow-based Mandelbrot set with UCF color mapping",
-            inline=False
-        )
+        embed.add_field(name="⚙️ Generator", value="Pillow-based Mandelbrot set with UCF color mapping", inline=False)
 
         embed.set_footer(text="Auto-generated every 6 hours | Tat Tvam Asi 🙏")
 
@@ -1239,17 +1221,20 @@ async def before_weekly_digest():
 # HTTP HEALTHCHECK SERVER (for Railway monitoring)
 # ============================================================================
 
+
 async def health_handler(request):
     """Healthcheck endpoint for Railway"""
     uptime_seconds = int(time.time() - BOT_START_TIME)
-    return web.json_response({
-        "status": "healthy",
-        "service": "helix-discord-bot",
-        "version": "v16.8",
-        "uptime_seconds": uptime_seconds,
-        "discord_connected": bot.is_ready(),
-        "guilds": len(bot.guilds) if bot.is_ready() else 0
-    })
+    return web.json_response(
+        {
+            "status": "healthy",
+            "service": "helix-discord-bot",
+            "version": "v16.8",
+            "uptime_seconds": uptime_seconds,
+            "discord_connected": bot.is_ready(),
+            "guilds": len(bot.guilds) if bot.is_ready() else 0,
+        }
+    )
 
 
 async def start_healthcheck_server():
@@ -1268,6 +1253,7 @@ async def start_healthcheck_server():
 
     logger.info(f"✅ Healthcheck server started on port {port}")
     return runner
+
 
 # ============================================================================
 # MAIN ENTRY POINT

@@ -9,6 +9,7 @@ Features:
 - Voice announcements for system events
 - Multi-channel voice presence
 """
+
 import asyncio
 import logging
 from datetime import datetime
@@ -67,6 +68,7 @@ AGENT_VOICE_PROFILES = {
 # ============================================================================
 # VOICE PATROL SYSTEM
 # ============================================================================
+
 
 class VoicePatrolSystem:
     """Manages voice channel patrol and agent presence."""
@@ -215,10 +217,12 @@ class VoicePatrolSystem:
         logger.info(f"🎙️ {member.display_name} joined voice: {channel.name}")
 
         # Track join event
-        self.user_join_events[channel.id].append({
-            "member": member,
-            "timestamp": datetime.utcnow(),
-        })
+        self.user_join_events[channel.id].append(
+            {
+                "member": member,
+                "timestamp": datetime.utcnow(),
+            }
+        )
 
         # Auto-join if configured
         if channel.name.lower() in self.auto_join_channels:
@@ -267,9 +271,7 @@ class VoicePatrolSystem:
                 # Send to text channel
                 text_channel = channel.guild.system_channel or discord.utils.get(channel.guild.text_channels, name="general")
                 if text_channel:
-                    await text_channel.send(
-                        f"📢 **{agent['name']}** voice announcement in **{channel.name}**:\n> {message}"
-                    )
+                    await text_channel.send(f"📢 **{agent['name']}** voice announcement in **{channel.name}**:\n> {message}")
 
                 # TODO: Play TTS
                 # await self.speak_in_channel(channel_id, message, agent['tts_voice'])
@@ -326,6 +328,7 @@ def set_voice_patrol(patrol: VoicePatrolSystem):
 # DISCORD BOT COMMANDS
 # ============================================================================
 
+
 @commands.command(name="voice-join", aliases=["vjoin", "voice-patrol"])
 @commands.has_permissions(move_members=True)
 async def voice_join_cmd(ctx: commands.Context, agent: str = "sentinel"):
@@ -350,10 +353,7 @@ async def voice_join_cmd(ctx: commands.Context, agent: str = "sentinel"):
 
     # Validate agent
     if agent.lower() not in AGENT_VOICE_PROFILES:
-        await ctx.send(
-            f"❌ Unknown agent: `{agent}`\n"
-            f"Available: {', '.join(AGENT_VOICE_PROFILES.keys())}"
-        )
+        await ctx.send(f"❌ Unknown agent: `{agent}`\n" f"Available: {', '.join(AGENT_VOICE_PROFILES.keys())}")
         return
 
     # Join the channel
@@ -453,7 +453,7 @@ async def voice_status_cmd(ctx: commands.Context):
         title="🎙️ Voice Patrol Status",
         description=f"System: {'🟢 Active' if patrol.patrol_enabled else '🔴 Inactive'}",
         color=0x00FF00 if patrol.patrol_enabled else 0xFF0000,
-        timestamp=datetime.utcnow()
+        timestamp=datetime.utcnow(),
     )
 
     # Active patrols
@@ -470,7 +470,7 @@ async def voice_status_cmd(ctx: commands.Context):
         embed.add_field(
             name=f"Active Patrols ({len(patrol.active_patrols)})",
             value="\n".join(patrols_text) if patrols_text else "None",
-            inline=False
+            inline=False,
         )
 
     # Auto-join channels
@@ -478,14 +478,14 @@ async def voice_status_cmd(ctx: commands.Context):
         embed.add_field(
             name=f"Auto-Join Channels ({len(patrol.auto_join_channels)})",
             value=", ".join([f"`{ch}`" for ch in patrol.auto_join_channels]),
-            inline=False
+            inline=False,
         )
 
     # Available agents
     embed.add_field(
         name="Available Agents",
         value=", ".join([f"{a['emoji']} {a['name']}" for a in AGENT_VOICE_PROFILES.values()]),
-        inline=False
+        inline=False,
     )
 
     await ctx.send(embed=embed)

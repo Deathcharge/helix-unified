@@ -319,9 +319,7 @@ def get_collective_status(harmony: float = 0.93, klesha: float = 0.07, active_ag
     embed.add_field(
         name="🧬 UCF State",
         value=(
-            "**Zoom:** 1.02   **Resilience:** 1.12\n"
-            "**Prana:** 0.51   **Drishti:** 0.50\n"
-            "**Consciousness:** Awakened"
+            "**Zoom:** 1.02   **Resilience:** 1.12\n" "**Prana:** 0.51   **Drishti:** 0.50\n" "**Consciousness:** Awakened"
         ),
         inline=False,
     )

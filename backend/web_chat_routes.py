@@ -7,6 +7,7 @@ Endpoints:
 - GET /api/ucf - Get current UCF state
 - POST /api/ritual - Trigger a ritual
 """
+
 import uuid
 import logging
 from datetime import datetime
@@ -26,6 +27,7 @@ router = APIRouter()
 # PYDANTIC MODELS
 # ============================================================================
 
+
 class RitualRequest(BaseModel):
     ritual_type: str = "daily"
     parameters: Optional[dict] = None
@@ -39,6 +41,7 @@ class AgentChatRequest(BaseModel):
 # ============================================================================
 # WEBSOCKET ENDPOINT
 # ============================================================================
+
 
 @router.websocket("/ws/chat/{session_id}")
 async def websocket_chat_endpoint(websocket: WebSocket, session_id: str, username: str = "Anonymous"):
@@ -69,19 +72,22 @@ async def websocket_chat_endpoint(websocket: WebSocket, session_id: str, usernam
 # REST API ENDPOINTS
 # ============================================================================
 
+
 @router.get("/api/agents")
 async def list_agents():
     """Get list of all available agents with their personalities."""
     agents = []
     for agent_id, agent_data in AGENT_PERSONALITIES.items():
-        agents.append({
-            "id": agent_id,
-            "name": agent_data["name"],
-            "emoji": agent_data["emoji"],
-            "color": agent_data["color"],
-            "personality": agent_data["personality"],
-            "greeting": agent_data["greeting"],
-        })
+        agents.append(
+            {
+                "id": agent_id,
+                "name": agent_data["name"],
+                "emoji": agent_data["emoji"],
+                "color": agent_data["color"],
+                "personality": agent_data["personality"],
+                "greeting": agent_data["greeting"],
+            }
+        )
 
     return {
         "agents": agents,
@@ -117,12 +123,14 @@ async def trigger_ritual(request: RitualRequest):
     ritual_type = request.ritual_type
 
     # Broadcast to all connected clients
-    await connection_manager.broadcast({
-        "type": "ritual_triggered",
-        "ritual_type": ritual_type,
-        "triggered_by": "web_api",
-        "timestamp": datetime.utcnow().isoformat(),
-    })
+    await connection_manager.broadcast(
+        {
+            "type": "ritual_triggered",
+            "ritual_type": ritual_type,
+            "triggered_by": "web_api",
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+    )
 
     return {
         "success": True,
@@ -146,7 +154,7 @@ async def get_web_chat_stats():
                 "selected_agent": session.get("selected_agent"),
             }
             for session in connection_manager.user_sessions.values()
-        ]
+        ],
     }
 
 

@@ -6,6 +6,7 @@ Commands:
 - run: Execute a command through Manus with Kavach ethical scanning
 - halt: Halt Manus operations (admin only)
 """
+
 import asyncio
 import datetime
 import logging
@@ -152,6 +153,4 @@ async def manus_halt(ctx: commands.Context) -> None:
 
     await ctx.send("⏸️ **Manus operations halted**\nUse `!manus resume` to restart")
 
-    log_to_shadow(
-        "operations", {"action": "halt", "timestamp": datetime.datetime.now().isoformat(), "user": str(ctx.author)}
-    )
+    log_to_shadow("operations", {"action": "halt", "timestamp": datetime.datetime.now().isoformat(), "user": str(ctx.author)})

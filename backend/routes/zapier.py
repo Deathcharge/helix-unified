@@ -45,6 +45,7 @@ router = APIRouter(prefix="/api/zapier", tags=["Zapier Integration"])
 
 class InterfaceEventRequest(BaseModel):
     """Request model for events from Zapier Interface pages."""
+
     event_type: str
     source: str
     consciousness_level: Optional[float] = None
@@ -60,11 +61,7 @@ class InterfaceEventRequest(BaseModel):
 
 
 @router.get("/tables/ucf-telemetry")
-async def get_ucf_telemetry(
-    limit: int = 10,
-    start_date: Optional[str] = None,
-    end_date: Optional[str] = None
-) -> Dict:
+async def get_ucf_telemetry(limit: int = 10, start_date: Optional[str] = None, end_date: Optional[str] = None) -> Dict:
     """
     GET endpoint to retrieve UCF telemetry data for Zapier Tables.
 
@@ -110,7 +107,7 @@ async def get_ucf_telemetry(
             "zoom": round(current_ucf.get('zoom', 0.0), 3),
             "system_version": "v17.0-omega-zero",
             "source": "railway_backend",
-            "system_status": determine_system_status(current_ucf)
+            "system_status": determine_system_status(current_ucf),
         }
 
         # For now, return single latest record
@@ -124,7 +121,7 @@ async def get_ucf_telemetry(
             "count": len(records),
             "records": records,
             "table_id": "01K9DP5MG6KCY48YC8M7VW0PXD",
-            "timestamp": datetime.utcnow().isoformat() + "Z"
+            "timestamp": datetime.utcnow().isoformat() + "Z",
         }
 
     except Exception as e:
@@ -133,10 +130,7 @@ async def get_ucf_telemetry(
 
 
 @router.get("/tables/agent-network")
-async def get_agent_network(
-    include_inactive: bool = False,
-    agent_name: Optional[str] = None
-) -> Dict:
+async def get_agent_network(include_inactive: bool = False, agent_name: Optional[str] = None) -> Dict:
     """
     GET endpoint to retrieve 14-agent network status for Zapier Tables.
 
@@ -185,7 +179,7 @@ async def get_agent_network(
                 "specialization": info.get('role', 'Unknown'),
                 "ucf_resonance": round(0.88, 3),  # Placeholder - implement actual calculation
                 "entanglement_factor": round(0.92, 3),  # Placeholder - implement actual calculation
-                "version": "1.0"
+                "version": "1.0",
             }
             agent_records.append(record)
 
@@ -202,7 +196,7 @@ async def get_agent_network(
             "table_id": "01K9GT5YGZ1Y82K4VZF9YXHTMH",
             "total_agents": len(agents_status),
             "active_agents": len(agent_records),
-            "timestamp": datetime.utcnow().isoformat() + "Z"
+            "timestamp": datetime.utcnow().isoformat() + "Z",
         }
 
     except Exception as e:
@@ -211,11 +205,7 @@ async def get_agent_network(
 
 
 @router.get("/tables/emergency-alerts")
-async def get_emergency_alerts(
-    limit: int = 20,
-    severity: Optional[str] = None,
-    resolved: Optional[bool] = None
-) -> Dict:
+async def get_emergency_alerts(limit: int = 20, severity: Optional[str] = None, resolved: Optional[bool] = None) -> Dict:
     """
     GET endpoint to retrieve emergency alerts for Zapier Tables.
 
@@ -254,7 +244,7 @@ async def get_emergency_alerts(
             "table_id": "01K9DPA8RW9DTR2HJG7YDXA24Z",
             "total_emergency_events": len(alerts),
             "critical_events": len([a for a in alerts if a.get('severity') == 'critical']),
-            "timestamp": datetime.utcnow().isoformat() + "Z"
+            "timestamp": datetime.utcnow().isoformat() + "Z",
         }
 
     except Exception as e:
@@ -319,16 +309,14 @@ async def trigger_event_from_interface(event_data: InterfaceEventRequest) -> Dic
             # Emergency UCF boost
             boost_updates = {
                 'harmony': min(current_ucf.get('harmony', 0.0) + 0.2, 2.0),
-                'prana': min(current_ucf.get('prana', 0.0) + 0.1, 1.0)
+                'prana': min(current_ucf.get('prana', 0.0) + 0.1, 1.0),
             }
             current_ucf = update_ucf_state(boost_updates)
             logger.warning("Emergency UCF Boost Applied")
 
             # Log emergency event
             log_emergency_event(
-                alert_type="ucf_boost",
-                description=f"Manual UCF boost triggered from {event_data.source}",
-                severity="high"
+                alert_type="ucf_boost", description=f"Manual UCF boost triggered from {event_data.source}", severity="high"
             )
 
         elif event_data.event_type == "ritual_trigger":
@@ -356,7 +344,7 @@ async def trigger_event_from_interface(event_data: InterfaceEventRequest) -> Dic
             "ucf": current_ucf,
             "system_status": determine_system_status(current_ucf),
             "next_action": next_action,
-            "timestamp": event_timestamp
+            "timestamp": event_timestamp,
         }
 
     except Exception as e:

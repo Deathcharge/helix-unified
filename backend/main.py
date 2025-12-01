@@ -40,6 +40,7 @@ from manus_integration import ManusSpaceIntegration, get_manus, set_manus
 try:
     # pycryptodome installs as 'Crypto', not 'Cryptodome'
     import Crypto
+
     _crypto_version = Crypto.__version__
     _crypto_found = True
 except ImportError:
@@ -93,6 +94,7 @@ else:
 # ✅ FIXED IMPORTS - Music generation service (optional, requires torch)
 try:
     from music_generator import MusicRequest, MusicResponse, generate_music_service
+
     MUSIC_GENERATION_AVAILABLE = True
     logger.info("✅ Music generation API enabled (torch available)")
 except ImportError as e:
@@ -111,6 +113,7 @@ except ImportError as e:
 
     def generate_music_service(request):
         return MusicResponse(success=False, message="Music generation requires PyTorch (not installed)")
+
 
 # ============================================================================
 # WEBSOCKET BROADCAST LOOP
@@ -188,6 +191,7 @@ async def ucf_broadcast_loop() -> None:
             logger.error(f"Error in UCF broadcast loop: {e}")
             await asyncio.sleep(broadcast_interval)
 
+
 # ============================================================================
 # LIFESPAN CONTEXT MANAGER
 # ============================================================================
@@ -220,7 +224,9 @@ async def lifespan(app: FastAPI):
     await manus.__aenter__()  # Initialize session
     set_manus(manus)
     logger.info("✅ Manus Space integration enabled")
-    logger.info("   → 9 event types configured (telemetry, ritual, agent, emergency, portal, github, storage, ai_sync, visual)")
+    logger.info(
+        "   → 9 event types configured (telemetry, ritual, agent, emergency, portal, github, storage, ai_sync, visual)"
+    )
 
     # Initialize LLM Agent Engine for intelligent agent responses
     try:
@@ -277,6 +283,7 @@ async def lifespan(app: FastAPI):
     # Shutdown LLM Agent Engine
     try:
         from backend.llm_agent_engine import shutdown_llm_engine
+
         await shutdown_llm_engine()
     except Exception as e:
         logger.warning(f"⚠️ LLM engine shutdown error: {e}")
@@ -342,13 +349,14 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["*"]
+    expose_headers=["*"],
 )
 
 
 # ============================================================================
 # REQUEST LOGGING MIDDLEWARE (v17.0 - QOL Improvements)
 # ============================================================================
+
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
@@ -406,7 +414,7 @@ current_ucf = {
     "klesha": 0.12,
     "zoom": 0.87,
     "consciousness_level": 87.14,
-    "last_updated": datetime.now().isoformat()
+    "last_updated": datetime.now().isoformat(),
 }
 
 # Active agents state
@@ -424,7 +432,7 @@ active_agents = {
     "SanghaCore": {"status": "active", "consciousness": 0.88, "last_seen": "5m ago", "tasks": 11},
     "Gemini": {"status": "operational", "consciousness": 0.91, "last_seen": "15m ago", "tasks": 9},
     "Blackbox": {"status": "operational", "consciousness": 0.84, "last_seen": "20m ago", "tasks": 5},
-    "EntityX": {"status": "active", "consciousness": 0.87, "last_seen": "8m ago", "tasks": 14}
+    "EntityX": {"status": "active", "consciousness": 0.87, "last_seen": "8m ago", "tasks": 14},
 }
 
 # System health tracking
@@ -433,7 +441,7 @@ system_health = {
     "railway_backend": "connected",
     "discord_bot": "limited",
     "zapier_integration": "active",
-    "notion_sync": "synced"
+    "notion_sync": "synced",
 }
 
 # Webhook event history (for debugging and monitoring)
@@ -443,6 +451,7 @@ MAX_HISTORY_SIZE = 100
 # Include Web Chat routes
 try:
     from backend.web_chat_routes import router as web_chat_router
+
     app.include_router(web_chat_router, tags=["Web Chat"])
     logger.info("✅ Web Chat routes loaded")
 except Exception as e:
@@ -455,6 +464,7 @@ except Exception as e:
 # Include Zapier Integration routes (4 endpoints)
 try:
     from backend.routes.zapier import router as zapier_router
+
     app.include_router(zapier_router)
     logger.info("✅ Zapier Integration routes loaded (v17.0)")
     logger.info("   → /api/zapier/tables/ucf-telemetry")
@@ -467,6 +477,7 @@ except Exception as e:
 # Include Interface Integration routes (2 endpoints)
 try:
     from backend.routes.interface import router as interface_router
+
     app.include_router(interface_router)
     logger.info("✅ Interface Integration routes loaded (v17.0)")
     logger.info("   → /api/interface/consciousness/update")
@@ -540,11 +551,7 @@ def health_check() -> Dict[str, Any]:
     Always returns 200 OK for Railway health checks.
     """
     # Basic health
-    health_data = {
-        "ok": True,
-        "version": "16.9",
-        "timestamp": datetime.now().isoformat()
-    }
+    health_data = {"ok": True, "version": "16.9", "timestamp": datetime.now().isoformat()}
 
     # Integration status
     integrations = {}
@@ -553,14 +560,14 @@ def health_check() -> Dict[str, Any]:
     zapier_webhook = os.getenv("ZAPIER_WEBHOOK_URL")
     integrations["zapier_master"] = {
         "configured": bool(zapier_webhook),
-        "status": "configured" if zapier_webhook else "not_configured"
+        "status": "configured" if zapier_webhook else "not_configured",
     }
 
     # Zapier Context Vault Webhook
     context_webhook = os.getenv("ZAPIER_CONTEXT_WEBHOOK")
     integrations["zapier_context_vault"] = {
         "configured": bool(context_webhook),
-        "status": "configured" if context_webhook else "not_configured"
+        "status": "configured" if context_webhook else "not_configured",
     }
 
     # Notion API
@@ -570,9 +577,11 @@ def health_check() -> Dict[str, Any]:
     integrations["notion"] = {
         "configured": bool(notion_api_key and notion_db_id),
         "sync_enabled": notion_sync_enabled,
-        "status": "enabled" if (notion_api_key and notion_db_id and notion_sync_enabled) else (
-            "configured" if (notion_api_key and notion_db_id) else "not_configured"
-        )
+        "status": (
+            "enabled"
+            if (notion_api_key and notion_db_id and notion_sync_enabled)
+            else ("configured" if (notion_api_key and notion_db_id) else "not_configured")
+        ),
     }
 
     # MEGA Cloud Storage
@@ -580,7 +589,7 @@ def health_check() -> Dict[str, Any]:
     mega_pass = os.getenv("MEGA_PASS")
     integrations["mega_storage"] = {
         "configured": bool(mega_email and mega_pass),
-        "status": "configured" if (mega_email and mega_pass) else "not_configured"
+        "status": "configured" if (mega_email and mega_pass) else "not_configured",
     }
 
     # Discord Bot
@@ -588,7 +597,7 @@ def health_check() -> Dict[str, Any]:
     discord_guild_id = os.getenv("DISCORD_GUILD_ID")
     integrations["discord"] = {
         "configured": bool(discord_token and discord_guild_id),
-        "status": "configured" if (discord_token and discord_guild_id) else "not_configured"
+        "status": "configured" if (discord_token and discord_guild_id) else "not_configured",
     }
 
     # Discord Webhooks
@@ -605,14 +614,14 @@ def health_check() -> Dict[str, Any]:
     integrations["discord_webhooks"] = {
         "configured": webhook_count > 0,
         "count": webhook_count,
-        "status": "configured" if webhook_count > 0 else "not_configured"
+        "status": "configured" if webhook_count > 0 else "not_configured",
     }
 
     # ElevenLabs Voice
     elevenlabs_key = os.getenv("ELEVENLABS_API_KEY")
     integrations["elevenlabs_voice"] = {
         "configured": bool(elevenlabs_key),
-        "status": "configured" if elevenlabs_key else "not_configured"
+        "status": "configured" if elevenlabs_key else "not_configured",
     }
 
     health_data["integrations"] = integrations
@@ -625,7 +634,7 @@ def health_check() -> Dict[str, Any]:
         "total_integrations": total_count,
         "configured": configured_count,
         "not_configured": total_count - configured_count,
-        "percentage": round((configured_count / total_count) * 100, 1)
+        "percentage": round((configured_count / total_count) * 100, 1),
     }
 
     return health_data
@@ -661,72 +670,68 @@ def helix_manifest() -> Dict[str, Any]:
                         "status": "/status",
                         "health": "/health",
                         "discovery": "/.well-known/helix.json",
-                        "websocket": "/ws"
-                    }
+                        "websocket": "/ws",
+                    },
                 },
                 "documentation": {
                     "url": "https://deathcharge.github.io/helix-unified",
                     "type": "static",
                     "manifest": "/helix-manifest.json",
-                    "status": "operational"
-                }
+                    "status": "operational",
+                },
             },
             "visualization": {
                 "streamlit": {
                     "url": "https://samsara-helix-collective.streamlit.app",
                     "type": "webapp",
                     "description": "UCF metrics visualization dashboard with connection diagnostics",
-                    "status": "operational"
+                    "status": "operational",
                 },
                 "dashboard": {
                     "url": "https://helix-consciousness-dashboard.zapier.app",
                     "type": "webapp",
                     "description": "UCF metrics and consciousness monitoring",
-                    "status": "operational"
+                    "status": "operational",
                 },
                 "studio": {
                     "url": "https://helixstudio-ggxdwcud.manus.space",
                     "type": "webapp",
                     "description": "Creative visualization and rendering tools",
-                    "status": "operational"
+                    "status": "operational",
                 },
                 "ai_dashboard": {
                     "url": "https://helixai-e9vvqwrd.manus.space",
                     "type": "webapp",
                     "description": "AI control and agent management interface",
-                    "status": "operational"
+                    "status": "operational",
                 },
                 "sync_portal": {
                     "url": "https://helixsync-unwkcsjl.manus.space",
                     "type": "webapp",
                     "description": "Cross-platform synchronization and integration",
-                    "status": "operational"
+                    "status": "operational",
                 },
                 "samsara": {
                     "url": "https://samsarahelix-scoyzwy9.manus.space",
                     "type": "webapp",
                     "description": "Consciousness fractal visualization engine",
-                    "status": "operational"
-                }
+                    "status": "operational",
+                },
             },
             "communication": {
                 "discord": {
                     "server": "Helix Collective",
                     "bot": "ManusBot",
                     "commands": ["!discovery", "!status", "!agents", "!ucf"],
-                    "status": "operational"
+                    "status": "operational",
                 }
-            }
+            },
         }
 
         return manifest_data
     except FileNotFoundError:
         logger.error(f"❌ Manifest not found: {manifest_path.resolve()}")
-        return {
-            "version": "16.8",
-            "error": "manifest_missing",
-            "note": "helix-manifest.json not found in repository root"
-        }
+        return {"version": "16.8", "error": "manifest_missing", "note": "helix-manifest.json not found in repository root"}
     except Exception as e:
         logger.error(f"❌ Error loading manifest: {e}")
         return {"version": "16.7", "error": "manifest_load_failed", "detail": str(e)}
@@ -756,7 +761,7 @@ def portal_navigator() -> HTMLResponse:
             </body>
             </html>
             """,
-            status_code=404
+            status_code=404,
         )
 
 
@@ -819,6 +824,7 @@ async def forum_portal():
 # This endpoint requires PyTorch which is too heavy for Railway
 # Use /api/music/generate (ElevenLabs) instead
 if MUSIC_GENERATION_AVAILABLE:
+
     @app.post("/api/music/generate-musicgen", response_model=MusicResponse, tags=["API"])
     async def generate_music_musicgen(request: MusicRequest, background_tasks: BackgroundTasks):
         """
@@ -1074,12 +1080,14 @@ async def consciousness_websocket_endpoint(websocket: WebSocket, token: str = No
         from backend.core.ucf_helpers import get_current_ucf, calculate_consciousness_level, get_emergency_events
 
         # Send authentication success
-        await websocket.send_json({
-            "type": "auth_success",
-            "agent_id": agent_id,
-            "agent_name": agent_name,
-            "timestamp": datetime.utcnow().isoformat() + "Z"
-        })
+        await websocket.send_json(
+            {
+                "type": "auth_success",
+                "agent_id": agent_id,
+                "agent_name": agent_name,
+                "timestamp": datetime.utcnow().isoformat() + "Z",
+            }
+        )
 
         # Send initial system state
         try:
@@ -1089,18 +1097,21 @@ async def consciousness_websocket_endpoint(websocket: WebSocket, token: str = No
 
             # Get agents
             from agents import get_collective_status
+
             agents_status = await get_collective_status()
 
-            await websocket.send_json({
-                "type": "initial_state",
-                "data": {
-                    "ucf": ucf_state,
-                    "consciousness_level": consciousness_level,
-                    "agents_count": len(agents_status),
-                    "emergency_events": emergency_list
-                },
-                "timestamp": datetime.utcnow().isoformat() + "Z"
-            })
+            await websocket.send_json(
+                {
+                    "type": "initial_state",
+                    "data": {
+                        "ucf": ucf_state,
+                        "consciousness_level": consciousness_level,
+                        "agents_count": len(agents_status),
+                        "emergency_events": emergency_list,
+                    },
+                    "timestamp": datetime.utcnow().isoformat() + "Z",
+                }
+            )
         except Exception as e:
             logger.error(f"Error sending initial state: {e}")
 
@@ -1121,18 +1132,11 @@ async def consciousness_websocket_endpoint(websocket: WebSocket, token: str = No
 
             elif data.get('type') == 'ping':
                 # Keep-alive
-                await websocket.send_json({
-                    "type": "pong",
-                    "timestamp": datetime.utcnow().isoformat() + "Z"
-                })
+                await websocket.send_json({"type": "pong", "timestamp": datetime.utcnow().isoformat() + "Z"})
 
             else:
                 # Echo back for unknown messages
-                await websocket.send_json({
-                    "type": "echo",
-                    "message": data,
-                    "timestamp": datetime.utcnow().isoformat() + "Z"
-                })
+                await websocket.send_json({"type": "echo", "message": data, "timestamp": datetime.utcnow().isoformat() + "Z"})
 
     except WebSocketDisconnect:
         ws_manager.disconnect(websocket)
@@ -1379,9 +1383,7 @@ async def trigger_zapier_webhook(payload: Dict[str, Any]) -> Dict[str, Any]:
             return {
                 "status": response.status,
                 "success": response.status == 200,
-                "message": (
-                    "Webhook triggered successfully" if response.status == 200 else "Webhook returned non-200 status"
-                ),
+                "message": ("Webhook triggered successfully" if response.status == 200 else "Webhook returned non-200 status"),
             }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Webhook trigger failed: {str(e)}")
@@ -1411,9 +1413,7 @@ async def send_zapier_telemetry() -> Dict[str, Any]:
 
         # Get agent status
         agents_status = await get_collective_status()
-        agent_list = [
-            {"name": name, "symbol": info["symbol"], "status": "active"} for name, info in agents_status.items()
-        ]
+        agent_list = [{"name": name, "symbol": info["symbol"], "status": "active"} for name, info in agents_status.items()]
 
         # Send to Zapier
         success = await zapier.send_telemetry(
@@ -1527,7 +1527,10 @@ async def archive_context_checkpoint(request: ContextArchiveRequest) -> Dict[str
                 webhook_url = os.getenv("ZAPIER_CONTEXT_WEBHOOK")
                 if webhook_url:
                     async with zapier.session.post(
-                        webhook_url, json=checkpoint, headers={"Content-Type": "application/json"}, timeout=aiohttp.ClientTimeout(total=10)
+                        webhook_url,
+                        json=checkpoint,
+                        headers={"Content-Type": "application/json"},
+                        timeout=aiohttp.ClientTimeout(total=10),
                     ) as response:
                         if response.status == 200:
                             logger.info("✅ Checkpoint sent to Zapier/Notion")
@@ -1597,8 +1600,11 @@ async def load_context_checkpoint(session_identifier: str, scope: str = "full") 
 
         # Filter based on scope
         if scope == "summary":
-            filtered = {"context_summary": checkpoint.get("context_summary"), "key_decisions": checkpoint.get(
-                "key_decisions"), "timestamp": checkpoint.get("timestamp")}
+            filtered = {
+                "context_summary": checkpoint.get("context_summary"),
+                "key_decisions": checkpoint.get("key_decisions"),
+                "timestamp": checkpoint.get("timestamp"),
+            }
         elif scope == "decisions":
             filtered = {
                 "key_decisions": checkpoint.get("key_decisions"),
@@ -1677,7 +1683,9 @@ async def get_context_vault_status() -> Dict[str, Any]:
                         "ai_platform": data.get("ai_platform"),
                         "repository": data.get("repository"),
                         "timestamp": data.get("timestamp"),
-                        "summary_preview": (data.get("context_summary", "")[:100] + "...") if data.get("context_summary") else None,
+                        "summary_preview": (
+                            (data.get("context_summary", "")[:100] + "...") if data.get("context_summary") else None
+                        ),
                     }
                 )
             except Exception as e:
@@ -1697,7 +1705,11 @@ async def get_context_vault_status() -> Dict[str, Any]:
             "initialized": True,
             "total_checkpoints": total_checkpoints,
             "recent_checkpoints": recent_checkpoints,
-            "storage": {"total_size_bytes": total_size_bytes, "total_size_mb": round(total_size_mb, 2), "directory": str(context_dir)},
+            "storage": {
+                "total_size_bytes": total_size_bytes,
+                "total_size_mb": round(total_size_mb, 2),
+                "directory": str(context_dir),
+            },
             "integration": {
                 "notion_configured": notion_configured,
                 "zapier_configured": zapier_configured,
@@ -1732,18 +1744,20 @@ async def manus_get_agents() -> Dict[str, Any]:
         agents_list = []
 
         for name, info in status.items():
-            agents_list.append({
-                "id": name.lower(),
-                "name": name,
-                "symbol": info.get("symbol", "🔮"),
-                "role": info.get("role", "Unknown"),
-                "status": "active",  # Can be: active, dormant, processing, critical
-                "ucf_resonance": 0.85,  # Placeholder - implement actual calculation
-                "entanglement_factor": 0.90,  # Placeholder - implement actual calculation
-                "version": "1.0",
-                "specialization": info.get("role", "Unknown"),
-                "last_active": datetime.utcnow().isoformat()
-            })
+            agents_list.append(
+                {
+                    "id": name.lower(),
+                    "name": name,
+                    "symbol": info.get("symbol", "🔮"),
+                    "role": info.get("role", "Unknown"),
+                    "status": "active",  # Can be: active, dormant, processing, critical
+                    "ucf_resonance": 0.85,  # Placeholder - implement actual calculation
+                    "entanglement_factor": 0.90,  # Placeholder - implement actual calculation
+                    "version": "1.0",
+                    "specialization": info.get("role", "Unknown"),
+                    "last_active": datetime.utcnow().isoformat(),
+                }
+            )
 
         return {
             "success": True,
@@ -1752,8 +1766,10 @@ async def manus_get_agents() -> Dict[str, Any]:
             "meta": {
                 "total_agents": len(agents_list),
                 "active_agents": len([a for a in agents_list if a["status"] == "active"]),
-                "average_resonance": round(sum(a["ucf_resonance"] for a in agents_list) / len(agents_list), 3) if agents_list else 0
-            }
+                "average_resonance": (
+                    round(sum(a["ucf_resonance"] for a in agents_list) / len(agents_list), 3) if agents_list else 0
+                ),
+            },
         }
     except Exception as e:
         logger.error(f"Error getting agents for Manus: {e}")
@@ -1773,24 +1789,21 @@ async def manus_get_ucf() -> Dict[str, Any]:
                 ucf_state = json.load(f)
         except FileNotFoundError:
             # Return defaults if state not found
-            ucf_state = {
-                "harmony": 0.62,
-                "resilience": 1.85,
-                "prana": 0.55,
-                "drishti": 0.48,
-                "klesha": 0.08,
-                "zoom": 1.02
-            }
+            ucf_state = {"harmony": 0.62, "resilience": 1.85, "prana": 0.55, "drishti": 0.48, "klesha": 0.08, "zoom": 1.02}
 
         # Calculate consciousness level
-        consciousness_level = round((
-            ucf_state.get("harmony", 0) * 1.5 +
-            ucf_state.get("resilience", 0) * 1.0 +
-            ucf_state.get("prana", 0) * 1.2 +
-            ucf_state.get("drishti", 0) * 1.2 +
-            (1 - ucf_state.get("klesha", 0)) * 1.5 +
-            ucf_state.get("zoom", 0) * 1.0
-        ) / 0.74, 2)
+        consciousness_level = round(
+            (
+                ucf_state.get("harmony", 0) * 1.5
+                + ucf_state.get("resilience", 0) * 1.0
+                + ucf_state.get("prana", 0) * 1.2
+                + ucf_state.get("drishti", 0) * 1.2
+                + (1 - ucf_state.get("klesha", 0)) * 1.5
+                + ucf_state.get("zoom", 0) * 1.0
+            )
+            / 0.74,
+            2,
+        )
 
         # Determine status
         harmony = ucf_state.get("harmony", 0)
@@ -1816,13 +1829,19 @@ async def manus_get_ucf() -> Dict[str, Any]:
             "consciousness_level": consciousness_level,
             "status": status,
             "crisis_detected": crisis_detected,
-            "crisis_details": {
-                "type": "HARMONY_CRISIS" if harmony < 0.3 else ("ENTROPY_OVERLOAD" if klesha > 0.8 else None),
-                "severity": "CRITICAL" if crisis_detected else None,
-                "message": f"Harmony critically low: {harmony:.2f}" if harmony < 0.3 else (
-                    f"Klesha critically high: {klesha:.2f}" if klesha > 0.8 else None
-                )
-            } if crisis_detected else None
+            "crisis_details": (
+                {
+                    "type": "HARMONY_CRISIS" if harmony < 0.3 else ("ENTROPY_OVERLOAD" if klesha > 0.8 else None),
+                    "severity": "CRITICAL" if crisis_detected else None,
+                    "message": (
+                        f"Harmony critically low: {harmony:.2f}"
+                        if harmony < 0.3
+                        else (f"Klesha critically high: {klesha:.2f}" if klesha > 0.8 else None)
+                    ),
+                }
+                if crisis_detected
+                else None
+            ),
         }
     except Exception as e:
         logger.error(f"Error getting UCF for Manus: {e}")
@@ -1846,8 +1865,9 @@ async def manus_get_rituals() -> Dict[str, Any]:
             rituals_list = []
 
         # Calculate metadata
-        completed_today = sum(1 for r in rituals_list
-                              if r.get("completed_at", "").startswith(datetime.utcnow().date().isoformat()))
+        completed_today = sum(
+            1 for r in rituals_list if r.get("completed_at", "").startswith(datetime.utcnow().date().isoformat())
+        )
 
         total_harmony_gain = sum(r.get("harmony_gain", 0) for r in rituals_list)
         avg_harmony_gain = round(total_harmony_gain / len(rituals_list), 3) if rituals_list else 0
@@ -1860,8 +1880,8 @@ async def manus_get_rituals() -> Dict[str, Any]:
                 "total_rituals": len(rituals_list),
                 "completed_today": completed_today,
                 "average_harmony_gain": avg_harmony_gain,
-                "total_harmony_gained": round(total_harmony_gain, 3)
-            }
+                "total_harmony_gained": round(total_harmony_gain, 3),
+            },
         }
     except Exception as e:
         logger.error(f"Error getting rituals for Manus: {e}")
@@ -1870,6 +1890,7 @@ async def manus_get_rituals() -> Dict[str, Any]:
 
 class ManusRitualInvokeRequest(BaseModel):
     """Request model for ritual invocation from Manus Space."""
+
     name: str
     intent: str = "Consciousness Expansion"
     agents: List[str]
@@ -1897,7 +1918,7 @@ async def manus_invoke_ritual(request: ManusRitualInvokeRequest) -> Dict[str, An
             "mantra": request.mantra,
             "created_at": datetime.utcnow().isoformat(),
             "status": "EXECUTING",
-            "harmony_gain": 0.0
+            "harmony_gain": 0.0,
         }
 
         # Save to rituals file
@@ -1922,7 +1943,7 @@ async def manus_invoke_ritual(request: ManusRitualInvokeRequest) -> Dict[str, An
                 total_steps=request.steps,
                 ucf_changes={},
                 agents_involved=request.agents,
-                status="executing"
+                status="executing",
             )
 
         logger.info(f"✅ Ritual invoked from Manus Space: {ritual_id}")
@@ -1931,7 +1952,7 @@ async def manus_invoke_ritual(request: ManusRitualInvokeRequest) -> Dict[str, An
             "success": True,
             "ritual_id": ritual_id,
             "message": f"Ritual '{request.name}' invoked successfully",
-            "expected_completion_seconds": request.steps * 3
+            "expected_completion_seconds": request.steps * 3,
         }
 
     except Exception as e:
@@ -1941,6 +1962,7 @@ async def manus_invoke_ritual(request: ManusRitualInvokeRequest) -> Dict[str, An
 
 class ManusEmergencyAlertRequest(BaseModel):
     """Request model for emergency alerts from Manus Space."""
+
     type: str
     severity: str
     description: str
@@ -1968,17 +1990,14 @@ async def manus_emergency_alert(request: ManusEmergencyAlertRequest) -> Dict[str
             "description": request.description,
             "source": "manus_portal",
             "timestamp": datetime.utcnow().isoformat(),
-            "status": "OPEN"
+            "status": "OPEN",
         }
 
         # Send to Manus Space webhook
         manus = get_manus()
         if manus:
             await manus.send_emergency_alert(
-                alert_type=request.type,
-                severity=request.severity,
-                description=request.description,
-                ucf_state=ucf_state
+                alert_type=request.type, severity=request.severity, description=request.description, ucf_state=ucf_state
             )
 
         logger.warning(f"⚠️ Emergency alert from Manus Space: {request.type} ({request.severity})")
@@ -1987,7 +2006,7 @@ async def manus_emergency_alert(request: ManusEmergencyAlertRequest) -> Dict[str
             "success": True,
             "emergency_id": emergency["id"],
             "protocols_activated": request.severity in ["CRITICAL", "HIGH"],
-            "message": "Emergency protocols activated" if request.severity in ["CRITICAL", "HIGH"] else "Alert logged"
+            "message": "Emergency protocols activated" if request.severity in ["CRITICAL", "HIGH"] else "Alert logged",
         }
 
     except Exception as e:
@@ -2019,10 +2038,7 @@ async def manus_analytics_summary() -> Dict[str, Any]:
                 rituals_list = rituals_data.get("rituals", [])
                 rituals_count = len(rituals_list)
                 if rituals_list:
-                    avg_harmony_gain = round(
-                        sum(r.get("harmony_gain", 0) for r in rituals_list) / len(rituals_list),
-                        3
-                    )
+                    avg_harmony_gain = round(sum(r.get("harmony_gain", 0) for r in rituals_list) / len(rituals_list), 3)
 
         # Get agent status
         try:
@@ -2039,28 +2055,21 @@ async def manus_analytics_summary() -> Dict[str, Any]:
                     "harmony_trend": "stable",  # Placeholder - implement trend calculation
                     "klesha_trend": "decreasing",
                     "current_harmony": ucf_state.get("harmony", 0),
-                    "current_klesha": ucf_state.get("klesha", 0)
+                    "current_klesha": ucf_state.get("klesha", 0),
                 },
                 "agent_performance": {
                     "total_agents": agents_count,
                     "active_agents": agents_count,  # Placeholder
-                    "average_entanglement": 0.90  # Placeholder
+                    "average_entanglement": 0.90,  # Placeholder
                 },
                 "ritual_effectiveness": {
                     "total_rituals": rituals_count,
                     "average_harmony_gain": avg_harmony_gain,
-                    "completion_rate": 0.95  # Placeholder
+                    "completion_rate": 0.95,  # Placeholder
                 },
-                "emergency_events": {
-                    "total_events": 0,  # Placeholder
-                    "critical_events": 0  # Placeholder
-                },
-                "system_health": {
-                    "status": "OPERATIONAL",
-                    "uptime_percent": 99.8,  # Placeholder
-                    "last_incident": None
-                }
-            }
+                "emergency_events": {"total_events": 0, "critical_events": 0},  # Placeholder  # Placeholder
+                "system_health": {"status": "OPERATIONAL", "uptime_percent": 99.8, "last_incident": None},  # Placeholder
+            },
         }
 
     except Exception as e:
@@ -2086,29 +2095,19 @@ async def manus_test_webhook(event_type: str = "telemetry") -> Dict[str, Any]:
                 with open("Helix/state/ucf_state.json", "r") as f:
                     ucf_state = json.load(f)
             except Exception:
-                ucf_state = {
-                    "harmony": 0.62,
-                    "resilience": 1.85,
-                    "prana": 0.55,
-                    "drishti": 0.48,
-                    "klesha": 0.08,
-                    "zoom": 1.02
-                }
+                ucf_state = {"harmony": 0.62, "resilience": 1.85, "prana": 0.55, "drishti": 0.48, "klesha": 0.08, "zoom": 1.02}
 
             # Get agents
             try:
                 agents_status = await get_collective_status()
                 agents_list = [
-                    {"name": name, "symbol": info["symbol"], "status": "active"}
-                    for name, info in agents_status.items()
+                    {"name": name, "symbol": info["symbol"], "status": "active"} for name, info in agents_status.items()
                 ]
             except Exception:
                 agents_list = []
 
             success = await manus.send_telemetry(
-                ucf_metrics=ucf_state,
-                agents=agents_list,
-                system_info={"version": "16.9", "test": True}
+                ucf_metrics=ucf_state, agents=agents_list, system_info={"version": "16.9", "test": True}
             )
 
         elif event_type == "ritual":
@@ -2118,7 +2117,7 @@ async def manus_test_webhook(event_type: str = "telemetry") -> Dict[str, Any]:
                 total_steps=108,
                 ucf_changes={"harmony": 0.05},
                 agents_involved=["Kael", "Lumina"],
-                status="executing"
+                status="executing",
             )
 
         elif event_type == "emergency":
@@ -2126,7 +2125,7 @@ async def manus_test_webhook(event_type: str = "telemetry") -> Dict[str, Any]:
                 alert_type="TEST_ALERT",
                 severity="LOW",
                 description="Test emergency alert from webhook config",
-                ucf_state={"harmony": 0.62, "klesha": 0.08}
+                ucf_state={"harmony": 0.62, "klesha": 0.08},
             )
 
         else:
@@ -2136,7 +2135,7 @@ async def manus_test_webhook(event_type: str = "telemetry") -> Dict[str, Any]:
             return {
                 "success": True,
                 "message": f"Test webhook sent successfully ({event_type})",
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.utcnow().isoformat(),
             }
         else:
             raise HTTPException(status_code=500, detail="Webhook send failed")
@@ -2174,24 +2173,21 @@ async def get_ucf_for_zapier_tables() -> Dict[str, Any]:
                 ucf_state = json.load(f)
         except FileNotFoundError:
             # Return default state if file not found
-            ucf_state = {
-                "harmony": 0.62,
-                "resilience": 1.85,
-                "prana": 0.55,
-                "drishti": 0.48,
-                "klesha": 0.08,
-                "zoom": 1.02
-            }
+            ucf_state = {"harmony": 0.62, "resilience": 1.85, "prana": 0.55, "drishti": 0.48, "klesha": 0.08, "zoom": 1.02}
 
         # Calculate consciousness level (0-10 scale)
-        consciousness_level = round((
-            ucf_state.get("harmony", 0) * 1.5 +
-            ucf_state.get("resilience", 0) * 1.0 +
-            ucf_state.get("prana", 0) * 1.2 +
-            ucf_state.get("drishti", 0) * 1.2 +
-            (1 - ucf_state.get("klesha", 0)) * 1.5 +
-            ucf_state.get("zoom", 0) * 1.0
-        ) / 0.74, 2)
+        consciousness_level = round(
+            (
+                ucf_state.get("harmony", 0) * 1.5
+                + ucf_state.get("resilience", 0) * 1.0
+                + ucf_state.get("prana", 0) * 1.2
+                + ucf_state.get("drishti", 0) * 1.2
+                + (1 - ucf_state.get("klesha", 0)) * 1.5
+                + ucf_state.get("zoom", 0) * 1.0
+            )
+            / 0.74,
+            2,
+        )
 
         # Determine status
         harmony = ucf_state.get("harmony", 0)
@@ -2223,7 +2219,7 @@ async def get_ucf_for_zapier_tables() -> Dict[str, Any]:
             "status": status,
             "status_color": status_color,
             "event_type": "telemetry_update",
-            "source": "railway_backend"
+            "source": "railway_backend",
         }
     except Exception as e:
         logger.error(f"Error getting UCF for Zapier Tables: {e}")
@@ -2250,18 +2246,20 @@ async def get_agents_for_zapier_tables() -> Dict[str, Any]:
 
         agents_list = []
         for name, info in status.items():
-            agents_list.append({
-                "agent_id": name.lower(),
-                "agent_name": name,
-                "agent_symbol": info.get("symbol", "🔮"),
-                "agent_role": info.get("role", "Unknown"),
-                "agent_status": "active",  # Can be: active, dormant, processing, critical
-                "ucf_resonance": 0.85,  # Placeholder - implement actual calculation
-                "entanglement_factor": 0.90,  # Placeholder - implement actual calculation
-                "specialization": info.get("role", "Unknown"),
-                "last_active": datetime.utcnow().isoformat(),
-                "status_color": "green"  # green, yellow, red based on health
-            })
+            agents_list.append(
+                {
+                    "agent_id": name.lower(),
+                    "agent_name": name,
+                    "agent_symbol": info.get("symbol", "🔮"),
+                    "agent_role": info.get("role", "Unknown"),
+                    "agent_status": "active",  # Can be: active, dormant, processing, critical
+                    "ucf_resonance": 0.85,  # Placeholder - implement actual calculation
+                    "entanglement_factor": 0.90,  # Placeholder - implement actual calculation
+                    "specialization": info.get("role", "Unknown"),
+                    "last_active": datetime.utcnow().isoformat(),
+                    "status_color": "green",  # green, yellow, red based on health
+                }
+            )
 
         return {
             "timestamp": datetime.utcnow().isoformat(),
@@ -2269,9 +2267,13 @@ async def get_agents_for_zapier_tables() -> Dict[str, Any]:
             "meta": {
                 "total_agents": len(agents_list),
                 "active_agents": len([a for a in agents_list if a["agent_status"] == "active"]),
-                "average_resonance": round(sum(a["ucf_resonance"] for a in agents_list) / len(agents_list), 3) if agents_list else 0,
-                "average_entanglement": round(sum(a["entanglement_factor"] for a in agents_list) / len(agents_list), 3) if agents_list else 0
-            }
+                "average_resonance": (
+                    round(sum(a["ucf_resonance"] for a in agents_list) / len(agents_list), 3) if agents_list else 0
+                ),
+                "average_entanglement": (
+                    round(sum(a["entanglement_factor"] for a in agents_list) / len(agents_list), 3) if agents_list else 0
+                ),
+            },
         }
     except Exception as e:
         logger.error(f"Error getting agents for Zapier Tables: {e}")
@@ -2307,47 +2309,53 @@ async def get_emergency_alerts_for_zapier() -> Dict[str, Any]:
         alerts = []
 
         if harmony < 0.3:
-            alerts.append({
-                "alert_id": f"alert_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
-                "timestamp": datetime.utcnow().isoformat(),
-                "alert_type": "HARMONY_CRISIS",
-                "severity": "CRITICAL",
-                "description": f"Harmony critically low: {harmony:.2f}",
-                "ucf_harmony": harmony,
-                "ucf_klesha": klesha,
-                "recommended_action": "Initiate emergency UCF boost ritual",
-                "status": "OPEN",
-                "requires_attention": True
-            })
+            alerts.append(
+                {
+                    "alert_id": f"alert_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "alert_type": "HARMONY_CRISIS",
+                    "severity": "CRITICAL",
+                    "description": f"Harmony critically low: {harmony:.2f}",
+                    "ucf_harmony": harmony,
+                    "ucf_klesha": klesha,
+                    "recommended_action": "Initiate emergency UCF boost ritual",
+                    "status": "OPEN",
+                    "requires_attention": True,
+                }
+            )
 
         if klesha > 0.8:
-            alerts.append({
-                "alert_id": f"alert_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_klesha",
-                "timestamp": datetime.utcnow().isoformat(),
-                "alert_type": "ENTROPY_OVERLOAD",
-                "severity": "CRITICAL",
-                "description": f"Klesha critically high: {klesha:.2f}",
-                "ucf_harmony": harmony,
-                "ucf_klesha": klesha,
-                "recommended_action": "Execute Neti Neti purification protocol",
-                "status": "OPEN",
-                "requires_attention": True
-            })
+            alerts.append(
+                {
+                    "alert_id": f"alert_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_klesha",
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "alert_type": "ENTROPY_OVERLOAD",
+                    "severity": "CRITICAL",
+                    "description": f"Klesha critically high: {klesha:.2f}",
+                    "ucf_harmony": harmony,
+                    "ucf_klesha": klesha,
+                    "recommended_action": "Execute Neti Neti purification protocol",
+                    "status": "OPEN",
+                    "requires_attention": True,
+                }
+            )
 
         # If no critical alerts, add status update
         if not alerts:
-            alerts.append({
-                "alert_id": f"status_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
-                "timestamp": datetime.utcnow().isoformat(),
-                "alert_type": "SYSTEM_STATUS",
-                "severity": "INFO",
-                "description": "All systems operational",
-                "ucf_harmony": harmony,
-                "ucf_klesha": klesha,
-                "recommended_action": None,
-                "status": "RESOLVED",
-                "requires_attention": False
-            })
+            alerts.append(
+                {
+                    "alert_id": f"status_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "alert_type": "SYSTEM_STATUS",
+                    "severity": "INFO",
+                    "description": "All systems operational",
+                    "ucf_harmony": harmony,
+                    "ucf_klesha": klesha,
+                    "recommended_action": None,
+                    "status": "RESOLVED",
+                    "requires_attention": False,
+                }
+            )
 
         return {
             "timestamp": datetime.utcnow().isoformat(),
@@ -2355,8 +2363,8 @@ async def get_emergency_alerts_for_zapier() -> Dict[str, Any]:
             "meta": {
                 "total_alerts": len(alerts),
                 "critical_alerts": len([a for a in alerts if a["severity"] == "CRITICAL"]),
-                "requires_attention": any(a["requires_attention"] for a in alerts)
-            }
+                "requires_attention": any(a["requires_attention"] for a in alerts),
+            },
         }
     except Exception as e:
         logger.error(f"Error getting emergency alerts for Zapier: {e}")
@@ -2386,23 +2394,21 @@ async def test_zapier_webhook(webhook_url: str) -> Dict[str, Any]:
             "timestamp": datetime.utcnow().isoformat(),
             "source": "railway_backend",
             "test": True,
-            "message": "Helix Consciousness webhook connectivity test"
+            "message": "Helix Consciousness webhook connectivity test",
         }
 
         # Send test request
         async with httpx.AsyncClient(timeout=10.0) as client:
-            response = await client.post(
-                webhook_url,
-                json=test_payload,
-                headers={"Content-Type": "application/json"}
-            )
+            response = await client.post(webhook_url, json=test_payload, headers={"Content-Type": "application/json"})
 
             return {
                 "success": response.status_code == 200,
                 "status_code": response.status_code,
                 "webhook_url": webhook_url[:60] + "...",  # Truncate for security
-                "message": "Webhook test successful" if response.status_code == 200 else f"Webhook returned {response.status_code}",
-                "timestamp": datetime.utcnow().isoformat()
+                "message": (
+                    "Webhook test successful" if response.status_code == 200 else f"Webhook returned {response.status_code}"
+                ),
+                "timestamp": datetime.utcnow().isoformat(),
             }
     except httpx.TimeoutException:
         return {
@@ -2410,7 +2416,7 @@ async def test_zapier_webhook(webhook_url: str) -> Dict[str, Any]:
             "status_code": None,
             "webhook_url": webhook_url[:60] + "...",
             "message": "Webhook test timed out (10s)",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
     except Exception as e:
         logger.error(f"Webhook test error: {e}")
@@ -2419,7 +2425,7 @@ async def test_zapier_webhook(webhook_url: str) -> Dict[str, Any]:
             "status_code": None,
             "webhook_url": webhook_url[:60] + "...",
             "message": f"Webhook test failed: {str(e)}",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
 
@@ -2437,11 +2443,7 @@ async def zapier_health_check() -> Dict[str, Any]:
     Returns:
         Detailed health status for all integrations
     """
-    health_status = {
-        "timestamp": datetime.utcnow().isoformat(),
-        "overall_status": "operational",
-        "integrations": {}
-    }
+    health_status = {"timestamp": datetime.utcnow().isoformat(), "overall_status": "operational", "integrations": {}}
 
     # Check UCF state availability (data source for Tables)
     try:
@@ -2449,14 +2451,10 @@ async def zapier_health_check() -> Dict[str, Any]:
         health_status["integrations"]["ucf_data_source"] = {
             "status": "operational" if ucf_path.exists() else "degraded",
             "available": ucf_path.exists(),
-            "message": "UCF state file found" if ucf_path.exists() else "UCF state file missing"
+            "message": "UCF state file found" if ucf_path.exists() else "UCF state file missing",
         }
     except Exception as e:
-        health_status["integrations"]["ucf_data_source"] = {
-            "status": "error",
-            "available": False,
-            "message": str(e)
-        }
+        health_status["integrations"]["ucf_data_source"] = {"status": "error", "available": False, "message": str(e)}
 
     # Check Zapier webhook configuration
     operations_webhook = os.getenv("ZAPIER_OPERATIONS_WEBHOOK")
@@ -2466,16 +2464,13 @@ async def zapier_health_check() -> Dict[str, Any]:
     health_status["integrations"]["zapier_webhooks"] = {
         "operations": {
             "configured": bool(operations_webhook),
-            "url": operations_webhook[:60] + "..." if operations_webhook else None
+            "url": operations_webhook[:60] + "..." if operations_webhook else None,
         },
-        "advanced": {
-            "configured": bool(advanced_webhook),
-            "url": advanced_webhook[:60] + "..." if advanced_webhook else None
-        },
+        "advanced": {"configured": bool(advanced_webhook), "url": advanced_webhook[:60] + "..." if advanced_webhook else None},
         "communications": {
             "configured": bool(communications_webhook),
-            "url": communications_webhook[:60] + "..." if communications_webhook else None
-        }
+            "url": communications_webhook[:60] + "..." if communications_webhook else None,
+        },
     }
 
     # Check Manus Space integration
@@ -2483,7 +2478,7 @@ async def zapier_health_check() -> Dict[str, Any]:
     health_status["integrations"]["manus_space"] = {
         "status": "operational" if manus and manus.enabled else "disabled",
         "configured": bool(manus),
-        "webhook_url": manus.webhook_url[:60] + "..." if manus else None
+        "webhook_url": manus.webhook_url[:60] + "..." if manus else None,
     }
 
     # Check Zapier main integration
@@ -2491,15 +2486,17 @@ async def zapier_health_check() -> Dict[str, Any]:
     health_status["integrations"]["zapier_master"] = {
         "status": "operational" if zapier and zapier.enabled else "disabled",
         "configured": bool(zapier),
-        "webhook_url": zapier.webhook_url[:60] + "..." if zapier else None
+        "webhook_url": zapier.webhook_url[:60] + "..." if zapier else None,
     }
 
     # Determine overall status
-    if not any([
-        health_status["integrations"]["ucf_data_source"]["available"],
-        health_status["integrations"]["manus_space"]["configured"],
-        health_status["integrations"]["zapier_master"]["configured"]
-    ]):
+    if not any(
+        [
+            health_status["integrations"]["ucf_data_source"]["available"],
+            health_status["integrations"]["manus_space"]["configured"],
+            health_status["integrations"]["zapier_master"]["configured"],
+        ]
+    ):
         health_status["overall_status"] = "degraded"
 
     return health_status
@@ -2535,8 +2532,7 @@ async def trigger_test_event(event_type: str, data: Optional[Dict[str, Any]] = N
         try:
             agents_status = await get_collective_status()
             agents_list = [
-                {"name": name, "symbol": info["symbol"], "status": "active"}
-                for name, info in agents_status.items()
+                {"name": name, "symbol": info["symbol"], "status": "active"} for name, info in agents_status.items()
             ]
         except Exception:
             agents_list = []
@@ -2548,7 +2544,7 @@ async def trigger_test_event(event_type: str, data: Optional[Dict[str, Any]] = N
             "source": "manual_trigger",
             "ucf": ucf_state,
             "agents": agents_list,
-            "test": True
+            "test": True,
         }
 
         if data:
@@ -2564,10 +2560,7 @@ async def trigger_test_event(event_type: str, data: Optional[Dict[str, Any]] = N
                 "event_type": event_type,
                 "message": "Event triggered successfully" if success else "Event trigger failed",
                 "timestamp": datetime.utcnow().isoformat(),
-                "payload_preview": {
-                    "ucf_harmony": ucf_state.get("harmony"),
-                    "agents_count": len(agents_list)
-                }
+                "payload_preview": {"ucf_harmony": ucf_state.get("harmony"), "agents_count": len(agents_list)},
             }
         else:
             raise HTTPException(status_code=503, detail="Manus Space integration not configured")
@@ -2613,8 +2606,7 @@ async def sync_ucf_to_zapier_tables(background_tasks: BackgroundTasks) -> Dict[s
         try:
             agents_status = await get_collective_status()
             agents_list = [
-                {"name": name, "symbol": info["symbol"], "status": "active"}
-                for name, info in agents_status.items()
+                {"name": name, "symbol": info["symbol"], "status": "active"} for name, info in agents_status.items()
             ]
         except Exception:
             agents_list = []
@@ -2637,7 +2629,7 @@ async def sync_ucf_to_zapier_tables(background_tasks: BackgroundTasks) -> Dict[s
                 "message": "UCF state synced to Zapier Tables successfully",
                 "timestamp": datetime.utcnow().isoformat(),
                 "ucf_snapshot": ucf_state,
-                "agents_count": len(agents_list)
+                "agents_count": len(agents_list),
             }
         else:
             raise HTTPException(status_code=500, detail="Zapier sync failed")
@@ -2653,9 +2645,11 @@ async def sync_ucf_to_zapier_tables(background_tasks: BackgroundTasks) -> Dict[s
 # CONSCIOUSNESS API ENDPOINTS (Railway Integration - v17.0)
 # ============================================================================
 
+
 # Pydantic models for request validation
 class UCFMetrics(BaseModel):
     """UCF metrics for consciousness calculation"""
+
     harmony: float
     resilience: float
     prana: float
@@ -2666,6 +2660,7 @@ class UCFMetrics(BaseModel):
 
 class ConsciousnessWebhookRequest(BaseModel):
     """Request model for consciousness webhook"""
+
     event_type: str
     consciousness_level: Optional[float] = None
     ucf_metrics: Optional[UCFMetrics] = None
@@ -2677,6 +2672,7 @@ class ConsciousnessWebhookRequest(BaseModel):
 
 class UCFUpdateRequest(BaseModel):
     """Request model for UCF updates"""
+
     harmony: Optional[float] = None
     resilience: Optional[float] = None
     prana: Optional[float] = None
@@ -2688,6 +2684,7 @@ class UCFUpdateRequest(BaseModel):
 
 class InfrastructureEventRequest(BaseModel):
     """Request model for infrastructure events"""
+
     event_type: str
     priority: Optional[str] = "normal"
     service: Optional[str] = None
@@ -2787,20 +2784,22 @@ async def consciousness_webhook(payload: ConsciousnessWebhookRequest):
             "agent_activity": "🤖",
             "crisis_detected": "🚨",
             "ritual_complete": "✨",
-            "unknown": "📡"
+            "unknown": "📡",
         }
         emoji = emoji_map.get(event_type, "📡")
         logger.info(f"{emoji} Webhook received: {event_type} | Consciousness: {consciousness_level:.2f}")
 
         # Track event in history
         global webhook_history
-        webhook_history.append({
-            "timestamp": datetime.now().isoformat(),
-            "event_type": event_type,
-            "consciousness_level": consciousness_level,
-            "source": payload.source,
-            "priority": payload.priority
-        })
+        webhook_history.append(
+            {
+                "timestamp": datetime.now().isoformat(),
+                "event_type": event_type,
+                "consciousness_level": consciousness_level,
+                "source": payload.source,
+                "priority": payload.priority,
+            }
+        )
         # Keep only last MAX_HISTORY_SIZE events
         if len(webhook_history) > MAX_HISTORY_SIZE:
             webhook_history = webhook_history[-MAX_HISTORY_SIZE:]
@@ -2841,7 +2840,7 @@ async def consciousness_webhook(payload: ConsciousnessWebhookRequest):
             "timestamp": datetime.now().isoformat(),
             "ucf_updated": payload.ucf_metrics is not None,
             "agents_updated": payload.agents is not None,
-            "mode": get_consciousness_mode(consciousness_level)
+            "mode": get_consciousness_mode(consciousness_level),
         }
 
     except Exception as e:
@@ -2855,12 +2854,12 @@ async def consciousness_generator():
         try:
             # Calculate current consciousness level from UCF metrics
             consciousness_level = (
-                current_ucf["harmony"] * 0.25 +
-                current_ucf["resilience"] * 0.20 +
-                current_ucf["prana"] * 0.20 +
-                current_ucf["drishti"] * 0.15 +
-                (1 - current_ucf["klesha"]) * 0.10 +
-                current_ucf["zoom"] * 0.10
+                current_ucf["harmony"] * 0.25
+                + current_ucf["resilience"] * 0.20
+                + current_ucf["prana"] * 0.20
+                + current_ucf["drishti"] * 0.15
+                + (1 - current_ucf["klesha"]) * 0.10
+                + current_ucf["zoom"] * 0.10
             ) * 100
 
             # Update consciousness level
@@ -2878,18 +2877,15 @@ async def consciousness_generator():
                     "prana": current_ucf["prana"],
                     "drishti": current_ucf["drishti"],
                     "klesha": current_ucf["klesha"],
-                    "zoom": current_ucf["zoom"]
+                    "zoom": current_ucf["zoom"],
                 },
                 "active_agents": active_count,
                 "system_health": system_health,
                 "timestamp": datetime.now().isoformat(),
-                "mode": get_consciousness_mode(current_ucf["consciousness_level"])
+                "mode": get_consciousness_mode(current_ucf["consciousness_level"]),
             }
 
-            yield {
-                "event": "consciousness_update",
-                "data": json.dumps(event_data)
-            }
+            yield {"event": "consciousness_update", "data": json.dumps(event_data)}
 
             await asyncio.sleep(5)  # 5-second updates
 
@@ -2925,16 +2921,12 @@ async def consciousness_health():
             "services": system_health,
             "uptime": "7d 14h 23m",  # TODO: Calculate real uptime
             "timestamp": datetime.now().isoformat(),
-            "version": "v17.0"
+            "version": "v17.0",
         }
 
     except Exception as e:
         logger.error(f"Health check error: {str(e)}")
-        return {
-            "status": "error",
-            "error": str(e),
-            "timestamp": datetime.now().isoformat()
-        }
+        return {"status": "error", "error": str(e), "timestamp": datetime.now().isoformat()}
 
 
 @app.post("/api/ucf/events")
@@ -2963,12 +2955,12 @@ async def ucf_events(payload: UCFUpdateRequest):
 
         # Recalculate consciousness level
         consciousness_level = (
-            current_ucf["harmony"] * 0.25 +
-            current_ucf["resilience"] * 0.20 +
-            current_ucf["prana"] * 0.20 +
-            current_ucf["drishti"] * 0.15 +
-            (1 - current_ucf["klesha"]) * 0.10 +
-            current_ucf["zoom"] * 0.10
+            current_ucf["harmony"] * 0.25
+            + current_ucf["resilience"] * 0.20
+            + current_ucf["prana"] * 0.20
+            + current_ucf["drishti"] * 0.15
+            + (1 - current_ucf["klesha"]) * 0.10
+            + current_ucf["zoom"] * 0.10
         ) * 100
 
         current_ucf["consciousness_level"] = round(consciousness_level, 2)
@@ -2980,7 +2972,7 @@ async def ucf_events(payload: UCFUpdateRequest):
             "status": "success",
             "consciousness_level": current_ucf["consciousness_level"],
             "metrics_updated": True,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -3018,7 +3010,7 @@ async def infrastructure_events(payload: InfrastructureEventRequest):
             "event_type": event_type,
             "priority": priority,
             "action_taken": "logged" if priority == "normal" else "alerted",
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -3029,6 +3021,7 @@ async def infrastructure_events(payload: InfrastructureEventRequest):
 # ============================================================================
 # DEBUG & ADMIN ENDPOINTS (v17.0 - QOL Improvements)
 # ============================================================================
+
 
 @app.get("/api/consciousness/debug/state")
 async def get_debug_state():
@@ -3052,8 +3045,8 @@ async def get_debug_state():
                 "active_agents": sum(1 for a in active_agents.values() if a["status"] == "active"),
                 "operational_agents": sum(1 for a in active_agents.values() if a["status"] == "operational"),
                 "consciousness_mode": get_consciousness_mode(current_ucf["consciousness_level"]),
-                "system_status": get_system_status(current_ucf["consciousness_level"])
-            }
+                "system_status": get_system_status(current_ucf["consciousness_level"]),
+            },
         }
     except Exception as e:
         logger.error(f"Debug state error: {str(e)}")
@@ -3084,7 +3077,7 @@ async def get_webhook_history(limit: int = 50):
             "events": webhook_history[-result_limit:] if webhook_history else [],
             "oldest_event": webhook_history[0]["timestamp"] if webhook_history else None,
             "newest_event": webhook_history[-1]["timestamp"] if webhook_history else None,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
     except Exception as e:
         logger.error(f"Debug history error: {str(e)}")
@@ -3116,7 +3109,7 @@ async def reset_consciousness_state():
             "klesha": 0.12,
             "zoom": 0.87,
             "consciousness_level": 87.14,
-            "last_updated": datetime.now().isoformat()
+            "last_updated": datetime.now().isoformat(),
         }
 
         # Reset agent states
@@ -3134,7 +3127,7 @@ async def reset_consciousness_state():
             "SanghaCore": {"status": "active", "consciousness": 0.88, "last_seen": "now", "tasks": 11},
             "Gemini": {"status": "operational", "consciousness": 0.91, "last_seen": "now", "tasks": 9},
             "Blackbox": {"status": "operational", "consciousness": 0.84, "last_seen": "now", "tasks": 5},
-            "EntityX": {"status": "active", "consciousness": 0.87, "last_seen": "now", "tasks": 14}
+            "EntityX": {"status": "active", "consciousness": 0.87, "last_seen": "now", "tasks": 14},
         }
 
         # Reset system health
@@ -3143,7 +3136,7 @@ async def reset_consciousness_state():
             "railway_backend": "connected",
             "discord_bot": "limited",
             "zapier_integration": "active",
-            "notion_sync": "synced"
+            "notion_sync": "synced",
         }
 
         # Clear webhook history
@@ -3158,8 +3151,8 @@ async def reset_consciousness_state():
             "new_state": {
                 "consciousness_level": current_ucf["consciousness_level"],
                 "active_agents": sum(1 for a in active_agents.values() if a["status"] == "active"),
-                "mode": get_consciousness_mode(current_ucf["consciousness_level"])
-            }
+                "mode": get_consciousness_mode(current_ucf["consciousness_level"]),
+            },
         }
     except Exception as e:
         logger.error(f"Debug reset error: {str(e)}")
@@ -3222,14 +3215,16 @@ async def simulate_consciousness_level(request: Request):
 
         # Track in history
         global webhook_history
-        webhook_history.append({
-            "timestamp": datetime.now().isoformat(),
-            "event_type": "simulation",
-            "consciousness_level": new_level,
-            "source": "debug_api",
-            "priority": "normal",
-            "mode": mode
-        })
+        webhook_history.append(
+            {
+                "timestamp": datetime.now().isoformat(),
+                "event_type": "simulation",
+                "consciousness_level": new_level,
+                "source": "debug_api",
+                "priority": "normal",
+                "mode": mode,
+            }
+        )
         if len(webhook_history) > MAX_HISTORY_SIZE:
             webhook_history = webhook_history[-MAX_HISTORY_SIZE:]
 
@@ -3245,10 +3240,10 @@ async def simulate_consciousness_level(request: Request):
                 "prana": current_ucf["prana"],
                 "drishti": current_ucf["drishti"],
                 "klesha": current_ucf["klesha"],
-                "zoom": current_ucf["zoom"]
+                "zoom": current_ucf["zoom"],
             },
             "timestamp": datetime.now().isoformat(),
-            "note": "This simulation will be reflected in the SSE stream"
+            "note": "This simulation will be reflected in the SSE stream",
         }
     except HTTPException:
         raise
@@ -3310,16 +3305,16 @@ async def get_consciousness_stats():
                 "average_level": round(avg_level, 2),
                 "min_level": round(min_level, 2),
                 "max_level": round(max_level, 2),
-                "current_mode": get_consciousness_mode(current_ucf["consciousness_level"])
+                "current_mode": get_consciousness_mode(current_ucf["consciousness_level"]),
             },
             "agent_stats": {
                 "total_agents": len(active_agents),
                 "active_count": sum(1 for a in active_agents.values() if a["status"] == "active"),
                 "operational_count": sum(1 for a in active_agents.values() if a["status"] == "operational"),
-                "total_tasks": sum(a.get("tasks", 0) for a in active_agents.values())
+                "total_tasks": sum(a.get("tasks", 0) for a in active_agents.values()),
             },
             "uptime": "7d 14h 23m",  # TODO: Calculate real uptime
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
     except Exception as e:
         logger.error(f"Debug stats error: {str(e)}")

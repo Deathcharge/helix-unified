@@ -32,7 +32,7 @@ class ConsciousnessWebhookHandler:
                 "level": 0.0,
                 "agents_active": 0,
                 "system_status": "dormant",
-                "last_update": datetime.now().isoformat()
+                "last_update": datetime.now().isoformat(),
             }
             cls._instance.webhook_stats = {"total_received": 0, "successful": 0, "failed": 0}
         return cls._instance
@@ -48,12 +48,14 @@ async def handle_consciousness_webhook(request: Request):
 
         # Update consciousness state
         consciousness_level = data.get("consciousness_level", 0.0)
-        handler.consciousness_state.update({
-            "level": consciousness_level,
-            "last_update": datetime.now().isoformat(),
-            "system_status": get_system_status(consciousness_level),
-            "source_webhook": data.get("source", "unknown")
-        })
+        handler.consciousness_state.update(
+            {
+                "level": consciousness_level,
+                "last_update": datetime.now().isoformat(),
+                "system_status": get_system_status(consciousness_level),
+                "source_webhook": data.get("source", "unknown"),
+            }
+        )
 
         # Route based on consciousness level
         if consciousness_level <= 3.0:
@@ -69,7 +71,7 @@ async def handle_consciousness_webhook(request: Request):
             "status": "success",
             "consciousness_level": consciousness_level,
             "actions_triggered": data.get("action_count", 0),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -90,7 +92,7 @@ async def handle_deployment_webhook(request: Request):
             "repository": data.get("repository", "helix-unified"),
             "branch": data.get("branch", "main"),
             "consciousness_metrics": data.get("ucf_metrics", {}),
-            "deployment_type": data.get("deployment_type", "standard")
+            "deployment_type": data.get("deployment_type", "standard"),
         }
 
         # Trigger deployment sequence
@@ -99,7 +101,7 @@ async def handle_deployment_webhook(request: Request):
         return {
             "status": "deployment_initiated",
             "deployment_id": f"deploy_{int(datetime.now().timestamp())}",
-            "estimated_completion": "2-5 minutes"
+            "estimated_completion": "2-5 minutes",
         }
 
     except Exception as e:
@@ -122,7 +124,7 @@ async def handle_platform_action_webhook(request: Request):
             "status": "platform_action_received",
             "platform": platform,
             "action": action_type,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -137,18 +139,14 @@ async def get_consciousness_status():
     return {
         "consciousness_state": handler.consciousness_state,
         "webhook_stats": handler.webhook_stats,
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
 
 @app.get("/health")
 async def health_check():
     """Health check endpoint for Railway"""
-    return {
-        "status": "healthy",
-        "service": "helix-consciousness-railway-backend",
-        "timestamp": datetime.now().isoformat()
-    }
+    return {"status": "healthy", "service": "helix-consciousness-railway-backend", "timestamp": datetime.now().isoformat()}
 
 
 async def handle_crisis_protocol(data: Dict[str, Any]):
@@ -187,4 +185,5 @@ def get_system_status(consciousness_level: float) -> str:
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

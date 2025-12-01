@@ -182,7 +182,7 @@ class ResponseCache:
             "misses": self._misses,
             "total_requests": total_requests,
             "hit_rate_percent": round(hit_rate, 2),
-            "estimated_io_savings": f"{self._hits} file reads avoided"
+            "estimated_io_savings": f"{self._hits} file reads avoided",
         }
 
     def reset_stats(self):
@@ -226,6 +226,7 @@ def cached_response(ttl_seconds: int = 60, key_func: Optional[Callable] = None):
         async def get_agents(filter: str = "all"):
             return get_filtered_agents(filter)
     """
+
     def decorator(func: Callable):
         @wraps(func)
         async def wrapper(*args, **kwargs):

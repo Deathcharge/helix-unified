@@ -75,9 +75,7 @@ class EnhancedKavach:
                 continue
 
         if not dataset_loaded:
-            print(
-                "⚠️ CrAI-SafeFuncCall dataset not found in any expected location. Memory injection scanning will be limited."
-            )
+            print("⚠️ CrAI-SafeFuncCall dataset not found in any expected location. Memory injection scanning will be limited.")
 
         return patterns
 
@@ -136,14 +134,10 @@ class EnhancedKavach:
             memory_scan = self.scan_memory_for_injection(action["agent_memory"])
             if not memory_scan["clean"]:
                 scan_result["approved"] = False
-                scan_result["concerns"].append(
-                    f"Memory injection detected: {memory_scan['injections_detected']} patterns"
-                )
+                scan_result["concerns"].append(f"Memory injection detected: {memory_scan['injections_detected']} patterns")
                 scan_result["security_layers"]["memory_injection_scan"] = False
                 scan_result["injection_details"] = memory_scan["details"]
-                await self.log(
-                    f"🚨 Blocked memory injection attack: {memory_scan['injections_detected']} patterns detected"
-                )
+                await self.log(f"🚨 Blocked memory injection attack: {memory_scan['injections_detected']} patterns detected")
 
         # Log scan results
         Path("Helix/ethics").mkdir(parents=True, exist_ok=True)

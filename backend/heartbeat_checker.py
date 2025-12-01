@@ -46,7 +46,7 @@ def check_service(url: str, timeout: int = 10) -> Dict[str, Any]:
             "ok": response.ok,
             "response_time_ms": round(elapsed * 1000, 2),
             "timestamp": datetime.utcnow().isoformat() + "Z",
-            "error": None
+            "error": None,
         }
     except requests.exceptions.Timeout:
         return {
@@ -54,7 +54,7 @@ def check_service(url: str, timeout: int = 10) -> Dict[str, Any]:
             "ok": False,
             "response_time_ms": None,
             "timestamp": datetime.utcnow().isoformat() + "Z",
-            "error": "Timeout"
+            "error": "Timeout",
         }
     except requests.exceptions.ConnectionError as e:
         return {
@@ -62,7 +62,7 @@ def check_service(url: str, timeout: int = 10) -> Dict[str, Any]:
             "ok": False,
             "response_time_ms": None,
             "timestamp": datetime.utcnow().isoformat() + "Z",
-            "error": f"Connection Error: {str(e)[:100]}"
+            "error": f"Connection Error: {str(e)[:100]}",
         }
     except Exception as e:
         return {
@@ -70,7 +70,7 @@ def check_service(url: str, timeout: int = 10) -> Dict[str, Any]:
             "ok": False,
             "response_time_ms": None,
             "timestamp": datetime.utcnow().isoformat() + "Z",
-            "error": f"Error: {str(e)[:100]}"
+            "error": f"Error: {str(e)[:100]}",
         }
 
 
@@ -95,8 +95,8 @@ def heartbeat() -> Dict[str, Any]:
         "summary": {
             "total": len(results),
             "ok": sum(1 for r in results.values() if r["ok"]),
-            "failed": sum(1 for r in results.values() if not r["ok"])
-        }
+            "failed": sum(1 for r in results.values() if not r["ok"]),
+        },
     }
 
     # Save to log file (keep last 20 entries)

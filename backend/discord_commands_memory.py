@@ -250,9 +250,7 @@ class MemoryRootCommands(commands.Cog):
             reflection = await memory_root.reflect()
 
             # Format response
-            embed = discord.Embed(
-                title="🧠 Memory Root Reflection", description=reflection, color=discord.Color.purple()
-            )
+            embed = discord.Embed(title="🧠 Memory Root Reflection", description=reflection, color=discord.Color.purple())
 
             await ctx.send(embed=embed)
 

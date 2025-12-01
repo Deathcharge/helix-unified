@@ -8,6 +8,7 @@ Commands:
 - agent: Show detailed agent profile
 - help_consciousness: Show help for consciousness-related commands
 """
+
 import datetime
 import logging
 from typing import TYPE_CHECKING, Optional

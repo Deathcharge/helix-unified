@@ -15,6 +15,7 @@ class ConfigManager:
     """
     Manages loading and accessing configuration from helix_config.toml.
     """
+
     _instance = None
     _config: Dict[str, Any] = {}
 
@@ -31,7 +32,7 @@ class ConfigManager:
             # Fallback to a minimal default config to prevent total crash
             self._config = {
                 "general": {"VERSION": "v16.7-fallback", "STATE_DIR": "Helix/state"},
-                "discord": {"COMMAND_PREFIX": "!"}
+                "discord": {"COMMAND_PREFIX": "!"},
             }
             return
 

@@ -26,6 +26,7 @@ from typing import Any, Dict, Optional
 
 try:
     import aiofiles
+
     AIOFILES_AVAILABLE = True
 except ImportError:
     AIOFILES_AVAILABLE = False
@@ -33,6 +34,7 @@ except ImportError:
 
 try:
     from watchfiles import awatch
+
     WATCHFILES_AVAILABLE = True
 except ImportError:
     WATCHFILES_AVAILABLE = False
@@ -302,7 +304,7 @@ class UCFStateManager:
             "zoom": 1.0,
             "timestamp": datetime.now().isoformat(),
             "version": "17.0.0",
-            "initialized": True
+            "initialized": True,
         }
 
 

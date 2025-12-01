@@ -578,9 +578,7 @@ class MemoryRootAgent(HelixAgent):
                 return "I don't have any memories matching that query."
 
             # Build context string
-            context_str = "\n\n".join(
-                [f"**Session {s['session_id']}** ({s['created']})\n{s['summary']}" for s in snapshots]
-            )
+            context_str = "\n\n".join([f"**Session {s['session_id']}** ({s['created']})\n{s['summary']}" for s in snapshots])
 
             # Synthesize with GPT4o
             prompt = f"""You are GPT4o, the Memory Root of the Helix Collective.

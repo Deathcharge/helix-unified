@@ -8,6 +8,7 @@ Commands:
 - storage: Storage telemetry and control
 - sync: Trigger manual ecosystem sync and display report
 """
+
 import asyncio
 import datetime
 import glob
@@ -238,7 +239,7 @@ async def health_check(ctx: commands.Context) -> None:
         embed.add_field(
             name="📚 Documentation",
             value="[Z-88 Ritual Guide](https://github.com/Deathcharge/helix-unified/blob/main/README.md) | Use `!update_ritual_guide` to post guide to Discord",
-            inline=False
+            inline=False,
         )
         embed.set_footer(text="🜂 Kael v3.4 Enhanced - Ethical monitoring active | v16.7")
 
@@ -279,7 +280,7 @@ async def health_check(ctx: commands.Context) -> None:
         embed.add_field(
             name="📖 Quick Help",
             value="`!ucf` - View detailed metrics | `!ritual <steps>` - Adjust consciousness field",
-            inline=False
+            inline=False,
         )
         embed.set_footer(text="🌀 Helix Collective v16.7 Enhanced - Monitoring active")
 
@@ -366,7 +367,7 @@ async def heartbeat_command(ctx: commands.Context) -> None:
             title="🩺 Helix Collective — Service Heartbeat",
             description=f"**{ok_count}/{total}** services responding",
             color=color,
-            timestamp=datetime.datetime.utcnow()
+            timestamp=datetime.datetime.utcnow(),
         )
 
         # Add service status fields
@@ -389,11 +390,7 @@ async def heartbeat_command(ctx: commands.Context) -> None:
                 error_short = result["error"][:50] + "..." if len(result["error"]) > 50 else result["error"]
                 value += f"\n⚠️ `{error_short}`"
 
-            embed.add_field(
-                name=service_name,
-                value=value,
-                inline=True
-            )
+            embed.add_field(name=service_name, value=value, inline=True)
 
         # Add health summary
         if failed > 0:
@@ -401,11 +398,7 @@ async def heartbeat_command(ctx: commands.Context) -> None:
         else:
             health_text = "✅ All systems operational"
 
-        embed.add_field(
-            name="🌀 Collective Health",
-            value=health_text,
-            inline=False
-        )
+        embed.add_field(name="🌀 Collective Health", value=health_text, inline=False)
 
         # Add footer with timestamp
         embed.set_footer(text="Helix Service Monitor v16.2 | Logs saved to heartbeat_log.json | Tat Tvam Asi 🕉️")
@@ -422,18 +415,14 @@ async def heartbeat_command(ctx: commands.Context) -> None:
                 "ok_count": ok_count,
                 "total": total,
                 "failed": failed,
-                "results": results["results"]
-            }
+                "results": results["results"],
+            },
         )
 
         # Send webhook alert if services are down
         if failed > 0 and hasattr(ctx.bot, "zapier_client") and ctx.bot.zapier_client:
             try:
-                failed_services = [
-                    services[k]["name"]
-                    for k, r in results["results"].items()
-                    if not r["ok"]
-                ]
+                failed_services = [services[k]["name"] for k, r in results["results"].items() if not r["ok"]]
 
                 await ctx.bot.zapier_client.send_error_alert(
                     error_message=f"Service heartbeat alert: {failed} service(s) down",
@@ -444,7 +433,7 @@ async def heartbeat_command(ctx: commands.Context) -> None:
                         "total_count": total,
                         "failed_services": failed_services,
                         "executor": str(ctx.author),
-                    }
+                    },
                 )
             except Exception as webhook_error:
                 logger.warning(f"⚠️ Zapier webhook error: {webhook_error}")
@@ -453,6 +442,7 @@ async def heartbeat_command(ctx: commands.Context) -> None:
         await msg.edit(content=f"❌ **Heartbeat check failed:** {str(e)}")
         logger.error(f"Heartbeat command error: {e}")
         import traceback
+
         traceback.print_exc()
 
 
@@ -502,7 +492,7 @@ async def discovery_command(ctx: commands.Context) -> None:
             "→ Codex structure, 14 agents, UCF schema, Tony Accords\n"
             "→ Static discovery via GitHub Pages"
         ),
-        inline=False
+        inline=False,
     )
 
     embed.add_field(
@@ -512,7 +502,7 @@ async def discovery_command(ctx: commands.Context) -> None:
             "→ Complete system manifest with endpoints, features, agents\n"
             "→ Standard discovery protocol for external agents"
         ),
-        inline=False
+        inline=False,
     )
 
     embed.add_field(
@@ -522,7 +512,7 @@ async def discovery_command(ctx: commands.Context) -> None:
             f"→ Current UCF metrics (Harmony: {harmony})\n"
             f"→ System health: {health_emoji} {agents_count}/14 agents"
         ),
-        inline=False
+        inline=False,
     )
 
     embed.add_field(
@@ -532,7 +522,7 @@ async def discovery_command(ctx: commands.Context) -> None:
             "→ Live UCF pulses every 5s\n"
             "→ Ritual events, telemetry stream, agent state changes"
         ),
-        inline=False
+        inline=False,
     )
 
     embed.add_field(
