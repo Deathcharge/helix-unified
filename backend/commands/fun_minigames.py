@@ -258,6 +258,7 @@ REALITY_STATES = [
 # COMMANDS
 # ============================================================================
 
+
 @commands.command(name="8ball", aliases=["oracle", "ucf-oracle"])
 async def magic_8ball(ctx: commands.Context, *, question: str) -> None:
     """

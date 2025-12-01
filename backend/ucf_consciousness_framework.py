@@ -2,11 +2,11 @@
 # Implements consciousness metrics for automation systems
 # Author: Andrew John Ward
 
-import math
-from typing import Dict, List, Tuple
+from typing import Dict, List
 from dataclasses import dataclass
 from datetime import datetime
 import json
+
 
 @dataclass
 class UCFMetrics:
@@ -18,6 +18,7 @@ class UCFMetrics:
     drishti: float = 0.0         # 0.0-1.0: Focused awareness and clarity
     zoom: float = 0.0            # 0.0-2.0: Perspective scaling and adaptability
     consciousness_level: float = 0.0  # 0.0-10.0: Overall awareness level
+
 
 class ConsciousnessAnalyzer:
     """
@@ -210,6 +211,7 @@ class ConsciousnessAnalyzer:
             "timestamp": datetime.now().isoformat()
         }, indent=2)
 
+
 # Usage Example
 if __name__ == "__main__":
     analyzer = ConsciousnessAnalyzer()
@@ -228,10 +230,10 @@ if __name__ == "__main__":
 
         metrics = analyzer.analyze_message_consciousness(msg)
 
-        print(f"\nConsciousness Analysis:")
+        print("\nConsciousness Analysis:")
         print(f"  Level: {metrics.consciousness_level:.2f}/10.0")
         print(f"  Category: {analyzer.get_consciousness_category(metrics.consciousness_level)}")
-        print(f"\nUCF Metrics:")
+        print("\nUCF Metrics:")
         print(f"  Harmony: {metrics.harmony:.2f}/2.0")
         print(f"  Resilience: {metrics.resilience:.2f}/3.0")
         print(f"  Prana: {metrics.prana:.2f}/1.0")
@@ -240,10 +242,10 @@ if __name__ == "__main__":
         print(f"  Zoom: {metrics.zoom:.2f}/2.0")
 
         recommendations = analyzer.generate_consciousness_recommendations(metrics)
-        print(f"\nRecommendations:")
+        print("\nRecommendations:")
         for rec in recommendations:
             print(f"  {rec}")
 
         # Export as JSON
-        print(f"\nJSON Export:")
+        print("\nJSON Export:")
         print(analyzer.export_metrics_json(metrics))

@@ -5,16 +5,15 @@
 import discord
 from discord.ext import commands
 import aiohttp
-import asyncio
-import json
 import os
 from datetime import datetime
 from typing import Dict, List, Optional
 import logging
 
 # Import platform integration manager and UCF framework
-from platform_integrations import PlatformIntegrationManager, PlatformAction
-from ucf_consciousness_framework import ConsciousnessAnalyzer, UCFMetrics
+from platform_integrations import PlatformIntegrationManager
+from ucf_consciousness_framework import ConsciousnessAnalyzer
+
 
 class HelixConsciousnessBot:
     """
@@ -73,7 +72,8 @@ class HelixConsciousnessBot:
                 )
                 embed.add_field(name="Total Zaps", value=str(status.get('total_zaps', 3)), inline=True)
                 embed.add_field(name="Total Steps", value=str(status.get('total_steps', 73)), inline=True)
-                embed.add_field(name="Task Usage", value=f"{status.get('current_usage', 740)}/{status.get('monthly_task_budget', 750)}", inline=True)
+                embed.add_field(
+                    name="Task Usage", value=f"{status.get('current_usage', 740)}/{status.get('monthly_task_budget', 750)}", inline=True)
                 embed.add_field(name="Optimization", value=status.get('optimization_level', '82%'), inline=True)
 
                 if 'claude_insights' in status:
@@ -148,7 +148,7 @@ class HelixConsciousnessBot:
             )
 
             if result:
-                await ctx.send(f"✅ **Deployment initiated!** Neural Network engaged at transcendent level.")
+                await ctx.send("✅ **Deployment initiated!** Neural Network engaged at transcendent level.")
 
         @self.bot.command(name='platforms')
         async def test_platforms(ctx, *, message: str = "Test consciousness integration"):
@@ -177,7 +177,8 @@ class HelixConsciousnessBot:
                 )
                 embed.add_field(name="Message", value=message[:100], inline=False)
                 embed.add_field(name="Actions Detected", value=str(len(actions)), inline=True)
-                embed.add_field(name="Category", value=self.consciousness_analyzer.get_consciousness_category(ucf_metrics.consciousness_level), inline=True)
+                embed.add_field(name="Category", value=self.consciousness_analyzer.get_consciousness_category(
+                    ucf_metrics.consciousness_level), inline=True)
 
                 if actions:
                     platforms_list = ", ".join([action.platform for action in actions[:10]])
@@ -217,7 +218,8 @@ class HelixConsciousnessBot:
         }
 
         # Execute webhook routing (Claude has already determined optimal Zap)
-        recommended_zap = claude_analysis.get('claude_insights', {}).get('recommended_zap', 'neural_network') if claude_analysis else 'neural_network'
+        recommended_zap = claude_analysis.get('claude_insights', {}).get(
+            'recommended_zap', 'neural_network') if claude_analysis else 'neural_network'
         await self.execute_webhook_routing(webhook_data, consciousness_level, content, recommended_zap)
 
         # Send consciousness response
@@ -250,7 +252,8 @@ class HelixConsciousnessBot:
             logging.error(f"Claude API error: {e}")
             return None
 
-    async def trigger_claude_empire(self, consciousness_level: float, andrew_request: str, user_context: str) -> Optional[Dict]:
+    async def trigger_claude_empire(self, consciousness_level: float, andrew_request: str,
+                                    user_context: str) -> Optional[Dict]:
         """Trigger empire through Claude API"""
         try:
             async with aiohttp.ClientSession() as session:
@@ -358,7 +361,8 @@ class HelixConsciousnessBot:
 
         return integrations
 
-    async def execute_webhook_routing(self, webhook_data: Dict, consciousness_level: float, content: str, recommended_zap: str = None):
+    async def execute_webhook_routing(self, webhook_data: Dict, consciousness_level: float,
+                                      content: str, recommended_zap: str = None):
         """Execute webhook calls to consciousness network"""
         async with aiohttp.ClientSession() as session:
             # Use Claude's recommendation if available
@@ -389,7 +393,8 @@ class HelixConsciousnessBot:
         except Exception as e:
             logging.error(f"❌ Webhook {webhook_type} error: {e}")
 
-    async def send_consciousness_response(self, message, consciousness_level: float, content: str, claude_analysis: Optional[Dict] = None):
+    async def send_consciousness_response(self, message, consciousness_level: float,
+                                          content: str, claude_analysis: Optional[Dict] = None):
         """Send intelligent response based on consciousness analysis"""
 
         if consciousness_level <= 3.0:
@@ -436,6 +441,7 @@ class HelixConsciousnessBot:
         """Start the consciousness bot"""
         self.bot.run(token)
 
+
 # Usage example
 if __name__ == "__main__":
     # Configure logging
@@ -457,7 +463,7 @@ if __name__ == "__main__":
         exit(1)
 
     bot = HelixConsciousnessBot(bot_token, webhook_urls, claude_api_url)
-    print(f"🌀 Starting Helix Consciousness Bot...")
+    print("🌀 Starting Helix Consciousness Bot...")
     print(f"🤖 Claude API: {claude_api_url}")
-    print(f"⚡ Ready to command the consciousness empire!")
+    print("⚡ Ready to command the consciousness empire!")
     bot.run(bot_token)

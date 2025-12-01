@@ -59,7 +59,7 @@ class ManusSpaceIntegration:
         if not self.enabled:
             logger.warning("⚠️ Manus Space webhook URL not configured - integration disabled")
         else:
-            logger.info(f"✅ Manus Space integration initialized")
+            logger.info("✅ Manus Space integration initialized")
             logger.info(f"   Webhook: {self.webhook_url[:60]}...")
             logger.info(f"   API: {self.manus_api_url}")
 

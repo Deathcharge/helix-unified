@@ -362,7 +362,7 @@ async def test_railway_api() -> List[Dict[str, Any]]:
             try:
                 async with session.get(f"{base_url}{path}", timeout=10) as resp:
                     if resp.status == 200:
-                        data = await resp.json()
+                        await resp.json()
                         results.append({
                             "name": f"API: {name}",
                             "status": "pass",

@@ -10,6 +10,7 @@ from typing import Any, Dict
 BASE_DIR = Path(__file__).resolve().parent.parent
 CONFIG_PATH = BASE_DIR / "helix_config.toml"
 
+
 class ConfigManager:
     """
     Manages loading and accessing configuration from helix_config.toml.
@@ -48,7 +49,7 @@ class ConfigManager:
         Prioritizes environment variables (SECTION_KEY) over TOML file.
         """
         env_key = f"{section.upper()}_{key.upper()}"
-        
+
         # 1. Check Environment Variable
         env_value = os.getenv(env_key)
         if env_value is not None:
@@ -74,6 +75,7 @@ class ConfigManager:
         # 3. Return Default Value
         return default
 
+
 # Global instance for easy access
 config = ConfigManager()
 
@@ -83,9 +85,8 @@ if __name__ == '__main__':
     print(f"Command Prefix: {config.get('discord', 'COMMAND_PREFIX')}")
     print(f"Initial Harmony: {config.get('ucf', 'INITIAL_HARMONY')}")
     print(f"Non-existent Key: {config.get('nonexistent', 'key', default='default_value')}")
-    
+
     # Test environment variable override
     os.environ['UCF_INITIAL_HARMONY'] = '0.99'
     print(f"Initial Harmony (Override): {config.get('ucf', 'INITIAL_HARMONY')}")
     del os.environ['UCF_INITIAL_HARMONY']
-

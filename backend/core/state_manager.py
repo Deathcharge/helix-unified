@@ -70,7 +70,7 @@ class UCFStateManager:
         self._use_file_watching = WATCHFILES_AVAILABLE
         self._use_async_io = AIOFILES_AVAILABLE
 
-        logger.info(f"UCF State Manager initialized")
+        logger.info("UCF State Manager initialized")
         logger.info(f"  File path: {self.state_file_path}")
         logger.info(f"  File watching: {'enabled' if self._use_file_watching else 'disabled (polling mode)'}")
         logger.info(f"  Async I/O: {'enabled' if self._use_async_io else 'disabled (sync mode)'}")
@@ -137,7 +137,7 @@ class UCFStateManager:
                 self._current_state = json.loads(content)
                 self._last_updated = datetime.now()
 
-            logger.info(f" UCF state loaded from disk")
+            logger.info(" UCF state loaded from disk")
             logger.debug(f"   Harmony: {self._current_state.get('harmony', 0.0):.2f}")
             logger.debug(f"   Resilience: {self._current_state.get('resilience', 0.0):.2f}")
 
@@ -165,7 +165,7 @@ class UCFStateManager:
                 with open(self.state_file_path, 'w') as f:
                     f.write(content)
 
-            logger.debug(f"UCF state saved to disk")
+            logger.debug("UCF state saved to disk")
 
         except Exception as e:
             logger.error(f"Failed to save UCF state: {e}")

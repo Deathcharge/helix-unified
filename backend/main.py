@@ -2,6 +2,7 @@
 # backend/main.py — FastAPI + Discord Bot Launcher + Manus Integration
 # Author: Andrew John Ward (Architect)
 
+from backend.config_manager import config
 import asyncio
 import json
 import os
@@ -34,8 +35,8 @@ from websocket_manager import manager as ws_manager
 from zapier_integration import HelixZapierIntegration, get_zapier, set_zapier
 from manus_integration import ManusSpaceIntegration, get_manus, set_manus
 
-    # FIX: Create Crypto → Cryptodome alias BEFORE importing mega
-    # The config manager is initialized here to ensure it's available for all modules
+# FIX: Create Crypto → Cryptodome alias BEFORE importing mega
+# The config manager is initialized here to ensure it's available for all modules
 try:
     # pycryptodome installs as 'Crypto', not 'Cryptodome'
     import Crypto
@@ -74,7 +75,6 @@ class PersistenceEngine:
 
 # Load environment variables and initialize config manager immediately
 load_dotenv()
-from backend.config_manager import config
 _ = config
 
 
@@ -100,12 +100,15 @@ except ImportError as e:
     logger.warning(f"⚠️ Music generation API disabled: {e}")
     logger.info("💡 Install torch and transformers to enable music generation")
     # Create dummy classes for type hints
+
     class MusicRequest(BaseModel):
         prompt: str = ""
         duration: int = 5
+
     class MusicResponse(BaseModel):
         success: bool = False
         message: str = "Music generation not available"
+
     def generate_music_service(request):
         return MusicResponse(success=False, message="Music generation requires PyTorch (not installed)")
 
@@ -1594,7 +1597,8 @@ async def load_context_checkpoint(session_identifier: str, scope: str = "full") 
 
         # Filter based on scope
         if scope == "summary":
-            filtered = {"context_summary": checkpoint.get("context_summary"), "key_decisions": checkpoint.get("key_decisions"), "timestamp": checkpoint.get("timestamp")}
+            filtered = {"context_summary": checkpoint.get("context_summary"), "key_decisions": checkpoint.get(
+                "key_decisions"), "timestamp": checkpoint.get("timestamp")}
         elif scope == "decisions":
             filtered = {
                 "key_decisions": checkpoint.get("key_decisions"),
@@ -1843,7 +1847,7 @@ async def manus_get_rituals() -> Dict[str, Any]:
 
         # Calculate metadata
         completed_today = sum(1 for r in rituals_list
-                             if r.get("completed_at", "").startswith(datetime.utcnow().date().isoformat()))
+                              if r.get("completed_at", "").startswith(datetime.utcnow().date().isoformat()))
 
         total_harmony_gain = sum(r.get("harmony_gain", 0) for r in rituals_list)
         avg_harmony_gain = round(total_harmony_gain / len(rituals_list), 3) if rituals_list else 0
@@ -1953,7 +1957,7 @@ async def manus_emergency_alert(request: ManusEmergencyAlertRequest) -> Dict[str
         try:
             with open("Helix/state/ucf_state.json", "r") as f:
                 ucf_state = json.load(f)
-        except:
+        except Exception:
             ucf_state = {}
 
         # Create emergency record
@@ -2002,7 +2006,7 @@ async def manus_analytics_summary() -> Dict[str, Any]:
         try:
             with open("Helix/state/ucf_state.json", "r") as f:
                 ucf_state = json.load(f)
-        except:
+        except Exception:
             ucf_state = {"harmony": 0.62, "klesha": 0.08}
 
         # Read rituals
@@ -2024,7 +2028,7 @@ async def manus_analytics_summary() -> Dict[str, Any]:
         try:
             agents_status = await get_collective_status()
             agents_count = len(agents_status)
-        except:
+        except Exception:
             agents_count = 14
 
         return {
@@ -2081,7 +2085,7 @@ async def manus_test_webhook(event_type: str = "telemetry") -> Dict[str, Any]:
             try:
                 with open("Helix/state/ucf_state.json", "r") as f:
                     ucf_state = json.load(f)
-            except:
+            except Exception:
                 ucf_state = {
                     "harmony": 0.62,
                     "resilience": 1.85,
@@ -2098,7 +2102,7 @@ async def manus_test_webhook(event_type: str = "telemetry") -> Dict[str, Any]:
                     {"name": name, "symbol": info["symbol"], "status": "active"}
                     for name, info in agents_status.items()
                 ]
-            except:
+            except Exception:
                 agents_list = []
 
             success = await manus.send_telemetry(

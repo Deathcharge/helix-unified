@@ -41,7 +41,6 @@ async def create_backup(ctx: commands.Context) -> None:
     try:
         # Import backup system with robust path handling
         import sys
-        import os
 
         # Get absolute path to project root
         project_root = Path(__file__).parent.parent.parent.resolve()

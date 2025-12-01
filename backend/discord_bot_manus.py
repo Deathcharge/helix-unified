@@ -57,6 +57,7 @@ HEARTBEAT_PATH = STATE_DIR / "heartbeat.json"
 # CONFIGURATION
 # ============================================================================
 
+
 def safe_int_env(key: str, default: int = 0) -> int:
     """Safely parse integer from environment variable."""
     try:
@@ -64,6 +65,7 @@ def safe_int_env(key: str, default: int = 0) -> int:
         return int(value)
     except (ValueError, TypeError):
         return default
+
 
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 DISCORD_GUILD_ID = safe_int_env("DISCORD_GUILD_ID", 0)
@@ -1248,6 +1250,7 @@ async def health_handler(request):
         "discord_connected": bot.is_ready(),
         "guilds": len(bot.guilds) if bot.is_ready() else 0
     })
+
 
 async def start_healthcheck_server():
     """Start HTTP server for Railway healthchecks"""

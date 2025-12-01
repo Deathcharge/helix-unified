@@ -75,7 +75,7 @@ class DiscordWebBridge:
         logger.debug(f"📡 Discord → Web: {message.author.name}: {message.content[:50]}...")
 
     async def send_to_discord(self, channel_name: str, username: str, message: str,
-                             embed: Optional[discord.Embed] = None) -> bool:
+                              embed: Optional[discord.Embed] = None) -> bool:
         """
         Send a message from web chat to Discord.
 

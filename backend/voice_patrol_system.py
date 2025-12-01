@@ -304,7 +304,6 @@ class VoicePatrolSystem:
         #
         # For now, we'll log the intent
         logger.info(f"🎙️ [TTS] Would speak in channel {channel_id}: {text[:50]}...")
-        pass
 
 
 # Global voice patrol instance

@@ -18,6 +18,7 @@ except ImportError:
     CRYPTO_AVAILABLE = False
     logging.warning("cryptography not available, using base64 encoding (NOT SECURE for production!)")
 
+
 class HelixAuthManager:
     """Secure authentication management for all platform integrations"""
 
@@ -136,6 +137,7 @@ class HelixAuthManager:
             del self.auth_cache[platform]
         logging.info(f"🗑️ Removed authentication for {platform}")
 
+
 # Usage Example
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
@@ -143,6 +145,6 @@ if __name__ == "__main__":
     auth_manager = HelixAuthManager()
     configured = auth_manager.setup_all_integrations()
 
-    print(f"\n🔐 Authentication Manager Status:")
+    print("\n🔐 Authentication Manager Status:")
     print(f"Configured platforms: {configured}")
     print(f"Platforms: {', '.join(auth_manager.get_all_configured_platforms())}")
