@@ -1,0 +1,5 @@
+./docs/dashboards/agents/kael.html
+./helix-unified-fresh/docs/dashboards/agents/kael.html
+./agents-dashboard/kael.html
+./agents-dashboard/manus.html
+./agents-dashboard/superninja.html

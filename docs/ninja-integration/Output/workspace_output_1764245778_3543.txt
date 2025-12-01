@@ -1,0 +1,9 @@
+/usr/bin/bash: line 20: Manus: command not found
+/usr/bin/bash: line 21: ↓: command not found
+/usr/bin/bash: line 22: Manus: command not found
+/usr/bin/bash: line 19: frontend/helix-collective-agents/index.html: Permission denied
+/usr/bin/bash: line 19: frontend/helix-collective-agents/styles.css: Permission denied
+/usr/bin/bash: line 19: frontend/helix-collective-agents/README.md: No such file or directory
+/usr/bin/bash: line 19: HELIX_OS_TRIPLE_AI_ECOSYSTEM.md: command not found
+/usr/bin/bash: line 19: DEPLOY_DASHBOARD_PR.sh: command not found
+aborted: you must first push the current branch to a remote, or use the --head flag

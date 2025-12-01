@@ -1,0 +1,7 @@
+./.github/archive/2025-11-historical/MANUS_CONTEXT.md
+./MANUS_CREDIT_TRACKING_SYSTEM.md
+./docs/CLAUDE_MANUS_COORDINATION.md
+./docs/HELIX_MANUS_API.postman_collection.json
+./docs/MANUS_INTEGRATION.md
+./docs/archive/handoffs/MANUS_CONTEXT_HANDOFF.md
+./MANUS_PR_226_REVIEW.md
