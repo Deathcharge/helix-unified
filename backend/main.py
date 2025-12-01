@@ -36,6 +36,7 @@ from zapier_integration import HelixZapierIntegration, get_zapier, set_zapier
 from backend.zapier_sender import ZapierSender, zapier_sender
 from backend.notion_sync import NotionSync, notion_sync
 from manus_integration import ManusSpaceIntegration, get_manus, set_manus
+from backend.security_middleware import apply_security_middleware, SafeErrorResponse
 
 # FIX: Create Crypto → Cryptodome alias BEFORE importing mega
 # The config manager is initialized here to ensure it's available for all modules
@@ -370,6 +371,8 @@ app.add_middleware(
     expose_headers=["*"]
 )
 
+# Apply security middleware (CSRF, rate limiting, security headers)
+apply_security_middleware(app)
 
 # ============================================================================
 # REQUEST LOGGING MIDDLEWARE (v17.0 - QOL Improvements)

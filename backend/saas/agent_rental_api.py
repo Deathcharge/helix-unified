@@ -14,9 +14,14 @@ Version: 17.1.0
 
 import logging
 from typing import Any, Dict, Optional
+import re
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field, validator
+
+# User ID format validation (URL-safe alphanumeric, hyphens, underscores)
+VALID_USER_ID_PATTERN = re.compile(r'^[a-zA-Z0-9_-]{1,128}$')
+VALID_AGENT_ID_PATTERN = re.compile(r'^[a-z_]{1,32}$')
 
 logger = logging.getLogger(__name__)
 
@@ -245,8 +250,16 @@ async def query_agent(
     """Query a specific agent with real Claude API integration."""
     from backend.saas.usage_metering import UsageMeter
 
+    # Validate input formats
+    if not VALID_AGENT_ID_PATTERN.match(agent_id):
+        raise HTTPException(status_code=400, detail="Invalid agent ID format")
+
     tier = user.get("tier", "free")
     user_id = user.get("user_id")
+
+    # Validate user_id format
+    if not user_id or not VALID_USER_ID_PATTERN.match(str(user_id)):
+        raise HTTPException(status_code=400, detail="Invalid user ID format")
 
     # Check if agent exists
     if agent_id not in AGENTS_CATALOG:
@@ -316,8 +329,10 @@ Leverage your specialized knowledge to provide high-value responses."""
             cost=agent_info["cost_per_call"],
         )
     except Exception as e:
-        logger.error(f"Agent query error: {e}")
-        raise HTTPException(status_code=500, detail=f"Error querying agent: {str(e)}")
+        # Use safe error responses to avoid information disclosure
+        from backend.security_middleware import SafeErrorResponse
+        status_code, error_response = SafeErrorResponse.sanitize_error(e, "agent_query_error")
+        raise HTTPException(status_code=status_code, detail=error_response)
 
 
 @router.post("/{agent_id}/stream")

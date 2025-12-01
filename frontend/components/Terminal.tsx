@@ -23,10 +23,16 @@ export default function Terminal() {
   const [currentDir, setCurrentDir] = React.useState('/home/helix');
 
   useEffect(() => {
-    // Connect to WebSocket
+    // Connect to WebSocket with JWT authentication
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const userId = localStorage.getItem('session_id') || 'default';
-    const wsUrl = `${protocol}//${window.location.host}/api/web-os/ws/terminal/${userId}`;
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      setOutput(['❌ Not authenticated. Please log in.', '$ ']);
+      return;
+    }
+
+    const wsUrl = `${protocol}//${window.location.host}/api/web-os/ws/terminal?token=${encodeURIComponent(token)}`;
 
     try {
       wsRef.current = new WebSocket(wsUrl);
