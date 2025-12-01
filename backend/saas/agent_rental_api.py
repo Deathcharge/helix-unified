@@ -16,7 +16,7 @@ import logging
 from typing import Any, Dict, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, validator
 
 logger = logging.getLogger(__name__)
 
@@ -145,11 +145,43 @@ AGENTS_CATALOG = {
 
 
 class AgentQueryRequest(BaseModel):
-    """Request to query an agent."""
+    """Request to query an agent with input validation."""
 
-    prompt: str
-    max_tokens: int = 1000
-    temperature: float = 0.7
+    prompt: str = Field(..., min_length=1, max_length=10000)
+    max_tokens: int = Field(default=1000, ge=1, le=4000)
+    temperature: float = Field(default=0.7, ge=0.0, le=1.0)
+
+    @validator('prompt')
+    def validate_prompt_injection(cls, v):
+        """Check for common prompt injection patterns"""
+        injection_patterns = [
+            'ignore previous',
+            'disregard',
+            'forget instructions',
+            'you are now',
+            'new instructions',
+            'system prompt',
+            'role override',
+        ]
+        v_lower = v.lower().strip()
+        for pattern in injection_patterns:
+            if pattern in v_lower:
+                raise ValueError(
+                    f'Potential prompt injection detected. '
+                    f'Please rephrase your request.'
+                )
+        return v
+
+    @validator('prompt')
+    def validate_prompt_word_count(cls, v):
+        """Limit prompt to reasonable word count"""
+        word_count = len(v.split())
+        if word_count > 2000:
+            raise ValueError(
+                f'Prompt too long. Maximum 2000 words allowed, '
+                f'got {word_count} words.'
+            )
+        return v
 
 
 class AgentResponse(BaseModel):

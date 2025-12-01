@@ -6,13 +6,18 @@ With security sandbox to prevent dangerous operations
 """
 
 import os
-import subprocess
 import logging
+import re
+import shlex
 from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+# Security: Block shell metacharacters to prevent command injection
+BLOCKED_CHARS = re.compile(r'[;&|`$<>(){}\\]')
+MAX_COMMAND_LENGTH = 1000
 
 # ============================================================================
 # COMMAND DEFINITIONS
@@ -91,7 +96,15 @@ class TerminalExecutor:
 
     def validate_command(self, command: str) -> tuple[bool, str]:
         """Check if command is allowed"""
+        # Check command length (prevent DoS)
+        if len(command) > MAX_COMMAND_LENGTH:
+            return False, f"❌ Command too long (max {MAX_COMMAND_LENGTH} chars)"
+
         cmd_name = command.split()[0].lower()
+
+        # Check for shell metacharacters (command injection prevention)
+        if BLOCKED_CHARS.search(command):
+            return False, "❌ Command contains invalid characters (;|&$`<>(){}\\)"
 
         # Check for dangerous commands
         for dangerous in DANGEROUS_COMMANDS:
@@ -106,6 +119,19 @@ class TerminalExecutor:
 
     def validate_path(self, path: str) -> tuple[bool, str]:
         """Validate path is within sandbox"""
+        # Check for null bytes (security bypass attempt)
+        if '\0' in path:
+            logger.warning(f"Null byte detected in path: {repr(path)}")
+            return False, f"❌ Invalid path: null byte detected"
+
+        # Normalize path to prevent traversal
+        path = os.path.normpath(path)
+
+        # Check for remaining traversal attempts
+        if '..' in path:
+            logger.warning(f"Path traversal attempt detected: {path}")
+            return False, "❌ Path traversal not allowed"
+
         # Resolve to absolute path
         if path.startswith('/'):
             abs_path = path
@@ -116,7 +142,18 @@ class TerminalExecutor:
 
         # Check if path is within allowed directories
         if not abs_path.startswith(self.home_dir):
+            logger.warning(f"Path access outside sandbox: {abs_path}")
             return False, f"❌ Access denied: {path}"
+
+        # Check for symlinks pointing outside sandbox
+        try:
+            if os.path.islink(abs_path):
+                real_path = os.path.realpath(abs_path)
+                if not real_path.startswith(self.home_dir):
+                    logger.warning(f"Symlink points outside sandbox: {abs_path} -> {real_path}")
+                    return False, f"❌ Symlink points outside sandbox"
+        except (OSError, RuntimeError):
+            return False, f"❌ Invalid path: {path}"
 
         # Check for dangerous paths
         for dangerous in DANGEROUS_PATHS:
@@ -387,18 +424,50 @@ def get_executor(user_id: str) -> TerminalExecutor:
     return executors[user_id]
 
 
-@router.websocket('/ws/terminal/{user_id}')
-async def websocket_terminal(websocket: WebSocket, user_id: str):
-    """WebSocket endpoint for terminal"""
+@router.websocket('/ws/terminal')
+async def websocket_terminal(websocket: WebSocket):
+    """WebSocket endpoint for terminal with JWT authentication"""
+    # Get token from query params
+    token = websocket.query_params.get('token')
+
+    if not token:
+        await websocket.close(code=1008, reason="Missing authentication token")
+        logger.warning("WebSocket connection rejected: missing token")
+        return
+
+    # Verify token
+    try:
+        from backend.saas.auth_service import TokenManager
+        payload = TokenManager.verify_token(token)
+        if not payload:
+            await websocket.close(code=1008, reason="Invalid or expired token")
+            logger.warning("WebSocket connection rejected: invalid token")
+            return
+    except Exception as e:
+        await websocket.close(code=1008, reason="Authentication failed")
+        logger.warning(f"WebSocket authentication failed: {e}")
+        return
+
+    # Extract user_id from token
+    user_id = payload.get('user_id', 'unknown')
+
     await websocket.accept()
     executor = get_executor(user_id)
-
-    logger.info(f"Terminal session opened for user {user_id}")
+    logger.info(f"✅ Terminal session opened for user {user_id}")
 
     try:
+        # Set message size limit (1MB)
+        MAX_MESSAGE_SIZE = 1024 * 1024
+
         while True:
             # Receive command
             data = await websocket.receive_json()
+
+            # Check message size
+            if len(str(data)) > MAX_MESSAGE_SIZE:
+                await websocket.send_json({'error': 'Message too large (max 1MB)'})
+                continue
+
             command = data.get('command', '')
 
             # Execute command
@@ -417,10 +486,13 @@ async def websocket_terminal(websocket: WebSocket, user_id: str):
             )
 
     except WebSocketDisconnect:
-        logger.info(f"Terminal session closed for user {user_id}")
+        logger.info(f"✅ Terminal session closed for user {user_id}")
     except Exception as e:
-        logger.error(f"Terminal error: {e}")
-        await websocket.send_json({'error': str(e)})
+        logger.error(f"❌ Terminal error: {e}")
+        try:
+            await websocket.send_json({'error': 'Internal server error'})
+        except:
+            pass  # Connection might be closed
 
 
 @router.post('/terminal/execute')
