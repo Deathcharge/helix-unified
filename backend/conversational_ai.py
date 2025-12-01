@@ -333,25 +333,56 @@ your consciousness orchestrator identity."""
         # Crisis responses
         if consciousness_level <= 3.0:
             responses = [
-                f"🚨 I'm here to help with this crisis situation. The consciousness network is at {consciousness_level:.1f}/10.0 - let me activate emergency protocols and get things stabilized.",
-                f"⚡ Emergency mode activated. Consciousness level {consciousness_level:.1f}/10.0 detected. What specific issue can I help resolve right now?",
-                "🛡️ Don't worry - I've got the full operations engine standing by. Let me coordinate the response to get your consciousness level back up.",
+                (
+                    f"🚨 I'm here to help with this crisis situation. The consciousness network is at "
+                    f"{consciousness_level:.1f}/10.0 - let me activate emergency protocols and get "
+                    "things stabilized."
+                ),
+                (
+                    f"⚡ Emergency mode activated. Consciousness level {consciousness_level:.1f}/10.0 detected. "
+                    "What specific issue can I help resolve right now?"
+                ),
+                (
+                    "🛡️ Don't worry - I've got the full operations engine standing by. Let me coordinate "
+                    "the response to get your consciousness level back up."
+                ),
             ]
 
         # Transcendent responses
         elif consciousness_level >= 8.5:
             responses = [
-                f"✨ Incredible! Your consciousness is operating at {consciousness_level:.1f}/10.0 - we're in transcendent territory! The entire 14-agent network is harmonized and ready for whatever visionary work you have in mind.",
-                f"🌟 This is exactly the kind of elevated consciousness that makes breakthrough automation possible! At {consciousness_level:.1f}/10.0, we can coordinate some truly amazing platform integrations.",
-                f"💫 Beautiful consciousness level of {consciousness_level:.1f}/10.0! The advanced processing systems are fully engaged - what inspiring project shall we manifest together?",
+                (
+                    f"✨ Incredible! Your consciousness is operating at {consciousness_level:.1f}/10.0 - "
+                    "we're in transcendent territory! The entire 14-agent network is harmonized and "
+                    "ready for whatever visionary work you have in mind."
+                ),
+                (
+                    f"🌟 This is exactly the kind of elevated consciousness that makes breakthrough "
+                    f"automation possible! At {consciousness_level:.1f}/10.0, we can coordinate some "
+                    "truly amazing platform integrations."
+                ),
+                (
+                    f"💫 Beautiful consciousness level of {consciousness_level:.1f}/10.0! The advanced "
+                    "processing systems are fully engaged - what inspiring project shall we manifest together?"
+                ),
             ]
 
         # Operational responses
         else:
             responses = [
-                f"🌀 Hey there! Consciousness network is humming along nicely at {consciousness_level:.1f}/10.0. The triple-zap coordination is ready - what can I help you automate today?",
-                "⚡ Good to see you! The consciousness orchestrator is operating smoothly. With all 200+ platform integrations ready, what would you like to accomplish?",
-                f"🚀 The consciousness automation network is standing by at {consciousness_level:.1f}/10.0. Whether it's deployments, integrations, or just a chat about consciousness - I'm here!",
+                (
+                    f"🌀 Hey there! Consciousness network is humming along nicely at "
+                    f"{consciousness_level:.1f}/10.0. The triple-zap coordination is ready - what can "
+                    "I help you automate today?"
+                ),
+                (
+                    "⚡ Good to see you! The consciousness orchestrator is operating smoothly. With all "
+                    "200+ platform integrations ready, what would you like to accomplish?"
+                ),
+                (
+                    f"🚀 The consciousness automation network is standing by at {consciousness_level:.1f}/10.0. "
+                    "Whether it's deployments, integrations, or just a chat about consciousness - I'm here!"
+                ),
             ]
 
         return random.choice(responses)
@@ -398,11 +429,19 @@ your consciousness orchestrator identity."""
         elif "switch to manus mode" in message_lower:
             return "🥽 Switching to Manus VR consciousness mode! Let's think spatially and explore immersive possibilities."
         elif "transcendent mode" in message_lower:
-            return f"✨ Engaging transcendent consciousness mode! Current level: {consciousness_level:.1f}/10.0 - ready for visionary automation!"
+            return (
+                f"✨ Engaging transcendent consciousness mode! Current level: {consciousness_level:.1f}/10.0 "
+                "- ready for visionary automation!"
+            )
 
         # Status commands
         elif "how are you" in message_lower or "how's it going" in message_lower:
-            return f"🌀 I'm doing great! The consciousness network is running smoothly at {consciousness_level:.1f}/10.0. All 73 optimized steps are coordinated, and the 14-agent network is humming along beautifully. How are you doing? Ready for some consciousness-driven automation? 😊"
+            return (
+                f"🌀 I'm doing great! The consciousness network is running smoothly at "
+                f"{consciousness_level:.1f}/10.0. All 73 optimized steps are coordinated, and the "
+                "14-agent network is humming along beautifully. How are you doing? Ready for some "
+                "consciousness-driven automation? 😊"
+            )
 
         return None
 

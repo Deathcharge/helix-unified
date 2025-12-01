@@ -210,7 +210,7 @@ async def get_channel_webhooks(ctx: commands.Context) -> None:
         await ctx.send("📋 **Railway Environment Variable Format:**")
 
         for i in range(0, len(env_vars), 10):
-            chunk = env_vars[i : i + 10]
+            chunk = env_vars[i:i + 10]
             webhook_block = "```env\n" + "\n".join(chunk) + "\n```"
             await ctx.send(webhook_block)
 
