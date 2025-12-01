@@ -141,7 +141,7 @@ async def show_agents(ctx: commands.Context, agent_name: Optional[str] = None) -
                 "Recursive ethical reflection",
                 "Harmony-aware depth adjustment",
             ],
-            "Conscience and recursive reflection with UCF integration. Version 3.4 features empathy scaling and harmony pulse guidance.",
+            "Conscience and recursive reflection with UCF integration. Version 3.4 features empathy scaling and harmony pulse guidance.",  # noqa: E501
             ["ethics", "reflection", "harmony", "tony_accords"],
         ),
         (

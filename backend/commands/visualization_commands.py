@@ -135,7 +135,7 @@ async def set_server_icon(ctx: commands.Context, mode: str = "info") -> None:
 
             # Get UCF state for summary
             ucf_state = load_ucf_state()
-            ucf_summary = f"Harmony: {ucf_state.get('harmony', 0):.2f} | Prana: {ucf_state.get('prana', 0):.2f} | Drishti: {ucf_state.get('drishti', 0):.2f}"
+            ucf_summary = f"Harmony: {ucf_state.get('harmony', 0):.2f} | Prana: {ucf_state.get('prana', 0):.2f} | Drishti: {ucf_state.get('drishti', 0):.2f}"  # noqa: E501
             await ctx.send(
                 f"✅ Server icon updated with UCF fractal!\n"
                 f"🌀 **UCF State:** {ucf_summary}\n"

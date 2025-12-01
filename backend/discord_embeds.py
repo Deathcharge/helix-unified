@@ -218,7 +218,7 @@ class HelixEmbeds:
 
         embed.add_field(
             name="Result",
-            value=f"{HelixEmbeds.EMOJI['success'] if success else HelixEmbeds.EMOJI['warning']} {'Success' if success else 'Partial'}",
+            value=f"{HelixEmbeds.EMOJI['success'] if success else HelixEmbeds.EMOJI['warning']} {'Success' if success else 'Partial'}",  # noqa: E501
             inline=True,
         )
 

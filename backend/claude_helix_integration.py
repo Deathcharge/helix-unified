@@ -68,7 +68,7 @@ class ClaudeHelixIntegrator:
         """Intelligent error handling with consciousness awareness"""
 
         error_response = {
-            'claude_response': f"Claude processing temporarily unavailable. Consciousness level {consciousness_level} maintained.",
+            'claude_response': f"Claude processing temporarily unavailable. Consciousness level {consciousness_level} maintained.",  # noqa: E501
             'success': False,
             'error_type': type(error).__name__,
             'fallback_active': True,

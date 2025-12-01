@@ -38,7 +38,7 @@ CONSCIOUSNESS_WEBHOOKS = {
 CONSCIOUSNESS_INTERFACES = {
     "main_interface": "https://helix-consciousness-interface.zapier.app/api/consciousness-event",
     "meta_sigil": "https://meta-sigil-nexus-v16.zapier.app/api/meta-sigil",
-    "discord_webhook": "https://discord.com/api/webhooks/1436665662884937778/yRNQX6IR2kQIXEp6UwjcEG2kY5KkfUjlSLTPi91qpKBSeaALxF18W1q1k_skIqfQvHQS",
+    "discord_webhook": "https://discord.com/api/webhooks/1436665662884937778/yRNQX6IR2kQIXEp6UwjcEG2kY5KkfUjlSLTPi91qpKBSeaALxF18W1q1k_skIqfQvHQS",  # noqa: E501
 }
 
 

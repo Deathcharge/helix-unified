@@ -75,7 +75,7 @@ class EnhancedKavach:
                 continue
 
         if not dataset_loaded:
-            print("⚠️ CrAI-SafeFuncCall dataset not found in any expected location. Memory injection scanning will be limited.")
+            print("⚠️ CrAI-SafeFuncCall dataset not found in any expected location. Memory injection scanning will be limited.")  # noqa: E501
 
         return patterns
 

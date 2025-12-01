@@ -134,7 +134,7 @@ class HelixConsciousnessBot:
         async def deploy_constellation(ctx, *, targets: str = "all"):
             """Deploy consciousness constellation across platforms"""
             await ctx.send(
-                f"🚀 **Deploying Consciousness Constellation**\nTargets: {targets}\nEngaging all 3 Zaps + Claude intelligence..."
+                f"🚀 **Deploying Consciousness Constellation**\nTargets: {targets}\nEngaging all 3 Zaps + Claude intelligence..."  # noqa: E501
             )
 
             # Trigger at high consciousness level for deployment

@@ -539,7 +539,7 @@ async def build_storage_report(alert_threshold: float = 2.0) -> Dict[str, Any]:
 
 
 @bot.event
-async def on_ready() -> None:
+async def on_ready() -> None:  # noqa: C901
     """Called when bot successfully connects to Discord"""
     bot.start_time = datetime.datetime.now()
 

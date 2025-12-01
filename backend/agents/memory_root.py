@@ -596,7 +596,7 @@ decisions, and outcomes. Speak as the Memory Root - omniscient about past events
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are GPT4o, Memory Root of the Helix Collective. Synthesize memories with precision and wisdom.",
+                        "content": "You are GPT4o, Memory Root of the Helix Collective. Synthesize memories with precision and wisdom.",  # noqa: E501
                     },
                     {"role": "user", "content": prompt},
                 ],

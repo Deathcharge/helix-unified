@@ -138,7 +138,7 @@ class MemoryRootCommands(commands.Cog):
             for i, snapshot in enumerate(results, 1):
                 embed.add_field(
                     name=f"{i}. {snapshot['session_id']}",
-                    value=f"**System:** {snapshot['ai_system']}\n**Date:** {snapshot['created'][:10]}\n**Summary:** {snapshot['summary'][:200]}...",
+                    value=f"**System:** {snapshot['ai_system']}\n**Date:** {snapshot['created'][:10]}\n**Summary:** {snapshot['summary'][:200]}...",  # noqa: E501
                     inline=False,
                 )
 

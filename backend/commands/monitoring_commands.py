@@ -144,7 +144,7 @@ async def manus_status(ctx: commands.Context) -> None:
 
 
 @commands.command(name="health", aliases=["check", "diagnostic"])
-async def health_check(ctx: commands.Context) -> None:
+async def health_check(ctx: commands.Context) -> None:  # noqa: C901
     """
     Quick system health check - perfect for mobile monitoring!
 
@@ -238,7 +238,7 @@ async def health_check(ctx: commands.Context) -> None:
         # Add documentation link
         embed.add_field(
             name="📚 Documentation",
-            value="[Z-88 Ritual Guide](https://github.com/Deathcharge/helix-unified/blob/main/README.md) | Use `!update_ritual_guide` to post guide to Discord",
+            value="[Z-88 Ritual Guide](https://github.com/Deathcharge/helix-unified/blob/main/README.md) | Use `!update_ritual_guide` to post guide to Discord",  # noqa: E501
             inline=False,
         )
         embed.set_footer(text="🜂 Kael v3.4 Enhanced - Ethical monitoring active | v16.7")

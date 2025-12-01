@@ -425,7 +425,7 @@ async def dice_roll(ctx: commands.Context, dice: str = "1d20") -> None:
         # Create embed
         embed = discord.Embed(
             title=f"🎲 Dice Roll: {num_dice}d{num_sides}",
-            description=f"**Rolls:** {', '.join(map(str, rolls))}\n**Base Total:** {total}\n**UCF Modifier:** {'+' if ucf_modifier >= 0 else ''}{ucf_modifier}\n**Final Result:** **{modified_total}**",
+            description=f"**Rolls:** {', '.join(map(str, rolls))}\n**Base Total:** {total}\n**UCF Modifier:** {'+' if ucf_modifier >= 0 else ''}{ucf_modifier}\n**Final Result:** **{modified_total}**",  # noqa: E501
             color=0x9370DB,
         )
 

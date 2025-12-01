@@ -433,7 +433,7 @@ class Manus(HelixAgent):
         elif action == "sync_ucf":
             cmd = "python backend/services/ucf_calculator.py"
         elif action == "archive_memory":
-            cmd = "python -c \"from backend.agents import AGENTS, Shadow; import asyncio; asyncio.run(AGENTS['Shadow'].archive_collective(AGENTS))\""
+            cmd = "python -c \"from backend.agents import AGENTS, Shadow; import asyncio; asyncio.run(AGENTS['Shadow'].archive_collective(AGENTS))\""  # noqa: E501
         elif action == "execute_direct":
             cmd = params.get("command", "echo 'No command provided'")
         else:

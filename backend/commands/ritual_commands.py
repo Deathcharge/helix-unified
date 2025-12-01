@@ -68,7 +68,7 @@ async def harmony_command(ctx):
                     event_title="Neti-Neti Harmony Ritual Complete",
                     event_type="ritual_complete",
                     agent_name="Z-88 Ritual Engine",
-                    description=f"Harmony ritual executed by {ctx.author.name}. Harmony increased from {current_harmony:.3f} to {ucf['harmony']:.3f}",
+                    description=f"Harmony ritual executed by {ctx.author.name}. Harmony increased from {current_harmony:.3f} to {ucf['harmony']:.3f}",  # noqa: E501
                     ucf_snapshot=json.dumps(ucf),
                 )
 

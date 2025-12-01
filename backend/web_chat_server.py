@@ -419,7 +419,7 @@ class WebChatConnectionManager:
             "nexus": f"Analyzing strategic options... {user_message} requires coordinated action across agents 3, 7, and 11.",
             "oracle": f"I see the pattern in '{user_message}'. The path reveals itself through iteration and reflection.",
             "velocity": f"Processing at maximum speed: '{user_message}' → Action plan ready. Executing now!",
-            "cipher": f"Decrypting query: '{user_message}' → Output: The answer lies in the transformation of data structures.",
+            "cipher": f"Decrypting query: '{user_message}' → Output: The answer lies in the transformation of data structures.",  # noqa: E501
             "flow": f"Flowing with '{user_message}'... adapting approach... finding the path of least resistance.",
             "phoenix": f"'{user_message}' reminds me of past failures. This time, we rise stronger!",
             "luna": f"*quietly processes '{user_message}' in background* ... solution will emerge when the time is right.",

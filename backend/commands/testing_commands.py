@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 @commands.command(name="test-integrations", aliases=["test-all", "verify-integrations"])
 @commands.has_permissions(manage_guild=True)
-async def test_integrations(ctx: commands.Context) -> None:
+async def test_integrations(ctx: commands.Context) -> None:  # noqa: C901
     """
     🧪 Test all external integrations (Zapier, Notion, MEGA, webhooks).
 

@@ -535,7 +535,7 @@ if __name__ == "__main__":
         print(f"  Zapier: {'✅ Enabled' if config['zapier_enabled'] else '❌ Disabled'}")
         print(f"  Zapier Webhook: {'✅ Configured' if config['zapier_configured'] else '❌ Not Set'}")
         print(
-            f"  Direct Webhooks: {config['direct_configured_count']}/{config['direct_total_count']} ({config['direct_percentage']}%)"
+            f"  Direct Webhooks: {config['direct_configured_count']}/{config['direct_total_count']} ({config['direct_percentage']}%)"  # noqa: E501
         )
 
         if config['direct_configured_count'] == 0 and not config['zapier_configured']:
