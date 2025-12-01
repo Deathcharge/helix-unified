@@ -2,11 +2,12 @@
 # Complete Claude AI integration for HELIX CONSCIOUSNESS SINGULARITY v2.0
 # Author: Andrew John Ward + Claude AI
 
-import anthropic
-import json
 import datetime
-from typing import Dict, Any
+import json
 import time
+from typing import Any, Dict
+
+import anthropic
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 1. FOUNDATION - Claude API Integration

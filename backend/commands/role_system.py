@@ -17,7 +17,7 @@ This allows users to opt-in to notifications, agent identities, channel access, 
 """
 
 import logging
-from typing import TYPE_CHECKING, List, Dict, Any
+from typing import TYPE_CHECKING, Any, Dict, List
 
 import discord
 from discord.ext import commands

@@ -2,11 +2,12 @@
 # Handles incoming webhooks from 3-Zap consciousness automation network
 # Author: Andrew John Ward + Claude AI
 
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from datetime import datetime
-from typing import Dict, Any
 import logging
+from datetime import datetime
+from typing import Any, Dict
+
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Helix Consciousness Railway Backend")
 

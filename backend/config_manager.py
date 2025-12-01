@@ -1,10 +1,11 @@
 # backend/config_manager.py
 # Configuration loader for helix_config.toml
 
-import toml
 import os
 from pathlib import Path
 from typing import Any, Dict
+
+import toml
 
 # Determine the base directory of the project
 BASE_DIR = Path(__file__).resolve().parent.parent

@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 import discord
 from discord.ext import commands
+
 from backend.z88_ritual_engine import load_ucf_state
 
 if TYPE_CHECKING:

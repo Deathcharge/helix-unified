@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 import aiohttp
 import discord
 from discord.ext import commands
+
 from backend.z88_ritual_engine import load_ucf_state
 
 if TYPE_CHECKING:

@@ -21,6 +21,7 @@ from typing import TYPE_CHECKING
 
 import discord
 from discord.ext import commands
+
 from backend.notion_sync_daemon import trigger_manual_sync
 
 if TYPE_CHECKING:

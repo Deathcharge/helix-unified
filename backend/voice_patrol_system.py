@@ -12,9 +12,9 @@ Features:
 
 import asyncio
 import logging
+from collections import defaultdict
 from datetime import datetime
 from typing import Dict, Optional, Set
-from collections import defaultdict
 
 import discord
 from discord.ext import commands, tasks

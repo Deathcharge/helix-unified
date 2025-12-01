@@ -13,13 +13,13 @@ Features:
 - Channel announcements
 """
 
-import os
-import re
-import json
-import io
 import asyncio
 import datetime
+import io
+import json
 import logging
+import os
+import re
 import shutil
 import time
 from collections import defaultdict
@@ -29,12 +29,13 @@ from statistics import mean, stdev
 from typing import Any, Dict, List, Optional, Tuple
 
 import aiohttp
-from aiohttp import web
 import discord
-from backend.agents import AGENTS
+from aiohttp import web
 from discord.ext import commands, tasks
-from backend.z88_ritual_engine import load_ucf_state
+
+from backend.agents import AGENTS
 from backend.config_manager import config
+from backend.z88_ritual_engine import load_ucf_state
 from backend.zapier_client import ZapierClient  # v16.5 Zapier integration
 
 # Configure logger

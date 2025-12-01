@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Optional
 
 import discord
 from discord.ext import commands
+
 from backend.discord_embeds import HelixEmbeds
 
 if TYPE_CHECKING:

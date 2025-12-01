@@ -6,8 +6,8 @@ dependencies are missing.
 """
 
 import logging
-from typing import Optional, Dict, List, Tuple
 from dataclasses import dataclass
+from typing import Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 

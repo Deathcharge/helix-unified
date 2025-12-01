@@ -10,7 +10,6 @@ from pathlib import Path
 
 from agents import Manus
 from backend.config_manager import config
-
 from backend.enhanced_kavach import EnhancedKavach
 
 # ============================================================================
@@ -119,8 +118,8 @@ async def process_directives(manus, kavach):
 
 async def monitor_collective_health(manus):
     """Monitors the health of all active agents and triggers Zapier alerts."""
-    from backend.zapier_client import ZapierClient
     from backend.config_manager import config
+    from backend.zapier_client import ZapierClient
 
     # Check if Zapier health alerting is enabled
     webhook_url = config.get("zapier", "HEALTH_ALERT_WEBHOOK", default=None)

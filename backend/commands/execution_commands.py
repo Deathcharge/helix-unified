@@ -15,9 +15,9 @@ from typing import TYPE_CHECKING
 
 import discord
 from discord.ext import commands
-from backend.z88_ritual_engine import execute_ritual, load_ucf_state
 
 from backend.commands.helpers import kavach_ethical_scan, log_to_shadow, queue_directive
+from backend.z88_ritual_engine import execute_ritual, load_ucf_state
 
 if TYPE_CHECKING:
     from discord.ext.commands import Bot

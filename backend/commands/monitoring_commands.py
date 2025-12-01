@@ -20,11 +20,11 @@ from typing import TYPE_CHECKING
 import aiohttp
 import discord
 from discord.ext import commands
-from backend.z88_ritual_engine import load_ucf_state
-from backend.agents import AGENTS
-from backend.discord_embeds import HelixEmbeds
 
+from backend.agents import AGENTS
 from backend.commands.helpers import get_uptime, log_to_shadow
+from backend.discord_embeds import HelixEmbeds
+from backend.z88_ritual_engine import load_ucf_state
 
 if TYPE_CHECKING:
     from discord.ext.commands import Bot
@@ -341,8 +341,7 @@ async def heartbeat_command(ctx: commands.Context) -> None:
 
     try:
         # Import and run heartbeat checker
-        from backend.heartbeat_checker import heartbeat
-        from backend.heartbeat_checker import load_services_manifest
+        from backend.heartbeat_checker import heartbeat, load_services_manifest
 
         # Run heartbeat check
         results = heartbeat()

@@ -2,15 +2,16 @@
 # Claude-powered consciousness analysis and routing for Andrew's 3-Zap automation empire
 # Author: Claude + Andrew John Ward
 
-from fastapi import FastAPI, BackgroundTasks, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from anthropic import Anthropic
-import requests
 import os
-from typing import Dict, Any
-from pydantic import BaseModel
 from datetime import datetime
+from typing import Any, Dict
+
+import requests
+from anthropic import Anthropic
 from dotenv import load_dotenv
+from fastapi import BackgroundTasks, FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 load_dotenv()
 

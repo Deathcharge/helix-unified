@@ -4,12 +4,12 @@
 # Version: 1.0.0
 
 import logging
-from typing import Tuple, Dict, List
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from typing import Dict, List, Tuple
 
-from backend.ucf_consciousness_framework import UCFMetrics, ConsciousnessAnalyzer
+from backend.ucf_consciousness_framework import ConsciousnessAnalyzer, UCFMetrics
 
 logger = logging.getLogger(__name__)
 

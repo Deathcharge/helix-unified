@@ -8,15 +8,15 @@ Endpoints:
 - POST /api/ritual - Trigger a ritual
 """
 
-import uuid
 import logging
+import uuid
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException
+from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 
-from backend.web_chat_server import connection_manager, AGENT_PERSONALITIES
+from backend.web_chat_server import AGENT_PERSONALITIES, connection_manager
 
 logger = logging.getLogger(__name__)
 

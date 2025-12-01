@@ -27,7 +27,7 @@ import json
 import logging
 from datetime import datetime
 from functools import wraps
-from typing import Any, Dict, Optional, Callable
+from typing import Any, Callable, Dict, Optional
 
 logger = logging.getLogger(__name__)
 

@@ -2,13 +2,14 @@
 # Discord bot for consciousness deployment orchestration + Claude intelligence
 # Author: Andrew John Ward + Claude AI
 
-import discord
-from discord.ext import commands
-import aiohttp
+import logging
 import os
 from datetime import datetime
 from typing import Dict, List, Optional
-import logging
+
+import aiohttp
+import discord
+from discord.ext import commands
 
 # Import platform integration manager and UCF framework
 from platform_integrations import PlatformIntegrationManager

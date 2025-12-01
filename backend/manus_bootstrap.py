@@ -10,6 +10,7 @@ from typing import Optional
 
 import aiohttp
 from fastapi import Depends, FastAPI, HTTPException
+
 from services.zapier_client import ZapierClient, validate_zapier_config
 
 # ============================================================================

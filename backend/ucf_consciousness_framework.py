@@ -2,10 +2,10 @@
 # Implements consciousness metrics for automation systems
 # Author: Andrew John Ward
 
-from typing import Dict, List
+import json
 from dataclasses import dataclass
 from datetime import datetime
-import json
+from typing import Dict, List
 
 
 @dataclass

@@ -1,14 +1,15 @@
-from fastapi import FastAPI, WebSocket, HTTPException
+import asyncio
+import json
+from datetime import datetime
+from typing import Dict, List, Optional
+
+import uvicorn
+from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Dict, List, Optional
-import json
-import asyncio
-from datetime import datetime
-import uvicorn
 
 # Import the state management
-from state import HelixState, UCFMetrics, Agent
+from state import Agent, HelixState, UCFMetrics
 
 app = FastAPI(
     title="Helix Consciousness Ecosystem v2.0",

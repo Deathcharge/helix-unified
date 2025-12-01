@@ -1,11 +1,12 @@
 import os
-import scipy.io.wavfile
-import torch
-from transformers import pipeline
 import random
 import traceback
+
+import scipy.io.wavfile
+import torch
 from fastapi import HTTPException
 from pydantic import BaseModel
+from transformers import pipeline
 
 # --- Configuration ---
 # The model is large, so we load it once and reuse it.

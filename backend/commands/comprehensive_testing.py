@@ -14,7 +14,7 @@ import json
 import logging
 import time
 from datetime import datetime
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 import aiohttp
 import discord

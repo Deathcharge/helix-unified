@@ -2,7 +2,6 @@
 # backend/main.py — FastAPI + Discord Bot Launcher + Manus Integration
 # Author: Andrew John Ward (Architect)
 
-from backend.config_manager import config
 import asyncio
 import json
 import os
@@ -13,15 +12,20 @@ from typing import Any, Dict, List, Optional
 
 import aiohttp
 import httpx
-from agents import get_collective_status
 from agents_loop import main_loop as manus_loop
 from discord_bot_manus import bot as discord_bot
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect, BackgroundTasks
+from fastapi import (
+    BackgroundTasks,
+    FastAPI,
+    HTTPException,
+    Request,
+    WebSocket,
+    WebSocketDisconnect,
+)
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
-from sse_starlette.sse import EventSourceResponse
 
 # Import centralized logging configuration
 from logging_config import setup_logging
@@ -30,10 +34,14 @@ from mandelbrot_ucf import (
     generate_ritual_ucf,
     get_eye_of_consciousness,
 )
+from manus_integration import ManusSpaceIntegration, get_manus, set_manus
 from pydantic import BaseModel
+from sse_starlette.sse import EventSourceResponse
 from websocket_manager import manager as ws_manager
 from zapier_integration import HelixZapierIntegration, get_zapier, set_zapier
-from manus_integration import ManusSpaceIntegration, get_manus, set_manus
+
+from agents import get_collective_status
+from backend.config_manager import config
 
 # FIX: Create Crypto → Cryptodome alias BEFORE importing mega
 # The config manager is initialized here to ensure it's available for all modules
@@ -1077,7 +1085,11 @@ async def consciousness_websocket_endpoint(websocket: WebSocket, token: str = No
         await ws_manager.connect(websocket, client_id=agent_id)
 
         # Import core helpers for state
-        from backend.core.ucf_helpers import get_current_ucf, calculate_consciousness_level, get_emergency_events
+        from backend.core.ucf_helpers import (
+            calculate_consciousness_level,
+            get_current_ucf,
+            get_emergency_events,
+        )
 
         # Send authentication success
         await websocket.send_json(
