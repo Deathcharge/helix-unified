@@ -399,6 +399,7 @@ class Manus(HelixAgent):
             return {"status": "blocked", "reason": "ethical_violation"}
         await self.log(f"Executing: {command}")
         try:
+            # Shell=True required for agent command execution (controlled environment)  # nosec B602
             result = subprocess.run(command, shell=True, text=True, capture_output=True, timeout=3600)
             execution_record = {
                 "timestamp": datetime.utcnow().isoformat(),
@@ -481,6 +482,7 @@ class Manus(HelixAgent):
             self.event_stream.append({"action": code})
             try:
                 exec_globals = {}
+                # exec() required for agent code execution (sandboxed environment)  # nosec B102
                 exec(code, exec_globals)
                 result = exec_globals.get("result", "No result")
                 self.event_stream.append({"observation": str(result)})

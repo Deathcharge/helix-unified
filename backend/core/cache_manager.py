@@ -238,7 +238,8 @@ def cached_response(ttl_seconds: int = 60, key_func: Optional[Callable] = None):
             else:
                 # Default: use function name + args hash
                 args_str = json.dumps({"args": args, "kwargs": kwargs}, sort_keys=True, default=str)
-                args_hash = hashlib.md5(args_str.encode()).hexdigest()[:8]
+                # Use MD5 for cache key (not for security) - #nosec B324
+                args_hash = hashlib.md5(args_str.encode(), usedforsecurity=False).hexdigest()[:8]
                 cache_key = f"{func.__module__}.{func.__name__}:{args_hash}"
 
             # Try to get from cache

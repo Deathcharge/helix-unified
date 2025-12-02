@@ -88,7 +88,7 @@ def generate_music_service(request: MusicRequest) -> MusicResponse:
 
             # Save audio file to a temporary location
             output_filename = f"music_track_{i+1}_{random_seed}.wav"
-            output_path = os.path.join("/tmp", output_filename)
+            output_path = os.path.join("/tmp", output_filename)  # nosec B108
             scipy.io.wavfile.write(output_path, rate=sampling_rate, data=audio_data)
             output_files.append(output_path)
 

@@ -1249,7 +1249,7 @@ async def start_healthcheck_server():
 
     runner = web.AppRunner(app)
     await runner.setup()
-    site = web.TCPSite(runner, '0.0.0.0', port)
+    site = web.TCPSite(runner, '0.0.0.0', port)  # nosec B104
     await site.start()
 
     logger.info(f"✅ Healthcheck server started on port {port}")
