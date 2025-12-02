@@ -9,31 +9,22 @@ from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from urllib.parse import urlparse
 
 import aiohttp
 import httpx
 from agents_loop import main_loop as manus_loop
 from discord_bot_manus import bot as discord_bot
 from dotenv import load_dotenv
-from fastapi import (
-    BackgroundTasks,
-    FastAPI,
-    HTTPException,
-    Request,
-    WebSocket,
-    WebSocketDisconnect,
-)
+from fastapi import (BackgroundTasks, FastAPI, HTTPException, Request,
+                     WebSocket, WebSocketDisconnect)
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
-from urllib.parse import urlparse
 # Import centralized logging configuration
 from logging_config import setup_logging
-from mandelbrot_ucf import (
-    MandelbrotUCFGenerator,
-    generate_ritual_ucf,
-    get_eye_of_consciousness,
-)
+from mandelbrot_ucf import (MandelbrotUCFGenerator, generate_ritual_ucf,
+                            get_eye_of_consciousness)
 from manus_integration import ManusSpaceIntegration, get_manus, set_manus
 from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
@@ -101,7 +92,8 @@ else:
 
 # ✅ FIXED IMPORTS - Music generation service (optional, requires torch)
 try:
-    from music_generator import MusicRequest, MusicResponse, generate_music_service
+    from music_generator import (MusicRequest, MusicResponse,
+                                 generate_music_service)
 
     MUSIC_GENERATION_AVAILABLE = True
     logger.info("✅ Music generation API enabled (torch available)")
@@ -1085,11 +1077,9 @@ async def consciousness_websocket_endpoint(websocket: WebSocket, token: Optional
         await ws_manager.connect(websocket, client_id=agent_id)
 
         # Import core helpers for state
-        from backend.core.ucf_helpers import (
-            calculate_consciousness_level,
-            get_current_ucf,
-            get_emergency_events,
-        )
+        from backend.core.ucf_helpers import (calculate_consciousness_level,
+                                              get_current_ucf,
+                                              get_emergency_events)
 
         # Send authentication success
         await websocket.send_json(

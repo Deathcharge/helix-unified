@@ -13,8 +13,8 @@ Version: 17.1.0
 """
 
 import logging
-from typing import Any, Dict
 import re
+from typing import Any, Dict
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field, validator

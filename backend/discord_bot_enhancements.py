@@ -251,7 +251,8 @@ def require_consciousness(min_level: float) -> Callable:
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         async def wrapper(ctx: commands.Context, *args, **kwargs):
-            from backend.core.ucf_helpers import calculate_consciousness_level, get_current_ucf
+            from backend.core.ucf_helpers import (
+                calculate_consciousness_level, get_current_ucf)
 
             ucf = get_current_ucf()
             consciousness = calculate_consciousness_level(ucf)
@@ -302,7 +303,8 @@ def audit_command() -> Callable:
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         async def wrapper(ctx: commands.Context, *args, **kwargs):
-            from backend.core.ucf_helpers import calculate_consciousness_level, get_current_ucf
+            from backend.core.ucf_helpers import (
+                calculate_consciousness_level, get_current_ucf)
 
             ucf = get_current_ucf()
             consciousness = calculate_consciousness_level(ucf)
@@ -396,7 +398,8 @@ async def get_available_commands(
     user: discord.User, guild: Optional[discord.Guild]
 ) -> List[CommandMetadata]:
     """Get commands available to user based on tier + consciousness."""
-    from backend.core.ucf_helpers import calculate_consciousness_level, get_current_ucf
+    from backend.core.ucf_helpers import (calculate_consciousness_level,
+                                          get_current_ucf)
 
     user_tier = await _get_user_tier(user, guild)
     ucf = get_current_ucf()

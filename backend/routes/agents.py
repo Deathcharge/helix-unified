@@ -2,12 +2,13 @@
 Agent Orchestration API Routes
 """
 
+import logging
+from typing import Any, Dict, Optional
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import Dict, Any, Optional
-import logging
 
-from backend.agent_orchestrator import get_orchestrator, Z88Stage
+from backend.agent_orchestrator import Z88Stage, get_orchestrator
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/agents", tags=["agents"])

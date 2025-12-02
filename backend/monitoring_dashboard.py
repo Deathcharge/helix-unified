@@ -293,10 +293,8 @@ class MonitoringDashboard:
 
     async def get_dashboard_data(self) -> Dict[str, Any]:
         """Get all dashboard data."""
-        from backend.core.ucf_helpers import (
-            calculate_consciousness_level,
-            get_current_ucf,
-        )
+        from backend.core.ucf_helpers import (calculate_consciousness_level,
+                                              get_current_ucf)
 
         # Get current UCF
         ucf = get_current_ucf()
@@ -352,10 +350,8 @@ class MonitoringDashboard:
 
     async def record_system_metrics(self) -> None:
         """Record current system metrics."""
-        from backend.core.ucf_helpers import (
-            calculate_consciousness_level,
-            get_current_ucf,
-        )
+        from backend.core.ucf_helpers import (calculate_consciousness_level,
+                                              get_current_ucf)
 
         ucf = get_current_ucf()
         consciousness = calculate_consciousness_level(ucf)

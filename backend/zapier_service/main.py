@@ -1,16 +1,17 @@
-from fastapi import FastAPI, Depends, HTTPException, status, Request, Header
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from pydantic import BaseModel
-from typing import Optional, Dict, Any, List
-import uvicorn
-import redis
-import json
-import jwt
-import os
-from datetime import datetime
 import hashlib
 import hmac
+import json
+import os
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+import jwt
+import redis
+import uvicorn
+from fastapi import Depends, FastAPI, Header, HTTPException, Request, status
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from pydantic import BaseModel
 
 # Initialize FastAPI app
 app = FastAPI(title="Zapier Integration Service")

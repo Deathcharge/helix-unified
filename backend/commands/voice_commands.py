@@ -1,10 +1,13 @@
-import os
 import asyncio
+import os
+
 import discord
 from discord.ext import commands
 from loguru import logger
-from vosk import Model, KaldiRecognizer
-from backend.tts_service import tts_service, get_agent_voice  # Import the new TTS service
+from vosk import KaldiRecognizer, Model
+
+from backend.tts_service import get_agent_voice  # Import the new TTS service
+from backend.tts_service import tts_service
 from backend.voice_sink import VoskVoiceSink, get_vosk_recognizer
 
 # --- CONFIGURATION ---

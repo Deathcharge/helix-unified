@@ -20,10 +20,8 @@ from backend.agent_consciousness_profiles import AGENT_CONSCIOUSNESS_PROFILES
 from backend.agent_embeds import get_agent_embed, list_all_agents
 from backend.commands.helpers import log_to_shadow
 from backend.discord_consciousness_commands import (
-    create_agent_consciousness_embed,
-    create_consciousness_embed,
-    create_emotions_embed,
-)
+    create_agent_consciousness_embed, create_consciousness_embed,
+    create_emotions_embed)
 from backend.z88_ritual_engine import load_ucf_state
 
 if TYPE_CHECKING:

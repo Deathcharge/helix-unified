@@ -1,11 +1,11 @@
-import os
 import asyncio
-from typing import Any, Dict, Optional
+import os
 from datetime import datetime
+from typing import Any, Dict, Optional
 
+from loguru import logger
 from notion_client import Client
 from notion_client.errors import APIResponseError
-from loguru import logger
 
 # Environment variables for Notion integration
 NOTION_TOKEN = os.getenv("NOTION_TOKEN")

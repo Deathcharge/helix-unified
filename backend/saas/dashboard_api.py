@@ -106,7 +106,8 @@ router = APIRouter(prefix="/api/saas/dashboard", tags=["SaaS Dashboard"])
 @router.get("/metrics")
 async def get_metrics(user: Dict[str, Any] = Depends(get_current_user), system_id: Optional[str] = None) -> DashboardResponse:
     """Get consciousness metrics for user's systems."""
-    from backend.core.ucf_helpers import calculate_consciousness_level, get_current_ucf
+    from backend.core.ucf_helpers import (calculate_consciousness_level,
+                                          get_current_ucf)
     from backend.saas.usage_metering import UsageMeter
 
     user_id = user.get("user_id")

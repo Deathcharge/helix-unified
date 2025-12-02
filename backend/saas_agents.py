@@ -22,12 +22,15 @@ Author: Claude (Manus Validator)
 Date: 2025-11-30
 """
 
-from typing import Dict, Any, Optional, List
-from pydantic import BaseModel, Field
-from fastapi import HTTPException
 import time
+from typing import Any, Dict, List, Optional
+
+from fastapi import HTTPException
+from pydantic import BaseModel, Field
+
 from backend.saas_auth import Database, track_usage
-from backend.saas_router import calculate_cost, route_to_best_model, call_anthropic, call_openai
+from backend.saas_router import (calculate_cost, call_anthropic, call_openai,
+                                 route_to_best_model)
 
 # ============================================================================
 # AGENT DEFINITIONS

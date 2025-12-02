@@ -294,7 +294,8 @@ async def post_daily_trends():
         storage_mode = os.getenv("HELIX_STORAGE_MODE", "local")
         if storage_mode in ["nextcloud", "mega"]:
             try:
-                from backend.helix_storage_adapter_async import upload_samsara_asset
+                from backend.helix_storage_adapter_async import \
+                    upload_samsara_asset
 
                 await upload_samsara_asset(
                     chart_path,

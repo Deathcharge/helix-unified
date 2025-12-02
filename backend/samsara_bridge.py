@@ -20,7 +20,8 @@ try:
 except ImportError:
     # Fallback to absolute import (local development)
     try:
-        from backend.helix_storage_adapter_async import HelixStorageAdapterAsync
+        from backend.helix_storage_adapter_async import \
+            HelixStorageAdapterAsync
     except ImportError:
         # Mock for environments without storage adapter
         class HelixStorageAdapterAsync:

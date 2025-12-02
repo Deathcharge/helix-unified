@@ -12,7 +12,6 @@ Date: 2025-11-01
 import asyncio
 import json
 import logging
-
 # Setup logging
 # Create logs directory if it doesn't exist
 import os
@@ -25,10 +24,8 @@ import backoff
 
 # Import publishers
 from backend.sync.discord_publisher import DiscordPublisher
-
 # Import collectors
 from backend.sync.github_collector import GitHubCollector
-
 # Import exporters
 from backend.sync.markdown_exporter import MarkdownExporter
 from backend.sync.notion_exporter import NotionExporter

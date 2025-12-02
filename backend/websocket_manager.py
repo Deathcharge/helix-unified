@@ -12,7 +12,7 @@ Version: 15.5.0
 import asyncio
 import logging
 from datetime import datetime
-from typing import Any, Dict, Set
+from typing import Any, Dict, Optional, Set
 
 from fastapi import WebSocket, WebSocketDisconnect
 

@@ -19,7 +19,7 @@ import json
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
 
 import discord
 from discord.ext import commands

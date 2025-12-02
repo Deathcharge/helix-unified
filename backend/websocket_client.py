@@ -6,7 +6,7 @@ import asyncio
 import json
 import logging
 from datetime import datetime
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, Optional
 
 # Try to import websockets, provide fallback
 try:

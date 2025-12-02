@@ -5,16 +5,15 @@ Image Commands for Helix Discord Bot
 """
 
 import json
+from typing import Optional
 
 from discord.ext import commands
 
 # Import PIL-based fractal generation (v16.1 additions to samsara_bridge)
 try:
-    from backend.samsara_bridge import (
-        PIL_AVAILABLE,
-        generate_pil_and_post_to_discord,
-        generate_pil_fractal_bytes,
-    )
+    from backend.samsara_bridge import (PIL_AVAILABLE,
+                                        generate_pil_and_post_to_discord,
+                                        generate_pil_fractal_bytes)
 except ImportError:
     generate_pil_fractal_bytes = None
     generate_pil_and_post_to_discord = None

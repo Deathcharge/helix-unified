@@ -7,7 +7,6 @@ import uvicorn
 from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-
 # Import the state management
 from state import Agent, HelixState, UCFMetrics
 

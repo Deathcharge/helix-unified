@@ -12,13 +12,15 @@ Author: Claude (Manus Validator)
 Date: 2025-11-30
 """
 
+import os
+import time
+from typing import Any, Dict, List, Literal, Optional
+
 import anthropic
 import openai
-from typing import List, Dict, Any, Optional, Literal
-from pydantic import BaseModel, Field
 from fastapi import HTTPException
-import time
-import os
+from pydantic import BaseModel, Field
+
 from backend.security_middleware import SafeErrorResponse
 
 # Import existing orchestrator if available

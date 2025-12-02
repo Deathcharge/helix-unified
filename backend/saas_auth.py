@@ -13,18 +13,19 @@ Author: Claude (Manus Validator)
 Date: 2025-11-30
 """
 
+import hashlib
+import os
 import secrets
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
+
+import asyncpg
 import bcrypt
 import jwt
-import asyncpg
-from datetime import datetime, timedelta
-from typing import Optional, Dict, Any, List
-from fastapi import HTTPException, Header, Depends
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from pydantic import BaseModel, EmailStr, validator
 import redis.asyncio as redis
-import os
-import hashlib
+from fastapi import Depends, Header, HTTPException
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from pydantic import BaseModel, EmailStr, validator
 
 # ============================================================================
 # CONFIGURATION

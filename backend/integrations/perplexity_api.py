@@ -3,10 +3,11 @@ Perplexity API Integration
 Provides access to multiple LLMs through Perplexity's unified API
 """
 
-import os
-import aiohttp
 import asyncio
-from typing import Dict, List, Optional, Any
+import os
+from typing import Any, Dict, List, Optional
+
+import aiohttp
 from loguru import logger
 
 

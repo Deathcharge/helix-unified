@@ -3,11 +3,12 @@ Environment Variable Validation & Health Checks
 Validates required environment variables and API keys on startup
 """
 
+import asyncio
 import os
 import sys
-from typing import Dict, List, Optional
 from datetime import datetime
-import asyncio
+from typing import Dict, List, Optional
+
 import aiohttp
 from loguru import logger
 

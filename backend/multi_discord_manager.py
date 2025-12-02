@@ -11,11 +11,12 @@ Author: Claude (Manus Validator)
 Date: 2025-11-30
 """
 
-import discord
-from discord.ext import commands
-from typing import Dict, Any, List
 import os
 from enum import Enum
+from typing import Any, Dict, List
+
+import discord
+from discord.ext import commands
 
 
 class DiscordServerType(Enum):

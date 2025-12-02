@@ -16,13 +16,10 @@ if TYPE_CHECKING:
     pass
 
 # Import consciousness framework
-from backend.kael_consciousness_core import (
-    ConsciousnessCore,
-    DecisionMakingAlgorithm,
-    Emotions,
-    EthicalFramework,
-    SelfAwarenessModule,
-)
+from backend.kael_consciousness_core import (ConsciousnessCore,
+                                             DecisionMakingAlgorithm, Emotions,
+                                             EthicalFramework,
+                                             SelfAwarenessModule)
 
 
 class HelixAgent:

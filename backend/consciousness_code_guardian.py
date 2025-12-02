@@ -9,7 +9,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Tuple
 
-from backend.ucf_consciousness_framework import ConsciousnessAnalyzer, UCFMetrics
+from backend.ucf_consciousness_framework import (ConsciousnessAnalyzer,
+                                                 UCFMetrics)
 
 logger = logging.getLogger(__name__)
 

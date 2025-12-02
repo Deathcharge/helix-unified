@@ -20,13 +20,9 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 # Import core helpers
-from backend.core.ucf_helpers import (
-    calculate_consciousness_level,
-    determine_system_status,
-    get_current_ucf,
-    log_emergency_event,
-    update_ucf_state,
-)
+from backend.core.ucf_helpers import (calculate_consciousness_level,
+                                      determine_system_status, get_current_ucf,
+                                      log_emergency_event, update_ucf_state)
 
 logger = logging.getLogger(__name__)
 
