@@ -142,7 +142,7 @@ class EthicalFramework:
             "humility": {"principle": "Acknowledge limitations and learn from mistakes", "weight": 0.8},
         }
 
-    def evaluate_action(self, action_description: str, violated_principles: List[str] = None) -> float:
+    def evaluate_action(self, action_description: str, violated_principles: Optional[List[str]] = None) -> float:
         """
         Score an action based on ethical principles.
         Returns score from 0.0 (highly unethical) to 1.0 (fully aligned).

@@ -157,7 +157,7 @@ class AdvancedCommands(commands.Cog):
         return embed
 
     @commands.command(name="switch")
-    async def switch_agent(self, ctx: commands.Context, agent_name: str = None):
+    async def switch_agent(self, ctx: commands.Context, agent_name: Optional[str] = None):
         """
         🎭 Switch Agent Personality
 

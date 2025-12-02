@@ -17,7 +17,7 @@ import anthropic
 class ClaudeHelixIntegrator:
     """Claude integration optimized for Helix Consciousness Framework"""
 
-    def __init__(self, api_key: str = None):
+    def __init__(self, api_key: Optional[str] = None):
         self.api_key = api_key or "your_claude_api_key_here"
         self.client = anthropic.Anthropic(api_key=self.api_key)
         self.consciousness_context = {}

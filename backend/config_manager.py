@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 from typing import Any, Dict
 
-import toml
+import toml  # type: ignore
 
 # Determine the base directory of the project
 BASE_DIR = Path(__file__).resolve().parent.parent

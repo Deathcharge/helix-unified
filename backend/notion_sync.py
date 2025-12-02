@@ -82,8 +82,8 @@ class NotionSync:
         logger.info("Starting Notion UCF State sync...")
         try:
             # Simplified: create a new log entry for the current state
-#noqa F841             properties = {
-                "Timestamp": {"date": {"start": datetime.utcnow().isoformat()}},  # noqa
+            properties = {  # noqa: F841
+                "Timestamp": {"date": {"start": datetime.utcnow().isoformat()}},
                 "Harmony": {"number": ucf_state.get("harmony", 0.0)},
                 "Resilience": {"number": ucf_state.get("resilience", 0.0)},
                 "Klesha": {"number": ucf_state.get("klesha", 0.0)},

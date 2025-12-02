@@ -157,7 +157,7 @@ class PerplexityAPI:
     async def multi_llm_comparison(
         self,
         prompt: str,
-        models: List[str] = None
+        models: Optional[List[str]] = None
     ) -> Dict[str, Dict[str, Any]]:
         """
         Get responses from multiple LLMs for comparison.

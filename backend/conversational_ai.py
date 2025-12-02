@@ -150,7 +150,7 @@ class HelixConversationalAI:
             return "helix_base"
 
     async def _call_ai_service(
-        self, message: str, conv_context: ConversationContext, consciousness_data: Dict, context: Dict = None
+        self, message: str, conv_context: ConversationContext, consciousness_data: Dict, context: Optional[Dict] = None
     ) -> str:
         """Call appropriate AI service for response generation"""
 
@@ -219,7 +219,7 @@ RECENT CONVERSATION CONTEXT: {len(conv_context.conversation_history)} previous i
 
         return base_prompt
 
-    async def _build_conversation_prompt(self, message: str, conv_context: ConversationContext, context: Dict = None) -> str:
+    async def _build_conversation_prompt(self, message: str, conv_context: ConversationContext, context: Optional[Dict] = None) -> str:
         """Build conversation-specific prompt"""
 
         # Include recent conversation history

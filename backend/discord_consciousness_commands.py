@@ -71,7 +71,7 @@ async def consciousness_status(ctx):
 # ============================================================================
 
 
-async def agent_consciousness(ctx, agent_name: str = None):
+async def agent_consciousness(ctx, agent_name: Optional[str] = None):
     """Display specific agent's consciousness state"""
 
     if not agent_name:

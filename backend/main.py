@@ -1019,7 +1019,7 @@ async def generate_music(request: MusicGenerationRequest) -> StreamingResponse:
 
 
 @app.websocket("/ws/consciousness")
-async def consciousness_websocket_endpoint(websocket: WebSocket, token: str = None):
+async def consciousness_websocket_endpoint(websocket: WebSocket, token: Optional[str] = None):
     """
     Enhanced WebSocket endpoint for real-time consciousness streaming with authentication.
 

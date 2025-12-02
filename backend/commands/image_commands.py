@@ -46,7 +46,7 @@ class ImageCommands(commands.Cog):
         self.bot = bot
 
     @commands.command(name="image", aliases=["fractal", "aion"])
-    async def image_command(self, ctx, mode: str = None):
+    async def image_command(self, ctx, mode: Optional[str] = None):
         """
         Generate AION fractal visualizations based on UCF state
 

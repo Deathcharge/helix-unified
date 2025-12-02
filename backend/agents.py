@@ -265,7 +265,7 @@ class Shadow(HelixAgent):
             json.dump(collective_state, f, indent=2)
         await self.log(f"Collective memory archived to {filename}")
 
-    async def load_collective_archive(self, filename: str = None) -> Optional[Dict[str, Any]]:
+    async def load_collective_archive(self, filename: Optional[str] = None) -> Optional[Dict[str, Any]]:
         """
         Load a collective memory archive.
 

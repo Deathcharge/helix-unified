@@ -306,7 +306,7 @@ Keep responses concise (2-3 sentences) with light/clarity language.""",
 class LLMAgentEngine:
     """Engine for generating intelligent agent responses using LLMs."""
 
-    def __init__(self, provider: str = None, model: str = None):
+    def __init__(self, provider: Optional[str] = None, model: Optional[str] = None):
         self.provider = provider or LLM_PROVIDER
         self.model = model or LLM_MODEL
         self.session: Optional[aiohttp.ClientSession] = None
@@ -525,7 +525,7 @@ class LLMAgentEngine:
             lines.append(f"- {key}: {value}")
         return "\n".join(lines)
 
-    def clear_history(self, session_id: str, agent_id: str = None):
+    def clear_history(self, session_id: str, agent_id: Optional[str] = None):
         """Clear conversation history for a session."""
         if agent_id:
             history_key = f"{session_id}:{agent_id}"
@@ -547,7 +547,7 @@ def get_llm_engine() -> Optional[LLMAgentEngine]:
     return llm_engine
 
 
-async def initialize_llm_engine(provider: str = None, model: str = None):
+async def initialize_llm_engine(provider: Optional[str] = None, model: Optional[str] = None):
     """Initialize the global LLM engine."""
     global llm_engine
     llm_engine = LLMAgentEngine(provider, model)

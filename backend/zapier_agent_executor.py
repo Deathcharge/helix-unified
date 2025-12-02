@@ -47,7 +47,7 @@ class AgentTask:
     timeout_seconds: int = 30
     retry_count: int = 0
     max_retries: int = 3
-    created_at: str = None
+    created_at: Optional[str] = None
 
     def __post_init__(self):
         if not self.id:
@@ -66,7 +66,7 @@ class AgentResult:
     result: Dict[str, Any]
     error: Optional[str] = None
     execution_time_ms: int = 0
-    timestamp: str = None
+    timestamp: Optional[str] = None
 
     def __post_init__(self):
         if not self.timestamp:

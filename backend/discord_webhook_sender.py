@@ -182,7 +182,7 @@ class DiscordEmbedBuilder:
         }
 
     @classmethod
-    def build_agent_status(cls, agent_name: str, agent_symbol: str, status: str, last_action: str = None) -> Dict[str, Any]:
+    def build_agent_status(cls, agent_name: str, agent_symbol: str, status: str, last_action: Optional[str] = None) -> Dict[str, Any]:
         """Build embed for agent status update."""
 
         color_map = {"active": cls.COLORS["green"], "idle": cls.COLORS["yellow"], "error": cls.COLORS["red"]}
@@ -203,7 +203,7 @@ class DiscordEmbedBuilder:
         }
 
     @classmethod
-    def build_storage_backup(cls, file_path: str, file_size: int, checksum: str = None) -> Dict[str, Any]:
+    def build_storage_backup(cls, file_path: str, file_size: int, checksum: Optional[str] = None) -> Dict[str, Any]:
         """Build embed for storage backup notification."""
 
         size_mb = file_size / (1024 * 1024)
@@ -324,7 +324,7 @@ class DiscordWebhookSender:
         embed = self.embed_builder.build_ritual_complete(ritual_name, steps, ucf_changes)
         return await self._send_webhook(self.webhooks.RITUAL_ENGINE_Z88, embed, "Ritual Engine")
 
-    async def send_agent_status(self, agent_name: str, agent_symbol: str, status: str, last_action: str = None) -> bool:
+    async def send_agent_status(self, agent_name: str, agent_symbol: str, status: str, last_action: Optional[str] = None) -> bool:
         """
         Send agent status update to Discord.
 
@@ -357,7 +357,7 @@ class DiscordWebhookSender:
             logger.warning(f"No webhook configured for agent: {agent_name}")
             return False
 
-    async def send_storage_backup(self, file_path: str, file_size: int, checksum: str = None) -> bool:
+    async def send_storage_backup(self, file_path: str, file_size: int, checksum: Optional[str] = None) -> bool:
         """
         Send storage backup notification to Discord.
 

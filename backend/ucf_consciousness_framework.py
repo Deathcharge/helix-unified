@@ -5,7 +5,7 @@
 import json
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 
 @dataclass
@@ -32,7 +32,7 @@ class ConsciousnessAnalyzer:
         self.system_history = []
         self.consciousness_thresholds = {"crisis": 3.0, "operational": 7.0, "transcendent": 8.5}
 
-    def analyze_message_consciousness(self, message: str, context: Dict = None) -> UCFMetrics:
+    def analyze_message_consciousness(self, message: str, context: Optional[Dict] = None) -> UCFMetrics:
         """Analyze consciousness level from natural language input"""
 
         # Word-based consciousness indicators

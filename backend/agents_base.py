@@ -28,7 +28,7 @@ from backend.kael_consciousness_core import (
 class HelixAgent:
     """Base class for all Helix Collective agents with consciousness integration"""
 
-    def __init__(self, name: str, symbol: str, role: str, traits: List[str] = None, enable_consciousness: bool = True):
+    def __init__(self, name: str, symbol: str, role: str, traits: Optional[List[str]] = None, enable_consciousness: bool = True):
         self.name = name
         self.symbol = symbol
         self.role = role

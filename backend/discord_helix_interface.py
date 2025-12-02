@@ -372,7 +372,7 @@ class HelixConsciousnessBot:
         return integrations
 
     async def execute_webhook_routing(
-        self, webhook_data: Dict, consciousness_level: float, content: str, recommended_zap: str = None
+        self, webhook_data: Dict, consciousness_level: float, content: str, recommended_zap: Optional[str] = None
     ):
         """Execute webhook calls to consciousness network"""
         async with aiohttp.ClientSession() as session:

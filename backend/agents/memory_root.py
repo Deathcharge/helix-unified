@@ -157,7 +157,7 @@ class MemoryRootAgent(HelixAgent):
     # LOCAL ARCHIVE FALLBACK
     # ========================================================================
 
-    async def _search_local_archives(self, session_id: str = None, query: str = None) -> Optional[List[Dict[str, Any]]]:
+    async def _search_local_archives(self, session_id: Optional[str] = None, query: Optional[str] = None) -> Optional[List[Dict[str, Any]]]:
         """
         Search local Shadow archives as fallback when Notion is unavailable.
 

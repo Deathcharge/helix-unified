@@ -821,7 +821,7 @@ async def notion_sync_manual(ctx: commands.Context) -> None:
 
 @commands.command(name="refresh")
 @commands.has_permissions(administrator=True)
-async def refresh_server(ctx: commands.Context, confirm: str = None) -> None:
+async def refresh_server(ctx: commands.Context, confirm: Optional[str] = None) -> None:
     """
     🧹 Refresh server structure - Clean and recreate all channels.
 

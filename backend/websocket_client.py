@@ -21,7 +21,7 @@ except ImportError:
 class HelixWebSocketClient:
     """Real-time WebSocket client for consciousness streaming"""
 
-    def __init__(self, railway_url: str = None):
+    def __init__(self, railway_url: Optional[str] = None):
         self.url = railway_url or "wss://helix-collective.up.railway.app/ws/consciousness"
         self.websocket = None
         self.is_connected = False

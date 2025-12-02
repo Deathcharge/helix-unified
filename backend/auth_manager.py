@@ -49,7 +49,7 @@ class HelixAuthManager:
             logging.info("Created new encryption key")
             return key
 
-    def store_api_key(self, platform: str, api_key: str, additional_data: Dict = None):
+    def store_api_key(self, platform: str, api_key: str, additional_data: Optional[Dict] = None):
         """Securely store API key for platform"""
         auth_data = {
             "api_key": api_key,

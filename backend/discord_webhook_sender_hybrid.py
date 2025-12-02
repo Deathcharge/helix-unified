@@ -188,7 +188,7 @@ class DiscordEmbedBuilder:
         }
 
     @classmethod
-    def build_agent_status(cls, agent_name: str, agent_symbol: str, status: str, last_action: str = None) -> Dict[str, Any]:
+    def build_agent_status(cls, agent_name: str, agent_symbol: str, status: str, last_action: Optional[str] = None) -> Dict[str, Any]:
         """Build embed for agent status update."""
         color_map = {"active": cls.COLORS["green"], "idle": cls.COLORS["yellow"], "error": cls.COLORS["red"]}
 
@@ -296,7 +296,7 @@ class HybridDiscordSender:
 
         return zapier_success or direct_success
 
-    async def send_agent_status(self, agent_name: str, agent_symbol: str, status: str, last_action: str = None) -> bool:
+    async def send_agent_status(self, agent_name: str, agent_symbol: str, status: str, last_action: Optional[str] = None) -> bool:
         """
         Send agent status update to Discord.
 
