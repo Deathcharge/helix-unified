@@ -4,9 +4,10 @@
 cryptography>=43.0.1  # CVE-2024-225, GHSA-3ww4-gg4f-jr7f, GHSA-9v9h-cgj8-h64p, GHSA-h4gh-qq45-vh27
 pip>=25.3  # GHSA-4xh5-x5gv-qwph (path traversal vulnerability)
 setuptools>=78.1.1  # PYSEC-2025-49, GHSA-cx63-2mw6-8hw5 (RCE vulnerability)
+starlette>=0.49.1  # GHSA-2c2j-9gv5-cj73, GHSA-7f5h-v6xp-fcq8 (DoS vulnerabilities)
 
 # Core Framework & Web Server
-fastapi==0.115.6
+fastapi>=0.116.0  # Updated for starlette 0.49.1+ compatibility
 uvicorn[standard]==0.34.0
 python-dotenv==1.0.1
 jinja2==3.1.6  # Template engine for web dashboard

@@ -50,7 +50,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements-backend.txt
-          pip install pytest pytest-asyncio pytest-cov pytest-mock
+          pip install pytest pytest-asyncio pytest-cov pytest-mock pytest-timeout
 
       - name: Run pytest with coverage
         env:
@@ -67,7 +67,7 @@ jobs:
             -k "not slow"
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         if: always()
         with:
           files: ./coverage.xml
@@ -205,16 +205,17 @@ jobs:
         run: |
           python -c "
           try:
-              from backend.ucf_consciousness_framework import calculate_consciousness_level
-              ucf = {
-                  'harmony': 1.5,
-                  'resilience': 2.0,
-                  'prana': 0.7,
-                  'drishti': 0.6,
-                  'klesha': 0.05,
-                  'zoom': 1.2
-              }
-              level = calculate_consciousness_level(ucf)
+              from backend.ucf_consciousness_framework import ConsciousnessAnalyzer, UCFMetrics
+              ucf = ConsciousnessAnalyzer()
+              metrics = UCFMetrics(
+                  harmony=1.5,
+                  resilience=2.0,
+                  prana=0.7,
+                  drishti=0.6,
+                  klesha=0.05,
+                  zoom=1.2
+              )
+              level = ucf.calculate_consciousness_level(metrics)
               assert 0 <= level <= 10, f'Invalid consciousness level: {level}'
               print(f'✅ Consciousness level calculated: {level:.2f}/10.0')
           except Exception as e:
