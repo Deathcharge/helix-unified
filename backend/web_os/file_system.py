@@ -4,13 +4,14 @@ REST API for file operations with sandbox security
 Supports: list, read, write, delete, create files/folders
 """
 
-import os
-import json
 import logging
-from typing import Any, Dict, List, Optional
-from pathlib import Path
+import os
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
+from typing import List
+
+from fastapi import APIRouter, HTTPException, Query
 
 logger = logging.getLogger(__name__)
 
@@ -188,7 +189,7 @@ class FileSystemManager:
 
             # Check size
             if len(content) > self.max_file_size:
-                return False, f'Content too large'
+                return False, f'Content too large'  # noqa
 
             with open(abs_path, 'w', encoding='utf-8') as f:
                 f.write(content)
@@ -214,7 +215,7 @@ class FileSystemManager:
                 return False, f'Path not found: {path}'
 
             if os.path.isdir(abs_path):
-                return False, f'Use folder deletion endpoint for directories'
+                return False, f'Use folder deletion endpoint for directories'  # noqa
 
             os.remove(abs_path)
             return True, f'File deleted: {path}'
@@ -308,7 +309,6 @@ class FileSystemManager:
 # FASTAPI INTEGRATION
 # ============================================================================
 
-from fastapi import APIRouter, HTTPException, Query
 
 router = APIRouter(prefix='/api/web-os/files', tags=['Web OS Files'])
 

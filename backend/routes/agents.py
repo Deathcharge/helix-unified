@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from typing import Dict, Any, Optional
 import logging
 
-from backend.agent_orchestrator import get_orchestrator, HandshakePhase, Z88Stage
+from backend.agent_orchestrator import get_orchestrator, Z88Stage
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/agents", tags=["agents"])

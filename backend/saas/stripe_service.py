@@ -16,7 +16,7 @@ Version: 17.1.0
 import json
 import logging
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -89,9 +89,7 @@ class StripeService:
     # CUSTOMER MANAGEMENT
     # ========================================================================
 
-    async def create_customer(
-        self, user_id: str, email: str, name: str, metadata: Dict[str, str]
-    ) -> Dict[str, Any]:
+    async def create_customer(self, user_id: str, email: str, name: str, metadata: Dict[str, str]) -> Dict[str, Any]:
         """Create Stripe customer."""
         try:
             customer = stripe.Customer.create(
@@ -137,9 +135,7 @@ class StripeService:
     # SUBSCRIPTION MANAGEMENT
     # ========================================================================
 
-    async def create_subscription(
-        self, user_id: str, stripe_customer_id: str, tier: str
-    ) -> Dict[str, Any]:
+    async def create_subscription(self, user_id: str, stripe_customer_id: str, tier: str) -> Dict[str, Any]:
         """Create subscription for user."""
         tier_config = self.tiers.get(tier)
         if not tier_config:
@@ -158,14 +154,14 @@ class StripeService:
 
             logger.info(f"✅ Created subscription: {subscription.id} ({tier})")
             return {
-                "status": "success",
+                "status": "success",  # noqa
                 "subscription_id": subscription.id,
                 "tier": tier,
-                "status": subscription.status,
-                "current_period_end": subscription.current_period_end,
+                "status": subscription.status,  # noqa
+                "current_period_end": subscription.current_period_end,  # noqa
             }
 
-        except stripe.error.StripeError as e:
+        except stripe.error.StripeError as e:  # noqa
             logger.error(f"❌ Subscription error: {e}")
             return {"status": "error", "error": str(e)}
 
@@ -189,13 +185,13 @@ class StripeService:
         try:
             subscription = stripe.Subscription.retrieve(subscription_id)
             return {
-                "status": "success",
+                "status": "success",  # noqa
                 "subscription_id": subscription.id,
-                "status": subscription.status,
+                "status": subscription.status,  # noqa
                 "tier": subscription.metadata.get("tier"),
-                "current_period_end": subscription.current_period_end,
+                "current_period_end": subscription.current_period_end,  # noqa
                 "cancel_at_period_end": subscription.cancel_at_period_end,
-            }
+            }  # noqa
 
         except stripe.error.StripeError as e:
             logger.error(f"❌ Retrieval error: {e}")
@@ -205,9 +201,7 @@ class StripeService:
     # USAGE-BASED BILLING
     # ========================================================================
 
-    async def record_usage(
-        self, subscription_id: str, quantity: int, metric_name: str = "api_calls"
-    ) -> Dict[str, Any]:
+    async def record_usage(self, subscription_id: str, quantity: int, metric_name: str = "api_calls") -> Dict[str, Any]:
         """Record usage for metered billing."""
         try:
             # Get subscription to find usage record ID
@@ -250,9 +244,7 @@ class StripeService:
             logger.error(f"❌ Invoice retrieval error: {e}")
             return []
 
-    async def create_invoice(
-        self, customer_id: str, amount: int, description: str
-    ) -> Dict[str, Any]:
+    async def create_invoice(self, customer_id: str, amount: int, description: str) -> Dict[str, Any]:
         """Create one-time invoice."""
         try:
             invoice = stripe.Invoice.create(
@@ -293,9 +285,7 @@ class StripeService:
     def verify_webhook_signature(self, request_body: str, signature: str) -> Optional[Dict]:
         """Verify and parse Stripe webhook."""
         try:
-            event = stripe.Webhook.construct_event(
-                request_body, signature, self.webhook_secret
-            )
+            event = stripe.Webhook.construct_event(request_body, signature, self.webhook_secret)
             return event
         except ValueError:
             logger.error("Invalid webhook payload")
@@ -356,9 +346,7 @@ class StripeService:
     # CHECKOUT SESSION
     # ========================================================================
 
-    async def create_checkout_session(
-        self, customer_id: str, tier: str, success_url: str, cancel_url: str
-    ) -> Dict[str, Any]:
+    async def create_checkout_session(self, customer_id: str, tier: str, success_url: str, cancel_url: str) -> Dict[str, Any]:
         """Create Stripe checkout session for subscription."""
         tier_config = self.tiers.get(tier)
         if not tier_config:

@@ -128,8 +128,8 @@ class TrendAnalyzer:
             return "INSUFFICIENT_DATA"
 
         # Check slope
-        first_third = np.mean(avg[: len(avg) // 3])
-        last_third = np.mean(avg[-len(avg) // 3 :])
+        first_third = np.mean(avg[:len(avg) // 3])
+        last_third = np.mean(avg[-len(avg) // 3 :])  # noqa: E203
         change = last_third - first_third
 
         threshold = 0.1  # 10% change threshold

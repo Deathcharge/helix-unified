@@ -13,7 +13,7 @@ Version: 17.1.0
 """
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 import re
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -172,7 +172,7 @@ class AgentQueryRequest(BaseModel):
         for pattern in injection_patterns:
             if pattern in v_lower:
                 raise ValueError(
-                    f'Potential prompt injection detected. '
+                    f'Potential prompt injection detected. '  # noqa
                     f'Please rephrase your request.'
                 )
         return v
@@ -182,10 +182,7 @@ class AgentQueryRequest(BaseModel):
         """Limit prompt to reasonable word count"""
         word_count = len(v.split())
         if word_count > 2000:
-            raise ValueError(
-                f'Prompt too long. Maximum 2000 words allowed, '
-                f'got {word_count} words.'
-            )
+            raise ValueError(f'Prompt too long. Maximum 2000 words allowed, ' f'got {word_count} words.')
         return v
 
 
@@ -225,10 +222,10 @@ router = APIRouter(prefix="/api/agents", tags=["Agent Rental"])
 
 
 @router.get("/catalog")
-async def get_agents_catalog(user: Dict[str, Any] = Depends(get_current_user)) -> Dict[str, Any]:
+async def get_agents_catalog(user: Dict[str, Any] = Depends(get_current_user)) -> Dict[str, Any]:  # noqa
     """Get available agents catalog."""
     tier = user.get("tier", "free")
-    allowed_agents = TIER_LIMITS.get(tier, {}).get("agents_available", [])
+    allowed_agents = TIER_LIMITS.get(tier, {}).get("agents_available", [])  # noqa
 
     catalog = {
         agent_id: {
@@ -245,10 +242,10 @@ async def get_agents_catalog(user: Dict[str, Any] = Depends(get_current_user)) -
 async def query_agent(
     agent_id: str,
     request_data: AgentQueryRequest,
-    user: Dict[str, Any] = Depends(get_current_user),
+    user: Dict[str, Any] = Depends(get_current_user),  # noqa
 ) -> AgentResponse:
     """Query a specific agent with real Claude API integration."""
-    from backend.saas.usage_metering import UsageMeter
+    from backend.saas.usage_metering import UsageMeter  # noqa
 
     # Validate input formats
     if not VALID_AGENT_ID_PATTERN.match(agent_id):
@@ -299,9 +296,7 @@ Leverage your specialized knowledge to provide high-value responses."""
 
         # Extract response
         response_text = message.content[0].text if message.content else ""
-        tokens_used = (
-            message.usage.output_tokens if hasattr(message.usage, "output_tokens") else len(response_text.split())
-        )
+        tokens_used = message.usage.output_tokens if hasattr(message.usage, "output_tokens") else len(response_text.split())
         cost = agent_info["cost_per_call"]
 
         # Record usage
@@ -331,6 +326,7 @@ Leverage your specialized knowledge to provide high-value responses."""
     except Exception as e:
         # Use safe error responses to avoid information disclosure
         from backend.security_middleware import SafeErrorResponse
+
         status_code, error_response = SafeErrorResponse.sanitize_error(e, "agent_query_error")
         raise HTTPException(status_code=status_code, detail=error_response)
 
@@ -339,20 +335,20 @@ Leverage your specialized knowledge to provide high-value responses."""
 async def stream_agent(
     agent_id: str,
     request_data: AgentQueryRequest,
-    user: Dict[str, Any] = Depends(get_current_user),
+    user: Dict[str, Any] = Depends(get_current_user),  # noqa
 ):
     """Stream response from agent (Server-Sent Events)."""
     # TODO: Implement streaming with aiohttp
-    # For now, return endpoint stub
+    # For now, return endpoint stub  # noqa
     return {"status": "streaming_not_yet_implemented"}
 
 
 @router.get("/stats")
-async def get_agent_stats(user: Dict[str, Any] = Depends(get_current_user)) -> Dict[str, Any]:
+async def get_agent_stats(user: Dict[str, Any] = Depends(get_current_user)) -> Dict[str, Any]:  # noqa
     """Get agent usage statistics."""
     from backend.saas.usage_metering import UsageMeter
 
-    user_id = user.get("user_id")
+    user_id = user.get("user_id")  # noqa
     meter = UsageMeter()
     usage = meter.get_billing_period_usage(user_id)
 

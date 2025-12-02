@@ -1,18 +1,18 @@
-from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from pydantic import BaseModel
-from typing import Optional, Dict, Any
-import uvicorn
-import redis
+import io
 import json
-import jwt
 import os
 from datetime import datetime
-import io
-from pydub import AudioSegment
+from typing import Optional
+
+import jwt
+import redis
+import uvicorn
+from fastapi import Depends, FastAPI, File, HTTPException, UploadFile, status
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from google.cloud import speech, texttospeech
-import asyncio
+from pydantic import BaseModel
+from pydub import AudioSegment
 
 # Initialize FastAPI app
 app = FastAPI(title="Voice Processing Service")

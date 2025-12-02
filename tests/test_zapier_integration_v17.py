@@ -27,7 +27,27 @@ LOCAL_URL = "http://localhost:8000"
 TEST_URL = LOCAL_URL
 
 
-@pytest.mark.asyncio
+# Helper to check if server is running
+async def _is_server_available():
+    try:
+        async with httpx.AsyncClient(timeout=2.0) as client:
+            await client.get(f"{TEST_URL}/health")
+            return True
+    except (httpx.ConnectError, httpx.TimeoutException):
+        return False
+
+
+# Skip all integration tests if server is not available
+pytestmark = [
+    pytest.mark.integration,
+    pytest.mark.asyncio,
+    pytest.mark.skipif(
+        "not config.getoption('--run-integration')",
+        reason="Integration tests require --run-integration flag or running API server"
+    )
+]
+
+
 async def test_ucf_telemetry_endpoint():
     """Test GET /api/zapier/tables/ucf-telemetry"""
     async with httpx.AsyncClient() as client:
@@ -61,7 +81,6 @@ async def test_ucf_telemetry_endpoint():
         print(f"   System Status: {record.get('system_status', 'N/A')}")
 
 
-@pytest.mark.asyncio
 async def test_agent_network_endpoint():
     """Test GET /api/zapier/tables/agent-network"""
     async with httpx.AsyncClient() as client:
@@ -94,7 +113,6 @@ async def test_agent_network_endpoint():
         print(f"   Active Agents: {data['active_agents']}")
 
 
-@pytest.mark.asyncio
 async def test_emergency_alerts_endpoint():
     """Test GET /api/zapier/tables/emergency-alerts"""
     async with httpx.AsyncClient() as client:
@@ -127,7 +145,6 @@ async def test_emergency_alerts_endpoint():
         print(f"   Critical Events: {data['critical_events']}")
 
 
-@pytest.mark.asyncio
 async def test_trigger_event_endpoint():
     """Test POST /api/zapier/trigger-event"""
     async with httpx.AsyncClient() as client:
@@ -166,7 +183,6 @@ async def test_trigger_event_endpoint():
         print(f"   Next Action: {data['next_action']}")
 
 
-@pytest.mark.asyncio
 async def test_consciousness_update_endpoint():
     """Test POST /api/interface/consciousness/update"""
     async with httpx.AsyncClient() as client:
@@ -202,7 +218,6 @@ async def test_consciousness_update_endpoint():
         print(f"   System Status: {data['system_status']}")
 
 
-@pytest.mark.asyncio
 async def test_command_endpoint_ucf_boost():
     """Test POST /api/interface/command (ucf_boost)"""
     async with httpx.AsyncClient() as client:
@@ -232,7 +247,6 @@ async def test_command_endpoint_ucf_boost():
         print(f"   New Consciousness Level: {data['result']['new_consciousness_level']}")
 
 
-@pytest.mark.asyncio
 async def test_command_endpoint_system_reset():
     """Test POST /api/interface/command (system_reset)"""
     async with httpx.AsyncClient() as client:
@@ -260,7 +274,6 @@ async def test_command_endpoint_system_reset():
         print(f"   UCF reset to defaults")
 
 
-@pytest.mark.asyncio
 async def test_health_endpoint():
     """Test GET /health (verify system is operational)"""
     async with httpx.AsyncClient() as client:
