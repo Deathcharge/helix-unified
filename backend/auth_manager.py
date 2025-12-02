@@ -18,7 +18,8 @@ except ImportError:
     import base64
 
     CRYPTO_AVAILABLE = False
-    logging.warning("cryptography not available, using base64 encoding (NOT SECURE for production!)")
+    logging.error("CRITICAL: cryptography not available. HelixAuthManager is disabled.")
+
 
 
 class HelixAuthManager:
@@ -44,8 +45,7 @@ class HelixAuthManager:
             if CRYPTO_AVAILABLE:
                 key = Fernet.generate_key()
             else:
-                # Fallback: not secure!
-                key = base64.b64encode(b"helix_fallback_key_not_secure")
+                raise RuntimeError("CRITICAL: cryptography not available. Cannot generate secure key.")
             key_file.write_bytes(key)
             logging.info("Created new encryption key")
             return key
@@ -62,8 +62,7 @@ class HelixAuthManager:
         if CRYPTO_AVAILABLE and self.cipher_suite:
             encrypted_data = self.cipher_suite.encrypt(json.dumps(auth_data).encode())
         else:
-            # Fallback: base64 encoding (NOT SECURE!)
-            encrypted_data = base64.b64encode(json.dumps(auth_data).encode())
+            raise RuntimeError("CRITICAL: cryptography not available. Cannot securely store data.")
 
         auth_file = self.secrets_path / f"{platform}_auth.enc"
         auth_file.write_bytes(encrypted_data)
@@ -87,8 +86,7 @@ class HelixAuthManager:
             if CRYPTO_AVAILABLE and self.cipher_suite:
                 decrypted_data = self.cipher_suite.decrypt(encrypted_data)
             else:
-                # Fallback: base64 decoding
-                decrypted_data = base64.b64decode(encrypted_data)
+                raise RuntimeError("CRITICAL: cryptography not available. Cannot securely retrieve data.")
 
             auth_data = json.loads(decrypted_data.decode())
 

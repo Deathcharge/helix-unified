@@ -228,9 +228,9 @@ export default function NetiNetiHarmonyMantra() {
       const response = await fetch('https://elevenlabs-proxy-server-lipn.onrender.com/v1/music', {
         method: 'POST',
         headers: {
-          'customerId': 'cus_T5Rz3Ip4gsHeBy',
+          'customerId': process.env.NEXT_PUBLIC_ELEVENLABS_CUSTOMER_ID || '',
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer xxx'
+          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY || ''}`
         },
         body: JSON.stringify({
           composition_plan: compositionPlan,

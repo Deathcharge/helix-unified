@@ -635,6 +635,9 @@ async def on_ready() -> None:  # noqa: C901
         ('commands.monitoring_commands', 'Monitoring commands (status, health, discovery, storage, sync)'),
         ('commands.admin_commands', 'Admin commands (setup, webhooks, verify-setup, refresh, clean)'),
         ('commands.consciousness_commands_ext', 'Consciousness commands (consciousness, emotions, ethics, agent)'),
+        ('commands.portal_deployment_commands', 'Portal deployment commands (deploy, portal, join, leave)'),
+        ('commands.fun_minigames', 'Fun commands (8ball, horoscope, coinflip, wisdom, fortune, agent-advice)'),
+        ('commands.role_system', 'Role management (roles, subscribe, my-roles, setup-roles, setup-all-roles)'),
     ]
 
     for module_name, description in command_modules:
@@ -1236,6 +1239,7 @@ async def health_handler(request):
             "guilds": len(bot.guilds) if bot.is_ready() else 0,
         }
     )
+
 
 
 async def start_healthcheck_server():

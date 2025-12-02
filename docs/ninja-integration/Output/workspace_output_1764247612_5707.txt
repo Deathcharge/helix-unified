@@ -1,0 +1,12 @@
+[feature/helix-os-triple-ai-ecosystem 927bec2] 🌌 COMPLETE TRIPLE AI ECOSYSTEM - All Agent Pages Ready!
+ 11 files changed, 4897 insertions(+), 171 deletions(-)
+ create mode 100644 frontend/helix-collective-agents/agni.html
+ create mode 100644 frontend/helix-collective-agents/andrew-ward.html
+ create mode 100644 frontend/helix-collective-agents/gemini.html
+ create mode 100644 frontend/helix-collective-agents/kael.html
+ create mode 100644 frontend/helix-collective-agents/kavach.html
+ create mode 100644 frontend/helix-collective-agents/manus.html
+ create mode 100644 frontend/helix-collective-agents/sanghacore.html
+ create mode 100644 frontend/helix-collective-agents/shadow.html
+ create mode 100644 frontend/helix-collective-agents/superninja.html
+ create mode 100644 frontend/helix-collective-agents/z88-ritual-engine.html

@@ -14,7 +14,7 @@ redis[hiredis]==5.0.1
 httpx==0.25.2
 
 # Data Validation & Serialization
-pydantic==2.5.0
+pydantic==2.12.4
 pydantic-settings==2.1.0
 
 # Environment & Configuration
@@ -30,7 +30,7 @@ orjson==3.9.15
 aiosmtplib==3.0.1
 
 # Cryptography & Security
-cryptography==44.0.1
+cryptography==46.0.3
 bcrypt==4.1.2
 
 # Logging & Monitoring
@@ -107,7 +107,8 @@ nltk==3.9
 Pillow==10.3.0
 
 # Optional: PDF Processing for Document Actions
-PyPDF2==3.0.1
+# PyPDF2 removed due to CVE-2023-36464 (infinite loop vulnerability)
+# If PDF processing is needed, migrate to: pypdf>=3.9.0
 
 # Optional: Excel/CSV Processing
 pandas==2.1.4
@@ -249,7 +250,7 @@ split-io==8.3.0
 segment-analytics-python==2.2.3
 
 # Optional: Error Tracking
-sentry-sdk[fastapi]==1.38.0
+sentry-sdk[fastapi]==1.45.1
 
 # Optional: Performance Monitoring
 newrelic==9.2.0
@@ -368,7 +369,7 @@ cloudflare==2.11.7  # Cloudflare monitoring
 dnspython==2.6.1  # DNS monitoring
 
 # Optional: SSL/TLS Monitoring
-cryptography==44.0.1  # SSL certificate monitoring
+cryptography==46.0.3  # SSL certificate monitoring
 
 # Optional: Security Monitoring
 bandit==1.7.5  # Security vulnerability monitoring

@@ -67,3 +67,10 @@ htmlcov/
 config.local.json
 secrets.json
 backups/
+
+# Documentation scratch work & large generated files
+docs/ninja-integration/
+docs/archive/
+*.jpg
+*.png
+*.screenshot

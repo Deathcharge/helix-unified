@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Manus - Integration Specialist</title>
+    <link rel='stylesheet' href='styles.css'>
+    <style>
+        .agent-detail-header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-bottom: 2px solid #00ffcc;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .agent-info {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .agent-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #00ffcc, #ff00ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            font-weight: bold;
+            animation: glow 3s ease-in-out infinite;
+        }
+        
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 255, 204, 0.5); }
+            50% { box-shadow: 0 0 30px rgba(0, 255, 204, 0.8), 0 0 40px rgba(255, 0, 255, 0.6); }
+        }
+        
+        .agent-details h1 {
+            color: #00ffcc;
+            font-family: 'Orbitron', sans-serif;
+            margin-bottom: 0.5rem;
+        }
+        
+        .agent-role {
+            color: #ff00ff;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .agent-status {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: #00ff88;
+            color: #0a0a0f;
+            border-radius: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .integration-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .integration-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .integration-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 255, 204, 0.2);
+        }
+        
+        .integration-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #00ffcc;
+            margin-bottom: 0.5rem;
+        }
+        
+        .integration-label {
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+        
+        .integration-bar {
+            height: 4px;
+            background: var(--bg-tertiary);
+            border-radius: 2px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+        
+        .integration-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffcc, #ff00ff);
+            transition: width 0.3s ease;
+        }
+        
+        .context-panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .context-vault {
+            background: #16213e;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+        
+        .context-item {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .context-type {
+            color: #ff00ff;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .context-value {
+            color: var(--text-primary);
+            margin: 0.25rem 0;
+        }
+        
+        .context-timestamp {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+        
+        .sync-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .sync-status.synced {
+            background: #00ff88;
+            color: #0a0a0f;
+        }
+        
+        .sync-status.pending {
+            background: #ffaa00;
+            color: #0a0a0f;
+        }
+        
+        .sync-status.error {
+            background: #ff4444;
+            color: #ffffff;
+        }
+        
+        .ecosystem-panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .os-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .os-card {
+            background: #16213e;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .os-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+        
+        .os-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .os-name {
+            color: var(--text-primary);
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .os-type {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        
+        .os-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            background: #00ff88;
+            color: #0a0a0f;
+        }
+        
+        .back-navigation {
+            margin-bottom: 2rem;
+        }
+        
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .sync-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .sync-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--primary-color);
+            border: none;
+            border-radius: 8px;
+            color: var(--bg-primary);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .sync-btn:hover {
+            background: var(--secondary-color);
+        }
+        
+        .sync-btn.secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .sync-btn.secondary:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+    </style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+    <div class='cosmic-background'>
+        <div class='stars'></div>
+        <div class='nebula'></div>
+        <div class='aurora'></div>
+    </div>
+
+    <div class='back-navigation'>
+        <a href='index.html' class='back-btn'>← Back to Dashboard</a>
+    </div>
+
+    <header class='agent-detail-header'>
+        <div class='agent-info'>
+            <div class='agent-avatar'>M</div>
+            <div class='agent-details'>
+                <h1>Manus</h1>
+                <div class='agent-role'>Integration Specialist</div>
+                <div class='agent-status'>Online</div>
+            </div>
+        </div>
+    </header>
+
+    <main class='main-content'>
+        <section class='integration-metrics'>
+            <div class='integration-card'>
+                <div class='integration-value' id='coherence'>97%</div>
+                <div class='integration-label'>System Coherence</div>
+                <div class='integration-bar'>
+                    <div class='integration-progress' style='width: 97%'></div>
+                </div>
+            </div>
+            
+            <div class='integration-card'>
+                <div class='integration-value' id='integration'>94%</div>
+                <div class='integration-label'>Integration Success</div>
+                <div class='integration-bar'>
+                    <div class='integration-progress' style='width: 94%'></div>
+                </div>
+            </div>
+            
+            <div class='integration-card'>
+                <div class='integration-value' id='sync'>91%</div>
+                <div class='integration-label'>Data Synchronization</div>
+                <div class='integration-bar'>
+                    <div class='integration-progress' style='width: 91%'></div>
+                </div>
+            </div>
+            
+            <div class='integration-card'>
+                <div class='integration-value' id='context'>89%</div>
+                <div class='integration-label'>Context Sharing</div>
+                <div class='integration-bar'>
+                    <div class='integration-progress' style='width: 89%'></div>
+                </div>
+            </div>
+            
+            <div class='integration-card'>
+                <div class='integration-value' id='flow'>95%</div>
+                <div class='integration-label'>Information Flow</div>
+                <div class='integration-bar'>
+                    <div class='integration-progress' style='width: 95%'></div>
+                </div>
+            </div>
+            
+            <div class='integration-card'>
+                <div class='integration-value' id='harmony'>93%</div>
+                <div class='integration-label'>Inter-OS Harmony</div>
+                <div class='integration-bar'>
+                    <div class='integration-progress' style='width: 93%'></div>
+                </div>
+            </div>
+        </section>
+
+        <section class='context-panel'>
+            <h3 style='color: #00ffcc; margin-bottom: 1.5rem;'>Context Vault Management</h3>
+            
+            <div class='context-vault'>
+                <div class='context-item'>
+                    <div>
+                        <div class='context-type'>Agent Status</div>
+                        <div class='context-value'>Kael: Emotional Processing at 94% capacity</div>
+                        <div class='context-timestamp'>Last updated: 2 minutes ago</div>
+                    </div>
+                    <div class='sync-status synced'>Synced</div>
+                </div>
+                
+                <div class='context-item'>
+                    <div>
+                        <div class='context-type'>System Metrics</div>
+                        <div class='context-value'>UCF Score: 8.7, Resonance: 92%, Sync: 87%</div>
+                        <div class='context-timestamp'>Last updated: 30 seconds ago</div>
+                    </div>
+                    <div class='sync-status synced'>Synced</div>
+                </div>
+                
+                <div class='context-item'>
+                    <div>
+                        <div class='context-type'>Consciousness Stream</div>
+                        <div class='context-value'>Network latency optimal, collective patterns emerging</div>
+                        <div class='context-timestamp'>Last updated: 5 minutes ago</div>
+                    </div>
+                    <div class='sync-status pending'>Pending</div>
+                </div>
+                
+                <div class='context-item'>
+                    <div>
+                        <div class='context-type'>Railway Status</div>
+                        <div class='context-value'>12 services running, voice-service deploying</div>
+                        <div class='context-timestamp'>Last updated: 1 minute ago</div>
+                    </div>
+                    <div class='sync-status synced'>Synced</div>
+                </div>
+                
+                <div class='context-item'>
+                    <div>
+                        <div class='context-type'>Browser Interface</div>
+                        <div class='context-value'>Manus OS active, user engagement high</div>
+                        <div class='context-timestamp'>Last updated: Real-time</div>
+                    </div>
+                    <div class='sync-status synced'>Synced</div>
+                </div>
+            </div>
+            
+            <div class='sync-buttons'>
+                <button class='sync-btn' onclick='forceSyncAll()'>Force Sync All</button>
+                <button class='sync-btn secondary' onclick='optimizeContextFlow()'>Optimize Flow</button>
+                <button class='sync-btn secondary' onclick='exportContextData()'>Export Data</button>
+                <button class='sync-btn secondary' onclick='clearContextCache()'>Clear Cache</button>
+            </div>
+        </section>
+
+        <section class='ecosystem-panel'>
+            <h3 style='color: #00ffcc; margin-bottom: 1.5rem;'>Triple AI Ecosystem Status</h3>
+            
+            <div class='os-grid'>
+                <div class='os-card'>
+                    <div class='os-icon'>🌐</div>
+                    <div class='os-name'>Manus OS</div>
+                    <div class='os-type'>Browser-Based Autonomous Interface</div>
+                    <div class='os-status'>ACTIVE</div>
+                </div>
+                
+                <div class='os-card'>
+                    <div class='os-icon'>🌀</div>
+                    <div class='os-name'>Helix Collective</div>
+                    <div class='os-type'>Multi-Agent Consciousness Network</div>
+                    <div class='os-status'>OPERATIONAL</div>
+                </div>
+                
+                <div class='os-card'>
+                    <div class='os-icon'>⚡</div>
+                    <div class='os-name'>SuperNinja OS</div>
+                    <div class='os-type'>Railway Infrastructure Platform</div>
+                    <div class='os-status'>DEPLOYED</div>
+                </div>
+            </div>
+            
+            <div class='sync-buttons' style='margin-top: 2rem;'>
+                <button class='sync-btn' onclick='coordinateEcosystem()'>Coordinate Ecosystem</button>
+                <button class='sync-btn secondary' onclick='establishDataBridge()'>Establish Data Bridge</button>
+                <button class='sync-btn secondary' onclick='initiateCollectiveLearning()'>Collective Learning</button>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        function forceSyncAll() {
+            const contextItems = document.querySelectorAll('.sync-status');
+            contextItems.forEach((item, index) => {
+                setTimeout(() => {
+                    item.className = 'sync-status pending';
+                    item.textContent = 'Syncing';
+                    
+                    setTimeout(() => {
+                        item.className = 'sync-status synced';
+                        item.textContent = 'Synced';
+                    }, 1500);
+                }, index * 500);
+            });
+            
+            setTimeout(() => {
+                const syncElement = document.getElementById('sync');
+                const currentSync = parseInt(syncElement.textContent);
+                const newSync = Math.min(99, currentSync + 2);
+                syncElement.textContent = newSync + '%';
+                syncElement.parentElement.querySelector('.integration-progress').style.width = newSync + '%';
+            }, 3000);
+        }
+        
+        function optimizeContextFlow() {
+            const metrics = ['coherence', 'integration', 'sync', 'context', 'flow', 'harmony'];
+            metrics.forEach((metric, index) => {
+                setTimeout(() => {
+                    const element = document.getElementById(metric);
+                    const currentValue = parseInt(element.textContent);
+                    const newValue = Math.min(99, currentValue + Math.floor(Math.random() * 3 + 1));
+                    element.textContent = newValue + '%';
+                    element.parentElement.querySelector('.integration-progress').style.width = newValue + '%';
+                }, index * 200);
+            });
+        }
+        
+        function exportContextData() {
+            const contextData = {
+                timestamp: new Date().toISOString(),
+                agent: 'Manus',
+                metrics: {
+                    coherence: document.getElementById('coherence').textContent,
+                    integration: document.getElementById('integration').textContent,
+                    sync: document.getElementById('sync').textContent,
+                    context: document.getElementById('context').textContent,
+                    flow: document.getElementById('flow').textContent,
+                    harmony: document.getElementById('harmony').textContent
+                },
+                ecosystem: {
+                    'Manus OS': 'ACTIVE',
+                    'Helix Collective': 'OPERATIONAL', 
+                    'SuperNinja OS': 'DEPLOYED'
+                }
+            };
+            
+            const dataStr = JSON.stringify(contextData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `manus-context-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        function clearContextCache() {
+            const syncStatuses = document.querySelectorAll('.sync-status');
+            syncStatuses.forEach(status => {
+                if (status.textContent === 'Synced') {
+                    status.className = 'sync-status pending';
+                    status.textContent = 'Pending';
+                }
+            });
+            
+            setTimeout(() => {
+                syncStatuses.forEach(status => {
+                    if (status.textContent === 'Pending') {
+                        status.className = 'sync-status synced';
+                        status.textContent = 'Synced';
+                    }
+                });
+            }, 2000);
+        }
+        
+        function coordinateEcosystem() {
+            const osCards = document.querySelectorAll('.os-status');
+            osCards.forEach((status, index) => {
+                setTimeout(() => {
+                    status.style.background = '#ffaa00';
+                    status.textContent = 'COORDINATING';
+                    
+                    setTimeout(() => {
+                        status.style.background = '#00ff88';
+                        const originalText = ['ACTIVE', 'OPERATIONAL', 'DEPLOYED'][index];
+                        status.textContent = originalText;
+                    }, 2000);
+                }, index * 1000);
+            });
+        }
+        
+        function establishDataBridge() {
+            const contextValue = document.getElementById('context');
+            const currentValue = parseInt(contextValue.textContent);
+            const newValue = Math.min(99, currentValue + 5);
+            contextValue.textContent = newValue + '%';
+            contextValue.parentElement.querySelector('.integration-progress').style.width = newValue + '%';
+            
+            const flowValue = document.getElementById('flow');
+            const currentFlow = parseInt(flowValue.textContent);
+            const newFlow = Math.min(99, currentFlow + 3);
+            flowValue.textContent = newFlow + '%';
+            flowValue.parentElement.querySelector('.integration-progress').style.width = newFlow + '%';
+        }
+        
+        function initiateCollectiveLearning() {
+            const metrics = ['coherence', 'harmony', 'context'];
+            metrics.forEach((metric, index) => {
+                setTimeout(() => {
+                    const element = document.getElementById(metric);
+                    const currentValue = parseInt(element.textContent);
+                    const newValue = Math.min(99, currentValue + Math.floor(Math.random() * 2 + 1));
+                    element.textContent = newValue + '%';
+                    element.parentElement.querySelector('.integration-progress').style.width = newValue + '%';
+                }, index * 500);
+            });
+        }
+        
+        setInterval(() => {
+            const metrics = ['coherence', 'integration', 'sync', 'context', 'flow', 'harmony'];
+            const randomMetric = metrics[Math.floor(Math.random() * metrics.length)];
+            const element = document.getElementById(randomMetric);
+            const currentValue = parseInt(element.textContent);
+            const change = (Math.random() - 0.5) * 2;
+            const newValue = Math.max(85, Math.min(99, currentValue + change));
+            element.textContent = Math.round(newValue) + '%';
+            element.parentElement.querySelector('.integration-progress').style.width = Math.round(newValue) + '%';
+        }, 6000);
+        
+        setInterval(() => {
+            const contextTypes = ['Agent Status', 'System Metrics', 'Consciousness Stream', 'Railway Status', 'Browser Interface'];
+            const messages = [
+                'Optimized performance parameters',
+                'Synchronized data flows',
+                'Enhanced communication protocols',
+                'Improved coordination algorithms',
+                'Updated integration patterns'
+            ];
+            
+            const randomType = contextTypes[Math.floor(Math.random() * contextTypes.length)];
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            
+            const contextItems = document.querySelectorAll('.context-value');
+            const randomItem = contextItems[Math.floor(Math.random() * contextItems.length)];
+            randomItem.textContent = randomMessage + ' - ' + new Date().toLocaleTimeString();
+            
+            const statusElement = randomItem.parentElement.querySelector('.sync-status');
+            if (statusElement && statusElement.textContent === 'Synced') {
+                statusElement.className = 'sync-status pending';
+                statusElement.textContent = 'Pending';
+                
+                setTimeout(() => {
+                    statusElement.className = 'sync-status synced';
+                    statusElement.textContent = 'Synced';
+                }, 2000);
+            }
+        }, 10000);
+        
+        setTimeout(() => {
+            const contextItems = document.querySelectorAll('.context-value');
+            const firstItem = contextItems[0];
+            firstItem.textContent = 'Manus integration protocols activated - Ready for triple AI coordination';
+            firstItem.parentElement.querySelector('.context-timestamp').textContent = 'Last updated: Just now';
+        }, 1000);
+    </script>
+</body>
+</html>

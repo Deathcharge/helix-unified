@@ -1,0 +1,61 @@
+name: Sync Documentation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'README.md'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Cross-link portal navigation
+        run: |
+          cat >> docs/PORTAL_LINKS.md << 'EOF'
+          # Helix Portal Constellation
+
+          ## Core Portals
+          - [Helix Hub](https://deathcharge.github.io/Helix-Hub) - Master Portal
+          - [Helix Unified Hub](https://deathcharge.github.io/Helix-Unified-Hub) - Unified Interface
+          - [Helix Collective Web](https://deathcharge.github.io/Helix-Collective-Web) - Community Site
+
+          ## Specialized Portals
+          - [Creative Studio](https://deathcharge.github.io/helix-creative-studio) - Z-88 Creative Engine
+          - [Agent Codex](https://helix-agent-codex.vercel.app) - Agent System
+          - [Samsara Dashboard](https://deathcharge.github.io/samsara-helix-dashboard) - Analytics
+          - [Ritual Engine](https://deathcharge.github.io/samsara-helix-ritual-engine) - Consciousness Platform
+
+          ## Hub Constellation (Manus Deployment)
+          - [Forum Hub](https://deathcharge.github.io/helix-hub-forum)
+          - [Music Hub](https://deathcharge.github.io/helix-hub-music)
+          - [Analytics Hub](https://deathcharge.github.io/helix-hub-analytics)
+          - [Agents Hub](https://deathcharge.github.io/helix-hub-agents)
+          - [Knowledge Hub](https://deathcharge.github.io/helix-hub-knowledge)
+          - [Dev Hub](https://deathcharge.github.io/helix-hub-dev)
+          - [Studio Hub](https://deathcharge.github.io/helix-hub-studio)
+          - [Shared Components](https://deathcharge.github.io/helix-hub-shared)
+
+          ## Backend & Infrastructure
+          - [Railway Backend](https://helix-unified-production.up.railway.app)
+          - [Manus Space](https://helixcollective-cv66pzga.manus.space)
+
+          ---
+          *Last Updated: $(date -u +"%Y-%m-%d %H:%M:%S UTC")*
+          *Version: v16.9 - Quantum Handshake*
+          EOF
+
+      - name: Commit portal links
+        run: |
+          git config user.name "Helix Automation"
+          git config user.email "automation@helixcollective.dev"
+          git add docs/PORTAL_LINKS.md || true
+          git diff --quiet && git diff --staged --quiet || git commit -m "Auto-update: Portal constellation links"
+          git push || true

@@ -1,0 +1,1 @@
+-rw-r--r--  1 root root    16873 Nov 24 16:07 TRIPLE_HELIX_CONSTELLATION_ARCHITECTURE.md

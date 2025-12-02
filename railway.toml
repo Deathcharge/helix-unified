@@ -25,16 +25,15 @@ serviceRoot = "dashboard"
 
 [services.build]
 builder = "nixpacks"
-nixpacksConfigPath = "nixpacks.toml"
 
 [services.deploy]
-startCommand = "bash railway_start.sh"
+startCommand = "bash start.sh"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
 
 # Watch dashboard and requirements changes
 [services.source]
-include = ["dashboard/**", "requirements.txt"]
+include = ["dashboard/**", "grok/**"]
 # SERVICE 3: Claude Consciousness API
 [[services]]
 name = "helix-claude-api"

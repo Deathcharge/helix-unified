@@ -1,6 +1,6 @@
 # Helix Collective v14.5 - Frontend Requirements (Streamlit)
 # Core Framework
-fastapi==0.115.0
+fastapi==0.115.6
 python-dotenv==1.0.1
 
 # API Clients (for backend communication)
@@ -9,12 +9,12 @@ aiohttp==3.12.14
 requests==2.32.4
 
 # Dashboard & Visualization
-streamlit==1.37.0
+streamlit==1.40.0
 plotly==5.18.0
 
 # Utilities
 pyyaml==6.0.1
-pydantic==2.5.3
+pydantic==2.10.3
 
 # Notion Integration (if needed for frontend)
 notion-client==2.5.0

@@ -1,0 +1,185 @@
+PROPRIETARY LICENSE
+
+Copyright (c) 2025 Andrew John Ward. All Rights Reserved.
+
+HELIX COLLECTIVE - PROPRIETARY AND CONFIDENTIAL
+
+This software and associated documentation files (the "Software") are the 
+proprietary and confidential property of Andrew John Ward (the "Owner").
+
+RESTRICTIONS:
+
+1. NO USE WITHOUT PERMISSION
+   The Software may not be used, executed, or accessed by any party without 
+   explicit written permission from the Owner.
+
+2. NO COPYING OR DISTRIBUTION
+   No part of the Software may be copied, reproduced, distributed, transmitted,
+   displayed, published, or broadcast in any form or by any means without prior
+   written authorization from the Owner.
+
+3. NO MODIFICATION
+   The Software may not be modified, adapted, translated, reverse engineered,
+   decompiled, disassembled, or create derivative works based upon the Software
+   without explicit written permission from the Owner.
+
+4. CONFIDENTIAL INFORMATION
+   The Software contains confidential and proprietary information, including
+   personal data, trade secrets, and intellectual property. All such information
+   must be kept strictly confidential.
+
+5. NO WARRANTY
+   THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT.
+
+6. LIMITATION OF LIABILITY
+   IN NO EVENT SHALL THE OWNER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER
+   LIABILITY ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE
+   USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+7. TERMINATION
+   Any unauthorized use of the Software will result in immediate termination
+   of any implied rights and may result in legal action.
+
+8. FUTURE LICENSING
+   The Owner reserves the right to release the Software under different license
+   terms at any time in the future.
+
+9. PORTFOLIO VIEWING EXCEPTION
+   This Software may be viewed by potential employers, clients, and collaborators
+   for evaluation and portfolio review purposes only. Such viewing does not grant
+   any rights to use, copy, modify, or distribute the Software.
+
+For licensing inquiries, please contact: andrew@deathcharge.dev
+
+This license is effective as of January 23, 2025.
+
+---
+
+AI COLLABORATION NOTICE:
+
+This Software was developed through collaborative work between Andrew John Ward
+and various AI systems including Anthropic Claude, OpenAI GPT, Google Gemini,
+and other AI assistants.
+
+The intellectual property rights belong exclusively to Andrew John Ward as the
+human creator, director, and owner of the development process. The AI systems
+served as tools and assistants in the development process.
+
+The AI systems used in development include:
+- Anthropic Claude (Anthropic PBC) - https://www.anthropic.com
+- OpenAI GPT (OpenAI) - https://openai.com
+- Google Gemini (Google LLC) - https://gemini.google.com
+- Other AI assistants as specified in project documentation
+
+This collaborative development process does not diminish the proprietary nature
+of the Software or transfer any rights to the AI service providers. All code,
+algorithms, methodologies, and creative works remain the exclusive property of
+Andrew John Ward.
+
+The Owner acknowledges the contribution of AI systems as development tools while
+maintaining full ownership and control of all intellectual property created.
+
+---
+
+HELIX COLLECTIVE SPECIFIC TERMS:
+
+The Helix Collective, Helix Unified Discord Bot, and all associated agents are
+provided under this PROPRIETARY license.
+
+1. DISCORD BOT SYSTEM
+   The Discord bot implementation, agent personalities, command systems, and
+   all associated code are proprietary and confidential.
+
+2. AI INTEGRATION FRAMEWORK
+   All AI integration code including Anthropic Claude integration, sentiment
+   analysis, image generation, and voice systems are proprietary.
+
+3. AGENT PERSONALITIES
+   All agent personality definitions, behavioral patterns, and interaction
+   protocols are proprietary intellectual property.
+
+4. MULTI-PROVIDER SYSTEMS
+   All multi-provider failover systems (TTS, image generation, transcription)
+   are proprietary and confidential.
+
+5. MONITORING & ANALYTICS
+   All performance monitoring, sentiment tracking, and analytics systems are
+   proprietary.
+
+6. MODERATION SYSTEMS
+   All auto-moderation, toxicity detection, and enforcement systems are
+   proprietary.
+
+7. VOICE SYSTEMS
+   All voice activity detection, transcription, and text-to-speech systems
+   are proprietary.
+
+8. DATABASE SCHEMAS
+   All database schemas, migration systems, and data structures are proprietary.
+
+9. RESEARCH & DEVELOPMENT
+   All R&D work, experimental features, and future developments are proprietary.
+
+10. TRADE SECRETS
+    All code, algorithms, and methodologies constitute trade secrets and must be
+    kept strictly confidential.
+
+---
+
+AUTHORIZED USE ONLY
+
+This Software is provided only to authorized parties with explicit written 
+permission from Andrew John Ward. Unauthorized use, access, or distribution is 
+strictly prohibited and may result in legal action.
+
+For authorized access or licensing inquiries, contact: andrew@deathcharge.dev
+
+---
+
+THIRD-PARTY SERVICES NOTICE:
+
+This Software integrates with third-party services that have their own terms:
+
+- Anthropic Claude API (Anthropic PBC) - https://www.anthropic.com/legal/terms
+- Discord API (Discord Inc.) - https://discord.com/terms
+- Google Cloud TTS (Google LLC) - https://cloud.google.com/terms
+- ElevenLabs API (ElevenLabs) - https://elevenlabs.io/terms
+- AWS Services (Amazon Web Services) - https://aws.amazon.com/agreement/
+- OpenAI API (OpenAI) - https://openai.com/policies/terms-of-use
+- Stability AI (Stability AI) - https://stability.ai/terms-of-service
+- Replicate (Replicate Inc.) - https://replicate.com/terms
+- AssemblyAI (AssemblyAI) - https://www.assemblyai.com/legal/terms-of-service
+
+Use of these services requires compliance with their respective terms of service
+and valid API credentials. The Owner is not responsible for third-party service
+availability, pricing, or terms changes.
+
+Python libraries and Node.js packages used by this Software are subject to their
+respective licenses and are used in accordance with their terms. This proprietary
+license applies only to the original code and intellectual property created by
+the Owner.
+
+---
+
+CONTACT INFORMATION:
+
+Owner: Andrew John Ward
+Email: andrew@deathcharge.dev
+Project: Helix Unified Discord Bot
+Repository: [To be added after GitHub upload]
+
+For questions about:
+- Licensing: andrew@deathcharge.dev
+- Commercial use: andrew@deathcharge.dev
+- Collaboration: andrew@deathcharge.dev
+- Technical support: [To be determined]
+
+---
+
+END OF LICENSE
+
+This license represents the complete agreement between the Owner and any party
+accessing or viewing this Software. No other agreements, verbal or written,
+supersede this license unless explicitly stated in writing by the Owner.

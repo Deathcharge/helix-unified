@@ -1,0 +1,19 @@
+On branch feature/helix-os-triple-ai-ecosystem
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+	new file:   frontend/helix-collective-agents/agni.html
+	new file:   frontend/helix-collective-agents/andrew-ward.html
+	new file:   frontend/helix-collective-agents/gemini.html
+	modified:   frontend/helix-collective-agents/index.html
+	new file:   frontend/helix-collective-agents/kael.html
+	new file:   frontend/helix-collective-agents/kavach.html
+	new file:   frontend/helix-collective-agents/manus.html
+	new file:   frontend/helix-collective-agents/sanghacore.html
+	new file:   frontend/helix-collective-agents/shadow.html
+	new file:   frontend/helix-collective-agents/superninja.html
+	new file:   frontend/helix-collective-agents/z88-ritual-engine.html
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	helix-unified-fresh/
+
