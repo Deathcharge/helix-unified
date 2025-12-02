@@ -17,6 +17,23 @@ from discord.ext import commands
 sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
 
 
+def pytest_addoption(parser):
+    """Add custom command line options for pytest."""
+    parser.addoption(
+        "--run-integration",
+        action="store_true",
+        default=False,
+        help="Run integration tests that require external services (API server, databases, etc.)"
+    )
+
+
+def pytest_configure(config):
+    """Register custom markers."""
+    config.addinivalue_line(
+        "markers", "integration: Integration tests requiring external services"
+    )
+
+
 @pytest.fixture(scope="session")
 def event_loop():
     """Create event loop for async tests."""
