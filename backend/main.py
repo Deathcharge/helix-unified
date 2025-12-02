@@ -26,7 +26,7 @@ from fastapi import (
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
-
+from urllib.parse import urlparse
 # Import centralized logging configuration
 from logging_config import setup_logging
 from mandelbrot_ucf import (
@@ -2399,6 +2399,17 @@ async def test_zapier_webhook(webhook_url: str) -> Dict[str, Any]:
     Returns:
         Success/failure status with response details
     """
+    # Only allow requests to these specific Zapier webhook URLs (allowlist)
+    ZAPIER_WEBHOOK_ALLOWLIST = {
+        "https://hooks.zapier.com/hooks/catch/25075191/usnjj5t/",
+        "https://hooks.zapier.com/hooks/catch/25075191/usvyi7e/",
+        "https://hooks.zapier.com/hooks/catch/25075191/usxiwfg/",
+    }
+    if webhook_url not in ZAPIER_WEBHOOK_ALLOWLIST:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid or unauthorized webhook_url."
+        )
     try:
         # Create test payload
         test_payload = {
