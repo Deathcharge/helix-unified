@@ -2949,7 +2949,7 @@ async def consciousness_health():
 
     except Exception as e:
         logger.error(f"Health check error: {str(e)}")
-        return {"status": "error", "error": str(e), "timestamp": datetime.now().isoformat()}
+        return {"status": "error", "error": "An internal error has occurred.", "timestamp": datetime.now().isoformat()}
 
 
 @app.post("/api/ucf/events")
