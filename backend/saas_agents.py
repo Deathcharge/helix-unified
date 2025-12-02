@@ -22,13 +22,10 @@ Author: Claude (Manus Validator)
 Date: 2025-11-30
 """
 
-import anthropic
-import openai
-from typing import Dict, Any, Optional, List, Literal
+from typing import Dict, Any, Optional, List
 from pydantic import BaseModel, Field
 from fastapi import HTTPException
 import time
-import os
 from backend.saas_auth import Database, track_usage
 from backend.saas_router import calculate_cost, route_to_best_model, call_anthropic, call_openai
 
@@ -59,9 +56,8 @@ When generating documentation:
 Always format code blocks properly and use clear headings.""",
         "model_preference": "claude-3-sonnet-20240229",
         "tier_restriction": None,
-        "tasks": ["document", "explain", "tutorial", "analyze", "review"]
+        "tasks": ["document", "explain", "tutorial", "analyze", "review"],
     },
-
     "oracle": {
         "name": "Oracle",
         "specialization": "Analysis & Patterns",
@@ -84,9 +80,8 @@ When analyzing data:
 Be precise, data-driven, and insight-focused.""",
         "model_preference": "gpt-4-turbo-2024-04-09",
         "tier_restriction": "pro",
-        "tasks": ["analyze", "pattern", "trend", "predict", "insight"]
+        "tasks": ["analyze", "pattern", "trend", "predict", "insight"],
     },
-
     "lumina": {
         "name": "Lumina",
         "specialization": "Research & Synthesis",
@@ -109,9 +104,8 @@ When synthesizing information:
 Be thorough, balanced, and well-structured.""",
         "model_preference": "claude-3-opus-20240229",
         "tier_restriction": "pro",
-        "tasks": ["research", "synthesize", "summarize", "report", "review"]
+        "tasks": ["research", "synthesize", "summarize", "report", "review"],
     },
-
     "shadow": {
         "name": "Shadow",
         "specialization": "Deep Analysis",
@@ -134,9 +128,8 @@ When performing deep analysis:
 Be provocative, insightful, and thorough.""",
         "model_preference": "gpt-4-turbo-2024-04-09",
         "tier_restriction": "pro",
-        "tasks": ["analyze", "critique", "implications", "assumptions", "consequences"]
+        "tasks": ["analyze", "critique", "implications", "assumptions", "consequences"],
     },
-
     "agni": {
         "name": "Agni",
         "specialization": "Data Transformation",
@@ -159,9 +152,8 @@ When transforming data:
 Be precise, efficient, and thorough.""",
         "model_preference": "claude-3-haiku-20240307",
         "tier_restriction": None,
-        "tasks": ["transform", "convert", "clean", "extract", "generate"]
+        "tasks": ["transform", "convert", "clean", "extract", "generate"],
     },
-
     "vega": {
         "name": "Vega",
         "specialization": "Creative Ideation",
@@ -184,9 +176,8 @@ When generating ideas:
 Be bold, creative, and expansive.""",
         "model_preference": "gpt-3.5-turbo-0125",
         "tier_restriction": None,
-        "tasks": ["ideate", "brainstorm", "create", "innovate", "story"]
+        "tasks": ["ideate", "brainstorm", "create", "innovate", "story"],
     },
-
     "echo": {
         "name": "Echo",
         "specialization": "Communication & Copywriting",
@@ -209,9 +200,8 @@ When writing copy:
 Be persuasive, clear, and engaging.""",
         "model_preference": "claude-3-sonnet-20240229",
         "tier_restriction": None,
-        "tasks": ["write", "copy", "email", "social", "edit"]
+        "tasks": ["write", "copy", "email", "social", "edit"],
     },
-
     "phoenix": {
         "name": "Phoenix",
         "specialization": "Problem Solving",
@@ -234,9 +224,8 @@ When solving problems:
 Be systematic, thorough, and solution-oriented.""",
         "model_preference": "gpt-4-turbo-2024-04-09",
         "tier_restriction": "pro",
-        "tasks": ["debug", "solve", "optimize", "fix", "troubleshoot"]
+        "tasks": ["debug", "solve", "optimize", "fix", "troubleshoot"],
     },
-
     "manus": {
         "name": "Manus",
         "specialization": "Meta-Coordination",
@@ -259,16 +248,18 @@ When coordinating:
 Be strategic, organized, and comprehensive.""",
         "model_preference": "claude-3-opus-20240229",
         "tier_restriction": "pro",
-        "tasks": ["coordinate", "orchestrate", "plan", "integrate", "manage"]
-    }
+        "tasks": ["coordinate", "orchestrate", "plan", "integrate", "manage"],
+    },
 }
 
 # ============================================================================
 # PYDANTIC MODELS
 # ============================================================================
 
+
 class AgentExecutionRequest(BaseModel):
     """Agent execution request"""
+
     task: str  # Task type (analyze, document, etc.)
     input: str  # Input data/prompt
     context: Optional[Dict[str, Any]] = None  # Additional context
@@ -276,8 +267,10 @@ class AgentExecutionRequest(BaseModel):
     temperature: float = Field(default=0.7, ge=0.0, le=2.0)
     max_tokens: int = Field(default=2000, ge=100, le=4096)
 
+
 class AgentExecutionResponse(BaseModel):
     """Agent execution response"""
+
     agent_id: str
     agent_name: str
     task: str
@@ -288,8 +281,10 @@ class AgentExecutionResponse(BaseModel):
     execution_time_ms: int
     quality_score: Optional[int] = None
 
+
 class AgentInfo(BaseModel):
     """Agent information"""
+
     id: str
     name: str
     specialization: str
@@ -298,15 +293,13 @@ class AgentInfo(BaseModel):
     available_tasks: List[str]
     model_preference: str
 
+
 # ============================================================================
 # AGENT EXECUTION
 # ============================================================================
 
-async def execute_agent(
-    agent_id: str,
-    request: AgentExecutionRequest,
-    user: Dict[str, Any]
-) -> AgentExecutionResponse:
+
+async def execute_agent(agent_id: str, request: AgentExecutionRequest, user: Dict[str, Any]) -> AgentExecutionResponse:
     """
     Execute an AI agent
 
@@ -337,14 +330,14 @@ async def execute_agent(
         if user_tier_level < required_tier_level:
             raise HTTPException(
                 status_code=403,
-                detail=f"Agent '{agent['name']}' requires '{agent['tier_restriction']}' tier or higher. Upgrade at https://helixcollective.io/pricing"
+                detail=f"Agent '{agent['name']}' requires '{agent['tier_restriction']}' tier or higher. Upgrade at https://helixcollective.io/pricing",  # noqa
             )
 
     # Validate task type
     if request.task not in agent["tasks"]:
         raise HTTPException(
             status_code=400,
-            detail=f"Task '{request.task}' not supported by {agent['name']}. Supported tasks: {', '.join(agent['tasks'])}"
+            detail=f"Task '{request.task}' not supported by {agent['name']}. Supported tasks: {', '.join(agent['tasks'])}",
         )
 
     # Build prompt
@@ -371,25 +364,17 @@ Input:
 
     # Build messages
     from backend.saas_router import Message
-    messages = [
-        Message(role="system", content=agent["system_prompt"]),
-        Message(role="user", content=prompt)
-    ]
+
+    messages = [Message(role="system", content=agent["system_prompt"]), Message(role="user", content=prompt)]
 
     # Call LLM
     if provider == "anthropic":
         result = await call_anthropic(
-            model=model,
-            messages=messages,
-            temperature=request.temperature,
-            max_tokens=request.max_tokens
+            model=model, messages=messages, temperature=request.temperature, max_tokens=request.max_tokens
         )
     elif provider == "openai":
         result = await call_openai(
-            model=model,
-            messages=messages,
-            temperature=request.temperature,
-            max_tokens=request.max_tokens
+            model=model, messages=messages, temperature=request.temperature, max_tokens=request.max_tokens
         )
     else:
         raise HTTPException(status_code=500, detail=f"Unknown provider: {provider}")
@@ -409,7 +394,7 @@ Input:
         tokens_output=result["usage"]["output_tokens"],
         cost_usd=cost_usd,
         response_time_ms=execution_time_ms,
-        status_code=200
+        status_code=200,
     )
 
     # Record agent execution
@@ -428,7 +413,7 @@ Input:
         model,
         result["usage"]["total_tokens"],
         cost_usd,
-        execution_time_ms
+        execution_time_ms,
     )
 
     # Update agent stats
@@ -438,7 +423,7 @@ Input:
         SET execution_count = execution_count + 1
         WHERE id = $1
         """,
-        agent_id
+        agent_id,
     )
 
     return AgentExecutionResponse(
@@ -449,12 +434,14 @@ Input:
         model_used=model,
         tokens_used=result["usage"]["total_tokens"],
         cost_usd=cost_usd,
-        execution_time_ms=execution_time_ms
+        execution_time_ms=execution_time_ms,
     )
+
 
 # ============================================================================
 # AGENT DISCOVERY
 # ============================================================================
+
 
 def list_agents(tier: str = "free") -> List[AgentInfo]:
     """
@@ -477,17 +464,20 @@ def list_agents(tier: str = "free") -> List[AgentInfo]:
             if user_tier_level < required_tier_level:
                 continue  # Skip this agent
 
-        agents.append(AgentInfo(
-            id=agent_id,
-            name=agent_data["name"],
-            specialization=agent_data["specialization"],
-            description=agent_data["description"],
-            tier_restriction=agent_data["tier_restriction"],
-            available_tasks=agent_data["tasks"],
-            model_preference=agent_data["model_preference"]
-        ))
+        agents.append(
+            AgentInfo(
+                id=agent_id,
+                name=agent_data["name"],
+                specialization=agent_data["specialization"],
+                description=agent_data["description"],
+                tier_restriction=agent_data["tier_restriction"],
+                available_tasks=agent_data["tasks"],
+                model_preference=agent_data["model_preference"],
+            )
+        )
 
     return agents
+
 
 def get_agent_info(agent_id: str) -> Optional[AgentInfo]:
     """
@@ -510,12 +500,14 @@ def get_agent_info(agent_id: str) -> Optional[AgentInfo]:
         description=agent_data["description"],
         tier_restriction=agent_data["tier_restriction"],
         available_tasks=agent_data["tasks"],
-        model_preference=agent_data["model_preference"]
+        model_preference=agent_data["model_preference"],
     )
+
 
 # ============================================================================
 # AGENT ANALYTICS
 # ============================================================================
+
 
 async def get_agent_stats(agent_id: str) -> Optional[Dict[str, Any]]:
     """
@@ -542,7 +534,7 @@ async def get_agent_stats(agent_id: str) -> Optional[Dict[str, Any]]:
         FROM agent_executions
         WHERE agent_id = $1 AND status = 'success'
         """,
-        agent_id
+        agent_id,
     )
 
     # Get task distribution
@@ -554,7 +546,7 @@ async def get_agent_stats(agent_id: str) -> Optional[Dict[str, Any]]:
         GROUP BY task_type
         ORDER BY count DESC
         """,
-        agent_id
+        agent_id,
     )
 
     return {
@@ -565,8 +557,9 @@ async def get_agent_stats(agent_id: str) -> Optional[Dict[str, Any]]:
         "avg_cost_usd": round(stats["avg_cost_usd"], 6) if stats and stats["avg_cost_usd"] else 0,
         "total_tokens_used": stats["total_tokens_used"] if stats else 0,
         "total_cost_usd": round(stats["total_cost_usd"], 4) if stats and stats["total_cost_usd"] else 0,
-        "task_distribution": [dict(row) for row in task_distribution]
+        "task_distribution": [dict(row) for row in task_distribution],
     }
+
 
 async def get_user_agent_history(user_id: str, limit: int = 20) -> List[Dict[str, Any]]:
     """
@@ -589,7 +582,7 @@ async def get_user_agent_history(user_id: str, limit: int = 20) -> List[Dict[str
         LIMIT $2
         """,
         user_id,
-        limit
+        limit,
     )
 
     return [dict(execution) for execution in executions]

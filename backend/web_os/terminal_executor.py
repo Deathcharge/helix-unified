@@ -5,13 +5,14 @@ Supports: ls, pwd, cd, cat, mkdir, rm, and basic shell operations
 With security sandbox to prevent dangerous operations
 """
 
-import os
 import logging
+import os
 import re
-import shlex
-from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any, Dict, List
+
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 logger = logging.getLogger(__name__)
 
@@ -122,7 +123,7 @@ class TerminalExecutor:
         # Check for null bytes (security bypass attempt)
         if '\0' in path:
             logger.warning(f"Null byte detected in path: {repr(path)}")
-            return False, f"❌ Invalid path: null byte detected"
+            return False, f"❌ Invalid path: null byte detected"  # noqa
 
         # Normalize path to prevent traversal
         path = os.path.normpath(path)
@@ -151,7 +152,7 @@ class TerminalExecutor:
                 real_path = os.path.realpath(abs_path)
                 if not real_path.startswith(self.home_dir):
                     logger.warning(f"Symlink points outside sandbox: {abs_path} -> {real_path}")
-                    return False, f"❌ Symlink points outside sandbox"
+                    return False, f"❌ Symlink points outside sandbox"  # noqa
         except (OSError, RuntimeError):
             return False, f"❌ Invalid path: {path}"
 
@@ -408,7 +409,6 @@ class TerminalExecutor:
 # FASTAPI INTEGRATION
 # ============================================================================
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, HTTPException
 
 router = APIRouter(prefix='/api/web-os', tags=['Web OS'])
 
@@ -438,6 +438,7 @@ async def websocket_terminal(websocket: WebSocket):
     # Verify token
     try:
         from backend.saas.auth_service import TokenManager
+
         payload = TokenManager.verify_token(token)
         if not payload:
             await websocket.close(code=1008, reason="Invalid or expired token")
@@ -491,7 +492,7 @@ async def websocket_terminal(websocket: WebSocket):
         logger.error(f"❌ Terminal error: {e}")
         try:
             await websocket.send_json({'error': 'Internal server error'})
-        except:
+        except BaseException:
             pass  # Connection might be closed
 
 

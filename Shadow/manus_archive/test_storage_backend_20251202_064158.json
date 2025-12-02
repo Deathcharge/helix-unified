@@ -1,0 +1,10 @@
+{
+  "test": "multi-backend storage",
+  "timestamp": "2025-12-02T06:41:58.431188",
+  "backends": [
+    "nextcloud",
+    "mega",
+    "local"
+  ],
+  "ucf_harmony": 0.618
+}

@@ -119,9 +119,7 @@ class BillingCalculator:
     }
 
     @staticmethod
-    def calculate_overage_charges(
-        tier: str, api_calls_used: int
-    ) -> Dict[str, Any]:
+    def calculate_overage_charges(tier: str, api_calls_used: int) -> Dict[str, Any]:
         """Calculate overage charges for API calls."""
         pricing = BillingCalculator.PRICING.get(tier, {})
 
@@ -179,9 +177,7 @@ class BillingAccumulator:
         self.billing_file = Path("Helix/state/saas_billing.jsonl")
         self.billing_file.parent.mkdir(parents=True, exist_ok=True)
 
-    async def generate_monthly_invoice(
-        self, user_id: str, email: str, tier: str
-    ) -> Dict[str, Any]:
+    async def generate_monthly_invoice(self, user_id: str, email: str, tier: str) -> Dict[str, Any]:
         """Generate monthly invoice based on usage."""
         # Get usage for billing period
         usage = self.meter.get_billing_period_usage(user_id)

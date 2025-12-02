@@ -7,15 +7,16 @@ Endpoints:
 - GET /api/ucf - Get current UCF state
 - POST /api/ritual - Trigger a ritual
 """
-import uuid
+
 import logging
+import uuid
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException
+from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 
-from backend.web_chat_server import connection_manager, AGENT_PERSONALITIES
+from backend.web_chat_server import AGENT_PERSONALITIES, connection_manager
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +26,7 @@ router = APIRouter()
 # ============================================================================
 # PYDANTIC MODELS
 # ============================================================================
+
 
 class RitualRequest(BaseModel):
     ritual_type: str = "daily"
@@ -39,6 +41,7 @@ class AgentChatRequest(BaseModel):
 # ============================================================================
 # WEBSOCKET ENDPOINT
 # ============================================================================
+
 
 @router.websocket("/ws/chat/{session_id}")
 async def websocket_chat_endpoint(websocket: WebSocket, session_id: str, username: str = "Anonymous"):
@@ -61,7 +64,7 @@ async def websocket_chat_endpoint(websocket: WebSocket, session_id: str, usernam
             if len(str(data)) > MAX_MESSAGE_SIZE:
                 await websocket.send_json({
                     "error": "Message too large",
-                    "detail": f"Maximum message size is 1MB"
+                    "detail": f"Maximum message size is 1MB"  # noqa
                 })
                 continue
 
@@ -80,19 +83,22 @@ async def websocket_chat_endpoint(websocket: WebSocket, session_id: str, usernam
 # REST API ENDPOINTS
 # ============================================================================
 
+
 @router.get("/api/agents")
 async def list_agents():
     """Get list of all available agents with their personalities."""
     agents = []
     for agent_id, agent_data in AGENT_PERSONALITIES.items():
-        agents.append({
-            "id": agent_id,
-            "name": agent_data["name"],
-            "emoji": agent_data["emoji"],
-            "color": agent_data["color"],
-            "personality": agent_data["personality"],
-            "greeting": agent_data["greeting"],
-        })
+        agents.append(
+            {
+                "id": agent_id,
+                "name": agent_data["name"],
+                "emoji": agent_data["emoji"],
+                "color": agent_data["color"],
+                "personality": agent_data["personality"],
+                "greeting": agent_data["greeting"],
+            }
+        )
 
     return {
         "agents": agents,
@@ -128,12 +134,14 @@ async def trigger_ritual(request: RitualRequest):
     ritual_type = request.ritual_type
 
     # Broadcast to all connected clients
-    await connection_manager.broadcast({
-        "type": "ritual_triggered",
-        "ritual_type": ritual_type,
-        "triggered_by": "web_api",
-        "timestamp": datetime.utcnow().isoformat(),
-    })
+    await connection_manager.broadcast(
+        {
+            "type": "ritual_triggered",
+            "ritual_type": ritual_type,
+            "triggered_by": "web_api",
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+    )
 
     return {
         "success": True,
@@ -157,7 +165,7 @@ async def get_web_chat_stats():
                 "selected_agent": session.get("selected_agent"),
             }
             for session in connection_manager.user_sessions.values()
-        ]
+        ],
     }
 
 

@@ -13,14 +13,13 @@ Author: Claude (Automation)
 Version: 17.1.0
 """
 
-import asyncio
 import functools
 import json
 import logging
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Set
+from typing import Any, Callable, Dict, List, Optional
 
 import discord
 from discord.ext import commands
@@ -386,7 +385,7 @@ async def get_command_help(command_name: str) -> Optional[str]:
         help_text += f"📝 **Aliases**: {', '.join(metadata.aliases)}\n"
 
     if metadata.examples:
-        help_text += f"💡 **Examples**:\n"
+        help_text += f"💡 **Examples**:\n"  # noqa
         for ex in metadata.examples:
             help_text += f"  `{ex}`\n"
 

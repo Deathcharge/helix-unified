@@ -6,10 +6,10 @@ Browser-based operating system backend
 - Real-time WebSocket communication
 """
 
-from .terminal_executor import router as terminal_router
-from .terminal_executor import TerminalExecutor, CommandResult
+from .file_system import FileInfo, FileSystemManager
 from .file_system import router as file_system_router
-from .file_system import FileSystemManager, FileInfo
+from .terminal_executor import CommandResult, TerminalExecutor
+from .terminal_executor import router as terminal_router
 
 __all__ = [
     'terminal_router',

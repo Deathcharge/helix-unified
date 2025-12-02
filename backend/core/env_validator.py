@@ -5,7 +5,7 @@ Validates required environment variables and API keys on startup
 
 import os
 import sys
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 from datetime import datetime
 import asyncio
 import aiohttp
@@ -592,7 +592,7 @@ async def validate_claude_api_environment() -> bool:
 
 if __name__ == '__main__':
     """Run validation based on service type"""
-    import sys
+    import sys  # noqa
 
     service_type = os.getenv('SERVICE_TYPE', 'backend')
 

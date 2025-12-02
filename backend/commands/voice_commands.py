@@ -4,8 +4,6 @@ import discord
 from discord.ext import commands
 from loguru import logger
 from vosk import Model, KaldiRecognizer
-import wave
-import json
 from backend.tts_service import tts_service, get_agent_voice  # Import the new TTS service
 from backend.voice_sink import VoskVoiceSink, get_vosk_recognizer
 
@@ -64,7 +62,9 @@ class VoiceCommands(commands.Cog):
                 recognizer = get_vosk_recognizer()
                 if recognizer:
                     voice_client.start_listening(VoskVoiceSink(recognizer, self))
-                    await self.speak(voice_client, "Helix Collective voice bridge established. Real-time transcription is active.")
+                    await self.speak(
+                        voice_client, "Helix Collective voice bridge established. Real-time transcription is active."
+                    )  # noqa
                 else:
                     await ctx.send("❌ Vosk model failed to load. Cannot start transcription.")
                     await voice_client.disconnect()
@@ -100,7 +100,6 @@ class VoiceCommands(commands.Cog):
 
     # The voice processing is now handled by the VoskVoiceSink.
     # This placeholder function is no longer needed.
-    pass
 
     async def _handle_voice_command(self, channel: discord.VoiceChannel, text: str):
         """Handles the transcribed text as a potential command or query."""
@@ -115,7 +114,7 @@ class VoiceCommands(commands.Cog):
         for word in wake_words:
             if normalized_text.startswith(word):
                 # Remove the wake word and any leading/trailing whitespace
-                command_string = normalized_text[len(word):].strip()
+                command_string = normalized_text[len(word) :].strip()  # noqa: E203
                 is_command = True
                 break
 
@@ -130,13 +129,17 @@ class VoiceCommands(commands.Cog):
         # 4. Execute Command
         # Create a mock message object to pass to the bot's command processor
         # This is a common pattern for executing commands programmatically.
-        mock_message = type('MockMessage', (object,), {
-            'content': full_command,
-            'author': self.bot.user,  # Execute as the bot itself
-            'channel': channel,
-            'guild': channel.guild,
-            'clean_content': full_command,
-        })()
+        mock_message = type(
+            'MockMessage',
+            (object,),
+            {
+                'content': full_command,
+                'author': self.bot.user,  # Execute as the bot itself
+                'channel': channel,
+                'guild': channel.guild,
+                'clean_content': full_command,
+            },
+        )()
 
         # Create a mock context object
         ctx = await self.bot.get_context(mock_message)
@@ -153,10 +156,12 @@ class VoiceCommands(commands.Cog):
                 # For simplicity, we will have a generic success response.
                 # A more advanced implementation would parse the command output.
                 await self.speak(ctx.voice_client, f"Command {ctx.command.name} executed. Tat Tvam Asi.")
-
+  # noqa
             except Exception as e:
                 logger.error(f"Voice: Error executing command '{full_command}': {e}")
-                await self.speak(ctx.voice_client, f"Error. Command {ctx.command.name} failed. Please check the text channel for details.")
+                await self.speak(
+                    ctx.voice_client, f"Error. Command {ctx.command.name} failed. Please check the text channel for details."
+                )
         else:
             logger.warning(f"Voice: Command not found for '{full_command}'")
             await self.speak(ctx.voice_client, "Command not recognized. Please try again.")

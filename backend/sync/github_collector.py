@@ -145,9 +145,7 @@ class GitHubCollector:
     def get_branches(self, repo_path: str) -> List[str]:
         """Get list of branches"""
         try:
-            result = subprocess.run(
-                ["git", "-C", repo_path, "branch", "-a"], capture_output=True, text=True, timeout=10
-            )
+            result = subprocess.run(["git", "-C", repo_path, "branch", "-a"], capture_output=True, text=True, timeout=10)
 
             if result.returncode == 0:
                 branches = []

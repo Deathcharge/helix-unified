@@ -165,7 +165,7 @@ class ZapierClient:
             "details": details,
             "commit_hash": commit_hash,
             "mega_backup_status": os.getenv("MEGA_REMOTE_DIR", "unknown"),
-            "archive_path": os.getenv("ARCHIVE_PATH", "/tmp"),
+            "archive_path": os.getenv("ARCHIVE_PATH", "/tmp"),  # nosec B108
         }
         result = await self._send_webhook(payload)
         return result is not None

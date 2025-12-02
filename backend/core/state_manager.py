@@ -26,6 +26,7 @@ from typing import Any, Dict, Optional
 
 try:
     import aiofiles
+
     AIOFILES_AVAILABLE = True
 except ImportError:
     AIOFILES_AVAILABLE = False
@@ -33,6 +34,7 @@ except ImportError:
 
 try:
     from watchfiles import awatch
+
     WATCHFILES_AVAILABLE = True
 except ImportError:
     WATCHFILES_AVAILABLE = False
@@ -70,7 +72,7 @@ class UCFStateManager:
         self._use_file_watching = WATCHFILES_AVAILABLE
         self._use_async_io = AIOFILES_AVAILABLE
 
-        logger.info(f"UCF State Manager initialized")
+        logger.info("UCF State Manager initialized")
         logger.info(f"  File path: {self.state_file_path}")
         logger.info(f"  File watching: {'enabled' if self._use_file_watching else 'disabled (polling mode)'}")
         logger.info(f"  Async I/O: {'enabled' if self._use_async_io else 'disabled (sync mode)'}")
@@ -137,7 +139,7 @@ class UCFStateManager:
                 self._current_state = json.loads(content)
                 self._last_updated = datetime.now()
 
-            logger.info(f" UCF state loaded from disk")
+            logger.info(" UCF state loaded from disk")
             logger.debug(f"   Harmony: {self._current_state.get('harmony', 0.0):.2f}")
             logger.debug(f"   Resilience: {self._current_state.get('resilience', 0.0):.2f}")
 
@@ -165,7 +167,7 @@ class UCFStateManager:
                 with open(self.state_file_path, 'w') as f:
                     f.write(content)
 
-            logger.debug(f"UCF state saved to disk")
+            logger.debug("UCF state saved to disk")
 
         except Exception as e:
             logger.error(f"Failed to save UCF state: {e}")
@@ -302,7 +304,7 @@ class UCFStateManager:
             "zoom": 1.0,
             "timestamp": datetime.now().isoformat(),
             "version": "17.0.0",
-            "initialized": True
+            "initialized": True,
         }
 
 
@@ -350,6 +352,8 @@ async def shutdown_state_manager():
     Call this during FastAPI lifespan shutdown:
         await shutdown_state_manager()
     """
+    # global _global_state_manager not needed - only reading, not assigning
+
     if _global_state_manager:
         await _global_state_manager.shutdown()
 

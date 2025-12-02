@@ -43,7 +43,7 @@ class AIResponse:
     confidence: float
     execution_time_ms: float
     error: Optional[str] = None
-    timestamp: str = None
+    timestamp: Optional[str] = None
 
     def __post_init__(self):
         if self.timestamp is None:

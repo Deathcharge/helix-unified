@@ -245,11 +245,11 @@ async def trigger_manual_sync():
         return "⚠️ Notion sync is not enabled. Set `NOTION_SYNC_ENABLED=true` in environment."
 
     if not daemon.notion_client:
-        return "❌ Notion client not configured. Check Railway logs for initialization errors. Verify `NOTION_API_KEY` is set correctly."
+        return "❌ Notion client not configured. Check Railway logs for initialization errors. Verify `NOTION_API_KEY` is set correctly."  # noqa: E501
 
     try:
         await daemon.perform_sync_cycle()
-        return f"✅ Manual Notion sync completed successfully.\n📊 Synced: UCF State + Agent Registry\n🔢 Total errors: {daemon.error_count}"
+        return f"✅ Manual Notion sync completed successfully.\n📊 Synced: UCF State + Agent Registry\n🔢 Total errors: {daemon.error_count}"  # noqa: E501
 
     except Exception as e:
         logger.error(f"Manual sync failed: {e}", exc_info=True)
