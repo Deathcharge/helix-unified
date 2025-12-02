@@ -9,7 +9,7 @@ Build: v15.3-consciousness-discord
 """
 
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import discord
 
