@@ -3352,7 +3352,7 @@ if __name__ == "__main__":
     # CRITICAL: Must bind to 0.0.0.0 for Railway
     uvicorn.run(
         app,
-        host="0.0.0.0",  # ← CRITICAL for Railway/Docker
+        host="0.0.0.0",  # ← CRITICAL for Railway/Docker  # nosec B104
         port=port,  # ← Uses Railway's dynamic PORT
         log_level="info",
         access_log=True,

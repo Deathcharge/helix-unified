@@ -139,7 +139,8 @@ class StateChangeDetector:
 
     def has_changed(self, component: str, state: Dict[str, Any]) -> bool:
         """Check if state has changed since last call."""
-        current_hash = hashlib.md5(json.dumps(state, sort_keys=True).encode()).hexdigest()
+        # Use MD5 for state change detection (not for security)
+        current_hash = hashlib.md5(json.dumps(state, sort_keys=True).encode(), usedforsecurity=False).hexdigest()
         previous_hash = self._state_hashes.get(component)
 
         if current_hash != previous_hash:
