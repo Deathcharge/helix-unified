@@ -43,7 +43,7 @@ jobs:
         pytest tests/ -v --cov=backend --cov-report=term-missing --cov-report=html --cov-report=xml:coverage.xml --cov-fail-under=10
 
     - name: Upload coverage reports
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       if: always()
       with:
         file: ./coverage.xml
