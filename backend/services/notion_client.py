@@ -2,7 +2,6 @@
 # backend/services/notion_client.py — Notion Integration Client
 # Author: Andrew John Ward (Architect) + Manus AI (Root Coordinator)
 
-import asyncio
 import logging
 import os
 from datetime import datetime
@@ -35,14 +34,11 @@ class HelixNotionClient:
             self.notion = None
             self._disabled = True
             return
-        
+
         self._disabled = False
 
         # Initialize client with 2025-09-03 API version
-        self.notion = Client(
-            auth=notion_token,
-            notion_version="2025-09-03"  # NEW: Explicitly set API version
-        )
+        self.notion = Client(auth=notion_token, notion_version="2025-09-03")  # NEW: Explicitly set API version
 
         # Database IDs (from Notion workspace)
         self.system_state_db = os.getenv("NOTION_SYSTEM_STATE_DB", "009a946d04fb46aa83e4481be86f09ef")
@@ -75,7 +71,7 @@ class HelixNotionClient:
         """
         if getattr(self, '_disabled', False):
             return None
-        
+
         if database_id in self._data_source_cache:
             return self._data_source_cache[database_id]
 
@@ -117,12 +113,7 @@ class HelixNotionClient:
             results = self.notion.request(
                 path=f"data_sources/{data_source_id}/query",
                 method="POST",
-                body={
-                    "filter": {
-                        "property": "Agent Name",
-                        "title": {"equals": agent_name}
-                    }
-                }
+                body={"filter": {"property": "Agent Name", "title": {"equals": agent_name}}},
             )
 
             if results.get("results"):
@@ -245,12 +236,7 @@ class HelixNotionClient:
             results = self.notion.request(
                 path=f"data_sources/{data_source_id}/query",
                 method="POST",
-                body={
-                    "filter": {
-                        "property": "Component",
-                        "title": {"equals": component_name}
-                    }
-                }
+                body={"filter": {"property": "Component", "title": {"equals": component_name}}},
             )
 
             properties = {
@@ -270,8 +256,7 @@ class HelixNotionClient:
                 # Create new with data_source_id parent (NEW)
                 properties["Component"] = {"title": [{"text": {"content": component_name}}]}
                 self.notion.pages.create(
-                    parent={"type": "data_source_id", "data_source_id": data_source_id},
-                    properties=properties
+                    parent={"type": "data_source_id", "data_source_id": data_source_id}, properties=properties
                 )
                 logger.info(f"✅ Created component {component_name}")
 
@@ -358,12 +343,7 @@ class HelixNotionClient:
             results = self.notion.request(
                 path=f"data_sources/{data_source_id}/query",
                 method="POST",
-                body={
-                    "filter": {
-                        "property": "Session ID",
-                        "title": {"equals": session_id}
-                    }
-                }
+                body={"filter": {"property": "Session ID", "title": {"equals": session_id}}},
             )
 
             if not results.get("results"):
@@ -399,25 +379,26 @@ class HelixNotionClient:
                 path=f"data_sources/{data_source_id}/query",
                 method="POST",
                 body={
-                    "filter": {
-                        "property": "Agent",
-                        "relation": {"contains": agent_page_id}
-                    },
+                    "filter": {"property": "Agent", "relation": {"contains": agent_page_id}},
                     "sorts": [{"property": "Timestamp", "direction": "descending"}],
-                    "page_size": limit
-                }
+                    "page_size": limit,
+                },
             )
 
             events = []
             for page in results.get("results", []):
-                events.append({
-                    "event": page["properties"]["Event"]["title"][0]["text"]["content"],
-                    "timestamp": page["properties"]["Timestamp"]["date"]["start"],
-                    "type": page["properties"]["Event Type"]["select"]["name"],
-                    "description": page["properties"]["Description"]["rich_text"][0]["text"]["content"]
-                    if page["properties"]["Description"]["rich_text"]
-                    else "",
-                })
+                events.append(
+                    {
+                        "event": page["properties"]["Event"]["title"][0]["text"]["content"],
+                        "timestamp": page["properties"]["Timestamp"]["date"]["start"],
+                        "type": page["properties"]["Event Type"]["select"]["name"],
+                        "description": (
+                            page["properties"]["Description"]["rich_text"][0]["text"]["content"]
+                            if page["properties"]["Description"]["rich_text"]
+                            else ""
+                        ),
+                    }
+                )
 
             return events
         except Exception as e:
@@ -434,24 +415,20 @@ class HelixNotionClient:
                 return []
 
             # Query using new data source endpoint
-            results = self.notion.request(
-                path=f"data_sources/{data_source_id}/query",
-                method="POST",
-                body={}
-            )
+            results = self.notion.request(path=f"data_sources/{data_source_id}/query", method="POST", body={})
 
             agents = []
             for page in results.get("results", []):
                 props = page["properties"]
-                agents.append({
-                    "name": props["Agent Name"]["title"][0]["text"]["content"],
-                    "symbol": props["Symbol"]["rich_text"][0]["text"]["content"]
-                    if props["Symbol"]["rich_text"]
-                    else "",
-                    "role": props["Role"]["rich_text"][0]["text"]["content"] if props["Role"]["rich_text"] else "",
-                    "status": props["Status"]["select"]["name"] if props["Status"]["select"] else "Unknown",
-                    "health_score": props["Health Score"]["number"] if props["Health Score"]["number"] else 0,
-                })
+                agents.append(
+                    {
+                        "name": props["Agent Name"]["title"][0]["text"]["content"],
+                        "symbol": props["Symbol"]["rich_text"][0]["text"]["content"] if props["Symbol"]["rich_text"] else "",
+                        "role": props["Role"]["rich_text"][0]["text"]["content"] if props["Role"]["rich_text"] else "",
+                        "status": props["Status"]["select"]["name"] if props["Status"]["select"] else "Unknown",
+                        "health_score": props["Health Score"]["number"] if props["Health Score"]["number"] else 0,
+                    }
+                )
 
             return agents
         except Exception as e:
@@ -471,7 +448,7 @@ class HelixNotionClient:
         triggered_by: Optional[str] = None,
         deploy_url: Optional[str] = None,
         duration: Optional[float] = None,
-        error_details: Optional[str] = None
+        error_details: Optional[str] = None,
     ) -> bool:
         """
         Log a deployment event to the Deployment Log database.
@@ -516,10 +493,7 @@ class HelixNotionClient:
                 properties["Error Details"] = {"rich_text": [{"text": {"content": error_details}}]}
 
             # Create page using data_source_id
-            self.notion.pages.create(
-                parent={"data_source_id": data_source_id},
-                properties=properties
-            )
+            self.notion.pages.create(parent={"data_source_id": data_source_id}, properties=properties)
 
             logger.info(f"✅ Logged deployment: {name} ({status})")
             return True
@@ -541,27 +515,30 @@ class HelixNotionClient:
             results = self.notion.request(
                 path=f"data_sources/{data_source_id}/query",
                 method="POST",
-                body={
-                    "sorts": [{"property": "Timestamp", "direction": "descending"}],
-                    "page_size": limit
-                }
+                body={"sorts": [{"property": "Timestamp", "direction": "descending"}], "page_size": limit},
             )
 
             deployments = []
             for page in results.get("results", []):
                 props = page["properties"]
-                deployments.append({
-                    "name": props["Name"]["title"][0]["text"]["content"],
-                    "platform": props["Platform"]["select"]["name"] if props["Platform"]["select"] else "Unknown",
-                    "status": props["Status"]["select"]["name"] if props["Status"]["select"] else "Unknown",
-                    "timestamp": props["Timestamp"]["date"]["start"] if props["Timestamp"]["date"] else None,
-                    "version": props["Version"]["rich_text"][0]["text"]["content"]
-                    if props["Version"]["rich_text"] else None,
-                    "triggered_by": props["Triggered By"]["rich_text"][0]["text"]["content"]
-                    if props["Triggered By"]["rich_text"] else None,
-                    "deploy_url": props["Deploy URL"]["url"] if props["Deploy URL"]["url"] else None,
-                    "duration": props["Duration"]["number"] if props["Duration"]["number"] else None,
-                })
+                deployments.append(
+                    {
+                        "name": props["Name"]["title"][0]["text"]["content"],
+                        "platform": props["Platform"]["select"]["name"] if props["Platform"]["select"] else "Unknown",
+                        "status": props["Status"]["select"]["name"] if props["Status"]["select"] else "Unknown",
+                        "timestamp": props["Timestamp"]["date"]["start"] if props["Timestamp"]["date"] else None,
+                        "version": (
+                            props["Version"]["rich_text"][0]["text"]["content"] if props["Version"]["rich_text"] else None
+                        ),
+                        "triggered_by": (
+                            props["Triggered By"]["rich_text"][0]["text"]["content"]
+                            if props["Triggered By"]["rich_text"]
+                            else None
+                        ),
+                        "deploy_url": props["Deploy URL"]["url"] if props["Deploy URL"]["url"] else None,
+                        "duration": props["Duration"]["number"] if props["Duration"]["number"] else None,
+                    }
+                )
 
             return deployments
         except Exception as e:
@@ -575,17 +552,18 @@ class HelixNotionClient:
 
 _notion_client_instance: Optional[HelixNotionClient] = None
 
+
 def get_notion_client() -> Optional[HelixNotionClient]:
     """
     Get or create a singleton Notion client instance.
-    
+
     Returns None if NOTION_API_KEY is not set, allowing graceful degradation.
     """
     global _notion_client_instance
-    
+
     if _notion_client_instance is not None:
         return _notion_client_instance
-    
+
     try:
         _notion_client_instance = HelixNotionClient()
         return _notion_client_instance

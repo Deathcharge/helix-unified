@@ -1,7 +1,6 @@
 import os
-import json
 import asyncio
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 from datetime import datetime
 
 from notion_client import Client
@@ -32,7 +31,7 @@ class NotionSync:
         """
         Maps agent data to Notion database properties.
         Assumes a Notion database with properties: Name (Title), Symbol (Text), Role (Text), Active (Checkbox), Memory Size (Number), Last Update (Date).
-        """
+        """  # noqa
         return {
             "Agent Name": {"title": [{"text": {"content": agent_data.get("name", "Unknown")}}]},
             "Symbol": {"rich_text": [{"text": {"content": agent_data.get("symbol", "❓")}}]},
@@ -58,8 +57,8 @@ class NotionSync:
 
             # For demonstration, we will just log the intent to sync
             for agent_name, agent_data in agents_status.items():
-                properties = self._get_agent_properties(agent_data)
-
+                self._get_agent_properties(agent_data)
+  # noqa
                 # Placeholder for actual Notion API call
                 # self.client.pages.create(parent={"database_id": AGENT_REGISTRY_DB_ID}, properties=properties)
                 logger.debug(f"Notion: Would sync/update page for agent {agent_name}")
@@ -83,8 +82,8 @@ class NotionSync:
         logger.info("Starting Notion UCF State sync...")
         try:
             # Simplified: create a new log entry for the current state
-            properties = {
-                "Timestamp": {"date": {"start": datetime.utcnow().isoformat()}},
+#noqa F841             properties = {
+                "Timestamp": {"date": {"start": datetime.utcnow().isoformat()}},  # noqa
                 "Harmony": {"number": ucf_state.get("harmony", 0.0)},
                 "Resilience": {"number": ucf_state.get("resilience", 0.0)},
                 "Klesha": {"number": ucf_state.get("klesha", 0.0)},

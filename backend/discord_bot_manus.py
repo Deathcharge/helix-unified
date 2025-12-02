@@ -1241,7 +1241,6 @@ async def health_handler(request):
     )
 
 
-
 async def start_healthcheck_server():
     """Start HTTP server for Railway healthchecks"""
     app = web.Application()

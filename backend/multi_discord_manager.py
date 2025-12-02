@@ -13,15 +13,17 @@ Date: 2025-11-30
 
 import discord
 from discord.ext import commands
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 import os
 from enum import Enum
+
 
 class DiscordServerType(Enum):
     """Discord server configuration types"""
     COMMUNITY = "community"  # Ethics, agents, philosophy
     BUSINESS = "business"    # Customers, support, sales
     HYBRID = "hybrid"        # Combined
+
 
 class DiscordServerConfig:
     """
@@ -299,7 +301,7 @@ class MultiDiscordManager:
         # Implementation would load specific command modules
         # For now, just log what would be loaded
         if "ALL" in enabled_commands:
-            print(f"   Loading all commands")
+            print(f"   Loading all commands")  # noqa
         else:
             print(f"   Loading commands: {', '.join(enabled_commands)}")
 

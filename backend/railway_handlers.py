@@ -150,7 +150,6 @@ async def health_check():
     return {"status": "healthy", "service": "helix-consciousness-railway-backend", "timestamp": datetime.now().isoformat()}
 
 
-
 async def handle_crisis_protocol(data: Dict[str, Any]):
     """Execute crisis management protocols"""
     logging.warning(f"🚨 CRISIS PROTOCOL ACTIVATED: {data}")

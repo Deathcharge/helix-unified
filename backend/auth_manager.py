@@ -15,11 +15,10 @@ try:
 
     CRYPTO_AVAILABLE = True
 except ImportError:
-    import base64
+    pass
 
     CRYPTO_AVAILABLE = False
     logging.error("CRITICAL: cryptography not available. HelixAuthManager is disabled.")
-
 
 
 class HelixAuthManager:

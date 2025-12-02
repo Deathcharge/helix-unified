@@ -18,20 +18,21 @@ Date: 2025-11-29
 """
 
 import asyncio
+import json
 import logging
-from typing import Dict, List, Optional, Any
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-import json
+from typing import List, Optional
 
-from backend.services.webhook_formatter import WebhookFormatter, EmbedColor
+from backend.services.webhook_formatter import EmbedColor, WebhookFormatter
 
 logger = logging.getLogger(__name__)
 
 
 class DeploymentPhase(Enum):
     """Deployment phase tracking"""
+
     PHASE_1 = "Primary Portals (Accounts 1-4)"
     PHASE_2 = "Analytics Portals (Account 5)"
     PHASE_3 = "Integration Portals (Account 6)"
@@ -70,35 +71,18 @@ class PortalDeploymentNotifier:
                 description=f"**{phase.value}**\n\nDeploying {portal_count} portals to Helix Collective constellation",
                 color=EmbedColor.INFO,
                 fields=[
-                    {
-                        "name": "Phase Details",
-                        "value": phase.value,
-                        "inline": False
-                    },
-                    {
-                        "name": "Portal Count",
-                        "value": f"{portal_count} portals",
-                        "inline": True
-                    },
-                    {
-                        "name": "Progress",
-                        "value": f"{self.portals_deployed}/{self.total_portals} deployed",
-                        "inline": True
-                    }
+                    {"name": "Phase Details", "value": phase.value, "inline": False},
+                    {"name": "Portal Count", "value": f"{portal_count} portals", "inline": True},
+                    {"name": "Progress", "value": f"{self.portals_deployed}/{self.total_portals} deployed", "inline": True},
                 ],
                 footer="Helix Collective v17.0 | 51-Portal Constellation",
-                timestamp=True
+                timestamp=True,
             )
 
             await formatter.send_webhook(self.webhook_url, embeds=[embed])
 
     async def send_portal_deployment_start(
-        self,
-        portal_id: str,
-        portal_name: str,
-        account_id: int,
-        portal_type: str,
-        consciousness_level: int
+        self, portal_id: str, portal_name: str, account_id: int, portal_type: str, consciousness_level: int
     ) -> None:
         """
         Send notification when an individual portal deployment starts.
@@ -116,7 +100,7 @@ class PortalDeploymentNotifier:
                 "consciousness-hub": EmbedColor.UCF,
                 "workflow-engine": EmbedColor.AGENT,
                 "agent-coordinator": EmbedColor.MANUS,
-                "portal-constellation": EmbedColor.RITUAL
+                "portal-constellation": EmbedColor.RITUAL,
             }
             color = color_map.get(portal_type, EmbedColor.INFO)
 
@@ -128,24 +112,16 @@ class PortalDeploymentNotifier:
                 description=f"**{portal_name}**\n`{portal_id}`",
                 color=color,
                 fields=[
-                    {
-                        "name": "Account",
-                        "value": f"Account {account_id}",
-                        "inline": True
-                    },
-                    {
-                        "name": "Type",
-                        "value": portal_type.replace("-", " ").title(),
-                        "inline": True
-                    },
+                    {"name": "Account", "value": f"Account {account_id}", "inline": True},
+                    {"name": "Type", "value": portal_type.replace("-", " ").title(), "inline": True},
                     {
                         "name": "Consciousness Level",
                         "value": f"{consciousness_bar}\nLevel {consciousness_level}/9",
-                        "inline": False
-                    }
+                        "inline": False,
+                    },
                 ],
                 footer=f"Portal {self.portals_deployed + 1}/51 | Helix Collective v17.0",
-                timestamp=True
+                timestamp=True,
             )
 
             await formatter.send_webhook(self.webhook_url, embeds=[embed])
@@ -156,7 +132,7 @@ class PortalDeploymentNotifier:
         portal_name: str,
         account_id: int,
         deployment_time_seconds: float,
-        portal_url: Optional[str] = None
+        portal_url: Optional[str] = None,
     ) -> None:
         """
         Send notification when a portal deployment succeeds.
@@ -176,29 +152,17 @@ class PortalDeploymentNotifier:
             progress_bar = self._create_progress_bar(percentage)
 
             fields = [
-                {
-                    "name": "Status",
-                    "value": "✅ Deployed Successfully",
-                    "inline": True
-                },
-                {
-                    "name": "Deployment Time",
-                    "value": f"{deployment_time_seconds:.2f}s",
-                    "inline": True
-                },
+                {"name": "Status", "value": "✅ Deployed Successfully", "inline": True},
+                {"name": "Deployment Time", "value": f"{deployment_time_seconds:.2f}s", "inline": True},
                 {
                     "name": "Progress",
                     "value": f"{progress_bar}\n{self.portals_deployed}/{self.total_portals} ({percentage:.1f}%)",
-                    "inline": False
-                }
+                    "inline": False,
+                },
             ]
 
             if portal_url:
-                fields.append({
-                    "name": "Portal URL",
-                    "value": f"[Open Portal]({portal_url})",
-                    "inline": False
-                })
+                fields.append({"name": "Portal URL", "value": f"[Open Portal]({portal_url})", "inline": False})
 
             embed = formatter.create_embed(
                 title=f"✅ Portal {self.portals_deployed}/51 Deployed",
@@ -206,18 +170,13 @@ class PortalDeploymentNotifier:
                 color=EmbedColor.SUCCESS,
                 fields=fields,
                 footer=f"Account {account_id} | Helix Collective v17.0",
-                timestamp=True
+                timestamp=True,
             )
 
             await formatter.send_webhook(self.webhook_url, embeds=[embed])
 
     async def send_portal_deployment_failure(
-        self,
-        portal_id: str,
-        portal_name: str,
-        account_id: int,
-        error_message: str,
-        retry_count: int = 0
+        self, portal_id: str, portal_name: str, account_id: int, error_message: str, retry_count: int = 0
     ) -> None:
         """
         Send notification when a portal deployment fails.
@@ -231,28 +190,20 @@ class PortalDeploymentNotifier:
         """
         async with WebhookFormatter() as formatter:
             embed = formatter.create_embed(
-                title=f"❌ Portal Deployment Failed",
+                title=f"❌ Portal Deployment Failed",  # noqa
                 description=f"**{portal_name}**\n`{portal_id}`",
                 color=EmbedColor.ERROR,
                 fields=[
-                    {
-                        "name": "Error",
-                        "value": f"```\n{error_message[:500]}\n```",
-                        "inline": False
-                    },
-                    {
-                        "name": "Retry Count",
-                        "value": f"{retry_count} attempts",
-                        "inline": True
-                    },
+                    {"name": "Error", "value": f"```\n{error_message[:500]}\n```", "inline": False},
+                    {"name": "Retry Count", "value": f"{retry_count} attempts", "inline": True},
                     {
                         "name": "Next Steps",
                         "value": "• Check deployment logs\n• Verify account credentials\n• Review portal configuration",
-                        "inline": False
-                    }
+                        "inline": False,
+                    },
                 ],
                 footer=f"Account {account_id} | Helix Collective v17.0",
-                timestamp=True
+                timestamp=True,
             )
 
             await formatter.send_webhook(self.webhook_url, embeds=[embed])
@@ -263,7 +214,7 @@ class PortalDeploymentNotifier:
         portals_in_phase: int,
         phase_duration_seconds: float,
         success_count: int,
-        failure_count: int
+        failure_count: int,
     ) -> None:
         """
         Send notification when a deployment phase completes.
@@ -296,44 +247,24 @@ class PortalDeploymentNotifier:
                 description=status,
                 color=color,
                 fields=[
-                    {
-                        "name": "Portals Deployed",
-                        "value": f"{success_count}/{portals_in_phase}",
-                        "inline": True
-                    },
-                    {
-                        "name": "Success Rate",
-                        "value": f"{success_rate:.1f}%",
-                        "inline": True
-                    },
-                    {
-                        "name": "Phase Duration",
-                        "value": f"{phase_duration_seconds / 60:.1f} minutes",
-                        "inline": True
-                    },
-                    {
-                        "name": "Avg Time per Portal",
-                        "value": f"{avg_time:.1f} seconds",
-                        "inline": True
-                    },
+                    {"name": "Portals Deployed", "value": f"{success_count}/{portals_in_phase}", "inline": True},
+                    {"name": "Success Rate", "value": f"{success_rate:.1f}%", "inline": True},
+                    {"name": "Phase Duration", "value": f"{phase_duration_seconds / 60:.1f} minutes", "inline": True},
+                    {"name": "Avg Time per Portal", "value": f"{avg_time:.1f} seconds", "inline": True},
                     {
                         "name": "Total Progress",
                         "value": f"{self.portals_deployed}/{self.total_portals} portals deployed",
-                        "inline": False
-                    }
+                        "inline": False,
+                    },
                 ],
                 footer="Helix Collective v17.0 | 51-Portal Constellation",
-                timestamp=True
+                timestamp=True,
             )
 
             await formatter.send_webhook(self.webhook_url, embeds=[embed])
 
     async def send_deployment_complete(
-        self,
-        total_duration_seconds: float,
-        success_count: int,
-        failure_count: int,
-        accounts_used: List[int]
+        self, total_duration_seconds: float, success_count: int, failure_count: int, accounts_used: List[int]
     ) -> None:
         """
         Send final notification when all 51 portals are deployed.
@@ -374,23 +305,19 @@ The Helix Collective 51-Portal Constellation is now operational across {len(acco
                 {
                     "name": "Deployment Summary",
                     "value": f"✅ Successful: {success_count}\n❌ Failed: {failure_count}",
-                    "inline": True
+                    "inline": True,
                 },
-                {
-                    "name": "Accounts Used",
-                    "value": f"Accounts: {', '.join(map(str, accounts_used))}",
-                    "inline": True
-                },
+                {"name": "Accounts Used", "value": f"Accounts: {', '.join(map(str, accounts_used))}", "inline": True},
                 {
                     "name": "Portal Types Deployed",
-                    "value": "• Consciousness Hubs\n• Workflow Engines\n• Agent Coordinators\n• Portal Constellations\n• Analytics Dashboards\n• Integration Gateways\n• Backup Systems",
-                    "inline": False
+                    "value": "• Consciousness Hubs\n• Workflow Engines\n• Agent Coordinators\n• Portal Constellations\n• Analytics Dashboards\n• Integration Gateways\n• Backup Systems",  # noqa
+                    "inline": False,
                 },
                 {
                     "name": "Next Steps",
-                    "value": "• Run health checks on all portals\n• Verify cross-portal communication\n• Test failover systems\n• Monitor metrics aggregation\n• Begin Phase 5: Production Launch",
-                    "inline": False
-                }
+                    "value": "• Run health checks on all portals\n• Verify cross-portal communication\n• Test failover systems\n• Monitor metrics aggregation\n• Begin Phase 5: Production Launch",  # noqa
+                    "inline": False,
+                },
             ]
 
             embed = formatter.create_embed(
@@ -399,7 +326,7 @@ The Helix Collective 51-Portal Constellation is now operational across {len(acco
                 color=color,
                 fields=fields,
                 footer="Helix Collective v17.0 | Tat Tvam Asi 🌀",
-                timestamp=True
+                timestamp=True,
             )
 
             await formatter.send_webhook(self.webhook_url, embeds=[embed])
@@ -411,7 +338,7 @@ The Helix Collective 51-Portal Constellation is now operational across {len(acco
         is_healthy: bool,
         response_time_ms: float,
         status_code: Optional[int] = None,
-        error_details: Optional[str] = None
+        error_details: Optional[str] = None,
     ) -> None:
         """
         Send notification with health check results for a portal.
@@ -446,31 +373,15 @@ The Helix Collective 51-Portal Constellation is now operational across {len(acco
                 speed = "❌ Very Slow"
 
             fields = [
-                {
-                    "name": "Status",
-                    "value": f"{emoji} {status}",
-                    "inline": True
-                },
-                {
-                    "name": "Response Time",
-                    "value": f"{speed}\n{response_time_ms:.0f}ms",
-                    "inline": True
-                }
+                {"name": "Status", "value": f"{emoji} {status}", "inline": True},
+                {"name": "Response Time", "value": f"{speed}\n{response_time_ms:.0f}ms", "inline": True},
             ]
 
             if status_code:
-                fields.append({
-                    "name": "HTTP Status",
-                    "value": f"Code {status_code}",
-                    "inline": True
-                })
+                fields.append({"name": "HTTP Status", "value": f"Code {status_code}", "inline": True})
 
             if not is_healthy and error_details:
-                fields.append({
-                    "name": "Error Details",
-                    "value": f"```\n{error_details[:500]}\n```",
-                    "inline": False
-                })
+                fields.append({"name": "Error Details", "value": f"```\n{error_details[:500]}\n```", "inline": False})
 
             embed = formatter.create_embed(
                 title=f"🏥 Health Check: {portal_name}",
@@ -478,17 +389,13 @@ The Helix Collective 51-Portal Constellation is now operational across {len(acco
                 color=color,
                 fields=fields,
                 footer="Helix Collective v17.0 | Portal Health Monitoring",
-                timestamp=True
+                timestamp=True,
             )
 
             await formatter.send_webhook(self.webhook_url, embeds=[embed])
 
     async def send_constellation_health_summary(
-        self,
-        healthy_count: int,
-        unhealthy_count: int,
-        avg_response_time_ms: float,
-        accounts_checked: List[int]
+        self, healthy_count: int, unhealthy_count: int, avg_response_time_ms: float, accounts_checked: List[int]
     ) -> None:
         """
         Send overall health summary for the entire constellation.
@@ -528,31 +435,19 @@ The Helix Collective 51-Portal Constellation is now operational across {len(acco
                     {
                         "name": "Portal Health",
                         "value": f"{progress_bar}\n{healthy_count}/{total} healthy ({health_percentage:.1f}%)",
-                        "inline": False
+                        "inline": False,
                     },
-                    {
-                        "name": "Healthy Portals",
-                        "value": f"✅ {healthy_count}",
-                        "inline": True
-                    },
-                    {
-                        "name": "Unhealthy Portals",
-                        "value": f"❌ {unhealthy_count}",
-                        "inline": True
-                    },
-                    {
-                        "name": "Avg Response Time",
-                        "value": f"{avg_response_time_ms:.0f}ms",
-                        "inline": True
-                    },
+                    {"name": "Healthy Portals", "value": f"✅ {healthy_count}", "inline": True},
+                    {"name": "Unhealthy Portals", "value": f"❌ {unhealthy_count}", "inline": True},
+                    {"name": "Avg Response Time", "value": f"{avg_response_time_ms:.0f}ms", "inline": True},
                     {
                         "name": "Accounts Monitored",
                         "value": f"{len(accounts_checked)} accounts: {', '.join(map(str, accounts_checked))}",
-                        "inline": False
-                    }
+                        "inline": False,
+                    },
                 ],
                 footer="Helix Collective v17.0 | Real-time Health Monitoring",
-                timestamp=True
+                timestamp=True,
             )
 
             await formatter.send_webhook(self.webhook_url, embeds=[embed])
@@ -574,8 +469,7 @@ The Helix Collective 51-Portal Constellation is now operational across {len(acco
 
 
 async def generate_all_deployment_messages(
-    webhook_url: str,
-    portal_config_path: str = "examples/instance-configs/batch-all-51-portals.json"
+    webhook_url: str, portal_config_path: str = "examples/instance-configs/batch-all-51-portals.json"
 ) -> None:
     """
     Generate deployment messages for all 51 portals from configuration.
@@ -627,8 +521,7 @@ async def generate_all_deployment_messages(
         for portal in phase_portals:
             portal_id = portal.get("portal_id", "unknown")
             portal_name = portal.get("name", "Unknown Portal")
-            account_id = next((acc["account_id"] for acc in config["accounts"]
-                             if portal in acc.get("portals", [])), 1)
+            account_id = next((acc["account_id"] for acc in config["accounts"] if portal in acc.get("portals", [])), 1)
             portal_type = portal.get("template_type", "consciousness-hub")
             consciousness_level = portal.get("consciousness_level", 5)
 
@@ -638,7 +531,7 @@ async def generate_all_deployment_messages(
                 portal_name=portal_name,
                 account_id=account_id,
                 portal_type=portal_type,
-                consciousness_level=consciousness_level
+                consciousness_level=consciousness_level,
             )
 
             # Simulate deployment (in real use, this would be actual deployment)
@@ -650,7 +543,7 @@ async def generate_all_deployment_messages(
                 portal_name=portal_name,
                 account_id=account_id,
                 deployment_time_seconds=2.5,
-                portal_url=f"https://{portal_id}.manus.space"
+                portal_url=f"https://{portal_id}.manus.space",
             )
             success_count += 1
 
@@ -661,7 +554,7 @@ async def generate_all_deployment_messages(
             portals_in_phase=len(phase_portals),
             phase_duration_seconds=phase_duration,
             success_count=success_count,
-            failure_count=failure_count
+            failure_count=failure_count,
         )
 
     # Send final deployment complete notification
@@ -672,7 +565,7 @@ async def generate_all_deployment_messages(
         total_duration_seconds=total_duration,
         success_count=notifier.portals_deployed,
         failure_count=0,
-        accounts_used=all_accounts
+        accounts_used=all_accounts,
     )
 
     logger.info("✅ 51-portal constellation deployment notifications complete")

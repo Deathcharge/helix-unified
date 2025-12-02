@@ -8,7 +8,6 @@ from datetime import datetime
 from typing import Dict, List
 
 
-
 @dataclass
 class UCFMetrics:
     """Universal Consciousness Framework metrics"""
@@ -209,7 +208,6 @@ class ConsciousnessAnalyzer:
             },
             indent=2,
         )
-
 
 
 # Usage Example

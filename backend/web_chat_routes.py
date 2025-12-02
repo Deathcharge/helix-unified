@@ -64,7 +64,7 @@ async def websocket_chat_endpoint(websocket: WebSocket, session_id: str, usernam
             if len(str(data)) > MAX_MESSAGE_SIZE:
                 await websocket.send_json({
                     "error": "Message too large",
-                    "detail": f"Maximum message size is 1MB"
+                    "detail": f"Maximum message size is 1MB"  # noqa
                 })
                 continue
 
