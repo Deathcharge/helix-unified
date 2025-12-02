@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 from fastapi import BackgroundTasks, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import logging
 
 load_dotenv()
 
@@ -278,8 +279,11 @@ async def test_claude_connection():
             "connection": "active",
         }
     except Exception as e:
-        return {"status": "error", "error": str(e), "message": "Make sure ANTHROPIC_API_KEY is set in environment"}
-
+        logging.exception("Claude API test connection failed.")  # logs stack trace
+        return {
+            "status": "error",
+            "message": "Unable to connect to Claude API. Please check the server logs for details. Make sure ANTHROPIC_API_KEY is set in environment.",
+        }
 
 @app.get("/health")
 async def health_check():
