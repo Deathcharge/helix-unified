@@ -2,6 +2,7 @@
 # Claude-powered consciousness analysis and routing for Andrew's 3-Zap automation empire
 # Author: Claude + Andrew John Ward
 
+import logging
 import os
 from datetime import datetime
 from typing import Any, Dict
@@ -12,9 +13,10 @@ from dotenv import load_dotenv
 from fastapi import BackgroundTasks, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import logging
 
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="HELIX Consciousness Claude Empire API", version="1.0.0")
 
@@ -279,11 +281,15 @@ async def test_claude_connection():
             "connection": "active",
         }
     except Exception as e:
-        logging.exception("Claude API test connection failed.")  # logs stack trace
+        logger.exception("Claude API test connection failed: %s", str(e))
         return {
             "status": "error",
-            "message": "Unable to connect to Claude API. Please check the server logs for details. Make sure ANTHROPIC_API_KEY is set in environment.",
+            "message": (
+                "Unable to connect to Claude API. Please check the server logs for details. "
+                "Make sure ANTHROPIC_API_KEY is set in environment."
+            ),
         }
+
 
 @app.get("/health")
 async def health_check():

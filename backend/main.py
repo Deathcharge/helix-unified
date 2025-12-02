@@ -2399,16 +2399,19 @@ async def test_zapier_webhook(webhook_url: str) -> Dict[str, Any]:
     Returns:
         Success/failure status with response details
     """
-    # Only allow requests to these specific Zapier webhook URLs (allowlist)
-    ZAPIER_WEBHOOK_ALLOWLIST = {
-        "https://hooks.zapier.com/hooks/catch/25075191/usnjj5t/",
-        "https://hooks.zapier.com/hooks/catch/25075191/usvyi7e/",
-        "https://hooks.zapier.com/hooks/catch/25075191/usxiwfg/",
-    }
-    if webhook_url not in ZAPIER_WEBHOOK_ALLOWLIST:
+    # Only allow requests to trusted Zapier webhook domains (SSRF protection)
+    ALLOWED_ZAPIER_HOSTS = {"hooks.zapier.com", "hooks.zapierusercontent.com"}
+    try:
+        parsed_url = urlparse(webhook_url)
+        if parsed_url.hostname not in ALLOWED_ZAPIER_HOSTS:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Webhook URL must be from allowed domains: {', '.join(ALLOWED_ZAPIER_HOSTS)}"
+            )
+    except (ValueError, AttributeError):
         raise HTTPException(
             status_code=400,
-            detail="Invalid or unauthorized webhook_url."
+            detail="Invalid webhook URL format."
         )
     try:
         # Create test payload
