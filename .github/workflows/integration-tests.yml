@@ -50,7 +50,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements-backend.txt
-          pip install pytest pytest-asyncio pytest-cov pytest-mock pytest-timeout
+          pip install pytest pytest-asyncio pytest-cov pytest-mock pytest-timeout PyJWT
 
       - name: Run pytest with coverage
         env:
