@@ -16,7 +16,7 @@ ACCESS_TOKEN = os.getenv("HELIX_ACCESS_TOKEN", "")
 
 def create_subscription(tier="pro", billing_cycle="monthly"):
     """Create a new subscription"""
-    print(f"\n💳 Creating {tier} subscription ({billing_cycle})...")
+    print("\n💳 Creating subscription...")
     print("-" * 50)
 
     headers = {"Authorization": f"Bearer {ACCESS_TOKEN}"}
