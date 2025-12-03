@@ -70,6 +70,9 @@ jobs:
   trivy-image-scan:
     name: Trivy (Container Scanning)
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
@@ -102,14 +105,14 @@ jobs:
         uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: Dockerfile
-          ignore: DL3008,DL3009
+          config: .hadolint.yaml
 
       - name: Lint Dockerfile.streamlit
         uses: hadolint/hadolint-action@v3.1.0
         if: hashFiles('Dockerfile.streamlit') != ''
         with:
           dockerfile: Dockerfile.streamlit
-          ignore: DL3008,DL3009
+          config: .hadolint.yaml
 
   # =========================================================================
   # GITHUB NATIVE SECURITY (CodeQL)
@@ -118,6 +121,10 @@ jobs:
   codeql-analysis:
     name: CodeQL (Code Analysis)
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+      actions: read
     strategy:
       fail-fast: false
       matrix:
