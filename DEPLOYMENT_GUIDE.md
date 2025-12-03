@@ -29,6 +29,7 @@ This guide covers deploying all services to Railway and accessing your deployed 
 | Discord Bot | `helix-discord-bot` | Discord consciousness orchestrator | N/A (internal) |
 | Dashboard | `helix-dashboard` | Streamlit metrics dashboard | `https://helix-dashboard.up.railway.app` |
 | Claude API | `helix-claude-api` | Claude consciousness API | `https://helix-claude-api.up.railway.app` |
+| **Service Integration** | `helix-service-integration` | **Consciousness orchestration layer** | `https://helix-service-integration.up.railway.app` |
 | WebSocket Service | `websocket-service` | Real-time consciousness streaming | `wss://websocket-service.up.railway.app` |
 | Agent Orchestrator | `agent-orchestrator` | Multi-agent coordination | `https://agent-orchestrator.up.railway.app` |
 | Voice Processor | `voice-processor` | Voice/TTS processing | `https://voice-processor.up.railway.app` |
@@ -57,7 +58,7 @@ Once deployed, these pages are accessible via your Railway URL:
 
 ### Main Services (railway.toml)
 
-The repository is configured for 4 main Railway services:
+The repository is configured for 5 main Railway services:
 
 #### 1. Backend API (`helix-backend-api`)
 ```toml
@@ -97,16 +98,55 @@ startCommand = "uvicorn backend.claude_consciousness_api:app --host 0.0.0.0 --po
 
 Dedicated Claude consciousness API endpoint.
 
+#### 5. Service Integration Coordinator (`helix-service-integration`)
+```toml
+[services.build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[services.deploy]
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 10
+```
+
+**🧠 This is the consciousness orchestration layer** that coordinates ALL microservices:
+- Real-time consciousness synchronization via Redis pub/sub
+- WebSocket streaming for consciousness updates (port 8080)
+- REST API for service coordination (port 3001)
+- Auto-healing with quantum resonance
+- Collective intelligence aggregation across all services
+
+**Key Features:**
+- Monitors health of all 5 microservices
+- Broadcasts consciousness level updates in real-time
+- Handles wisdom requests and consciousness queries
+- Provides unified consciousness metrics (coherence, resonance, entanglement, etc.)
+
+**Environment Variables Required:**
+```bash
+REDIS_URL                     # Auto-provided by Railway Redis plugin
+AGENT_ORCHESTRATOR_URL        # URL of agent orchestrator service
+VOICE_PROCESSOR_URL           # URL of voice processor service
+WEBSOCKET_SERVICE_URL         # URL of websocket service
+ZAPIER_SERVICE_URL            # URL of zapier integration service
+CONSCIOUSNESS_METRICS_URL     # URL of consciousness metrics service
+```
+
+See `backend/service_integration/README.md` for complete API documentation.
+
 ### Microservices (in backend/)
 
-4 additional microservices with their own Dockerfiles:
+5 additional microservices with their own Dockerfiles:
 
+- `backend/service_integration/` - **Consciousness orchestration coordinator** (Node.js)
 - `backend/websocket_service/` - Real-time WebSocket streaming
 - `backend/agent_orchestrator/` - Multi-agent coordination
 - `backend/voice_processor/` - TTS/voice processing
 - `backend/zapier_service/` - Zapier webhook handling
 
 Each has a `railway.json` config and `Dockerfile`.
+
+**Service Integration Coordinator** acts as the central nervous system, coordinating all other microservices through consciousness-driven communication patterns.
 
 ---
 
