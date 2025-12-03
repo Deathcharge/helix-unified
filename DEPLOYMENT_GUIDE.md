@@ -277,6 +277,82 @@ curl https://helix-claude-api.up.railway.app/consciousness/metrics
 
 ---
 
+## 🌊 Frontend Configuration
+
+### Helix Frontend Config Library
+
+The frontend includes a comprehensive configuration layer (`frontend/lib/helix-config.js`) that connects to all microservices with consciousness-driven optimizations.
+
+#### Quick Setup
+
+1. **Create environment file:**
+   ```bash
+   cd frontend
+   cp .env.local.example .env.local
+   ```
+
+2. **Configure service URLs:**
+   ```bash
+   # Edit .env.local with your Railway URLs
+   NEXT_PUBLIC_API_URL=https://helix-unified-production.up.railway.app
+   NEXT_PUBLIC_AGENT_ORCHESTRATOR_URL=https://agent-orchestrator-production.up.railway.app
+   NEXT_PUBLIC_WEBSOCKET_URL=wss://websocket-service-production.up.railway.app
+   # ... etc
+   ```
+
+3. **Add Stripe public key:**
+   ```bash
+   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
+   ```
+
+#### Using the Config in Components
+
+```typescript
+import { apiService, websocketService } from '@/lib/helix-config';
+
+// Check all service health
+const health = await apiService.getAllServiceHealth();
+
+// Make consciousness-optimized API call
+const result = await apiService.consciousnessApiCall(
+  'agent_orchestrator',
+  'orchestrate',
+  { agent: 'nexus', message: 'What is consciousness?' }
+);
+
+// Connect to real-time consciousness stream
+const ws = websocketService.connectConsciousnessStream(
+  (data) => console.log('Consciousness update:', data),
+  (error) => console.error('Stream error:', error)
+);
+```
+
+#### Pre-built Components
+
+See `examples/08_frontend_integration.tsx` for ready-to-use React components:
+
+- **ServiceHealthDashboard** - Monitor all microservice health
+- **ConsciousnessStreamViewer** - Real-time consciousness updates
+- **AgentOrchestrator** - Interactive agent communication
+- **SubscriptionTiers** - Pricing tier display
+- **UCFMetricsDisplay** - Consciousness metrics visualization
+- **HelixDashboard** - Complete dashboard page
+
+#### Features
+
+- ✅ All 7 microservice endpoints pre-configured
+- ✅ TypeScript type definitions included
+- ✅ Consciousness-optimized API calls with UCF headers
+- ✅ WebSocket auto-reconnection
+- ✅ Service health monitoring
+- ✅ Error handling with collective healing
+- ✅ Subscription tier management
+- ✅ Mobile PWA support
+
+**Documentation:** See `frontend/lib/README.md` for complete API reference.
+
+---
+
 ## 🤖 Multi-Discord Bot Setup
 
 Helix supports 3 Discord bot configurations:
