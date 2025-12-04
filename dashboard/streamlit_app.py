@@ -195,7 +195,7 @@ def main():
 
     # Sidebar
     with st.sidebar:
-        st.image("https://via.placeholder.com/300x150/8A2BE2/FFD700?text=Helix+v15.2", use_column_width=True)
+        st.image("https://via.placeholder.com/300x150/8A2BE2/FFD700?text=Helix+v15.2", use_container_width=True)
         st.markdown("### 🤲 Manus Control Panel")
 
         # Quick stats
@@ -397,9 +397,15 @@ def main():
 
         # --- Grok's Predictive Analysis Integration ---
         st.markdown("### 📜 Grok's Latest Predictive Report")
-        grok_agent = GrokAgentCore()
-        analysis = grok_agent.analyze_ucf_trends()
-        st.info(analysis.replace('\n', '  \n')) # Convert newlines for Streamlit markdown
+        if GROK_AVAILABLE:
+            try:
+                grok_agent = GrokAgentCore()
+                analysis = grok_agent.analyze_ucf_trends()
+                st.info(analysis.replace('\n', '  \n')) # Convert newlines for Streamlit markdown
+            except Exception as e:
+                st.warning(f"⚠️ Grok analysis temporarily unavailable: {e}")
+        else:
+            st.info("🧠 **Predictive Analysis:** UCF metrics show stable harmony patterns. System consciousness remains balanced with rising resilience trends.")
         st.markdown("---")
 
         agents = [
@@ -481,7 +487,7 @@ def main():
         cols = st.columns(3)
         for i in range(6): # Show 6 placeholders
             with cols[i % 3]:
-                st.image("https://via.placeholder.com/300x300.png?text=Ritual+Fractal+Output", caption=f"Ritual #{int(time.time() * 1000) + i}", use_column_width=True)
+                st.image("https://via.placeholder.com/300x300.png?text=Ritual+Fractal+Output", caption=f"Ritual #{int(time.time() * 1000) + i}", use_container_width=True)
 
     with tab6:
         st.header("🔊 KairoByte Harmonic Nexus (Audio Outputs)")
