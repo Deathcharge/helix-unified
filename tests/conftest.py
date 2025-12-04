@@ -6,11 +6,11 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, patch
 
-import pytest
 import discord
+import pytest
 from discord.ext import commands
 
 # Add backend to path for imports

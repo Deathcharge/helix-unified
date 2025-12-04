@@ -14,14 +14,15 @@ Requirements:
     - Zapier Pro account (for PRO tier tests)
 """
 
-import asyncio
-import aiohttp
 import argparse
+import asyncio
 import json
 import os
 import sys
 from datetime import datetime
 from pathlib import Path
+
+import aiohttp
 
 # Add backend to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))

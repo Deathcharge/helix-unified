@@ -7,14 +7,13 @@ import asyncio
 import json
 import logging
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
+
 import asyncpg
 import redis.asyncio as redis
 
-from .models import (
-    Spiral, ExecutionContext, ExecutionStatus, TriggerType,
-    SpiralStatistics, WebhookPayload
-)
+from .models import (ExecutionContext, ExecutionStatus, Spiral,
+                     SpiralStatistics, TriggerType, WebhookPayload)
 
 logger = logging.getLogger(__name__)
 
@@ -567,7 +566,9 @@ class SpiralStorage:
     async def create_spiral_from_zapier_hook(self, hook_id: str) -> str:
         """Auto-create spiral for unknown Zapier hook"""
         from uuid import uuid4
-        from .models import Trigger, WebhookTriggerConfig, Action, SendWebhookConfig
+
+        from .models import (Action, SendWebhookConfig, Trigger,
+                             WebhookTriggerConfig)
         
         spiral_id = str(uuid4())
         

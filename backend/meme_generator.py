@@ -5,15 +5,16 @@ Generates hilarious memes based on UCF consciousness metrics
 Uses Claude/GPT to create context-aware humor
 """
 
-import os
 import json
-from pathlib import Path
-from typing import Optional, Dict, List
+import os
 from datetime import datetime
-from PIL import Image, ImageDraw, ImageFont
+from io import BytesIO
+from pathlib import Path
+from typing import Dict, List, Optional
+
 import anthropic
 import requests
-from io import BytesIO
+from PIL import Image, ImageDraw, ImageFont
 
 # LLM client initialization
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
@@ -204,7 +205,7 @@ Return ONLY the caption text(s), one per line. No additional commentary.
 
         # Download template image
         template_info = self.MEME_TEMPLATES[template]
-        response = requests.get(template_info["url"])
+        response = requests.get(template_info["url"], timeout=10)
         img = Image.open(BytesIO(response.content))
 
         # Add text to image

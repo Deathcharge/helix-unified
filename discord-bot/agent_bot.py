@@ -3,18 +3,19 @@ Helix Agent Discord Bot - Multi-Agent Personality System
 Each agent runs as a separate Discord bot with unique personality and LLM routing
 """
 
-import os
 import asyncio
-import logging
 import io
+import logging
+import os
 import wave
-from typing import Dict, Optional, Any, List
-import discord
-from discord.ext import commands
+from typing import Any, Dict, List, Optional
+
+import aiohttp
 import anthropic
+import discord
 import openai
 from anthropic import Anthropic
-import aiohttp
+from discord.ext import commands
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

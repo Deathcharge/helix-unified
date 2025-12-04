@@ -6,10 +6,10 @@ Railway Environment Variables Manager
 Manages environment variables across Railway services.
 """
 
-import os
-import sys
 import json
+import os
 import subprocess
+import sys
 from typing import Dict, List, Optional
 
 # Required environment variables by service

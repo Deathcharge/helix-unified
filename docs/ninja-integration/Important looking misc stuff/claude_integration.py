@@ -2,14 +2,15 @@
 Enhanced Anthropic Claude integration for Helix Unified system
 Uses Anthropic's Claude API for AI-powered responses
 """
-import os
 import asyncio
+import json
 import logging
-from typing import Dict, List, Any, Optional
+import os
+import time
+from typing import Any, Dict, List, Optional
+
 import anthropic
 from anthropic import Anthropic
-import json
-import time
 
 logger = logging.getLogger(__name__)
 

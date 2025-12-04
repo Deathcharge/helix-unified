@@ -3,20 +3,15 @@ Copyright (c) 2025 Andrew John Ward. All Rights Reserved.
 PROPRIETARY AND CONFIDENTIAL - See LICENSE file for terms.
 """
 
-from sqlalchemy.orm import Session
-from fastapi import HTTPException, status
+from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
-from datetime import datetime
 
-from app.models import Spiral, Action, ExecutionLog, User
-from app.schemas import (
-    SpiralCreate,
-    SpiralUpdate,
-    SpiralResponse,
-    ActionCreate,
-    ActionUpdate
-)
+from app.models import Action, ExecutionLog, Spiral, User
+from app.schemas import (ActionCreate, ActionUpdate, SpiralCreate,
+                         SpiralResponse, SpiralUpdate)
+from fastapi import HTTPException, status
+from sqlalchemy.orm import Session
 
 
 class SpiralService:

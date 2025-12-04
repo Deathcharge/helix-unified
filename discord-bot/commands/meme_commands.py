@@ -4,10 +4,11 @@
 !meme - Generate consciousness-powered memes
 """
 
-from typing import Optional
-from discord.ext import commands
 import sys
 from pathlib import Path
+from typing import Optional
+
+from discord.ext import commands
 
 # Add backend to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))

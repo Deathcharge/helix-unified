@@ -11,21 +11,18 @@ This service connects the revolutionary Helix intelligence system
 with the automation platform for truly unique capabilities.
 """
 
-from typing import Dict, Any, Optional
-import sys
-import os
 import asyncio
+import os
+import sys
 from datetime import datetime
+from typing import Any, Dict, Optional
 
 # Add Helix LLM to path
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../helix-llm/core'))
 
 try:
-    from helix_intelligence import (
-        get_helix_response,
-        helix_is_active,
-        get_helix_status
-    )
+    from helix_intelligence import (get_helix_response, get_helix_status,
+                                    helix_is_active)
 except ImportError:
     # Fallback if Helix LLM not available
     def get_helix_response(prompt: str, context: Optional[Dict] = None):

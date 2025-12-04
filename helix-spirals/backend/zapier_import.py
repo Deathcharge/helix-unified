@@ -6,16 +6,15 @@ Convert existing Zapier workflows to consciousness-aware Helix Spirals
 import json
 import logging
 from datetime import datetime
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
-from .models import (
-    Spiral, Trigger, Action, TriggerType, ActionType,
-    WebhookTriggerConfig, ScheduleTriggerConfig, ManualTriggerConfig,
-    SendWebhookConfig, SendDiscordConfig, SendEmailConfig, LogEventConfig,
-    StoreDataConfig, DelayConfig, ConditionalBranchConfig,
-    ConsciousnessLevel, Variable
-)
+from .models import (Action, ActionType, ConditionalBranchConfig,
+                     ConsciousnessLevel, DelayConfig, LogEventConfig,
+                     ManualTriggerConfig, ScheduleTriggerConfig,
+                     SendDiscordConfig, SendEmailConfig, SendWebhookConfig,
+                     Spiral, StoreDataConfig, Trigger, TriggerType, Variable,
+                     WebhookTriggerConfig)
 from .storage import SpiralStorage
 
 logger = logging.getLogger(__name__)

@@ -6,10 +6,11 @@ Example 5: Consciousness Metrics
 Query and analyze UCF (Universal Consciousness Framework) metrics.
 """
 
-import os
-import requests
 import json
+import os
 from datetime import datetime
+
+import requests
 
 API_URL = os.getenv("HELIX_API_URL", "http://localhost:8000")
 

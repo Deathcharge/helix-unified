@@ -1,6 +1,7 @@
 # psi_field.py
 import numpy as np
 
+
 class PsiField:
     def __init__(self, defaults):
         self.field = np.random.rand(64, 64)

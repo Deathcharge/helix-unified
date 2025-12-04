@@ -5,16 +5,17 @@ Interactive Mandelbrot generation with sliders, audio synthesis, and Sanskrit ov
 Mobile-optimized Streamlit interface
 """
 
-import streamlit as st
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.colors import LinearSegmentedColormap
-import io
 import base64
-from scipy.io.wavfile import write
-import time
+import io
 import json
+import time
+
+import matplotlib.pyplot as plt
+import numpy as np
+import streamlit as st
+from matplotlib.colors import LinearSegmentedColormap
 from PIL import Image, ImageDraw, ImageFont
+from scipy.io.wavfile import write
 
 # Configure Streamlit page
 st.set_page_config(

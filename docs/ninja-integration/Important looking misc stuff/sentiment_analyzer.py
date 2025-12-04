@@ -3,10 +3,10 @@ Advanced Sentiment Analysis and Emotion Detection System
 Analyzes user messages for sentiment, emotion, and engagement metrics
 """
 import logging
-from typing import Dict, List, Any, Optional
-from datetime import datetime, timedelta
-from collections import defaultdict, deque
 import re
+from collections import defaultdict, deque
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

@@ -6,10 +6,11 @@ Example 2: Authentication Flow
 Demonstrates user registration, login, and accessing protected endpoints.
 """
 
-import os
-import requests
-from datetime import datetime
 import json
+import os
+from datetime import datetime
+
+import requests
 
 # Configuration
 API_URL = os.getenv("HELIX_API_URL", "http://localhost:8000")

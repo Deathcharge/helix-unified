@@ -4,9 +4,10 @@
 Accept Bitcoin, Ethereum, and other crypto for consciousness services
 """
 
-import streamlit as st
-from datetime import datetime
 import random
+from datetime import datetime
+
+import streamlit as st
 
 # Page config
 st.set_page_config(

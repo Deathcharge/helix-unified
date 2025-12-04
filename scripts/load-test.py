@@ -7,12 +7,13 @@ Test API performance under load using threading.
 """
 
 import os
-import time
-import requests
-import threading
 import statistics
+import threading
+import time
 from datetime import datetime
-from typing import List, Dict
+from typing import Dict, List
+
+import requests
 
 API_URL = os.getenv("HELIX_API_URL", "http://localhost:8000")
 

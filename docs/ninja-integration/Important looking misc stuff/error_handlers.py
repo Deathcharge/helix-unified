@@ -1,9 +1,10 @@
+import asyncio
+import functools
 import logging
 import traceback
-import functools
-from typing import Optional, Dict, Any, Callable
 from datetime import datetime
-import asyncio
+from typing import Any, Callable, Dict, Optional
+
 from discord import DiscordException
 from fastapi import HTTPException, Request
 from fastapi.responses import JSONResponse

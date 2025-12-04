@@ -3,18 +3,14 @@ Copyright (c) 2025 Andrew John Ward. All Rights Reserved.
 PROPRIETARY AND CONFIDENTIAL - See LICENSE file for terms.
 """
 
-from sqlalchemy.orm import Session
-from fastapi import HTTPException, status
 from datetime import datetime
 
-from app.models import User, Subscription
-from app.schemas import UserCreate, UserLogin, TokenResponse
-from app.utils.security import (
-    verify_password,
-    get_password_hash,
-    create_access_token,
-    create_refresh_token
-)
+from app.models import Subscription, User
+from app.schemas import TokenResponse, UserCreate, UserLogin
+from app.utils.security import (create_access_token, create_refresh_token,
+                                get_password_hash, verify_password)
+from fastapi import HTTPException, status
+from sqlalchemy.orm import Session
 
 
 class AuthService:

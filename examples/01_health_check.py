@@ -7,8 +7,9 @@ Check if the Helix Unified API is running and healthy.
 """
 
 import os
-import requests
 from datetime import datetime
+
+import requests
 
 # Configuration
 API_URL = os.getenv("HELIX_API_URL", "http://localhost:8000")

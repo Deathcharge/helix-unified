@@ -8,6 +8,7 @@ Creates database tables for Helix Unified SaaS platform.
 
 import os
 import sys
+
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import OperationalError
 

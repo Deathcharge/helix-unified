@@ -6,9 +6,10 @@ Example 4: Subscription Management
 Create, upgrade, and manage Stripe subscriptions.
 """
 
-import os
-import requests
 import json
+import os
+
+import requests
 
 API_URL = os.getenv("HELIX_API_URL", "http://localhost:8000")
 ACCESS_TOKEN = os.getenv("HELIX_ACCESS_TOKEN", "")

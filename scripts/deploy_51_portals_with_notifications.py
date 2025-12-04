@@ -24,23 +24,21 @@ Author: Helix Collective / Claude
 Date: 2025-11-29
 """
 
-import asyncio
 import argparse
-import logging
-import sys
-from pathlib import Path
-from datetime import datetime
-from typing import Dict, List, Optional, Any
+import asyncio
 import json
+import logging
 import os
+import sys
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 # Add backend to path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from backend.services.portal_deployment_notifications import (
-    PortalDeploymentNotifier,
-    DeploymentPhase
-)
+    DeploymentPhase, PortalDeploymentNotifier)
 
 # Configure logging
 logging.basicConfig(

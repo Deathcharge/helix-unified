@@ -4,12 +4,13 @@
 Quantum entanglement between agents, superposition states, coherence visualization
 """
 
-import streamlit as st
-import numpy as np
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 import random
 from datetime import datetime
+
+import numpy as np
+import plotly.graph_objects as go
+import streamlit as st
+from plotly.subplots import make_subplots
 
 # Page config
 st.set_page_config(

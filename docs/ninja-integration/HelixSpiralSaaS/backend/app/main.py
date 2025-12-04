@@ -3,14 +3,14 @@ Copyright (c) 2025 Andrew John Ward. All Rights Reserved.
 PROPRIETARY AND CONFIDENTIAL - See LICENSE file for terms.
 """
 
+import logging
+
+from app.api import ai, auth, spirals, subscriptions, users
+from app.config import settings
+from app.database import Base, engine
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-import logging
-
-from app.config import settings
-from app.database import engine, Base
-from app.api import auth, users, subscriptions, spirals, ai
 
 # Configure logging
 logging.basicConfig(

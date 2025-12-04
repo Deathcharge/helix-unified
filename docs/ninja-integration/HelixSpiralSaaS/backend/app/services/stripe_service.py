@@ -3,14 +3,15 @@ Copyright (c) 2025 Andrew John Ward. All Rights Reserved.
 PROPRIETARY AND CONFIDENTIAL - See LICENSE file for terms.
 """
 
-import stripe
-from sqlalchemy.orm import Session
-from fastapi import HTTPException, status
 from datetime import datetime
 
+import stripe
 from app.config import settings
-from app.models import User, Subscription
-from app.schemas import CheckoutSessionCreate, CheckoutSessionResponse, PortalSessionResponse
+from app.models import Subscription, User
+from app.schemas import (CheckoutSessionCreate, CheckoutSessionResponse,
+                         PortalSessionResponse)
+from fastapi import HTTPException, status
+from sqlalchemy.orm import Session
 
 # Initialize Stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY

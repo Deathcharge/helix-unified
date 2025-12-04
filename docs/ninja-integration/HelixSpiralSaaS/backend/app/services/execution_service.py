@@ -3,15 +3,15 @@ Copyright (c) 2025 Andrew John Ward. All Rights Reserved.
 PROPRIETARY AND CONFIDENTIAL - See LICENSE file for terms.
 """
 
-from sqlalchemy.orm import Session
-from typing import Dict, Any, Optional
-from uuid import UUID
-from datetime import datetime
-import httpx
 import logging
+from datetime import datetime
+from typing import Any, Dict, Optional
+from uuid import UUID
 
-from app.models import Spiral, Action, ExecutionLog, User, Subscription
+import httpx
+from app.models import Action, ExecutionLog, Spiral, Subscription, User
 from app.services.email_service import email_service
+from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ class ExecutionService:
             limit = subscription.execution_limit
             if limit != -1:  # -1 means unlimited
                 # Count executions this month
-                from sqlalchemy import func, extract
+                from sqlalchemy import extract, func
                 current_month_count = db.query(func.count(ExecutionLog.id)).filter(
                     ExecutionLog.spiral_id.in_(
                         db.query(Spiral.id).filter(Spiral.user_id == user.id)
