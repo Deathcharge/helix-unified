@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * 👥 Team Management Component
  * Manage team members, roles, and permissions

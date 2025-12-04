@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * 🚀 Signup Page
  * Create new consciousness dashboard account

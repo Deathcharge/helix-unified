@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * 🚀 User Onboarding Flow
  * Multi-step guided onboarding for new Helix users

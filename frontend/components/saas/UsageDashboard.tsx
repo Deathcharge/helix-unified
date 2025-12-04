@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * 📊 Usage Dashboard Component
  * Displays API usage, consciousness metrics, and billing information

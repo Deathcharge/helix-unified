@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * 🍞 Toast Notification System
  * Beautiful, dismissible notifications with queue management

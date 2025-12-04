@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * 💳 Billing & Account Settings
  * Manage subscription, invoices, and account details

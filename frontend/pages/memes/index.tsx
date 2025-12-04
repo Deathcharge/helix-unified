@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * 🎨 Consciousness Meme Generator
  * LLM-powered meme creation based on UCF metrics

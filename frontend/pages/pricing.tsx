@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * 💰 Pricing Page
  * All subscription tiers and features overview

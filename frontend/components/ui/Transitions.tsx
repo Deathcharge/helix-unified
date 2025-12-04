@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * ✨ Animated Transitions Component
  * Smooth animations for page transitions, fades, slides, and more

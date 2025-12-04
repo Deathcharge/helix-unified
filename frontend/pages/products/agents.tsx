@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * 🤖 Agent Rental API Product Page
  * Rent specialized AI agents via REST API

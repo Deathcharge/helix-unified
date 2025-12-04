@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * 🖥️ Helix Web OS v2.0 - LAUNCH READY
  * Full-featured browser-based operating system
@@ -265,17 +267,11 @@ export default function WebOS() {
             onUpdateData={(data) => updateWindowData(window.id, data)}
           >
             {window.type === 'terminal' && (
-              <Terminal
-                historySize={settings.terminalHistory}
-                fontSize={settings.fontSize}
-              />
+              <Terminal />
             )}
             {window.type === 'explorer' && <FileExplorer />}
             {window.type === 'editor' && (
-              <CodeEditor
-                fontSize={settings.fontSize}
-                syntaxHighlighting={true}
-              />
+              <CodeEditor />
             )}
           </WindowFrame>
         ))}

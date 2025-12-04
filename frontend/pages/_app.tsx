@@ -6,6 +6,7 @@
 import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
 import Navigation from '@/components/Navigation';
+import { ToastProvider } from '@/components/ui/Toast';
 import '../styles/globals.css';
 
 // Pages that should NOT show navigation (full-screen experiences)
@@ -16,9 +17,9 @@ export default function App({ Component, pageProps }: AppProps) {
   const showNav = !PAGES_WITHOUT_NAV.includes(router.pathname);
 
   return (
-    <>
+    <ToastProvider>
       {showNav && <Navigation />}
       <Component {...pageProps} />
-    </>
+    </ToastProvider>
   );
 }

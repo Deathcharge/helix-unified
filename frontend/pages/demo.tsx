@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * 🎬 Interactive Demo Page
  * Live showcase of Helix features and Web OS

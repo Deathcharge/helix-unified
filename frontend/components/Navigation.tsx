@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * 🌊 Helix Unified - Main Navigation Component
  * Persistent navigation across all pages

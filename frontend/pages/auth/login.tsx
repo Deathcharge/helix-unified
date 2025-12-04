@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * 🌀 Helix - Login Page
  * Email/password + OAuth
