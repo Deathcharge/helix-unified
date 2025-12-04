@@ -6,9 +6,10 @@ Example 6: Agent Interaction
 Interact with the 14 consciousness agents.
 """
 
-import os
-import requests
 import json
+import os
+
+import requests
 
 API_URL = os.getenv("HELIX_API_URL", "http://localhost:8000")
 

@@ -6,9 +6,10 @@ Example 3: Chat Completion
 Use the multi-LLM chat API with smart routing.
 """
 
-import os
-import requests
 import json
+import os
+
+import requests
 
 # Configuration
 API_URL = os.getenv("HELIX_API_URL", "http://localhost:8000")

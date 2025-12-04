@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * 🌊 Helix Unified - Main Navigation Component
  * Persistent navigation across all pages
@@ -42,8 +44,9 @@ const navigationItems: NavItem[] = [
     href: '#',
     icon: '✨',
     children: [
+      { label: 'Meme Generator', href: '/memes', icon: '🎨' },
       { label: 'Mobile Consciousness', href: '/demo/mobile-consciousness.html', icon: '📱' },
-      { label: 'Demo Page', href: '/demo', icon: '🎨' },
+      { label: 'Demo Page', href: '/demo', icon: '🎭' },
     ]
   },
   {

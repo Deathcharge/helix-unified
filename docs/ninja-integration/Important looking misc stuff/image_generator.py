@@ -2,15 +2,16 @@
 AI Image Generation Integration
 Supports DALL-E, Stable Diffusion, and other image generation APIs
 """
-import os
 import asyncio
-import logging
-from typing import Dict, Any, Optional, List
-import requests
 import base64
-from io import BytesIO
+import logging
+import os
 from datetime import datetime
+from io import BytesIO
+from typing import Any, Dict, List, Optional
+
 import openai
+import requests
 
 logger = logging.getLogger(__name__)
 

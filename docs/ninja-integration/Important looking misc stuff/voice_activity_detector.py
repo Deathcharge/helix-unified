@@ -2,13 +2,13 @@
 Voice Activity Detection and Transcription System
 Real-time voice activity monitoring and speech-to-text
 """
-import os
 import asyncio
-import logging
-from typing import Dict, List, Any, Optional
-from datetime import datetime, timedelta
-from collections import defaultdict, deque
 import io
+import logging
+import os
+from collections import defaultdict, deque
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -295,7 +295,7 @@ class WhisperTranscription:
         
         try:
             import openai
-            
+
             # Create file-like object
             audio_file = io.BytesIO(audio_data)
             audio_file.name = "audio.wav"

@@ -17,12 +17,12 @@ Four Phases:
 4. Mantra Seal (Steps 82-108): Lock transformation with mantras
 """
 
-import json
 import asyncio
+import json
 import random
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 # Golden ratio
 PHI = 1.618033988749

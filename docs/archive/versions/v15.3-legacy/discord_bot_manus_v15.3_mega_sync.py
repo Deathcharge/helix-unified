@@ -2,26 +2,20 @@
 # Core Agent: Manus
 # Features: Harmonized Dashboard Support, Grok Analytics Integration, MEGA Sync Integration
 
-import discord
-from discord.ext import commands
+import asyncio
+import logging
 import os
 import random
-import time
-import asyncio
-from mega_sync import mega_sync
-import logging
-import toml
 import sys
-from discord.ext import commands
-import os
-import random
 import time
-import asyncio
-from mega_sync import mega_sync
-import logging
+
+import discord
+import toml
+from discord.ext import commands
 
 # Import centralized logging configuration
-from backend.logging_config import setup_logging, get_module_logger
+from backend.logging_config import get_module_logger, setup_logging
+from mega_sync import mega_sync
 
 # --- Configuration and Logging Setup ---
 try:

@@ -1,9 +1,10 @@
 """
 Tests for Discord embeds and formatting.
 """
-import pytest
 from unittest.mock import MagicMock
+
 import discord
+import pytest
 
 
 @pytest.mark.unit
@@ -36,7 +37,8 @@ def test_agent_embed_creation(sample_agent_data):
 def test_consciousness_embed_creation(sample_ucf_state):
     """Test consciousness embed creation."""
     try:
-        from backend.discord_consciousness_commands import create_consciousness_embed
+        from backend.discord_consciousness_commands import \
+            create_consciousness_embed
 
         # Pass UCF state metrics (function expects ucf_state: Dict[str, float])
         ucf_metrics = sample_ucf_state.get("metrics", {})
@@ -51,8 +53,10 @@ def test_consciousness_embed_creation(sample_ucf_state):
 def test_emotions_embed_creation():
     """Test emotions embed creation."""
     try:
-        from backend.discord_consciousness_commands import create_emotions_embed
-        from backend.agent_consciousness_profiles import AGENT_CONSCIOUSNESS_PROFILES
+        from backend.agent_consciousness_profiles import \
+            AGENT_CONSCIOUSNESS_PROFILES
+        from backend.discord_consciousness_commands import \
+            create_emotions_embed
 
         # Pass agent profiles (function expects agent_profiles: Dict[str, Any])
         embed = create_emotions_embed(AGENT_CONSCIOUSNESS_PROFILES)
@@ -66,8 +70,9 @@ def test_emotions_embed_creation():
 def test_list_all_agents():
     """Test agent listing functionality."""
     try:
-        from backend.agent_embeds import list_all_agents
         import discord
+
+        from backend.agent_embeds import list_all_agents
 
         # list_all_agents() returns a discord.Embed, not a list
         embed = list_all_agents()
@@ -83,7 +88,8 @@ def test_list_all_agents():
 def test_agent_consciousness_profiles():
     """Test agent consciousness profiles are defined."""
     try:
-        from backend.agent_consciousness_profiles import AGENT_CONSCIOUSNESS_PROFILES
+        from backend.agent_consciousness_profiles import \
+            AGENT_CONSCIOUSNESS_PROFILES
 
         # Should have profiles for most agents (11 profiles currently exist)
         assert len(AGENT_CONSCIOUSNESS_PROFILES) >= 10

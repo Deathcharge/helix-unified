@@ -4,14 +4,14 @@ Portal Template Generator
 Generates customized portal instances from base templates with configuration injection
 """
 
+import hashlib
 import json
 import os
 import sys
-from pathlib import Path
-from typing import Dict, Any, Optional
-import hashlib
 import uuid
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, Optional
 
 
 class PortalTemplateGenerator:

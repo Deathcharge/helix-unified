@@ -3,12 +3,13 @@ Copyright (c) 2025 Andrew John Ward. All Rights Reserved.
 PROPRIETARY AND CONFIDENTIAL - See LICENSE file for terms.
 """
 
+import secrets
 from datetime import datetime, timedelta
 from typing import Optional
+
+from app.config import settings
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from app.config import settings
-import secrets
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

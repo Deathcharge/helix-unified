@@ -4,10 +4,11 @@
 IPFS permanent storage, Nostr censorship-resistant social, Matrix E2E encrypted chat
 """
 
-import streamlit as st
-from datetime import datetime
-import random
 import hashlib
+import random
+from datetime import datetime
+
+import streamlit as st
 
 # Page config
 st.set_page_config(

@@ -6,12 +6,13 @@ Example 7: Service Coordination
 Use the Service Integration Coordinator to orchestrate microservices.
 """
 
-import os
-import requests
-import websocket
 import json
+import os
 import threading
 import time
+
+import requests
+import websocket
 
 API_URL = os.getenv("SERVICE_INTEGRATION_URL", "http://localhost:3001")
 WS_URL = os.getenv("SERVICE_INTEGRATION_WS", "ws://localhost:8080")

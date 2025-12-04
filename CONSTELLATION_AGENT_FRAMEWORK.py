@@ -3,16 +3,17 @@
 # Implementation of your Triple Helix Constellation Architecture
 
 import asyncio
-import os
 import json
 import logging
-from datetime import datetime
-from typing import Dict, List, Optional, Any, Tuple
+import os
 from dataclasses import dataclass, field
+from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
+
 import discord
-from discord.ext import commands
 import numpy as np
+from discord.ext import commands
 
 # Configure logging
 logging.basicConfig(

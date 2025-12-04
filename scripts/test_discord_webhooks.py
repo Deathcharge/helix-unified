@@ -7,13 +7,14 @@ Usage:
     python scripts/test_discord_webhooks.py
 """
 
+import asyncio
+import json
 import os
 import sys
-import json
-import asyncio
-import aiohttp
 from datetime import datetime
 from pathlib import Path
+
+import aiohttp
 from dotenv import load_dotenv
 
 # Load environment variables

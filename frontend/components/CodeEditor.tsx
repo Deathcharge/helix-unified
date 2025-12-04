@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * ✏️ Code Editor Component
  * Browser-based code editor using Monaco Editor

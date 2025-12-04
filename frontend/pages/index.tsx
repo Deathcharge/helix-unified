@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * 🌀 Helix Collective - Landing Page
  * helixspiral.work

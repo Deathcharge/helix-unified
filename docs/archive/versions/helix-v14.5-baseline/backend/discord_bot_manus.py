@@ -2,13 +2,14 @@
 # backend/discord_bot_manus.py - Discord Bot Integration
 # Author: Andrew John Ward (Architect)
 
-import discord
-from discord.ext import commands, tasks
+import asyncio
 import json
 import os
-from pathlib import Path
 from datetime import datetime
-import asyncio
+from pathlib import Path
+
+import discord
+from discord.ext import commands, tasks
 
 from agents import AGENTS, get_collective_status, trigger_reflection
 

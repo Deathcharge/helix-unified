@@ -3,21 +3,16 @@ Copyright (c) 2025 Andrew John Ward. All Rights Reserved.
 PROPRIETARY AND CONFIDENTIAL - See LICENSE file for terms.
 """
 
-from fastapi import APIRouter, Depends, Request, HTTPException, status
-from sqlalchemy.orm import Session
 import stripe
-
+from app.config import settings
 from app.database import get_db
 from app.models import User
-from app.schemas import (
-    SubscriptionResponse,
-    CheckoutSessionCreate,
-    CheckoutSessionResponse,
-    PortalSessionResponse
-)
-from app.utils.dependencies import get_current_user
+from app.schemas import (CheckoutSessionCreate, CheckoutSessionResponse,
+                         PortalSessionResponse, SubscriptionResponse)
 from app.services.stripe_service import StripeService
-from app.config import settings
+from app.utils.dependencies import get_current_user
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 

@@ -1,8 +1,10 @@
 # audio_generator.py – ψ-Linked Modulation Version (Browser Safe)
-import numpy as np
-import streamlit as st
 import io
+
+import numpy as np
 import soundfile as sf
+import streamlit as st
+
 
 class AudioEngine:
     def __init__(self, base_freq=136.1, harmonics=[432, 864]):

@@ -3,12 +3,12 @@ Copyright (c) 2025 Andrew John Ward. All Rights Reserved.
 PROPRIETARY AND CONFIDENTIAL - See LICENSE file for terms.
 """
 
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail, Email, To, Content
-from typing import List, Optional
 import logging
+from typing import List, Optional
 
 from app.config import settings
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Content, Email, Mail, To
 
 logger = logging.getLogger(__name__)
 
