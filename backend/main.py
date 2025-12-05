@@ -2422,19 +2422,49 @@ async def test_zapier_webhook(webhook_url: str) -> Dict[str, Any]:
     Returns:
         Success/failure status with response details
     """
-    # Only allow requests to trusted Zapier webhook domains (SSRF protection)
+    # Enhanced SSRF protection - validate webhook URL strictly
     ALLOWED_ZAPIER_HOSTS = {"hooks.zapier.com", "hooks.zapierusercontent.com"}
     try:
         parsed_url = urlparse(webhook_url)
-        if parsed_url.hostname not in ALLOWED_ZAPIER_HOSTS:
+
+        # Validate scheme (only HTTPS allowed)
+        if parsed_url.scheme != "https":
+            raise HTTPException(
+                status_code=400,
+                detail="Webhook URL must use HTTPS protocol for security"
+            )
+
+        # Validate hostname (must be exact match, no IP addresses)
+        hostname = parsed_url.hostname
+        if not hostname or hostname not in ALLOWED_ZAPIER_HOSTS:
             raise HTTPException(
                 status_code=400,
                 detail=f"Webhook URL must be from allowed domains: {', '.join(ALLOWED_ZAPIER_HOSTS)}"
             )
-    except (ValueError, AttributeError):
+
+        # Prevent IP addresses (basic check)
+        if any(char.isdigit() for char in hostname.replace('.', '')):
+            # If hostname has digits, check if it's an IP pattern
+            parts = hostname.split('.')
+            if len(parts) == 4 and all(part.isdigit() for part in parts):
+                raise HTTPException(
+                    status_code=400,
+                    detail="IP addresses are not allowed, use domain names only"
+                )
+
+        # Validate port (must be default HTTPS port or not specified)
+        if parsed_url.port and parsed_url.port != 443:
+            raise HTTPException(
+                status_code=400,
+                detail="Non-standard ports are not allowed for webhooks"
+            )
+
+    except HTTPException:
+        raise
+    except (ValueError, AttributeError) as e:
         raise HTTPException(
             status_code=400,
-            detail="Invalid webhook URL format."
+            detail=f"Invalid webhook URL format: {str(e)}"
         )
     try:
         # Create test payload
