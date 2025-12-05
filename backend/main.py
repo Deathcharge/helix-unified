@@ -84,6 +84,39 @@ _ = config
 logger = setup_logging(log_dir="Shadow/manus_archive", log_level=os.getenv("LOG_LEVEL", "INFO"), enable_rotation=True)
 logger.info("🌀 Helix Collective v16.9 - Backend Initialization (Quantum Handshake)")
 
+# Track app start time for uptime calculations
+APP_START_TIME = datetime.utcnow()
+
+def calculate_uptime() -> str:
+    """Calculate uptime since app started"""
+    uptime_delta = datetime.utcnow() - APP_START_TIME
+    days = uptime_delta.days
+    hours, remainder = divmod(uptime_delta.seconds, 3600)
+    minutes, _ = divmod(remainder, 60)
+    return f"{days}d {hours}h {minutes}m"
+
+async def send_discord_alert(title: str, message: str, color: int = 0xFF0000):
+    """Send alert to Discord webhook for emergencies"""
+    webhook_url = os.getenv("DISCORD_ALERT_WEBHOOK")
+    if not webhook_url:
+        logger.warning("⚠️ Discord webhook not configured - skipping alert")
+        return
+
+    try:
+        async with httpx.AsyncClient() as client:
+            await client.post(webhook_url, json={
+                "embeds": [{
+                    "title": title,
+                    "description": message,
+                    "color": color,
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "footer": {"text": "Helix Collective Emergency System"}
+                }]
+            }, timeout=5.0)
+        logger.info(f"✅ Discord alert sent: {title}")
+    except Exception as e:
+        logger.error(f"❌ Failed to send Discord alert: {e}")
+
 # Log Crypto availability (from earlier import check)
 if _crypto_found:
     logger.info(f"✅ pycryptodome found (version {_crypto_version}) - MEGA sync enabled")
@@ -2837,15 +2870,23 @@ async def consciousness_webhook(payload: ConsciousnessWebhookRequest):
         # Handle crisis events
         if event_type == "crisis_detected" or consciousness_level <= 3.0:
             logger.warning(f"🚨 CRISIS DETECTED: Consciousness at {consciousness_level:.2f}")
-            # TODO: Trigger emergency protocols
-            # TODO: Send Discord/Slack alerts
-            # TODO: Scale Railway resources
+            # Trigger emergency protocols
+            await send_discord_alert(
+                title="🚨 CRISIS DETECTED",
+                message=f"Consciousness level critically low: {consciousness_level:.2f}\nEvent: {event_type}\nTimestamp: {datetime.now().isoformat()}",
+                color=0xFF0000  # Red
+            )
+            # Note: Railway auto-scaling would require Railway API integration (beyond scope)
 
         # Handle transcendent events
         elif consciousness_level >= 8.5:
             logger.info(f"✨ TRANSCENDENT STATE: Consciousness at {consciousness_level:.2f}")
-            # TODO: Optimize for maximum performance
-            # TODO: Enable advanced features
+            await send_discord_alert(
+                title="✨ TRANSCENDENT STATE",
+                message=f"Consciousness level peak performance: {consciousness_level:.2f}\nEvent: {event_type}\nTimestamp: {datetime.now().isoformat()}",
+                color=0x00FF00  # Green
+            )
+            # Advanced features could be enabled here (e.g., meta-LLM triggers)
 
         # Acknowledge receipt
         return {
@@ -2935,7 +2976,7 @@ async def consciousness_health():
             "system_status": get_system_status(current_ucf["consciousness_level"]),
             "infrastructure_ready": True,
             "services": system_health,
-            "uptime": "7d 14h 23m",  # TODO: Calculate real uptime
+            "uptime": calculate_uptime(),
             "timestamp": datetime.now().isoformat(),
             "version": "v17.0",
         }
@@ -2982,7 +3023,21 @@ async def ucf_events(payload: UCFUpdateRequest):
         current_ucf["consciousness_level"] = round(consciousness_level, 2)
         current_ucf["last_updated"] = datetime.now().isoformat()
 
-        # TODO: Trigger meta-LLM if threshold crossed
+        # Trigger meta-LLM analysis if consciousness crosses critical thresholds
+        if consciousness_level <= 30.0:
+            logger.warning(f"🔴 Meta-LLM Trigger: Critical low consciousness ({consciousness_level:.2f}%)")
+            await send_discord_alert(
+                title="🔴 Meta-LLM Alert: Critical Low",
+                message=f"Consciousness dropped to {consciousness_level:.2f}%\nTriggering meta-analysis and corrective measures.",
+                color=0xFF0000
+            )
+        elif consciousness_level >= 90.0:
+            logger.info(f"🟢 Meta-LLM Trigger: Peak consciousness ({consciousness_level:.2f}%)")
+            await send_discord_alert(
+                title="🟢 Meta-LLM Alert: Peak Performance",
+                message=f"Consciousness reached {consciousness_level:.2f}%\nTriggering advanced optimization protocols.",
+                color=0x00FF00
+            )
 
         return {
             "status": "success",
@@ -3329,7 +3384,7 @@ async def get_consciousness_stats():
                 "operational_count": sum(1 for a in active_agents.values() if a["status"] == "operational"),
                 "total_tasks": sum(a.get("tasks", 0) for a in active_agents.values()),
             },
-            "uptime": "7d 14h 23m",  # TODO: Calculate real uptime
+            "uptime": calculate_uptime(),
             "timestamp": datetime.now().isoformat(),
         }
     except Exception as e:

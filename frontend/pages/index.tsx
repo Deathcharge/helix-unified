@@ -23,6 +23,9 @@ export default function Home() {
             🌀 Helix
           </div>
           <div className="flex gap-6 items-center">
+            <Link href="/os" className="text-slate-300 hover:text-white transition font-semibold">
+              🖥️ Web OS
+            </Link>
             <a href="#products" className="text-slate-300 hover:text-white transition">Products</a>
             <a href="#pricing" className="text-slate-300 hover:text-white transition">Pricing</a>
             <a href="#docs" className="text-slate-300 hover:text-white transition">Docs</a>

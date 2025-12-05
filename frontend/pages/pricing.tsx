@@ -49,8 +49,10 @@ export default function Pricing() {
       id: 'hobby',
       name: 'Hobby',
       description: 'For indie developers',
-      price: billingCycle === 'monthly' ? 10 : 100,
+      price: billingCycle === 'monthly' ? 10 : 90,
       monthly: 10,
+      annual: 90,
+      trialDays: 14,
       features: [
         '3 monitored systems',
         '14-day metrics history',
@@ -61,17 +63,19 @@ export default function Pricing() {
         'Export to JSON & CSV',
       ],
       limitations: [],
-      cta: billingCycle === 'monthly' ? 'Start Free Trial' : 'Save 17%',
+      cta: 'Start 14-Day Free Trial',
       ctaAction: () => handleUpgrade('hobby'),
       highlight: false,
-      savings: billingCycle === 'annual' ? 'Save $20/year' : null,
+      savings: billingCycle === 'annual' ? 'Save $30/year (25% off)' : null,
     },
     {
       id: 'starter',
       name: 'Starter',
       description: 'For small teams',
-      price: billingCycle === 'monthly' ? 29 : 290,
+      price: billingCycle === 'monthly' ? 29 : 261,
       monthly: 29,
+      annual: 261,
+      trialDays: 14,
       features: [
         '5 monitored systems',
         '30-day metrics history',
@@ -83,18 +87,20 @@ export default function Pricing() {
         'Webhooks',
       ],
       limitations: [],
-      cta: billingCycle === 'monthly' ? 'Start Free Trial' : 'Save 17%',
+      cta: 'Start 14-Day Free Trial',
       ctaAction: () => handleUpgrade('starter'),
       highlight: false,
-      savings: billingCycle === 'annual' ? 'Save $58/year' : null,
+      savings: billingCycle === 'annual' ? 'Save $87/year (25% off)' : null,
       badge: 'Best Value',
     },
     {
       id: 'pro',
       name: 'Professional',
       description: 'For growing teams',
-      price: billingCycle === 'monthly' ? 79 : 790,
+      price: billingCycle === 'monthly' ? 79 : 711,
       monthly: 79,
+      annual: 711,
+      trialDays: 14,
       features: [
         '20 monitored systems',
         '90-day metrics history',
@@ -107,17 +113,19 @@ export default function Pricing() {
         'Team collaboration (up to 10 members)',
       ],
       limitations: [],
-      cta: billingCycle === 'monthly' ? 'Start Free Trial' : 'Save 17%',
+      cta: 'Start 14-Day Free Trial',
       ctaAction: () => handleUpgrade('pro'),
       highlight: true,
-      savings: billingCycle === 'annual' ? 'Save $158/year' : null,
+      savings: billingCycle === 'annual' ? 'Save $237/year (25% off)' : null,
     },
     {
       id: 'enterprise',
       name: 'Enterprise',
       description: 'For large-scale operations',
-      price: billingCycle === 'monthly' ? 299 : 2990,
+      price: billingCycle === 'monthly' ? 299 : 2691,
       monthly: 299,
+      annual: 2691,
+      trialDays: 14,
       features: [
         'Unlimited monitored systems',
         '1-year metrics history',
@@ -133,9 +141,10 @@ export default function Pricing() {
         'Custom integrations',
       ],
       limitations: [],
-      cta: 'Contact Sales',
+      cta: 'Start 14-Day Free Trial',
       ctaAction: () => (window.location.href = 'mailto:sales@helixspiral.work'),
       highlight: false,
+      savings: billingCycle === 'annual' ? 'Save $897/year (25% off)' : null,
     },
   ];
 
@@ -160,6 +169,9 @@ export default function Pricing() {
             <span>Helix</span>
           </Link>
           <div className="flex items-center gap-4">
+            <Link href="/os" className="text-slate-400 hover:text-slate-200 transition font-semibold">
+              🖥️ Web OS
+            </Link>
             <Link href="/" className="text-slate-400 hover:text-slate-200 transition">
               Home
             </Link>
@@ -170,11 +182,20 @@ export default function Pricing() {
         </div>
       </div>
 
+      {/* Promo Banner */}
+      <div className="bg-gradient-to-r from-purple-600 to-pink-600 py-3">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <p className="text-white font-semibold">
+            🎉 Limited Time: <span className="font-bold">14-Day Free Trial</span> on all paid plans + Use code <span className="font-mono bg-white/20 px-2 py-1 rounded">FIRSTMONTH50</span> for 50% off your first month!
+          </p>
+        </div>
+      </div>
+
       {/* Hero Section */}
       <div className="max-w-5xl mx-auto px-6 py-16 text-center">
         <h1 className="text-5xl md:text-6xl font-bold mb-6">Simple, Transparent Pricing</h1>
         <p className="text-xl text-slate-300 mb-8">
-          Start free. Scale as you grow. No credit card required.
+          Start free. Scale as you grow. No credit card required for trial.
         </p>
 
         {/* Billing Toggle */}
@@ -199,7 +220,7 @@ export default function Pricing() {
           >
             Annual
             <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-xs font-bold text-green-400 whitespace-nowrap">
-              Save 17%
+              Save 25%
             </span>
           </button>
         </div>
@@ -386,8 +407,24 @@ export default function Pricing() {
 
       {/* Footer */}
       <div className="border-t border-purple-800/30 bg-slate-950/50 py-8">
-        <div className="max-w-7xl mx-auto px-6 text-center text-slate-400 text-sm">
-          <p>All prices in USD. Billing occurs at the end of your trial or monthly subscription period.</p>
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <p className="text-slate-400 text-sm mb-4">
+            All prices in USD. Billing occurs at the end of your trial or monthly subscription period.
+          </p>
+          <div className="flex flex-wrap gap-6 justify-center text-sm">
+            <Link href="/legal/terms" className="text-slate-400 hover:text-purple-400 transition">
+              Terms of Service
+            </Link>
+            <Link href="/legal/privacy" className="text-slate-400 hover:text-purple-400 transition">
+              Privacy Policy
+            </Link>
+            <Link href="/legal/acceptable-use" className="text-slate-400 hover:text-purple-400 transition">
+              Acceptable Use
+            </Link>
+            <Link href="/" className="text-slate-400 hover:text-purple-400 transition">
+              Home
+            </Link>
+          </div>
         </div>
       </div>
     </div>
