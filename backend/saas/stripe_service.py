@@ -229,7 +229,7 @@ class StripeService:
 
             subscription = stripe.Subscription.create(**subscription_params)
 
-            logger.info(f"✅ Created subscription: {subscription.id} ({tier}, {billing_cycle}, {trial_days}d trial)")
+            logger.info(f"✅ Created subscription: {subscription.id}")
             return {
                 "status": "success",  # noqa
                 "subscription_id": subscription.id,
