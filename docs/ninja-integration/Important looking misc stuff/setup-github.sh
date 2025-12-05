@@ -6,9 +6,20 @@
 set -e  # Exit on any error
 
 # Configuration
-GITHUB_TOKEN="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"
+# SECURITY: GitHub token must be set as environment variable
+# Set it with: export GITHUB_TOKEN="your_github_token_here"
+# Never commit tokens to version control!
+GITHUB_TOKEN="${GITHUB_TOKEN:-}"
 ORG_NAME="helix-hub-manus"
 REPO_BASE_DIR="/workspace/individual-repos"
+
+# Validate GitHub token is set
+if [ -z "$GITHUB_TOKEN" ]; then
+    echo -e "${RED}[ERROR]${NC} GITHUB_TOKEN environment variable is not set!"
+    echo "Please set it with: export GITHUB_TOKEN=\"your_github_token_here\""
+    echo "Create a token at: https://github.com/settings/tokens"
+    exit 1
+fi
 
 # Colors for output
 RED='\033[0;31m'

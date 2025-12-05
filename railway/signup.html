@@ -293,12 +293,19 @@
 
                 // DEMO MODE: Allow signup with any credentials
                 // TODO: Remove this in production
+                // Security: Use cryptographically secure random for API keys
+                const secureRandom = () => {
+                    const array = new Uint8Array(16);
+                    crypto.getRandomValues(array);
+                    return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+                };
+
                 const demoUser = {
                     id: Date.now().toString(),
                     name: name,
                     email: email,
                     subscription: 'free',
-                    api_key: 'hx_' + Math.random().toString(36).substr(2, 24)
+                    api_key: 'hx_' + secureRandom()
                 };
 
                 localStorage.setItem('helix_auth_token', 'demo_token_' + Date.now());

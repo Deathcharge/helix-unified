@@ -630,19 +630,32 @@ class HelixNavigation {
     
     // ===== NOTIFICATION SYSTEM =====
     showNotification(notification) {
-        // Create notification element
-        const notificationHTML = `
-            <div class="helix-notification ${notification.type || 'info'}">
-                <div class="helix-notification-content">
-                    <div class="helix-notification-title">${notification.title}</div>
-                    <div class="helix-notification-message">${notification.message}</div>
-                </div>
-                <button class="helix-notification-close" onclick="this.parentElement.remove()">
-                    ✕
-                </button>
-            </div>
-        `;
-        
+        // XSS Protection: Create elements safely instead of using innerHTML
+        const notificationDiv = document.createElement('div');
+        notificationDiv.className = `helix-notification ${notification.type || 'info'}`;
+
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'helix-notification-content';
+
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'helix-notification-title';
+        titleDiv.textContent = notification.title; // Safe from XSS
+
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'helix-notification-message';
+        messageDiv.textContent = notification.message; // Safe from XSS
+
+        contentDiv.appendChild(titleDiv);
+        contentDiv.appendChild(messageDiv);
+
+        const closeButton = document.createElement('button');
+        closeButton.className = 'helix-notification-close';
+        closeButton.textContent = '✕';
+        closeButton.onclick = function() { this.parentElement.remove(); };
+
+        notificationDiv.appendChild(contentDiv);
+        notificationDiv.appendChild(closeButton);
+
         // Add to notifications container or create one
         let container = document.getElementById('helixNotifications');
         if (!container) {
@@ -651,8 +664,8 @@ class HelixNavigation {
             container.className = 'helix-notifications';
             document.body.appendChild(container);
         }
-        
-        container.insertAdjacentHTML('beforeend', notificationHTML);
+
+        container.appendChild(notificationDiv);
         
         // Auto-remove after 5 seconds
         setTimeout(() => {
