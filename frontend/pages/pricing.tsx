@@ -169,6 +169,9 @@ export default function Pricing() {
             <span>Helix</span>
           </Link>
           <div className="flex items-center gap-4">
+            <Link href="/os" className="text-slate-400 hover:text-slate-200 transition font-semibold">
+              🖥️ Web OS
+            </Link>
             <Link href="/" className="text-slate-400 hover:text-slate-200 transition">
               Home
             </Link>
