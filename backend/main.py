@@ -7,9 +7,10 @@ import json
 import os
 from contextlib import asynccontextmanager
 from datetime import datetime
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
+import os
 
 import aiohttp
 import httpx
@@ -976,17 +977,29 @@ async def get_ucf_state() -> Dict[str, Any]:
 @app.get("/templates/{file_path:path}")
 async def serve_template(file_path: str) -> FileResponse:
     """Serve HTML templates and assets."""
-    template_path = TEMPLATES_DIR / file_path
-
-    if not template_path.exists():
-        raise HTTPException(status_code=404, detail="Template not found")
-
+    # SECURITY: Robust validation of user-supplied path
+    # 1. Normalize user input to prevent traversal (defense in depth)
+    normalized_path = os.path.normpath(file_path)
+    # 2. Disallow paths that start with '..' or are absolute, or have traversal outside
+    if normalized_path.startswith("..") or os.path.isabs(normalized_path):
+        raise HTTPException(status_code=403, detail="Path traversal or absolute path forbidden")
+    # 3. Use PurePosixPath for strict parsing (web paths use '/')
+    safe_path = PurePosixPath(normalized_path)
+    # 4. Ensure no parent directory traversal after split
+    if any(part == ".." for part in safe_path.parts):
+        raise HTTPException(status_code=403, detail="Path traversal forbidden")
+    # 5. Combine with template directory and resolve
+    template_path = (TEMPLATES_DIR / safe_path).resolve()
     # Security check - ensure path is within templates directory
     try:
-        template_path.resolve().relative_to(TEMPLATES_DIR.resolve())
+        template_path.relative_to(TEMPLATES_DIR.resolve())
     except ValueError:
         raise HTTPException(status_code=403, detail="Access forbidden")
-
+    # Optionally, prevent serving symlinks (defence in depth)
+    if template_path.is_symlink():
+        raise HTTPException(status_code=403, detail="Symlinks are forbidden")
+    if not template_path.exists():
+        raise HTTPException(status_code=404, detail="Template not found")
     return FileResponse(template_path)
 
 
@@ -2499,11 +2512,12 @@ async def test_zapier_webhook(webhook_url: str) -> Dict[str, Any]:
         }
     except Exception as e:
         logger.error(f"Webhook test error: {e}")
+        # SECURITY: Don't expose exception details to API users
         return {
             "success": False,
             "status_code": None,
             "webhook_url": webhook_url[:60] + "...",
-            "message": f"Webhook test failed: {str(e)}",
+            "message": "Webhook test failed due to an error",
             "timestamp": datetime.utcnow().isoformat(),
         }
 

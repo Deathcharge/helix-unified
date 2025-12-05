@@ -346,7 +346,9 @@ async def read_file(path: str = Query(...)):
     success, result = file_manager.read_file(path)
 
     if not success:
-        raise HTTPException(status_code=400, detail=result)
+        # SECURITY: Sanitize error messages to prevent information disclosure
+        safe_error = "Failed to read file" if "Error" in result else result
+        raise HTTPException(status_code=400, detail=safe_error)
 
     return {'path': path, 'content': result}
 
@@ -357,7 +359,9 @@ async def write_file(path: str = Query(...), content: str = ''):
     success, result = file_manager.write_file(path, content)
 
     if not success:
-        raise HTTPException(status_code=400, detail=result)
+        # SECURITY: Sanitize error messages to prevent information disclosure
+        safe_error = "Failed to write file" if "Error" in result else result
+        raise HTTPException(status_code=400, detail=safe_error)
 
     return {'path': path, 'message': result}
 
@@ -368,7 +372,9 @@ async def delete_file(path: str = Query(...)):
     success, result = file_manager.delete_file(path)
 
     if not success:
-        raise HTTPException(status_code=400, detail=result)
+        # SECURITY: Sanitize error messages to prevent information disclosure
+        safe_error = "Failed to delete file" if "Error" in result else result
+        raise HTTPException(status_code=400, detail=safe_error)
 
     return {'message': result}
 
@@ -379,7 +385,9 @@ async def delete_folder(path: str = Query(...)):
     success, result = file_manager.delete_folder(path)
 
     if not success:
-        raise HTTPException(status_code=400, detail=result)
+        # SECURITY: Sanitize error messages to prevent information disclosure
+        safe_error = "Failed to delete folder" if "Error" in result else result
+        raise HTTPException(status_code=400, detail=safe_error)
 
     return {'message': result}
 
@@ -390,7 +398,9 @@ async def create_folder(path: str = Query(...)):
     success, result = file_manager.create_folder(path)
 
     if not success:
-        raise HTTPException(status_code=400, detail=result)
+        # SECURITY: Sanitize error messages to prevent information disclosure
+        safe_error = "Failed to create folder" if "Error" in result else result
+        raise HTTPException(status_code=400, detail=safe_error)
 
     return {'message': result}
 
