@@ -1,13 +1,11 @@
-"""
-🌀 Helix Collective Hub Backend Requirements
-Multi-Agent Knowledge Synchronization
-
-SECURITY UPDATES (2025):
-- python-multipart 0.0.18 (fixes DoS CVE)
-- python-jose 3.4.0 (fixes JWT bomb DoS CVE)
-- fastapi 0.116.0 (starlette compatibility + security)
-- pydantic 2.10.3 (security patches)
-"""
+# Helix Collective Hub Backend Requirements
+# Multi-Agent Knowledge Synchronization
+#
+# SECURITY UPDATES (2025):
+# - python-multipart 0.0.18 (fixes DoS CVE)
+# - python-jose 3.4.0 (fixes JWT bomb DoS CVE)
+# - fastapi 0.116.0 (starlette compatibility + security)
+# - pydantic 2.10.3 (security patches)
 
 fastapi==0.116.0
 uvicorn[standard]==0.34.0

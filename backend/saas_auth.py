@@ -276,10 +276,16 @@ def generate_api_key() -> tuple[str, str, str]:
         (full_key, key_hash, key_prefix) tuple
     """
     # Generate random bytes
-    random_part = secrets.token_hex(32)  # 64 chars
+    random_part = secrets.token_hex(32)  # 64 chars (256 bits entropy)
     full_key = f"{API_KEY_PREFIX}{random_part}"
 
-    # Hash the key for storage (never store plaintext!)
+    # SECURITY NOTE: Using SHA-256 for API key hashing
+    # Acceptable for high-entropy tokens (256 bits) but not ideal
+    # TODO: Migrate to bcrypt/Argon2 for production (requires db schema change)
+    # Current approach: SHA-256 is fast but acceptable given:
+    # 1. API keys have cryptographic randomness (not user-chosen)
+    # 2. 256-bit entropy makes brute force impractical
+    # 3. No password-specific attacks apply (no dictionaries/patterns)
     key_hash = hashlib.sha256(full_key.encode()).hexdigest()
 
     # Prefix for display (e.g., "hx_user_abc123...")
@@ -298,7 +304,9 @@ async def verify_api_key(api_key: str) -> Optional[Dict[str, Any]]:
     Returns:
         User data dict or None if invalid
     """
-    # Hash the provided key
+    # SECURITY NOTE: SHA-256 for verification (matches generation)
+    # See generate_api_key() for security considerations
+    # TODO: Match with bcrypt/Argon2 when migration happens
     key_hash = hashlib.sha256(api_key.encode()).hexdigest()
 
     # Check cache first (faster)
