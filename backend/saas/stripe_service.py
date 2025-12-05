@@ -37,6 +37,8 @@ SUBSCRIPTION_TIERS = {
         "name": "Free",
         "price_id": None,  # No Stripe product
         "monthly_price": 0,
+        "annual_price": 0,
+        "trial_days": 0,
         "features": {
             "systems_monitored": 1,
             "metrics_history_days": 7,
@@ -48,7 +50,10 @@ SUBSCRIPTION_TIERS = {
     "hobby": {
         "name": "Hobby",
         "price_id": os.getenv("STRIPE_PRICE_HOBBY"),
+        "annual_price_id": os.getenv("STRIPE_PRICE_HOBBY_ANNUAL"),
         "monthly_price": 10,
+        "annual_price": 90,  # 25% off = 9 months pricing
+        "trial_days": 14,  # 14-day free trial
         "features": {
             "systems_monitored": 3,
             "metrics_history_days": 14,
@@ -60,7 +65,10 @@ SUBSCRIPTION_TIERS = {
     "starter": {
         "name": "Starter",
         "price_id": os.getenv("STRIPE_PRICE_STARTER"),
+        "annual_price_id": os.getenv("STRIPE_PRICE_STARTER_ANNUAL"),
         "monthly_price": 29,
+        "annual_price": 261,  # 25% off = 9 months pricing ($29 * 9)
+        "trial_days": 14,
         "features": {
             "systems_monitored": 5,
             "metrics_history_days": 30,
@@ -72,7 +80,10 @@ SUBSCRIPTION_TIERS = {
     "pro": {
         "name": "Pro",
         "price_id": os.getenv("STRIPE_PRICE_PRO"),
+        "annual_price_id": os.getenv("STRIPE_PRICE_PRO_ANNUAL"),
         "monthly_price": 79,  # Lowered from $99
+        "annual_price": 711,  # 25% off = 9 months pricing ($79 * 9)
+        "trial_days": 14,
         "features": {
             "systems_monitored": 20,  # Increased from 10
             "metrics_history_days": 90,  # Increased from 30
@@ -85,7 +96,10 @@ SUBSCRIPTION_TIERS = {
     "enterprise": {
         "name": "Enterprise",
         "price_id": os.getenv("STRIPE_PRICE_ENTERPRISE"),
+        "annual_price_id": os.getenv("STRIPE_PRICE_ENTERPRISE_ANNUAL"),
         "monthly_price": 299,  # Lowered from $499
+        "annual_price": 2691,  # 25% off = 9 months pricing ($299 * 9)
+        "trial_days": 14,
         "features": {
             "systems_monitored": 999,
             "metrics_history_days": 365,
@@ -96,6 +110,31 @@ SUBSCRIPTION_TIERS = {
             "white_label": True,
             "dedicated_support": True,
         },
+    },
+}
+
+# ============================================================================
+# PROMOTIONAL CODES
+# ============================================================================
+
+PROMO_CODES = {
+    "FIRSTMONTH50": {
+        "name": "50% Off First Month",
+        "percent_off": 50,
+        "duration": "once",  # Apply once to first invoice
+        "active": True,
+    },
+    "LAUNCH2025": {
+        "name": "Launch Special - 50% Off First Month",
+        "percent_off": 50,
+        "duration": "once",
+        "active": True,
+    },
+    "ANNUAL25": {
+        "name": "25% Off Annual Plans",
+        "percent_off": 25,
+        "duration": "forever",  # Built into annual pricing
+        "active": True,
     },
 }
 
@@ -163,8 +202,8 @@ class StripeService:
     # SUBSCRIPTION MANAGEMENT
     # ========================================================================
 
-    async def create_subscription(self, user_id: str, stripe_customer_id: str, tier: str) -> Dict[str, Any]:
-        """Create subscription for user."""
+    async def create_subscription(self, user_id: str, stripe_customer_id: str, tier: str, billing_cycle: str = "monthly") -> Dict[str, Any]:
+        """Create subscription for user with trial period."""
         tier_config = self.tiers.get(tier)
         if not tier_config:
             return {"status": "error", "error": f"Invalid tier: {tier}"}
@@ -174,19 +213,32 @@ class StripeService:
             return {"status": "success", "tier": "free", "subscription_id": None}
 
         try:
-            subscription = stripe.Subscription.create(
-                customer=stripe_customer_id,
-                items=[{"price": tier_config["price_id"]}],
-                metadata={"user_id": user_id, "tier": tier},
-            )
+            # Choose price ID based on billing cycle
+            price_id = tier_config["annual_price_id"] if billing_cycle == "annual" else tier_config["price_id"]
+            trial_days = tier_config.get("trial_days", 0)
 
-            logger.info(f"✅ Created subscription: {subscription.id} ({tier})")
+            subscription_params = {
+                "customer": stripe_customer_id,
+                "items": [{"price": price_id}],
+                "metadata": {"user_id": user_id, "tier": tier, "billing_cycle": billing_cycle},
+            }
+
+            # Add trial period if configured
+            if trial_days > 0:
+                subscription_params["trial_period_days"] = trial_days
+
+            subscription = stripe.Subscription.create(**subscription_params)
+
+            logger.info(f"✅ Created subscription: {subscription.id} ({tier}, {billing_cycle}, {trial_days}d trial)")
             return {
                 "status": "success",  # noqa
                 "subscription_id": subscription.id,
                 "tier": tier,
+                "billing_cycle": billing_cycle,
+                "trial_days": trial_days,
                 "status": subscription.status,  # noqa
                 "current_period_end": subscription.current_period_end,  # noqa
+                "trial_end": subscription.trial_end if trial_days > 0 else None,  # noqa
             }
 
         except stripe.error.StripeError as e:  # noqa
@@ -422,8 +474,16 @@ class StripeService:
     # CHECKOUT SESSION
     # ========================================================================
 
-    async def create_checkout_session(self, customer_id: str, tier: str, success_url: str, cancel_url: str) -> Dict[str, Any]:
-        """Create Stripe checkout session for subscription."""
+    async def create_checkout_session(
+        self,
+        customer_id: str,
+        tier: str,
+        success_url: str,
+        cancel_url: str,
+        billing_cycle: str = "monthly",
+        promo_code: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Create Stripe checkout session for subscription with trial & promo codes."""
         tier_config = self.tiers.get(tier)
         if not tier_config:
             return {"status": "error", "error": f"Invalid tier: {tier}"}
@@ -432,22 +492,43 @@ class StripeService:
             return {"status": "error", "error": "Cannot checkout for free tier"}
 
         try:
-            session = stripe.checkout.Session.create(
-                customer=customer_id,
-                payment_method_types=["card"],
-                mode="subscription",
-                line_items=[
-                    {
-                        "price": tier_config["price_id"],
-                        "quantity": 1,
-                    }
-                ],
-                success_url=success_url,
-                cancel_url=cancel_url,
-            )
+            # Choose price based on billing cycle
+            price_id = tier_config["annual_price_id"] if billing_cycle == "annual" else tier_config["price_id"]
+            trial_days = tier_config.get("trial_days", 0)
 
-            logger.info(f"✅ Checkout session created: {session.id}")
-            return {"status": "success", "checkout_url": session.url}
+            session_params = {
+                "customer": customer_id,
+                "payment_method_types": ["card"],
+                "mode": "subscription",
+                "line_items": [{"price": price_id, "quantity": 1}],
+                "success_url": success_url,
+                "cancel_url": cancel_url,
+                "subscription_data": {
+                    "metadata": {"tier": tier, "billing_cycle": billing_cycle},
+                },
+            }
+
+            # Add trial period
+            if trial_days > 0:
+                session_params["subscription_data"]["trial_period_days"] = trial_days
+
+            # Add promotional code if provided and valid
+            if promo_code and promo_code in PROMO_CODES:
+                promo = PROMO_CODES[promo_code]
+                if promo["active"]:
+                    session_params["discounts"] = [{"coupon": promo_code}]
+                    logger.info(f"✅ Applied promo code: {promo_code}")
+
+            session = stripe.checkout.Session.create(**session_params)
+
+            logger.info(f"✅ Checkout session created: {session.id} ({tier}, {billing_cycle}, {trial_days}d trial)")
+            return {
+                "status": "success",
+                "checkout_url": session.url,
+                "trial_days": trial_days,
+                "billing_cycle": billing_cycle,
+                "promo_applied": promo_code if promo_code and promo_code in PROMO_CODES else None,
+            }
 
         except stripe.error.StripeError as e:
             logger.error(f"❌ Checkout error: {e}")
