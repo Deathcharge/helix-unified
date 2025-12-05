@@ -288,15 +288,17 @@ class TerminalExecutor:
         if not file:
             return CommandResult('', "❌ Usage: cat <file>", 1, 'cat', False)
 
-        valid, error = self.validate_path(file)
-        if not valid:
-            return CommandResult('', error, 1, 'cat', False)
-
         try:
+            # SECURITY: Resolve path first, then validate to prevent TOCTOU
             if not file.startswith('/'):
                 file = os.path.join(self.current_dir, file)
 
             file = os.path.abspath(file)
+
+            # Validate AFTER path resolution
+            valid, error = self.validate_path(file)
+            if not valid:
+                return CommandResult('', error, 1, 'cat', False)
 
             if not os.path.exists(file):
                 return CommandResult('', f"❌ File not found: {file}", 1, 'cat', False)
@@ -317,15 +319,17 @@ class TerminalExecutor:
         if not name:
             return CommandResult('', "❌ Usage: mkdir <name>", 1, 'mkdir', False)
 
-        valid, error = self.validate_path(name)
-        if not valid:
-            return CommandResult('', error, 1, 'mkdir', False)
-
         try:
+            # SECURITY: Resolve path first, then validate to prevent TOCTOU
             if not name.startswith('/'):
                 name = os.path.join(self.current_dir, name)
 
             name = os.path.abspath(name)
+
+            # Validate AFTER path resolution
+            valid, error = self.validate_path(name)
+            if not valid:
+                return CommandResult('', error, 1, 'mkdir', False)
 
             if os.path.exists(name):
                 return CommandResult('', f"❌ Already exists: {name}", 1, 'mkdir', False)
@@ -341,15 +345,17 @@ class TerminalExecutor:
         if not file:
             return CommandResult('', "❌ Usage: touch <file>", 1, 'touch', False)
 
-        valid, error = self.validate_path(file)
-        if not valid:
-            return CommandResult('', error, 1, 'touch', False)
-
         try:
+            # SECURITY: Resolve path first, then validate to prevent TOCTOU
             if not file.startswith('/'):
                 file = os.path.join(self.current_dir, file)
 
             file = os.path.abspath(file)
+
+            # Validate AFTER path resolution
+            valid, error = self.validate_path(file)
+            if not valid:
+                return CommandResult('', error, 1, 'touch', False)
 
             Path(file).touch()
             return CommandResult(f"✅ Created file: {file}", '', 0, 'touch', True)
@@ -362,15 +368,17 @@ class TerminalExecutor:
         if not file:
             return CommandResult('', "❌ Usage: rm <file>", 1, 'rm', False)
 
-        valid, error = self.validate_path(file)
-        if not valid:
-            return CommandResult('', error, 1, 'rm', False)
-
         try:
+            # SECURITY: Resolve path first, then validate to prevent TOCTOU
             if not file.startswith('/'):
                 file = os.path.join(self.current_dir, file)
 
             file = os.path.abspath(file)
+
+            # Validate AFTER path resolution
+            valid, error = self.validate_path(file)
+            if not valid:
+                return CommandResult('', error, 1, 'rm', False)
 
             if not os.path.exists(file):
                 return CommandResult('', f"❌ File not found: {file}", 1, 'rm', False)
