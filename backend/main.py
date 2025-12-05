@@ -981,10 +981,8 @@ async def serve_template(file_path: str) -> FileResponse:
     user_path = Path(file_path)
     if user_path.is_absolute():
         raise HTTPException(status_code=403, detail="Absolute paths are forbidden")
-    # Normalize and resolve relative path segments before combining
-    normalized_path = Path(os.path.normpath(str(user_path)))
-    template_path = (TEMPLATES_DIR.resolve() / normalized_path).resolve()
-
+    # Combine FIRST, then resolve and check containment
+    template_path = (TEMPLATES_DIR / user_path).resolve()
     # Security check - ensure path is within templates directory
     try:
         template_path.relative_to(TEMPLATES_DIR.resolve())
