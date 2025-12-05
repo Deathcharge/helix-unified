@@ -110,7 +110,7 @@ class StripeService:
 
         except stripe.error.StripeError as e:
             logger.error(f"❌ Stripe error: {e}")
-            return {"status": "error", "error": str(e)}
+            return {"status": "error", "error": "Failed to create customer. Please try again later."}
 
     async def get_customer(self, user_id: str) -> Optional[str]:
         """Get Stripe customer ID for user."""
