@@ -521,7 +521,7 @@ class StripeService:
 
             session = stripe.checkout.Session.create(**session_params)
 
-            logger.info(f"✅ Checkout session created: {session.id} ({tier}, {billing_cycle}, {trial_days}d trial)")
+            logger.info(f"✅ Checkout session created: {session.id}")
             return {
                 "status": "success",
                 "checkout_url": session.url,
