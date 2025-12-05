@@ -7,9 +7,10 @@ import json
 import os
 from contextlib import asynccontextmanager
 from datetime import datetime
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
+import os
 
 import aiohttp
 import httpx
@@ -977,25 +978,28 @@ async def get_ucf_state() -> Dict[str, Any]:
 async def serve_template(file_path: str) -> FileResponse:
     """Serve HTML templates and assets."""
     # SECURITY: Robust validation of user-supplied path
-    # Reject absolute paths immediately
-    user_path = Path(file_path)
-    if user_path.is_absolute():
-        raise HTTPException(status_code=403, detail="Absolute paths are forbidden")
-    # Combine FIRST, then resolve and check containment
-    template_path = (TEMPLATES_DIR / user_path).resolve()
+    # 1. Normalize user input to prevent traversal (defense in depth)
+    normalized_path = os.path.normpath(file_path)
+    # 2. Disallow paths that start with '..' or are absolute, or have traversal outside
+    if normalized_path.startswith("..") or os.path.isabs(normalized_path):
+        raise HTTPException(status_code=403, detail="Path traversal or absolute path forbidden")
+    # 3. Use PurePosixPath for strict parsing (web paths use '/')
+    safe_path = PurePosixPath(normalized_path)
+    # 4. Ensure no parent directory traversal after split
+    if any(part == ".." for part in safe_path.parts):
+        raise HTTPException(status_code=403, detail="Path traversal forbidden")
+    # 5. Combine with template directory and resolve
+    template_path = (TEMPLATES_DIR / safe_path).resolve()
     # Security check - ensure path is within templates directory
     try:
         template_path.relative_to(TEMPLATES_DIR.resolve())
     except ValueError:
         raise HTTPException(status_code=403, detail="Access forbidden")
-
     # Optionally, prevent serving symlinks (defence in depth)
     if template_path.is_symlink():
         raise HTTPException(status_code=403, detail="Symlinks are forbidden")
-
     if not template_path.exists():
         raise HTTPException(status_code=404, detail="Template not found")
-
     return FileResponse(template_path)
 
 
