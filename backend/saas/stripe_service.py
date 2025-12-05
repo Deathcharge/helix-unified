@@ -394,7 +394,107 @@ async def get_stripe_service() -> StripeService:
 
 
 # ============================================================================
+# FASTAPI ROUTER
+# ============================================================================
+
+from fastapi import APIRouter, Depends, HTTPException, Request
+from pydantic import BaseModel
+
+router = APIRouter()
+
+# Request/Response models
+class CreateCustomerRequest(BaseModel):
+    email: str
+    name: str
+    metadata: dict = {}
+
+class CreateSubscriptionRequest(BaseModel):
+    user_id: str
+    tier: str
+
+class CheckoutRequest(BaseModel):
+    tier: str
+    success_url: str = "http://localhost:3000/dashboard?success=true"
+    cancel_url: str = "http://localhost:3000/pricing?canceled=true"
+
+@router.post("/create-customer")
+async def create_customer_endpoint(
+    req: CreateCustomerRequest,
+    service: StripeService = Depends(get_stripe_service)
+):
+    """Create Stripe customer"""
+    user_id = f"user_{datetime.now().timestamp()}"
+    result = await service.create_customer(user_id, req.email, req.name, req.metadata)
+    if result.get("status") == "error":
+        raise HTTPException(status_code=400, detail=result.get("error"))
+    return result
+
+@router.post("/create-subscription")
+async def create_subscription_endpoint(
+    req: CreateSubscriptionRequest,
+    service: StripeService = Depends(get_stripe_service)
+):
+    """Create subscription"""
+    customer_id = await service.get_customer(req.user_id)
+    if not customer_id:
+        raise HTTPException(status_code=404, detail="Customer not found")
+
+    result = await service.create_subscription(req.user_id, customer_id, req.tier)
+    if result.get("status") == "error":
+        raise HTTPException(status_code=400, detail=result.get("error"))
+    return result
+
+@router.get("/subscription/{user_id}")
+async def get_subscription_endpoint(
+    user_id: str,
+    service: StripeService = Depends(get_stripe_service)
+):
+    """Get subscription info"""
+    # TODO: Implement get_user_subscription
+    return {"status": "active", "tier": "pro", "user_id": user_id}
+
+@router.post("/create-checkout-session")
+async def create_checkout_session_endpoint(
+    req: CheckoutRequest,
+    service: StripeService = Depends(get_stripe_service)
+):
+    """Create Stripe checkout session"""
+    user_id = f"user_{datetime.now().timestamp()}"  # TODO: Get from auth
+    result = await service.create_checkout_session(
+        user_id, req.tier, req.success_url, req.cancel_url
+    )
+    if result.get("status") == "error":
+        raise HTTPException(status_code=400, detail=result.get("error"))
+    return result
+
+@router.post("/webhook")
+async def stripe_webhook(request: Request):
+    """Handle Stripe webhooks"""
+    payload = await request.body()
+    sig_header = request.headers.get("stripe-signature")
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, STRIPE_WEBHOOK_SECRET
+        )
+
+        # Handle different event types
+        if event.type == "customer.subscription.created":
+            logger.info(f"✅ Subscription created: {event.data.object.id}")
+        elif event.type == "customer.subscription.updated":
+            logger.info(f"✅ Subscription updated: {event.data.object.id}")
+        elif event.type == "invoice.paid":
+            logger.info(f"✅ Invoice paid: {event.data.object.id}")
+        elif event.type == "customer.subscription.deleted":
+            logger.info(f"✅ Subscription cancelled: {event.data.object.id}")
+
+        return {"received": True}
+    except Exception as e:
+        logger.error(f"❌ Webhook error: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+
+# ============================================================================
 # EXPORTS
 # ============================================================================
 
-__all__ = ["StripeService", "SUBSCRIPTION_TIERS", "get_stripe_service"]
+__all__ = ["StripeService", "SUBSCRIPTION_TIERS", "get_stripe_service", "router"]
