@@ -349,6 +349,9 @@
                     console.error('Checkout error:', error);
                     // DEMO MODE: Simulate successful subscription
                     alert('Pro plan activated! (Demo mode - no actual charge)');
+
+                    // SECURITY WARNING: localStorage is not encrypted
+                    // Production apps should store subscription state on secure backend
                     const userData = JSON.parse(localStorage.getItem('helix_user_data'));
                     userData.subscription = 'pro';
                     localStorage.setItem('helix_user_data', JSON.stringify(userData));

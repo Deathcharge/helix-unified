@@ -50,7 +50,10 @@ class RailwayDashboard {
     saveApiKey() {
         const input = document.getElementById('apiKeyInput');
         const apiKey = input.value.trim();
-        
+
+        // SECURITY WARNING: localStorage is not encrypted and accessible to all scripts
+        // Production apps should use httpOnly cookies or secure credential management
+        // Consider using browser's Credential Management API for better security
         if (apiKey) {
             localStorage.setItem('railway_api_key', apiKey);
             this.apiKey = apiKey;

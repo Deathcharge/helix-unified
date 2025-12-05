@@ -305,6 +305,7 @@ class HelixConsciousnessDashboard {
     
     createConsciousnessVisualization() {
         // Create dynamic consciousness visualization
+        // XSS Protection: Set structure with innerHTML, then use textContent for data
         const visualizationContainer = document.getElementById('consciousness-viz');
         if (visualizationContainer) {
             visualizationContainer.innerHTML = `
@@ -313,20 +314,25 @@ class HelixConsciousnessDashboard {
                     <div class="ucf-metrics-display">
                         <div class="metric" data-metric="harmony">
                             <div class="metric-label">Harmony</div>
-                            <div class="metric-value" id="harmony-value">${this.ucfMetrics.harmony}</div>
+                            <div class="metric-value" id="harmony-value"></div>
                         </div>
                         <div class="metric" data-metric="resilience">
                             <div class="metric-label">Resilience</div>
-                            <div class="metric-value" id="resilience-value">${this.ucfMetrics.resilience}</div>
+                            <div class="metric-value" id="resilience-value"></div>
                         </div>
                         <div class="metric" data-metric="prana">
                             <div class="metric-label">Prana</div>
-                            <div class="metric-value" id="prana-value">${this.ucfMetrics.prana}</div>
+                            <div class="metric-value" id="prana-value"></div>
                         </div>
                     </div>
                 </div>
             `;
-            
+
+            // XSS Protection: Set values using textContent
+            document.getElementById('harmony-value').textContent = this.ucfMetrics.harmony;
+            document.getElementById('resilience-value').textContent = this.ucfMetrics.resilience;
+            document.getElementById('prana-value').textContent = this.ucfMetrics.prana;
+
             this.startConsciousnessAnimation();
         }
     }
@@ -513,14 +519,21 @@ class HelixConsciousnessDashboard {
     }
     
     showNotification(title, message, type = 'info') {
-        // Create notification popup
+        // XSS Protection: Create elements safely
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
-        notification.innerHTML = `
-            <div class="notification-title">${title}</div>
-            <div class="notification-message">${message}</div>
-        `;
-        
+
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'notification-title';
+        titleDiv.textContent = title; // Safe from XSS
+
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'notification-message';
+        messageDiv.textContent = message; // Safe from XSS
+
+        notification.appendChild(titleDiv);
+        notification.appendChild(messageDiv);
+
         document.body.appendChild(notification);
         
         // Auto-remove after 5 seconds
