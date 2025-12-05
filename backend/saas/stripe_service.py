@@ -163,7 +163,8 @@ class StripeService:
 
         except stripe.error.StripeError as e:  # noqa
             logger.error(f"❌ Subscription error: {e}")
-            return {"status": "error", "error": str(e)}
+            # Return a generic error message, not the raw exception text
+            return {"status": "error", "error": "Unable to create subscription at this time."}
 
     async def cancel_subscription(self, subscription_id: str) -> Dict[str, Any]:
         """Cancel subscription."""
