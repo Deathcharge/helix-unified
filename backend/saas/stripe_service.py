@@ -376,7 +376,7 @@ class StripeService:
 
         except stripe.error.StripeError as e:
             logger.error(f"❌ Checkout error: {e}")
-            return {"status": "error", "error": str(e)}
+            return {"status": "error", "error": "Unable to create checkout session."}
 
 
 # ============================================================================
