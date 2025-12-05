@@ -976,14 +976,24 @@ async def get_ucf_state() -> Dict[str, Any]:
 @app.get("/templates/{file_path:path}")
 async def serve_template(file_path: str) -> FileResponse:
     """Serve HTML templates and assets."""
-    # SECURITY: Resolve and validate BEFORE any file operations (TOCTOU fix)
-    template_path = (TEMPLATES_DIR / file_path).resolve()
+    # SECURITY: Robust validation of user-supplied path
+    # Reject absolute paths immediately
+    user_path = Path(file_path)
+    if user_path.is_absolute():
+        raise HTTPException(status_code=403, detail="Absolute paths are forbidden")
+    # Normalize and resolve relative path segments before combining
+    normalized_path = Path(os.path.normpath(str(user_path)))
+    template_path = (TEMPLATES_DIR.resolve() / normalized_path).resolve()
 
     # Security check - ensure path is within templates directory
     try:
         template_path.relative_to(TEMPLATES_DIR.resolve())
     except ValueError:
         raise HTTPException(status_code=403, detail="Access forbidden")
+
+    # Optionally, prevent serving symlinks (defence in depth)
+    if template_path.is_symlink():
+        raise HTTPException(status_code=403, detail="Symlinks are forbidden")
 
     if not template_path.exists():
         raise HTTPException(status_code=404, detail="Template not found")
