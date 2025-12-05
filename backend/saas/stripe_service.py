@@ -45,28 +45,56 @@ SUBSCRIPTION_TIERS = {
             "export_formats": ["json"],
         },
     },
-    "pro": {
-        "name": "Pro",
-        "price_id": os.getenv("STRIPE_PRICE_PRO"),  # Set in .env
-        "monthly_price": 99,
+    "hobby": {
+        "name": "Hobby",
+        "price_id": os.getenv("STRIPE_PRICE_HOBBY"),
+        "monthly_price": 10,
         "features": {
-            "systems_monitored": 10,
+            "systems_monitored": 3,
+            "metrics_history_days": 14,
+            "alerts": True,
+            "api_calls_per_month": 10000,
+            "export_formats": ["json", "csv"],
+        },
+    },
+    "starter": {
+        "name": "Starter",
+        "price_id": os.getenv("STRIPE_PRICE_STARTER"),
+        "monthly_price": 29,
+        "features": {
+            "systems_monitored": 5,
             "metrics_history_days": 30,
             "alerts": True,
-            "api_calls_per_month": 100000,
+            "api_calls_per_month": 50000,
             "export_formats": ["json", "csv", "pdf"],
+        },
+    },
+    "pro": {
+        "name": "Pro",
+        "price_id": os.getenv("STRIPE_PRICE_PRO"),
+        "monthly_price": 79,  # Lowered from $99
+        "features": {
+            "systems_monitored": 20,  # Increased from 10
+            "metrics_history_days": 90,  # Increased from 30
+            "alerts": True,
+            "api_calls_per_month": 200000,  # Increased from 100k
+            "export_formats": ["json", "csv", "pdf"],
+            "custom_integrations": True,
         },
     },
     "enterprise": {
         "name": "Enterprise",
         "price_id": os.getenv("STRIPE_PRICE_ENTERPRISE"),
-        "monthly_price": 499,
+        "monthly_price": 299,  # Lowered from $499
         "features": {
             "systems_monitored": 999,
             "metrics_history_days": 365,
             "alerts": True,
             "api_calls_per_month": 10000000,
             "export_formats": ["json", "csv", "pdf", "xml"],
+            "custom_integrations": True,
+            "white_label": True,
+            "dedicated_support": True,
         },
     },
 }
@@ -197,6 +225,53 @@ class StripeService:
         except stripe.error.StripeError as e:
             logger.error(f"❌ Retrieval error: {e}")
             return {"status": "error", "error": str(e)}
+
+    async def get_user_subscription(self, user_id: str) -> Dict[str, Any]:
+        """Get subscription info for a user."""
+        try:
+            # Get customer ID from local storage
+            customer_id = await self.get_customer(user_id)
+            if not customer_id:
+                # User has no customer = free tier
+                return {
+                    "status": "success",
+                    "tier": "free",
+                    "subscription_id": None,
+                    "user_id": user_id,
+                }
+
+            # List active subscriptions for customer
+            subscriptions = stripe.Subscription.list(
+                customer=customer_id,
+                status="active",
+                limit=1,
+            )
+
+            if not subscriptions.data:
+                # Customer exists but no active subscription = free tier
+                return {
+                    "status": "success",
+                    "tier": "free",
+                    "subscription_id": None,
+                    "user_id": user_id,
+                }
+
+            # Return active subscription details
+            sub = subscriptions.data[0]
+            tier = sub.metadata.get("tier", "free")
+            return {
+                "status": "success",
+                "tier": tier,
+                "subscription_id": sub.id,
+                "subscription_status": sub.status,
+                "current_period_end": sub.current_period_end,
+                "cancel_at_period_end": sub.cancel_at_period_end,
+                "user_id": user_id,
+            }
+
+        except stripe.error.StripeError as e:
+            logger.error(f"❌ Get user subscription error: {e}")
+            return {"status": "error", "error": "Unable to retrieve subscription details."}
 
     # ========================================================================
     # USAGE-BASED BILLING
@@ -451,8 +526,10 @@ async def get_subscription_endpoint(
     service: StripeService = Depends(get_stripe_service)
 ):
     """Get subscription info"""
-    # TODO: Implement get_user_subscription
-    return {"status": "active", "tier": "pro", "user_id": user_id}
+    result = await service.get_user_subscription(user_id)
+    if result.get("status") == "error":
+        raise HTTPException(status_code=400, detail=result.get("error"))
+    return result
 
 @router.post("/create-checkout-session")
 async def create_checkout_session_endpoint(

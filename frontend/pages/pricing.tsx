@@ -38,8 +38,7 @@ export default function Pricing() {
         '7-day metrics history',
         '1,000 API calls/month',
         'Basic dashboard',
-        'Email support',
-        'Community access',
+        'Community support',
       ],
       limitations: ['No real-time alerts', 'Single system only'],
       cta: 'Get Started Free',
@@ -47,34 +46,78 @@ export default function Pricing() {
       highlight: false,
     },
     {
+      id: 'hobby',
+      name: 'Hobby',
+      description: 'For indie developers',
+      price: billingCycle === 'monthly' ? 10 : 100,
+      monthly: 10,
+      features: [
+        '3 monitored systems',
+        '14-day metrics history',
+        '10,000 API calls/month',
+        'Real-time alerts',
+        'Email support',
+        'API access',
+        'Export to JSON & CSV',
+      ],
+      limitations: [],
+      cta: billingCycle === 'monthly' ? 'Start Free Trial' : 'Save 17%',
+      ctaAction: () => handleUpgrade('hobby'),
+      highlight: false,
+      savings: billingCycle === 'annual' ? 'Save $20/year' : null,
+    },
+    {
+      id: 'starter',
+      name: 'Starter',
+      description: 'For small teams',
+      price: billingCycle === 'monthly' ? 29 : 290,
+      monthly: 29,
+      features: [
+        '5 monitored systems',
+        '30-day metrics history',
+        '50,000 API calls/month',
+        'Real-time alerts',
+        'Priority email support',
+        'API access',
+        'Export to JSON, CSV, PDF',
+        'Webhooks',
+      ],
+      limitations: [],
+      cta: billingCycle === 'monthly' ? 'Start Free Trial' : 'Save 17%',
+      ctaAction: () => handleUpgrade('starter'),
+      highlight: false,
+      savings: billingCycle === 'annual' ? 'Save $58/year' : null,
+      badge: 'Best Value',
+    },
+    {
       id: 'pro',
       name: 'Professional',
       description: 'For growing teams',
-      price: billingCycle === 'monthly' ? 99 : 990,
-      monthly: 99,
+      price: billingCycle === 'monthly' ? 79 : 790,
+      monthly: 79,
       features: [
-        '10 monitored systems',
-        '30-day metrics history',
-        '100,000 API calls/month',
+        '20 monitored systems',
+        '90-day metrics history',
+        '200,000 API calls/month',
         'Advanced dashboard with alerts',
         'Real-time notifications',
-        'API access',
+        'API access & webhooks',
         'Priority email support',
         'Custom integrations',
-        'Team collaboration (up to 5 members)',
+        'Team collaboration (up to 10 members)',
       ],
       limitations: [],
       cta: billingCycle === 'monthly' ? 'Start Free Trial' : 'Save 17%',
       ctaAction: () => handleUpgrade('pro'),
       highlight: true,
-      savings: billingCycle === 'annual' ? 'Save $198/year' : null,
+      savings: billingCycle === 'annual' ? 'Save $158/year' : null,
     },
     {
       id: 'enterprise',
       name: 'Enterprise',
       description: 'For large-scale operations',
-      price: billingCycle === 'monthly' ? 499 : 4990,
-      monthly: 499,
+      price: billingCycle === 'monthly' ? 299 : 2990,
+      monthly: 299,
       features: [
         'Unlimited monitored systems',
         '1-year metrics history',
@@ -85,7 +128,7 @@ export default function Pricing() {
         '24/7 phone & email support',
         'Dedicated account manager',
         'Custom SLAs',
-        'Multi-team management',
+        'Unlimited team members',
         'Advanced security features',
         'Custom integrations',
       ],
@@ -93,19 +136,18 @@ export default function Pricing() {
       cta: 'Contact Sales',
       ctaAction: () => (window.location.href = 'mailto:sales@helixspiral.work'),
       highlight: false,
-      badge: 'Most Popular',
     },
   ];
 
   const comparisonFeatures = [
-    { name: 'Monitored Systems', free: '1', pro: '10', enterprise: 'Unlimited' },
-    { name: 'Metrics History', free: '7 days', pro: '30 days', enterprise: '1 year' },
-    { name: 'API Calls/Month', free: '1,000', pro: '100,000', enterprise: '10,000,000' },
-    { name: 'Real-time Alerts', free: 'No', pro: 'Yes', enterprise: 'Yes' },
-    { name: 'Webhooks', free: 'No', pro: 'Yes', enterprise: 'Yes' },
-    { name: 'Team Members', free: '1', pro: 'Up to 5', enterprise: 'Unlimited' },
-    { name: 'White Label', free: 'No', pro: 'No', enterprise: 'Yes' },
-    { name: 'Support', free: 'Community', pro: 'Email', enterprise: '24/7 Phone' },
+    { name: 'Monitored Systems', free: '1', hobby: '3', starter: '5', pro: '20', enterprise: 'Unlimited' },
+    { name: 'Metrics History', free: '7 days', hobby: '14 days', starter: '30 days', pro: '90 days', enterprise: '1 year' },
+    { name: 'API Calls/Month', free: '1,000', hobby: '10,000', starter: '50,000', pro: '200,000', enterprise: '10M' },
+    { name: 'Real-time Alerts', free: 'No', hobby: 'Yes', starter: 'Yes', pro: 'Yes', enterprise: 'Yes' },
+    { name: 'Webhooks', free: 'No', hobby: 'No', starter: 'Yes', pro: 'Yes', enterprise: 'Yes' },
+    { name: 'Team Members', free: '1', hobby: '1', starter: '3', pro: '10', enterprise: 'Unlimited' },
+    { name: 'White Label', free: 'No', hobby: 'No', starter: 'No', pro: 'No', enterprise: 'Yes' },
+    { name: 'Support', free: 'Community', hobby: 'Email', starter: 'Priority', pro: 'Priority', enterprise: '24/7 Phone' },
   ];
 
   return (
@@ -165,7 +207,7 @@ export default function Pricing() {
 
       {/* Pricing Cards */}
       <div className="max-w-7xl mx-auto px-6 pb-16">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-16">
           {plans.map((plan) => (
             <div
               key={plan.id}
@@ -252,21 +294,25 @@ export default function Pricing() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-slate-700/50 bg-slate-800/50">
-                  <th className="px-6 py-4 text-left font-semibold">Feature</th>
-                  <th className="px-6 py-4 text-center font-semibold">Free</th>
-                  <th className="px-6 py-4 text-center font-semibold">Professional</th>
-                  <th className="px-6 py-4 text-center font-semibold">Enterprise</th>
+                  <th className="px-4 py-4 text-left font-semibold text-sm">Feature</th>
+                  <th className="px-3 py-4 text-center font-semibold text-sm">Free</th>
+                  <th className="px-3 py-4 text-center font-semibold text-sm">Hobby</th>
+                  <th className="px-3 py-4 text-center font-semibold text-sm">Starter</th>
+                  <th className="px-3 py-4 text-center font-semibold text-sm">Pro</th>
+                  <th className="px-3 py-4 text-center font-semibold text-sm">Enterprise</th>
                 </tr>
               </thead>
               <tbody>
                 {comparisonFeatures.map((feature, i) => (
                   <tr key={i} className="border-b border-slate-700/30 hover:bg-slate-800/30 transition">
-                    <td className="px-6 py-4 font-medium">{feature.name}</td>
-                    <td className="px-6 py-4 text-center text-slate-300">{feature.free}</td>
-                    <td className="px-6 py-4 text-center text-slate-300 font-semibold text-purple-400">
+                    <td className="px-4 py-4 font-medium text-sm">{feature.name}</td>
+                    <td className="px-3 py-4 text-center text-slate-300 text-sm">{feature.free}</td>
+                    <td className="px-3 py-4 text-center text-slate-300 text-sm">{feature.hobby}</td>
+                    <td className="px-3 py-4 text-center text-slate-300 text-sm">{feature.starter}</td>
+                    <td className="px-3 py-4 text-center text-slate-300 text-sm font-semibold text-purple-400">
                       {feature.pro}
                     </td>
-                    <td className="px-6 py-4 text-center text-slate-300">{feature.enterprise}</td>
+                    <td className="px-3 py-4 text-center text-slate-300 text-sm">{feature.enterprise}</td>
                   </tr>
                 ))}
               </tbody>
