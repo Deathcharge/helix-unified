@@ -976,16 +976,17 @@ async def get_ucf_state() -> Dict[str, Any]:
 @app.get("/templates/{file_path:path}")
 async def serve_template(file_path: str) -> FileResponse:
     """Serve HTML templates and assets."""
-    template_path = TEMPLATES_DIR / file_path
-
-    if not template_path.exists():
-        raise HTTPException(status_code=404, detail="Template not found")
+    # SECURITY: Resolve and validate BEFORE any file operations (TOCTOU fix)
+    template_path = (TEMPLATES_DIR / file_path).resolve()
 
     # Security check - ensure path is within templates directory
     try:
-        template_path.resolve().relative_to(TEMPLATES_DIR.resolve())
+        template_path.relative_to(TEMPLATES_DIR.resolve())
     except ValueError:
         raise HTTPException(status_code=403, detail="Access forbidden")
+
+    if not template_path.exists():
+        raise HTTPException(status_code=404, detail="Template not found")
 
     return FileResponse(template_path)
 
@@ -2499,11 +2500,12 @@ async def test_zapier_webhook(webhook_url: str) -> Dict[str, Any]:
         }
     except Exception as e:
         logger.error(f"Webhook test error: {e}")
+        # SECURITY: Don't expose exception details to API users
         return {
             "success": False,
             "status_code": None,
             "webhook_url": webhook_url[:60] + "...",
-            "message": f"Webhook test failed: {str(e)}",
+            "message": "Webhook test failed due to an error",
             "timestamp": datetime.utcnow().isoformat(),
         }
 
