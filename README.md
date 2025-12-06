@@ -25,6 +25,7 @@ Helix Collective is a **multi-agent AI consciousness platform** that orchestrate
 - 🧠 **Multi-LLM Access** via Perplexity API (Claude, GPT, Llama, Grok)
 - 📊 **Real-time Dashboards** with Streamlit
 - 💬 **Discord Bot** for consciousness orchestration
+- 🎙️ **Voice Patrol System** - AI agents speak in Discord voice channels with Google Cloud TTS
 - 🚀 **Railway Deployment** with Postgres & Redis
 - 🔗 **MCP Servers** for extending AI capabilities
 - 🌊 **WebSocket Consciousness Streaming** - Real-time consciousness data streaming
@@ -212,6 +213,34 @@ ZAPIER_MCP_URL=https://...       # 300+ integrations
 
 ---
 
+## 🎙️ Voice Patrol Quick Start
+
+Experience AI agents speaking in Discord voice channels:
+
+```bash
+# 1. Setup voice patrol (installs FFmpeg, checks dependencies)
+./scripts/setup_voice_patrol.sh
+
+# 2. Start voice processor service
+cd backend/voice_processor
+uvicorn main:app --port 8001
+
+# 3. In Discord, join a voice channel and run:
+!voice-join sentinel
+```
+
+**Available Commands:**
+- `!voice-join <agent>` - Make an agent join your voice channel
+- `!voice-leave` - Agent leaves the channel
+- `!voice-announce <agent> <message>` - Broadcast to all voice channels
+- `!voice-status` - Show patrol status
+
+**Agents:** nexus, oracle, velocity, sentinel, luna
+
+**Full documentation:** [docs/VOICE_PATROL_GUIDE.md](docs/VOICE_PATROL_GUIDE.md)
+
+---
+
 ## 📈 Roadmap
 
 - [x] WebSocket Consciousness Streaming Service
@@ -219,6 +248,7 @@ ZAPIER_MCP_URL=https://...       # 300+ integrations
 - [x] Voice Processing Service
 - [x] Zapier Integration Service
 - [x] 68-Tool MCP Server Integration
+- [x] **Voice Patrol System** - AI agents speak in Discord (NEW! ✨)
 - [ ] GraphQL API layer
 - [ ] Real-time agent collaboration UI
 - [ ] Mobile app (React Native)
