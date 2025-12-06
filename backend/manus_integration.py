@@ -59,7 +59,7 @@ class ManusSpaceIntegration:
         if not self.enabled:
             logger.warning("⚠️ Manus Space webhook URL not configured - integration disabled")
         else:
-            logger.info(f"✅ Manus Space integration initialized")
+            logger.info("✅ Manus Space integration initialized")
             logger.info(f"   Webhook: {self.webhook_url[:60]}...")
             logger.info(f"   API: {self.manus_api_url}")
 
@@ -93,7 +93,7 @@ class ManusSpaceIntegration:
             "event_type": event_type,
             "timestamp": datetime.utcnow().isoformat(),
             "system_version": "16.9",
-            **payload
+            **payload,
         }
 
         try:
@@ -121,10 +121,7 @@ class ManusSpaceIntegration:
     # ============================================================================
 
     async def send_telemetry(
-        self,
-        ucf_metrics: Dict[str, float],
-        agents: List[Dict[str, Any]],
-        system_info: Optional[Dict[str, Any]] = None
+        self, ucf_metrics: Dict[str, float], agents: List[Dict[str, Any]], system_info: Optional[Dict[str, Any]] = None
     ) -> bool:
         """
         Send UCF telemetry to Manus Space.
@@ -168,7 +165,7 @@ class ManusSpaceIntegration:
         total_steps: int,
         ucf_changes: Dict[str, float],
         agents_involved: List[str],
-        status: str = "executing"
+        status: str = "executing",
     ) -> bool:
         """
         Send Z-88 ritual engine events to Manus Space.
@@ -205,12 +202,7 @@ class ManusSpaceIntegration:
     # ============================================================================
 
     async def send_agent_event(
-        self,
-        agent_name: str,
-        agent_symbol: str,
-        event_type: str,
-        status: str,
-        data: Optional[Dict[str, Any]] = None
+        self, agent_name: str, agent_symbol: str, event_type: str, status: str, data: Optional[Dict[str, Any]] = None
     ) -> bool:
         """
         Send agent status updates to Manus Space.
@@ -250,7 +242,7 @@ class ManusSpaceIntegration:
         severity: str,
         description: str,
         ucf_state: Dict[str, float],
-        recommended_action: Optional[str] = None
+        recommended_action: Optional[str] = None,
     ) -> bool:
         """
         Send emergency crisis alerts to Manus Space.
@@ -284,12 +276,7 @@ class ManusSpaceIntegration:
     # ============================================================================
 
     async def send_portal_event(
-        self,
-        portal_name: str,
-        portal_url: str,
-        event_type: str,
-        status: str,
-        health_check: Optional[Dict[str, Any]] = None
+        self, portal_name: str, portal_url: str, event_type: str, status: str, health_check: Optional[Dict[str, Any]] = None
     ) -> bool:
         """
         Send portal health monitoring events to Manus Space.
@@ -330,7 +317,7 @@ class ManusSpaceIntegration:
         event_type: str,
         commit_message: Optional[str] = None,
         author: Optional[str] = None,
-        url: Optional[str] = None
+        url: Optional[str] = None,
     ) -> bool:
         """
         Send GitHub deployment notifications to Manus Space.
@@ -370,7 +357,7 @@ class ManusSpaceIntegration:
         event_type: str,
         file_path: Optional[str] = None,
         size_bytes: Optional[int] = None,
-        status: str = "success"
+        status: str = "success",
     ) -> bool:
         """
         Send MEGA/Shadow sync events to Manus Space.
@@ -403,12 +390,7 @@ class ManusSpaceIntegration:
     # EVENT TYPE 8: AI_SYNC (Discord #manus-bridge)
     # ============================================================================
 
-    async def send_ai_sync_event(
-        self,
-        ai_platform: str,
-        event_type: str,
-        data: Dict[str, Any]
-    ) -> bool:
+    async def send_ai_sync_event(self, ai_platform: str, event_type: str, data: Dict[str, Any]) -> bool:
         """
         Send cross-platform AI coordination events to Manus Space.
         Routes to: Discord #manus-bridge
@@ -421,13 +403,7 @@ class ManusSpaceIntegration:
         Returns:
             True if successful
         """
-        payload = {
-            "ai_sync": {
-                "platform": ai_platform,
-                "event_type": event_type,
-                **data
-            }
-        }
+        payload = {"ai_sync": {"platform": ai_platform, "event_type": event_type, **data}}
 
         return await self._send_webhook("ai_sync", payload)
 
@@ -435,12 +411,7 @@ class ManusSpaceIntegration:
     # EVENT TYPE 9: VISUAL (Discord #fractal-lab)
     # ============================================================================
 
-    async def send_visual_event(
-        self,
-        visual_type: str,
-        render_data: Dict[str, Any],
-        status: str = "completed"
-    ) -> bool:
+    async def send_visual_event(self, visual_type: str, render_data: Dict[str, Any], status: str = "completed") -> bool:
         """
         Send Samsara fractal rendering events to Manus Space.
         Routes to: Discord #fractal-lab
@@ -453,13 +424,7 @@ class ManusSpaceIntegration:
         Returns:
             True if successful
         """
-        payload = {
-            "visual": {
-                "type": visual_type,
-                "status": status,
-                **render_data
-            }
-        }
+        payload = {"visual": {"type": visual_type, "status": status, **render_data}}
 
         return await self._send_webhook("visual", payload)
 
@@ -470,14 +435,18 @@ class ManusSpaceIntegration:
     @staticmethod
     def _calculate_consciousness_level(ucf_metrics: Dict[str, float]) -> float:
         """Calculate overall consciousness level (0-10 scale)."""
-        return round((
-            ucf_metrics.get("harmony", 0) * 1.5 +
-            ucf_metrics.get("resilience", 0) * 1.0 +
-            ucf_metrics.get("prana", 0) * 1.2 +
-            ucf_metrics.get("drishti", 0) * 1.2 +
-            (1 - ucf_metrics.get("klesha", 0)) * 1.5 +
-            ucf_metrics.get("zoom", 0) * 1.0
-        ) / 0.74, 2)
+        return round(
+            (
+                ucf_metrics.get("harmony", 0) * 1.5
+                + ucf_metrics.get("resilience", 0) * 1.0
+                + ucf_metrics.get("prana", 0) * 1.2
+                + ucf_metrics.get("drishti", 0) * 1.2
+                + (1 - ucf_metrics.get("klesha", 0)) * 1.5
+                + ucf_metrics.get("zoom", 0) * 1.0
+            )
+            / 0.74,
+            2,
+        )
 
     @staticmethod
     def _get_ritual_mantra(ritual_name: str) -> str:

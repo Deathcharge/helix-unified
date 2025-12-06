@@ -2,14 +2,15 @@
 # Visual control center for Andrew's 4-Railway automation empire with Claude AI + Mobile Management
 # Author: Claude + Andrew John Ward + SuperNinja AI
 
-import streamlit as st
-import requests
-from anthropic import Anthropic
-import plotly.graph_objects as go
-from datetime import datetime
 import json
 import os
 import time
+from datetime import datetime
+
+import plotly.graph_objects as go
+import requests
+import streamlit as st
+from anthropic import Anthropic
 
 # Initialize Claude (use secrets or env var)
 try:

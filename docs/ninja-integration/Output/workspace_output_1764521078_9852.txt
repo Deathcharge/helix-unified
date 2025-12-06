@@ -1,0 +1,4 @@
+[feature/qol-feature-upgrade-v2 db78de6] 📋 Add deployment verification scripts and push-ready backup
+ 2 files changed, 137 insertions(+)
+ create mode 100644 PUSH_READY_BACKUP.md
+ create mode 100755 scripts/verify-deployment-ready.sh

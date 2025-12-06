@@ -4,8 +4,8 @@ Generate full HTML pages for all agent profile cards.
 Wraps Tailwind CSS components in proper HTML structure.
 """
 
-from pathlib import Path
 import os
+from pathlib import Path
 
 # Paths
 TEMPLATES_DIR = Path(__file__).parent.parent / "templates"

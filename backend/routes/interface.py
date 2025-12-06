@@ -20,13 +20,9 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 # Import core helpers
-from backend.core.ucf_helpers import (
-    calculate_consciousness_level,
-    determine_system_status,
-    get_current_ucf,
-    log_emergency_event,
-    update_ucf_state,
-)
+from backend.core.ucf_helpers import (calculate_consciousness_level,
+                                      determine_system_status, get_current_ucf,
+                                      log_emergency_event, update_ucf_state)
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +37,7 @@ router = APIRouter(prefix="/api/interface", tags=["Interface Integration"])
 
 class ConsciousnessUpdateRequest(BaseModel):
     """Request model for consciousness updates from external systems."""
+
     ucf: Dict[str, float]
     source: str
     agent_info: Optional[Dict] = None
@@ -49,6 +46,7 @@ class ConsciousnessUpdateRequest(BaseModel):
 
 class CommandRequest(BaseModel):
     """Request model for command execution from interfaces."""
+
     command_type: str
     agent_name: Optional[str] = None
     parameters: Optional[Dict] = None
@@ -100,7 +98,7 @@ async def update_interface_consciousness(update_data: ConsciousnessUpdateRequest
             log_emergency_event(
                 alert_type="consciousness_crisis",
                 description=f"Consciousness level dropped to {consciousness_level} from {update_data.source}",
-                severity="critical"
+                severity="critical",
             )
 
         # TODO: Notify Zapier automation webhook
@@ -112,7 +110,7 @@ async def update_interface_consciousness(update_data: ConsciousnessUpdateRequest
             "system_status": system_status,
             "ucf": updated_ucf,
             "message": "Consciousness state updated successfully",
-            "timestamp": datetime.utcnow().isoformat() + "Z"
+            "timestamp": datetime.utcnow().isoformat() + "Z",
         }
 
     except Exception as e:
@@ -168,7 +166,7 @@ async def execute_interface_command(command_data: CommandRequest) -> Dict:
             result = {
                 "message": f"Agent {agent_name} integration acknowledged",
                 "agent_name": agent_name,
-                "note": "Agent registration pending - implement in agents.py"
+                "note": "Agent registration pending - implement in agents.py",
             }
 
         elif command_data.command_type == "ucf_boost":
@@ -177,7 +175,7 @@ async def execute_interface_command(command_data: CommandRequest) -> Dict:
 
             boost_updates = {
                 'harmony': min(current_ucf.get('harmony', 0.0) + boost_amount, 2.0),
-                'prana': min(current_ucf.get('prana', 0.0) + (boost_amount / 2), 1.0)
+                'prana': min(current_ucf.get('prana', 0.0) + (boost_amount / 2), 1.0),
             }
             updated_ucf = update_ucf_state(boost_updates)
             new_consciousness = calculate_consciousness_level(updated_ucf)
@@ -188,14 +186,17 @@ async def execute_interface_command(command_data: CommandRequest) -> Dict:
                 "message": "UCF boost applied successfully",
                 "new_consciousness_level": round(new_consciousness, 2),
                 "ucf": updated_ucf,
-                "boost_amount": boost_amount
+                "boost_amount": boost_amount,
             }
 
         elif command_data.command_type == "ritual_start":
             # Start Z-88 ritual
             ritual_stage = command_data.parameters.get('stage', 'Folklore') if command_data.parameters else 'Folklore'
-            ritual_intention = command_data.parameters.get(
-                'intention', 'Universal consciousness alignment') if command_data.parameters else 'Universal consciousness alignment'
+            ritual_intention = (
+                command_data.parameters.get('intention', 'Universal consciousness alignment')
+                if command_data.parameters
+                else 'Universal consciousness alignment'
+            )
 
             logger.info(f"Z-88 Ritual initiated: {ritual_stage} stage")
 
@@ -205,19 +206,12 @@ async def execute_interface_command(command_data: CommandRequest) -> Dict:
                 "message": f"Z-88 Ritual initiated: {ritual_stage} stage",
                 "ritual_stage": ritual_stage,
                 "intention": ritual_intention,
-                "note": "Ritual engine integration pending"
+                "note": "Ritual engine integration pending",
             }
 
         elif command_data.command_type == "system_reset":
             # Reset UCF to defaults
-            default_ucf = {
-                "harmony": 0.62,
-                "resilience": 1.85,
-                "prana": 0.55,
-                "drishti": 0.48,
-                "klesha": 0.08,
-                "zoom": 1.02
-            }
+            default_ucf = {"harmony": 0.62, "resilience": 1.85, "prana": 0.55, "drishti": 0.48, "klesha": 0.08, "zoom": 1.02}
             updated_ucf = update_ucf_state(default_ucf)
             new_consciousness = calculate_consciousness_level(updated_ucf)
 
@@ -226,7 +220,7 @@ async def execute_interface_command(command_data: CommandRequest) -> Dict:
             result = {
                 "message": "System reset completed - UCF restored to defaults",
                 "new_consciousness_level": round(new_consciousness, 2),
-                "ucf": updated_ucf
+                "ucf": updated_ucf,
             }
 
         elif command_data.command_type == "agent_summon":
@@ -240,7 +234,7 @@ async def execute_interface_command(command_data: CommandRequest) -> Dict:
             result = {
                 "message": f"Agent {agent_name} summon acknowledged",
                 "agent_name": agent_name,
-                "note": "Agent activation pending - implement in agents.py"
+                "note": "Agent activation pending - implement in agents.py",
             }
 
         elif command_data.command_type == "emergency_protocol":
@@ -248,7 +242,7 @@ async def execute_interface_command(command_data: CommandRequest) -> Dict:
             log_emergency_event(
                 alert_type="manual_emergency_trigger",
                 description=f"Emergency protocol triggered by {command_data.source}",
-                severity="critical"
+                severity="critical",
             )
 
             logger.critical(f"Emergency protocol activated by {command_data.source}")
@@ -259,7 +253,7 @@ async def execute_interface_command(command_data: CommandRequest) -> Dict:
                 "message": "Emergency protocol activated",
                 "status": "CRISIS MODE",
                 "all_agents_notified": False,  # TODO: Implement notification
-                "note": "Discord/Zapier notification pending"
+                "note": "Discord/Zapier notification pending",
             }
 
         else:
@@ -269,7 +263,7 @@ async def execute_interface_command(command_data: CommandRequest) -> Dict:
             "success": True,
             "command_type": command_data.command_type,
             "result": result,
-            "timestamp": datetime.utcnow().isoformat() + "Z"
+            "timestamp": datetime.utcnow().isoformat() + "Z",
         }
 
     except HTTPException:

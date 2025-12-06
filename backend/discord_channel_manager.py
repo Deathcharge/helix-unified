@@ -128,9 +128,7 @@ class ChannelManager:
 
         return channel
 
-    async def create_agent_workspace(
-        self, agent_name: str, purpose: str, temporary: bool = False
-    ) -> discord.TextChannel:
+    async def create_agent_workspace(self, agent_name: str, purpose: str, temporary: bool = False) -> discord.TextChannel:
         """
         Create a workspace channel for an agent.
 
@@ -205,7 +203,7 @@ class ChannelManager:
                     event_title="Channel Created: Agent Workspace",
                     event_type="channel_lifecycle",
                     agent_name="ChannelManager",
-                    description=f"Created {agent_name} workspace ({channel.mention}) - Purpose: {purpose} {'(temporary)' if temporary else ''}",
+                    description=f"Created {agent_name} workspace ({channel.mention}) - Purpose: {purpose} {'(temporary)' if temporary else ''}",  # noqa: E501
                     ucf_snapshot=json.dumps(
                         {
                             "channel_id": channel.id,
@@ -325,7 +323,7 @@ class ChannelManager:
                     event_title="Channel Created: Cross-AI Sync",
                     event_type="channel_lifecycle",
                     agent_name="ChannelManager",
-                    description=f"Created cross-AI channel ({channel.mention}) - AIs: {', '.join(ai_names)} - Purpose: {purpose}",
+                    description=f"Created cross-AI channel ({channel.mention}) - AIs: {', '.join(ai_names)} - Purpose: {purpose}",  # noqa: E501
                     ucf_snapshot=json.dumps(
                         {
                             "channel_id": channel.id,
@@ -382,7 +380,7 @@ class ChannelManager:
                     event_title="Channel Cleanup: Expired Channels",
                     event_type="channel_lifecycle",
                     agent_name="ChannelManager",
-                    description=f"Cleaned up {deleted_count['ritual_spaces']} ritual spaces, {deleted_count['agent_workspaces']} workspaces, {deleted_count['temporary_channels']} temporary channels",
+                    description=f"Cleaned up {deleted_count['ritual_spaces']} ritual spaces, {deleted_count['agent_workspaces']} workspaces, {deleted_count['temporary_channels']} temporary channels",  # noqa: E501
                     ucf_snapshot=json.dumps(
                         {
                             "deleted_count": deleted_count,

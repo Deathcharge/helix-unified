@@ -12,7 +12,7 @@ Version: 15.5.0
 import asyncio
 import logging
 from datetime import datetime
-from typing import Any, Dict, Set
+from typing import Any, Dict, Optional, Set
 
 from fastapi import WebSocket, WebSocketDisconnect
 
@@ -36,7 +36,7 @@ class ConnectionManager:
         self._broadcast_queue: asyncio.Queue = asyncio.Queue()
         self._is_broadcasting = False
 
-    async def connect(self, websocket: WebSocket, client_id: str = None):
+    async def connect(self, websocket: WebSocket, client_id: Optional[str] = None):
         """Accept new WebSocket connection and register client."""
         await websocket.accept()
         self.active_connections.add(websocket)

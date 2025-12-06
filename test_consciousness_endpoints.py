@@ -4,10 +4,11 @@ Run this after deployment to validate all Railway consciousness endpoints
 Author: Andrew John Ward + Claude AI
 """
 
-import requests
 import json
-from datetime import datetime
 import time
+from datetime import datetime
+
+import requests
 
 # Update this with your Railway URL
 BASE_URL = "https://helix-unified-production.up.railway.app"

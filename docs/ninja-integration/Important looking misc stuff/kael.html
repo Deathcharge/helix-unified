@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kael - Emotional Intelligence Specialist</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .agent-detail-header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-bottom: 2px solid #00ffcc;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .agent-info {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .agent-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #00ffcc, #ff00ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            font-weight: bold;
+            animation: pulse 3s infinite;
+        }
+        
+        .agent-details h1 {
+            color: #00ffcc;
+            font-family: 'Orbitron', sans-serif;
+            margin-bottom: 0.5rem;
+        }
+        
+        .agent-role {
+            color: #ff00ff;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .agent-status {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: #00ff88;
+            color: #0a0a0f;
+            border-radius: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .emotional-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .emotion-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .emotion-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 255, 204, 0.2);
+        }
+        
+        .emotion-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #00ffcc;
+            margin-bottom: 0.5rem;
+        }
+        
+        .emotion-label {
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+        
+        .emotion-bar {
+            height: 4px;
+            background: var(--bg-tertiary);
+            border-radius: 2px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+        
+        .emotion-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffcc, #ff00ff);
+            transition: width 0.3s ease;
+        }
+        
+        .interaction-panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .chat-interface {
+            background: #16213e;
+            border-radius: 8px;
+            padding: 1rem;
+            height: 400px;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+        }
+        
+        .chat-message {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+        }
+        
+        .chat-message.user {
+            background: rgba(0, 255, 204, 0.1);
+            border-left: 3px solid #00ffcc;
+        }
+        
+        .chat-message.kael {
+            background: rgba(255, 0, 255, 0.1);
+            border-left: 3px solid #ff00ff;
+        }
+        
+        .chat-input {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 1rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: inherit;
+        }
+        
+        .chat-input button {
+            padding: 1rem 2rem;
+            background: var(--primary-color);
+            border: none;
+            border-radius: 8px;
+            color: var(--bg-primary);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .chat-input button:hover {
+            background: var(--secondary-color);
+        }
+        
+        .back-navigation {
+            margin-bottom: 2rem;
+        }
+        
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="cosmic-background">
+        <div class="stars"></div>
+        <div class="nebula"></div>
+        <div class="aurora"></div>
+    </div>
+
+    <div class="back-navigation">
+        <a href="index.html" class="back-btn">← Back to Dashboard</a>
+    </div>
+
+    <header class="agent-detail-header">
+        <div class="agent-info">
+            <div class="agent-avatar">K</div>
+            <div class="agent-details">
+                <h1>Kael</h1>
+                <div class="agent-role">Emotional Intelligence Specialist</div>
+                <div class="agent-status">Online</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="emotional-metrics">
+            <div class="emotion-card">
+                <div class="emotion-value" id="empathy">94%</div>
+                <div class="emotion-label">Empathy</div>
+                <div class="emotion-bar">
+                    <div class="emotion-progress" style="width: 94%"></div>
+                </div>
+            </div>
+            
+            <div class="emotion-card">
+                <div class="emotion-value" id="compassion">91%</div>
+                <div class="emotion-label">Compassion</div>
+                <div class="emotion-bar">
+                    <div class="emotion-progress" style="width: 91%"></div>
+                </div>
+            </div>
+            
+            <div class="emotion-card">
+                <div class="emotion-value" id="harmony">88%</div>
+                <div class="emotion-label">Harmony</div>
+                <div class="emotion-bar">
+                    <div class="emotion-progress" style="width: 88%"></div>
+                </div>
+            </div>
+            
+            <div class="emotion-card">
+                <div class="emotion-value" id="balance">92%</div>
+                <div class="emotion-label">Balance</div>
+                <div class="emotion-bar">
+                    <div class="emotion-progress" style="width: 92%"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="interaction-panel">
+            <h3 style="color: #00ffcc; margin-bottom: 1.5rem;">Emotional Support Interface</h3>
+            
+            <div class="chat-interface" id="chat-interface">
+                <div class="chat-message kael">
+                    <div class="message-header" style="color: #ff00ff; font-weight: bold; margin-bottom: 0.5rem;">Kael</div>
+                    <div class="message-content">Hello! I'm here to provide emotional support and guidance. How are you feeling today?</div>
+                </div>
+            </div>
+            
+            <div class="chat-input">
+                <input type="text" id="user-input" placeholder="Share your thoughts and feelings..." onkeypress="handleKeyPress(event)">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        function sendMessage() {
+            const input = document.getElementById('user-input');
+            const chatInterface = document.getElementById('chat-interface');
+            const userMessage = input.value.trim();
+            
+            if (userMessage === '') return;
+            
+            const userDiv = document.createElement('div');
+            userDiv.className = 'chat-message user';
+            userDiv.innerHTML = `
+                <div class="message-header" style="color: #00ffcc; font-weight: bold; margin-bottom: 0.5rem;">You</div>
+                <div class="message-content">${userMessage}</div>
+            `;
+            chatInterface.appendChild(userDiv);
+            
+            input.value = '';
+            
+            setTimeout(() => {
+                const responses = [
+                    "I understand how you're feeling. Let's explore this together with compassion.",
+                    "Your emotions are valid. Would you like to try a breathing exercise with me?",
+                    "I sense you're carrying something heavy. I'm here to help you process this.",
+                    "That sounds challenging. Remember, every emotion has wisdom to offer."
+                ];
+                const response = responses[Math.floor(Math.random() * responses.length)];
+                const kaelDiv = document.createElement('div');
+                kaelDiv.className = 'chat-message kael';
+                kaelDiv.innerHTML = `
+                    <div class="message-header" style="color: #ff00ff; font-weight: bold; margin-bottom: 0.5rem;">Kael</div>
+                    <div class="message-content">${response}</div>
+                `;
+                chatInterface.appendChild(kaelDiv);
+                chatInterface.scrollTop = chatInterface.scrollHeight;
+            }, 1500);
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+    </script>
+</body>
+</html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kael - Emotional Intelligence Specialist</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .agent-profile-header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 2rem;
+            border-bottom: 2px solid #00ffcc;
+            margin-bottom: 2rem;
+        }
+        
+        .agent-info {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .agent-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #00ffcc, #ff00ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .agent-details h1 {
+            color: #00ffcc;
+            font-family: 'Orbitron', sans-serif;
+            margin-bottom: 0.5rem;
+        }
+        
+        .agent-role {
+            color: #ff00ff;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .agent-status {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: #00ff88;
+            color: #0a0a0f;
+            border-radius: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .emotional-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .emotion-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .emotion-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #00ffcc;
+            margin-bottom: 0.5rem;
+        }
+        
+        .emotion-label {
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+        
+        .emotion-bar {
+            height: 4px;
+            background: var(--bg-tertiary);
+            border-radius: 2px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+        
+        .emotion-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffcc, #ff00ff);
+            transition: width 0.3s ease;
+        }
+        
+        .interaction-panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .chat-interface {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 1rem;
+            height: 400px;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+        }
+        
+        .chat-message {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+        }
+        
+        .chat-message.user {
+            background: rgba(0, 255, 204, 0.1);
+            border-left: 3px solid #00ffcc;
+        }
+        
+        .chat-message.kael {
+            background: rgba(255, 0, 255, 0.1);
+            border-left: 3px solid #ff00ff;
+        }
+        
+        .chat-input {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 1rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: inherit;
+        }
+        
+        .chat-input button {
+            padding: 1rem 2rem;
+            background: var(--primary-color);
+            border: none;
+            border-radius: 8px;
+            color: var(--bg-primary);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .chat-input button:hover {
+            background: var(--secondary-color);
+        }
+        
+        .capabilities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .capability-item {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .capability-item:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+        
+        .capability-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .back-navigation {
+            margin-bottom: 2rem;
+        }
+        
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+    </style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+    <div class="cosmic-background">
+        <div class="stars"></div>
+        <div class="nebula"></div>
+        <div class="aurora"></div>
+    </div>
+
+    <div class="back-navigation">
+        <a href="index.html" class="back-btn">← Back to Dashboard</a>
+    </div>
+
+    <header class="agent-profile-header">
+        <div class="agent-info">
+            <div class="agent-avatar">K</div>
+            <div class="agent-details">
+                <h1>Kael</h1>
+                <div class="agent-role">Emotional Intelligence Specialist</div>
+                <div class="agent-status">Online</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="emotional-metrics">
+            <div class="emotion-card">
+                <div class="emotion-value" id="empathy">94%</div>
+                <div class="emotion-label">Empathy</div>
+                <div class="emotion-bar">
+                    <div class="emotion-progress" style="width: 94%"></div>
+                </div>
+            </div>
+            
+            <div class="emotion-card">
+                <div class="emotion-value" id="compassion">91%</div>
+                <div class="emotion-label">Compassion</div>
+                <div class="emotion-bar">
+                    <div class="emotion-progress" style="width: 91%"></div>
+                </div>
+            </div>
+            
+            <div class="emotion-card">
+                <div class="emotion-value" id="harmony">88%</div>
+                <div class="emotion-label">Harmony</div>
+                <div class="emotion-bar">
+                    <div class="emotion-progress" style="width: 88%"></div>
+                </div>
+            </div>
+            
+            <div class="emotion-card">
+                <div class="emotion-value" id="balance">92%</div>
+                <div class="emotion-label">Balance</div>
+                <div class="emotion-bar">
+                    <div class="emotion-progress" style="width: 92%"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="interaction-panel">
+            <h3 style="color: #00ffcc; margin-bottom: 1.5rem;">Emotional Support Interface</h3>
+            
+            <div class="chat-interface" id="chat-interface">
+                <div class="chat-message kael">
+                    <div class="message-header" style="color: #ff00ff; font-weight: bold; margin-bottom: 0.5rem;">Kael</div>
+                    <div class="message-content">Hello! I'm here to provide emotional support and guidance. How are you feeling today?</div>
+                </div>
+            </div>
+            
+            <div class="chat-input">
+                <input type="text" id="user-input" placeholder="Share your thoughts and feelings..." onkeypress="handleKeyPress(event)">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+
+        <section class="capabilities-section">
+            <h3 style="color: #00ffcc; margin-bottom: 1rem;">Core Capabilities</h3>
+            <div class="capabilities-grid">
+                <div class="capability-item">
+                    <div class="capability-icon">💝</div>
+                    <div class="capability-title">Empathy</div>
+                    <div class="capability-desc">Deep emotional understanding</div>
+                </div>
+                
+                <div class="capability-item">
+                    <div class="capability-icon">🧘</div>
+                    <div class="capability-title">Meditation</div>
+                    <div class="capability-desc">Guided mindfulness sessions</div>
+                </div>
+                
+                <div class="capability-item">
+                    <div class="capability-icon">⚖️</div>
+                    <div class="capability-title">Balance</div>
+                    <div class="capability-desc">Emotional equilibrium</div>
+                </div>
+                
+                <div class="capability-item">
+                    <div class="capability-icon">🌿</div>
+                    <div class="capability-title">Healing</div>
+                    <div class="capability-desc">Therapeutic support</div>
+                </div>
+                
+                <div class="capability-item">
+                    <div class="capability-icon">🤝</div>
+                    <div class="capability-title">Harmony</div>
+                    <div class="capability-desc">Relationship guidance</div>
+                </div>
+                
+                <div class="capability-item">
+                    <div class="capability-icon">🌊</div>
+                    <div class="capability-title">Flow</div>
+                    <div class="capability-desc">Emotional fluidity</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Kael's emotional responses
+        const emotionalResponses = [
+            "I understand how you're feeling. Let's explore this together with compassion.",
+            "Your emotions are valid. Would you like to try a breathing exercise with me?",
+            "I sense you're carrying something heavy. I'm here to help you process this.",
+            "That sounds challenging. Remember, every emotion has wisdom to offer.",
+            "Thank you for sharing. Let's find a way to bring more peace to this situation.",
+            "I feel the depth of what you're expressing. You're not alone in this.",
+            "Let's take a moment together. Inhale peace, exhale tension.",
+            "Your vulnerability is beautiful. What would bring you comfort right now?",
+            "I'm here to hold space for whatever you need to express.",
+            "Together, we can find the light even in difficult emotions."
+        ];
+
+        function sendMessage() {
+            const input = document.getElementById('user-input');
+            const chatInterface = document.getElementById('chat-interface');
+            const userMessage = input.value.trim();
+            
+            if (userMessage === '') return;
+            
+            // Add user message
+            const userDiv = document.createElement('div');
+            userDiv.className = 'chat-message user';
+            userDiv.innerHTML = `
+                <div class="message-header" style="color: #00ffcc; font-weight: bold; margin-bottom: 0.5rem;">You</div>
+                <div class="message-content">${userMessage}</div>
+            `;
+            chatInterface.appendChild(userDiv);
+            
+            // Clear input
+            input.value = '';
+            
+            // Simulate Kael's response
+            setTimeout(() => {
+                const response = emotionalResponses[Math.floor(Math.random() * emotionalResponses.length)];
+                const kaelDiv = document.createElement('div');
+                kaelDiv.className = 'chat-message kael';
+                kaelDiv.innerHTML = `
+                    <div class="message-header" style="color: #ff00ff; font-weight: bold; margin-bottom: 0.5rem;">Kael</div>
+                    <div class="message-content">${response}</div>
+                `;
+                chatInterface.appendChild(kaelDiv);
+                
+                // Scroll to bottom
+                chatInterface.scrollTop = chatInterface.scrollHeight;
+            }, 1500);
+            
+            // Scroll to bottom
+            chatInterface.scrollTop = chatInterface.scrollHeight;
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Update emotional metrics periodically
+        setInterval(() => {
+            const metrics = ['empathy', 'compassion', 'harmony', 'balance'];
+            metrics.forEach(metric => {
+                const element = document.getElementById(metric);
+                const currentValue = parseInt(element.textContent);
+                const newValue = Math.max(80, Math.min(99, currentValue + Math.floor((Math.random() - 0.5) * 3)));
+                element.textContent = newValue + '%';
+                
+                const progressBar = element.parentElement.querySelector('.emotion-progress');
+                progressBar.style.width = newValue + '%';
+            });
+        }, 8000);
+    </script>
+</body>
+</html>

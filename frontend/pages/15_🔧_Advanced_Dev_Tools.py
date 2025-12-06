@@ -4,12 +4,13 @@
 Real-time logs, database queries, performance profiling, system diagnostics
 """
 
-import streamlit as st
-import pandas as pd
-import plotly.graph_objects as go
+import json
 import random
 from datetime import datetime, timedelta
-import json
+
+import pandas as pd
+import plotly.graph_objects as go
+import streamlit as st
 
 # Page config
 st.set_page_config(

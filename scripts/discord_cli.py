@@ -23,13 +23,14 @@ Environment:
     DISCORD_GUILD_ID - Server ID (optional, will prompt if not set)
 """
 
+import asyncio
 import os
 import sys
-import asyncio
+from datetime import datetime
+from pathlib import Path
+
 import click
 import discord
-from pathlib import Path
-from datetime import datetime
 from dotenv import load_dotenv
 
 # Add parent directory to path

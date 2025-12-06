@@ -317,6 +317,13 @@
         let actualAPIKey = '';
         let isAPIKeyVisible = false;
 
+        // Security: Cryptographically secure random generator for API keys
+        function secureRandom() {
+            const array = new Uint8Array(16);
+            crypto.getRandomValues(array);
+            return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+        }
+
         // Load user data
         function loadUserData() {
             const userData = JSON.parse(localStorage.getItem('helix_user_data') || '{}');
@@ -335,7 +342,7 @@
             document.getElementById('plan-badge').textContent = plan.toUpperCase() + ' PLAN';
             document.getElementById('current-plan').textContent = plan.charAt(0).toUpperCase() + plan.slice(1) + ' Plan';
 
-            actualAPIKey = userData.api_key || 'hx_demo_key_' + Math.random().toString(36).substr(2, 24);
+            actualAPIKey = userData.api_key || 'hx_demo_key_' + secureRandom();
         }
 
         // Switch tabs
@@ -377,11 +384,14 @@
         // Generate new API key
         function generateNewKey() {
             if (confirm('Are you sure? This will invalidate your current API key.')) {
-                actualAPIKey = 'hx_' + Math.random().toString(36).substr(2, 32);
+                actualAPIKey = 'hx_' + secureRandom();
                 alert('New API key generated!');
 
                 const userData = JSON.parse(localStorage.getItem('helix_user_data'));
                 userData.api_key = actualAPIKey;
+                // Remove sensitive keys before storing
+                delete userData.api_key;
+                if (userData.actualAPIKey) delete userData.actualAPIKey;
                 localStorage.setItem('helix_user_data', JSON.stringify(userData));
             }
         }
@@ -394,6 +404,9 @@
             const userData = JSON.parse(localStorage.getItem('helix_user_data'));
             userData.name = name;
             userData.email = email;
+            // Remove sensitive keys before storing
+            delete userData.api_key;
+            if (userData.actualAPIKey) delete userData.actualAPIKey;
             localStorage.setItem('helix_user_data', JSON.stringify(userData));
 
             alert('Settings saved successfully!');

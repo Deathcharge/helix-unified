@@ -4,9 +4,10 @@ Dependency validator for optional packages in Helix Collective.
 Provides graceful handling and helpful error messages when optional
 dependencies are missing.
 """
+
 import logging
-from typing import Optional, Dict, List, Tuple
 from dataclasses import dataclass
+from typing import Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +15,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class DependencyInfo:
     """Information about an optional dependency."""
+
     package_name: str
     import_name: str
     pip_name: str
@@ -30,7 +32,7 @@ OPTIONAL_DEPENDENCIES: Dict[str, DependencyInfo] = {
         pip_name="webdav3",
         purpose="Nextcloud storage integration",
         fallback_available=True,
-        install_command="pip install webdav3"
+        install_command="pip install webdav3",
     ),
     "boto3": DependencyInfo(
         package_name="Boto3",
@@ -38,7 +40,7 @@ OPTIONAL_DEPENDENCIES: Dict[str, DependencyInfo] = {
         pip_name="boto3",
         purpose="Backblaze B2 and S3-compatible storage",
         fallback_available=True,
-        install_command="pip install boto3"
+        install_command="pip install boto3",
     ),
     "mega": DependencyInfo(
         package_name="MEGA.py",
@@ -46,7 +48,7 @@ OPTIONAL_DEPENDENCIES: Dict[str, DependencyInfo] = {
         pip_name="mega.py",
         purpose="MEGA cloud storage integration",
         fallback_available=True,
-        install_command="pip install --no-deps mega.py"
+        install_command="pip install --no-deps mega.py",
     ),
     "prophet": DependencyInfo(
         package_name="Prophet",
@@ -54,7 +56,7 @@ OPTIONAL_DEPENDENCIES: Dict[str, DependencyInfo] = {
         pip_name="prophet",
         purpose="Time series forecasting for analytics",
         fallback_available=False,
-        install_command="pip install prophet"
+        install_command="pip install prophet",
     ),
     "sklearn": DependencyInfo(
         package_name="Scikit-learn",
@@ -62,7 +64,7 @@ OPTIONAL_DEPENDENCIES: Dict[str, DependencyInfo] = {
         pip_name="scikit-learn",
         purpose="Machine learning features",
         fallback_available=False,
-        install_command="pip install scikit-learn"
+        install_command="pip install scikit-learn",
     ),
 }
 
@@ -117,9 +119,7 @@ class DependencyValidator:
                 f"Please install: {dep_info.install_command}"
             )
 
-        self.warnings.append(
-            f"{dep_info.package_name}: {dep_info.purpose} unavailable"
-        )
+        self.warnings.append(f"{dep_info.package_name}: {dep_info.purpose} unavailable")
 
     def check_all_optional(self) -> Dict[str, bool]:
         """

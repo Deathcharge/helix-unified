@@ -5,6 +5,7 @@ Demonstrates connecting to Zapier's MCP endpoint and calling tools
 
 import asyncio
 import json
+
 from fastmcp import Client
 from fastmcp.client.transports import StreamableHttpTransport
 

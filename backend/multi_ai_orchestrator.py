@@ -4,12 +4,12 @@ Coordinates task execution across Manus, Perplexity, Grok, and Claude
 """
 
 import asyncio
-import logging
-from typing import Any, Dict, List, Optional, Tuple
-from dataclasses import dataclass
-from enum import Enum
 import json
+import logging
+from dataclasses import dataclass
 from datetime import datetime
+from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -43,7 +43,7 @@ class AIResponse:
     confidence: float
     execution_time_ms: float
     error: Optional[str] = None
-    timestamp: str = None
+    timestamp: Optional[str] = None
 
     def __post_init__(self):
         if self.timestamp is None:

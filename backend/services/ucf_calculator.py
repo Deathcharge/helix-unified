@@ -260,9 +260,7 @@ class UCFCalculator:
             "description": adjustments.get("description", ""),
             "before": before_state,
             "after": after_state,
-            "changes": {
-                field: after_state[field] - before_state[field] for field in before_state if field in after_state
-            },
+            "changes": {field: after_state[field] - before_state[field] for field in before_state if field in after_state},
             "timestamp": datetime.utcnow().isoformat(),
         }
 

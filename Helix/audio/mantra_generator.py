@@ -2,6 +2,7 @@
 import numpy as np
 from scipy.io.wavfile import write
 
+
 def generate_neti_neti_mantra(duration=225, tempo=94, base_freq=136.1, overlay_freq=432):
     sample_rate = 44100
     t = np.linspace(0, duration, int(sample_rate * duration), False)

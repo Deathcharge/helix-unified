@@ -1,0 +1,7 @@
+From https://github.com/Deathcharge/helix-unified
+ * branch            main       -> FETCH_HEAD
+   41d2c0d..b38074a  main       -> origin/main
+Auto-merging backend/main.py
+CONFLICT (file location): backend/voice-processor/main.py.backup added in HEAD inside a directory that was renamed in b38074ac33a89a6d73a61c628c2ffb130027d314, suggesting it should perhaps be moved to backend/voice_processor/main.py.backup.
+CONFLICT (file location): backend/zapier-service/main.py.backup added in HEAD inside a directory that was renamed in b38074ac33a89a6d73a61c628c2ffb130027d314, suggesting it should perhaps be moved to backend/zapier_service/main.py.backup.
+Automatic merge failed; fix conflicts and then commit the result.

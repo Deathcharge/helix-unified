@@ -1,0 +1,4 @@
+./frontend/helix-chat.html
+./frontend/helix-forum.html
+./frontend/helix-hub-portal.html
+./frontend/helix-collective-hub/index.html

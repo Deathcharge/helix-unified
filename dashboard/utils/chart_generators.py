@@ -13,11 +13,12 @@ Visualization utilities for creating beautiful charts and graphs:
 Author: Manus AI
 """
 
-import plotly.graph_objects as go
-import plotly.express as px
-import pandas as pd
-from typing import Dict, Any, List, Optional
 import logging
+from typing import Any, Dict, List, Optional
+
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
 
 logger = logging.getLogger(__name__)
 

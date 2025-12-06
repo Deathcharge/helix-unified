@@ -25,9 +25,9 @@ import asyncio
 import hashlib
 import json
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from functools import wraps
-from typing import Any, Dict, Optional, Callable
+from typing import Any, Callable, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -182,7 +182,7 @@ class ResponseCache:
             "misses": self._misses,
             "total_requests": total_requests,
             "hit_rate_percent": round(hit_rate, 2),
-            "estimated_io_savings": f"{self._hits} file reads avoided"
+            "estimated_io_savings": f"{self._hits} file reads avoided",
         }
 
     def reset_stats(self):
@@ -226,6 +226,7 @@ def cached_response(ttl_seconds: int = 60, key_func: Optional[Callable] = None):
         async def get_agents(filter: str = "all"):
             return get_filtered_agents(filter)
     """
+
     def decorator(func: Callable):
         @wraps(func)
         async def wrapper(*args, **kwargs):
@@ -237,7 +238,8 @@ def cached_response(ttl_seconds: int = 60, key_func: Optional[Callable] = None):
             else:
                 # Default: use function name + args hash
                 args_str = json.dumps({"args": args, "kwargs": kwargs}, sort_keys=True, default=str)
-                args_hash = hashlib.md5(args_str.encode()).hexdigest()[:8]
+                # Use MD5 for cache key (not for security) - #nosec B324
+                args_hash = hashlib.md5(args_str.encode(), usedforsecurity=False).hexdigest()[:8]
                 cache_key = f"{func.__module__}.{func.__name__}:{args_hash}"
 
             # Try to get from cache

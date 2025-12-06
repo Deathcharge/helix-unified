@@ -3,16 +3,17 @@ Scheduled Content Generation for Helix Agents
 Agents post updates to their designated channels on a schedule
 """
 
-import os
 import asyncio
 import logging
+import os
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
-import discord
-from discord.ext import commands, tasks
+
 import anthropic
+import discord
 import openai
 from anthropic import Anthropic
+from discord.ext import commands, tasks
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -444,7 +445,7 @@ Generate ONLY the content, no meta-commentary."""
     def _fill_template(self, channel_name: str, template: str) -> str:
         """Fill template with placeholder data"""
         import random
-        
+
         # Generate realistic placeholder data
         data = {
             "timestamp": datetime.utcnow().strftime("%m/%d/%Y %I:%M %p"),

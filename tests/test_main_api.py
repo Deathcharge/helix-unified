@@ -1,8 +1,9 @@
 """
 Tests for main FastAPI application.
 """
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 from fastapi.testclient import TestClient
 
 
