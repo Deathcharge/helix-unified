@@ -16,7 +16,6 @@ from fastapi.responses import JSONResponse
 
 # Import existing state management
 from .state import get_live_state, get_status
-
 # Import Web OS routers
 from .web_os import file_system_router, terminal_router
 
