@@ -261,4 +261,5 @@ if __name__ == "__main__":
     print("ONE MILLION DOLLARS! 💰")
     print("=" * 70 + "\n")
 
-    uvicorn.run(app, host="0.0.0.0", port=port, log_level="info")
+    # nosec B104 - Binding to 0.0.0.0 is required for Docker/Railway deployment
+    uvicorn.run(app, host="0.0.0.0", port=port, log_level="info")  # nosec

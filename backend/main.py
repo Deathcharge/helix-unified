@@ -10,7 +10,6 @@ from datetime import datetime
 from pathlib import Path, PurePosixPath
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
-import os
 
 import aiohttp
 import httpx
