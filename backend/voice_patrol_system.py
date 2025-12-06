@@ -11,12 +11,16 @@ Features:
 """
 import asyncio
 import logging
+import tempfile
 from datetime import datetime
+from pathlib import Path
 from typing import Dict, Optional, Set
 from collections import defaultdict
 
 import discord
 from discord.ext import commands, tasks
+
+from backend.voice_processor_client import get_voice_client
 
 logger = logging.getLogger(__name__)
 
@@ -162,8 +166,8 @@ class VoicePatrolSystem:
                     f"{agent['emoji']} **{agent['name']}** has joined voice channel **{channel.name}** for patrol duty!"
                 )
 
-            # TODO: Play greeting TTS
-            # await self.speak_in_channel(channel.id, agent['greeting'], agent['tts_voice'])
+            # Play greeting TTS
+            await self.speak_in_channel(channel.id, agent['greeting'], agent['tts_voice'])
 
         except discord.ClientException as e:
             logger.error(f"Already connected to a voice channel: {e}")
@@ -237,6 +241,10 @@ class VoicePatrolSystem:
                     f"{agent['emoji']} **{agent['name']}**: Welcome, {member.mention}, to **{channel.name}**!"
                 )
 
+            # Speak voice greeting
+            greeting_text = f"Welcome, {member.display_name}."
+            await self.speak_in_channel(channel.id, greeting_text, agent['tts_voice'])
+
     async def on_user_leave_voice(self, member: discord.Member, channel: discord.VoiceChannel):
         """Handle user leaving voice channel."""
         logger.info(f"🎙️ {member.display_name} left voice: {channel.name}")
@@ -271,8 +279,8 @@ class VoicePatrolSystem:
                         f"📢 **{agent['name']}** voice announcement in **{channel.name}**:\n> {message}"
                     )
 
-                # TODO: Play TTS
-                # await self.speak_in_channel(channel_id, message, agent['tts_voice'])
+                # Play TTS announcement
+                await self.speak_in_channel(channel_id, message, agent['tts_voice'])
 
             except Exception as e:
                 logger.error(f"Error announcing to channel {channel_id}: {e}")
@@ -296,15 +304,68 @@ class VoicePatrolSystem:
             text: Text to speak
             voice: Google Cloud TTS voice name
         """
-        # TODO: Implement TTS with Google Cloud Text-to-Speech
-        # This requires:
-        # 1. Google Cloud TTS API setup
-        # 2. Audio file generation
-        # 3. FFmpeg for playing audio in Discord
-        #
-        # For now, we'll log the intent
-        logger.info(f"🎙️ [TTS] Would speak in channel {channel_id}: {text[:50]}...")
-        pass
+        if channel_id not in self.voice_clients:
+            logger.warning(f"Cannot speak in channel {channel_id}: Not connected")
+            return
+
+        voice_client = self.voice_clients[channel_id]
+
+        # Check if already playing audio
+        if voice_client.is_playing():
+            logger.info(f"⏳ Voice channel {channel_id} is busy, queuing message")
+            # Wait for current audio to finish
+            while voice_client.is_playing():
+                await asyncio.sleep(0.5)
+
+        try:
+            # Get TTS audio from voice_processor
+            logger.info(f"🎙️ Synthesizing speech for channel {channel_id}: {text[:50]}...")
+            voice_client_api = get_voice_client()
+
+            audio_data = await voice_client_api.synthesize_speech(
+                text=text,
+                voice_name=voice,
+                language_code="en-US"
+            )
+
+            if not audio_data:
+                logger.error(f"Failed to synthesize speech for: {text[:50]}...")
+                return
+
+            # Save audio to temporary file for FFmpeg
+            with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as temp_file:
+                temp_file.write(audio_data)
+                temp_path = temp_file.name
+
+            # Play audio in Discord voice channel
+            logger.info(f"🔊 Playing TTS audio in channel {channel_id}")
+
+            audio_source = discord.FFmpegPCMAudio(
+                temp_path,
+                options="-loglevel panic"  # Suppress FFmpeg logs
+            )
+
+            # Callback to delete temp file after playback
+            def after_playback(error):
+                if error:
+                    logger.error(f"Audio playback error: {error}")
+                else:
+                    logger.info(f"✅ TTS playback complete in channel {channel_id}")
+
+                # Clean up temp file
+                try:
+                    Path(temp_path).unlink()
+                except Exception as e:
+                    logger.warning(f"Failed to delete temp file {temp_path}: {e}")
+
+            voice_client.play(audio_source, after=after_playback)
+
+        except FileNotFoundError:
+            logger.error("FFmpeg not found! Install FFmpeg for voice playback.")
+            logger.error("Ubuntu/Debian: sudo apt-get install ffmpeg")
+            logger.error("macOS: brew install ffmpeg")
+        except Exception as e:
+            logger.error(f"Error speaking in channel: {e}", exc_info=True)
 
 
 # Global voice patrol instance
