@@ -16,7 +16,6 @@ from fastapi.responses import JSONResponse
 
 # Import existing state management
 from .state import get_live_state, get_status
-
 # Import Web OS routers
 from .web_os import file_system_router, terminal_router
 
@@ -262,4 +261,5 @@ if __name__ == "__main__":
     print("ONE MILLION DOLLARS! 💰")
     print("=" * 70 + "\n")
 
-    uvicorn.run(app, host="0.0.0.0", port=port, log_level="info")
+    # nosec B104 - Binding to 0.0.0.0 is required for Docker/Railway deployment
+    uvicorn.run(app, host="0.0.0.0", port=port, log_level="info")  # nosec
