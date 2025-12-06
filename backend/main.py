@@ -2489,7 +2489,9 @@ async def test_zapier_webhook(webhook_url: str) -> Dict[str, Any]:
         }
 
         # Send test request
+        # lgtm[py/full-ssrf] - URL validated above (HTTPS-only, hostname whitelist, no IPs, port 443)
         async with httpx.AsyncClient(timeout=10.0) as client:
+            # URL is safe: validated against ALLOWED_ZAPIER_HOSTS whitelist above
             response = await client.post(webhook_url, json=test_payload, headers={"Content-Type": "application/json"})
 
             return {
