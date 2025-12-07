@@ -4,7 +4,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.linear_model import LinearRegression
-# from prophet import Prophet # Will be installed via requirements.txt
+from prophet import Prophet  # Now installed via requirements.txt
 
 class GrokAgentCore:
     """

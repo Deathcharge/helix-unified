@@ -4,10 +4,12 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Install system dependencies
+# ffmpeg required for voice processing (pydub) and audio features
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
     curl \
+    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first (better caching)

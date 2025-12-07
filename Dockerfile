@@ -5,9 +5,11 @@ FROM python:3.11.10-slim
 WORKDIR /app
 
 # Install system dependencies for Grok's analytics libraries (scikit-learn, tensorflow, prophet)
+# ffmpeg required for voice processing (pydub) and audio features
 RUN apt-get update && apt-get install -y \
     gcc g++ curl \
     libblas-dev liblapack-dev gfortran \
+    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first (better caching)

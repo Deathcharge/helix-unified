@@ -1,8 +1,9 @@
-fastapi==0.68.0
-uvicorn==0.15.0
-redis==3.5.3
-pydantic==1.10.13
-python-jose==3.4.0
+# Voice Processor Microservice - Updated to match main requirements
+fastapi==0.115.6
+uvicorn[standard]==0.30.5
+redis>=4.5.0
+pydantic==2.10.3
+python-jose[cryptography]==3.4.0
 google-cloud-speech==2.10.0
 google-cloud-texttospeech==2.10.0
 pydub==0.25.1
