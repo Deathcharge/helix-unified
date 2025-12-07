@@ -10,9 +10,11 @@ import os
 import time
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 # Import existing state management
 from .state import get_live_state, get_status
@@ -41,6 +43,14 @@ try:
 except ImportError:
     HAS_AUTH = False
     logging.warning("Auth routes not found - will create")
+
+# Rate limiter
+try:
+    from .core.rate_limit import limiter
+    HAS_RATE_LIMIT = True
+except ImportError:
+    HAS_RATE_LIMIT = False
+    logging.warning("Rate limiter not found - will skip")
 
 # Stripe router (we're adding this)
 try:
@@ -97,21 +107,34 @@ app = FastAPI(
 # CORS - Allow frontend to connect
 # ============================================================================
 
+# Get allowed origins from environment variable or use defaults
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "").split(",") if os.getenv("ALLOWED_ORIGINS") else [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "https://helixspiral.work",
+    "https://*.helixspiral.work",
+    "https://*.railway.app",
+    "https://*.vercel.app",
+]
+
+# Remove wildcard in production
+if os.getenv("ENVIRONMENT") == "production" and "*" in ALLOWED_ORIGINS:
+    logger.warning("⚠️  Wildcard CORS origin detected in production! Removing for security.")
+    ALLOWED_ORIGINS = [origin for origin in ALLOWED_ORIGINS if origin != "*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "https://helixspiral.work",
-        "https://*.helixspiral.work",
-        "https://*.railway.app",
-        "https://*.vercel.app",
-        "*",  # Allow all for now (restrict in production)
-    ],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allow_headers=["*"],
 )
+
+# Add rate limiting
+if HAS_RATE_LIMIT:
+    app.state.limiter = limiter
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+    logger.info("✅ Rate limiting enabled")
 
 # ============================================================================
 # CORE ROUTES (Existing)

@@ -10,6 +10,11 @@ python-dotenv==1.0.1
 pyyaml==6.0.1
 toml==0.10.2
 
+# Security & Authentication
+passlib[bcrypt]==1.7.4  # Password hashing with bcrypt
+pyjwt==2.8.0  # JWT token handling
+slowapi==0.1.9  # Rate limiting for FastAPI
+
 # API Clients & HTTP
 aiohttp==3.12.14
 httpx==0.28.0

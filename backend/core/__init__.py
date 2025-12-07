@@ -1,29 +1,6 @@
 """
-🌀 Helix Collective v17.0 - Core Optimization Module
-backend/core/__init__.py
-
-Core performance optimization utilities for Railway backend:
-- Response caching with TTL
-- State management with file watching
-- Webhook routing with circuit breaker
-- Performance metrics collection
+🔐 Core Backend Modules
+Security, Configuration, Logging, Error Handling
 """
 
-from .cache_manager import ResponseCache, cached_response, get_cache
-from .metrics import MetricsCollector, get_metrics_collector
-from .state_manager import UCFStateManager, get_state_manager
-from .webhook_router import CircuitBreaker, WebhookRouter
-
-__all__ = [
-    "ResponseCache",
-    "cached_response",
-    "get_cache",
-    "UCFStateManager",
-    "get_state_manager",
-    "WebhookRouter",
-    "CircuitBreaker",
-    "MetricsCollector",
-    "get_metrics_collector",
-]
-
-__version__ = "17.0.0"
+__all__ = ["config", "security", "errors", "logging_config", "rate_limit"]
