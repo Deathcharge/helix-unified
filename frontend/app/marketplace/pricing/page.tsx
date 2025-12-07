@@ -256,7 +256,7 @@ export default function PricingPage() {
                   </div>
                   {billingCycle === 'yearly' && tier.price !== '$0' && (
                     <p className="text-sm text-green-400">
-                      Save ${parseInt(tier.price.replace('$', '')) * 12 - parseInt(tier.yearlyPrice.replace('$', '').replace(',', ''))} per year
+                      Save ${parseInt(tier.price.replace(/\$/g, '')) * 12 - parseInt(tier.yearlyPrice.replace(/\$/g, '').replace(',', ''))} per year
                     </p>
                   )}
                 </div>
