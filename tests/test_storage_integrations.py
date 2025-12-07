@@ -1,9 +1,10 @@
 """
 Tests for storage integrations (Nextcloud, Backblaze B2, MEGA).
 """
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 from pathlib import Path
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 
 @pytest.mark.unit
@@ -63,6 +64,7 @@ def test_nextcloud_upload(mock_env_vars, temp_state_dir):
 
     try:
         from services.nextcloud_client import HelixNextcloudClient
+
         # Just verify we can import and potentially initialize the client
         # Full upload testing would require WebDAV dependencies
         assert HelixNextcloudClient is not None
@@ -78,6 +80,7 @@ def test_backblaze_upload(mock_env_vars, temp_state_dir):
 
     try:
         from services.backblaze_client import HelixBackblazeClient
+
         # Just verify we can import the client
         # Full upload testing would require boto3 dependencies
         assert HelixBackblazeClient is not None
@@ -105,7 +108,8 @@ def test_storage_fallback_hierarchy():
 def test_dependency_validator_storage_checks():
     """Test dependency validator checks storage backends."""
     try:
-        from backend.dependency_validator import has_webdav, has_boto3, has_mega
+        from backend.dependency_validator import (has_boto3, has_mega,
+                                                  has_webdav)
 
         # These will check actual availability
         webdav_available = has_webdav()

@@ -1,0 +1,8 @@
+932963e 📋 Manus: Helix OS Status Report & Triple AI Vision
+f7db032 📦 Add deployment script and README for dashboard
+d082fb5 🎯 SuperNinja: Add Helix Collective Agents Dashboard
+a55f37c Merge latest main updates with dashboard integration branch
+1ebab1f Claude/debug helix services 014 c djd qt mp9 uqe qsthwxm ve (#229)
+441793a Claude/test push repo 0145x4 cwfl kb utl ph zasqbrb (#228)
+4957aca test: Update test verification with push results
+63ca158 test: Add test push verification file

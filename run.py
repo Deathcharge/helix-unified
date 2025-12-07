@@ -10,8 +10,8 @@ Author: Andrew John Ward (Architect)
 Version: 15.5.0
 """
 
-import sys
 import os
+import sys
 from pathlib import Path
 
 # Add project root to Python path for proper import resolution

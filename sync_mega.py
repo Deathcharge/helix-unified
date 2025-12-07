@@ -1,7 +1,8 @@
 # sync_mega.py - MEGA Sync Core Logic
-from mega import Mega
-import os
 import logging
+import os
+
+from mega import Mega
 
 # Configure logging
 logger = logging.getLogger(__name__)

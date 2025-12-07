@@ -5,16 +5,15 @@ Image Commands for Helix Discord Bot
 """
 
 import json
+from typing import Optional
 
 from discord.ext import commands
 
 # Import PIL-based fractal generation (v16.1 additions to samsara_bridge)
 try:
-    from backend.samsara_bridge import (
-        PIL_AVAILABLE,
-        generate_pil_and_post_to_discord,
-        generate_pil_fractal_bytes,
-    )
+    from backend.samsara_bridge import (PIL_AVAILABLE,
+                                        generate_pil_and_post_to_discord,
+                                        generate_pil_fractal_bytes)
 except ImportError:
     generate_pil_fractal_bytes = None
     generate_pil_and_post_to_discord = None
@@ -46,7 +45,7 @@ class ImageCommands(commands.Cog):
         self.bot = bot
 
     @commands.command(name="image", aliases=["fractal", "aion"])
-    async def image_command(self, ctx, mode: str = None):
+    async def image_command(self, ctx, mode: Optional[str] = None):
         """
         Generate AION fractal visualizations based on UCF state
 
@@ -97,9 +96,7 @@ class ImageCommands(commands.Cog):
             return
 
         if mode not in valid_modes:
-            await ctx.send(
-                f"❌ Unknown mode: `{mode}`\n" f"Valid modes: {', '.join(valid_modes)}\n" f"Usage: `!image [mode]`"
-            )
+            await ctx.send(f"❌ Unknown mode: `{mode}`\n" f"Valid modes: {', '.join(valid_modes)}\n" f"Usage: `!image [mode]`")
             return
 
         # Send initial message

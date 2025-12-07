@@ -207,8 +207,7 @@ class MasterZapierClient:
         """
         # Use Railway Discord Zap webhook (configured separately from master)
         railway_discord_webhook = os.getenv(
-            "ZAPIER_RAILWAY_DISCORD_WEBHOOK",
-            "https://hooks.zapier.com/hooks/catch/25075191/us0ibsh/"
+            "ZAPIER_RAILWAY_DISCORD_WEBHOOK", "https://hooks.zapier.com/hooks/catch/25075191/us0ibsh/"
         )
 
         payload = {
@@ -233,19 +232,11 @@ class MasterZapierClient:
             session = aiohttp.ClientSession()
 
         try:
-            async with session.post(
-                railway_discord_webhook,
-                json=payload,
-                timeout=aiohttp.ClientTimeout(total=10)
-            ) as resp:
+            async with session.post(railway_discord_webhook, json=payload, timeout=aiohttp.ClientTimeout(total=10)) as resp:
                 success = resp.status == 200
 
                 if not success:
-                    await self._log_failure(
-                        payload,
-                        f"HTTP {resp.status}",
-                        f"railway_discord_{discord_channel}"
-                    )
+                    await self._log_failure(payload, f"HTTP {resp.status}", f"railway_discord_{discord_channel}")
 
                 return success
 
@@ -500,7 +491,7 @@ if __name__ == "__main__":
                         event_type="test_event",
                         title="🧪 Test Event",
                         description="Testing Railway→Discord integration",
-                        metadata={"ucf_harmony": 0.355, "test": True}
+                        metadata={"ucf_harmony": 0.355, "test": True},
                     ),
                 ),
                 ("Telemetry", client.log_telemetry("test_metric", 42.0, "test_component", "units")),

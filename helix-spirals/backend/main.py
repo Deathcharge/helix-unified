@@ -6,28 +6,28 @@ Drop-in Zapier replacement with 98.7% more efficiency
 import asyncio
 import logging
 import os
-from datetime import datetime
-from typing import Dict, List, Optional, Any
 from contextlib import asynccontextmanager
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Request, BackgroundTasks
+import asyncpg
+import redis.asyncio as redis
+from dotenv import load_dotenv
+from fastapi import (BackgroundTasks, FastAPI, HTTPException, Request,
+                     WebSocket, WebSocketDisconnect)
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
-import redis.asyncio as redis
-import asyncpg
-from dotenv import load_dotenv
 
 from .engine import SpiralEngine
-from .models import (
-    Spiral, Trigger, Action, ExecutionContext, 
-    WebhookPayload, SpiralCreateRequest, SpiralUpdateRequest,
-    ExecutionRequest, ExecutionResponse, SpiralStatistics
-)
-from .storage import SpiralStorage
+from .models import (Action, ExecutionContext, ExecutionRequest,
+                     ExecutionResponse, Spiral, SpiralCreateRequest,
+                     SpiralStatistics, SpiralUpdateRequest, Trigger,
+                     WebhookPayload)
+from .routes import executions_router, spirals_router, templates_router
 from .scheduler import SpiralScheduler
+from .storage import SpiralStorage
 from .webhooks import WebhookReceiver
-from .routes import spirals_router, executions_router, templates_router
 from .zapier_import import ZapierImporter
 
 load_dotenv()

@@ -12,6 +12,7 @@ import random
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
+
 from backend.config_manager import config
 
 
@@ -72,9 +73,7 @@ class FolkloreEntry:
     def increment(self, description: str):
         """Increment encounter count and add to history."""
         self.times += 1
-        self.history.append(
-            {"timestamp": datetime.utcnow().isoformat(), "description": description, "count": self.times}
-        )
+        self.history.append({"timestamp": datetime.utcnow().isoformat(), "description": description, "count": self.times})
 
     def evolve(self):
         """Evolve folklore based on encounter count."""

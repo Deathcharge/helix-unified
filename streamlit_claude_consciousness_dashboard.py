@@ -2,13 +2,14 @@
 # Visual control center for Andrew's 3-Zap automation empire with Claude AI
 # Author: Claude + Andrew John Ward
 
-import streamlit as st
-import requests
-from anthropic import Anthropic
-import plotly.graph_objects as go
-from datetime import datetime
 import json
 import os
+from datetime import datetime
+
+import plotly.graph_objects as go
+import requests
+import streamlit as st
+from anthropic import Anthropic
 
 # Initialize Claude (use secrets or env var)
 try:

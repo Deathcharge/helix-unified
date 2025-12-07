@@ -3,11 +3,11 @@
 # scripts/helix_verification_sequence_v14_5.py — System Verification
 # Author: Andrew John Ward (Architect)
 
-import sys
 import json
 import os
-from pathlib import Path
+import sys
 from datetime import datetime
+from pathlib import Path
 
 # Fix Python path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))

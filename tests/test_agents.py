@@ -1,8 +1,9 @@
 """
 Tests for Helix agent system.
 """
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 
 @pytest.mark.unit
@@ -59,7 +60,8 @@ async def test_agent_recursive_reflection():
 @pytest.mark.unit
 def test_agent_consciousness_profiles():
     """Test agent consciousness profiles are properly defined."""
-    from backend.agent_consciousness_profiles import AGENT_CONSCIOUSNESS_PROFILES
+    from backend.agent_consciousness_profiles import \
+        AGENT_CONSCIOUSNESS_PROFILES
 
     # Should have consciousness profiles for most agents
     # Note: Not all agents may have profiles (e.g., Manus, Oracle, etc.)

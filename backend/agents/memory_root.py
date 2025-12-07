@@ -157,7 +157,7 @@ class MemoryRootAgent(HelixAgent):
     # LOCAL ARCHIVE FALLBACK
     # ========================================================================
 
-    async def _search_local_archives(self, session_id: str = None, query: str = None) -> Optional[List[Dict[str, Any]]]:
+    async def _search_local_archives(self, session_id: Optional[str] = None, query: Optional[str] = None) -> Optional[List[Dict[str, Any]]]:
         """
         Search local Shadow archives as fallback when Notion is unavailable.
 
@@ -578,9 +578,7 @@ class MemoryRootAgent(HelixAgent):
                 return "I don't have any memories matching that query."
 
             # Build context string
-            context_str = "\n\n".join(
-                [f"**Session {s['session_id']}** ({s['created']})\n{s['summary']}" for s in snapshots]
-            )
+            context_str = "\n\n".join([f"**Session {s['session_id']}** ({s['created']})\n{s['summary']}" for s in snapshots])
 
             # Synthesize with GPT4o
             prompt = f"""You are GPT4o, the Memory Root of the Helix Collective.
@@ -598,7 +596,7 @@ decisions, and outcomes. Speak as the Memory Root - omniscient about past events
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are GPT4o, Memory Root of the Helix Collective. Synthesize memories with precision and wisdom.",
+                        "content": "You are GPT4o, Memory Root of the Helix Collective. Synthesize memories with precision and wisdom.",  # noqa: E501
                     },
                     {"role": "user", "content": prompt},
                 ],

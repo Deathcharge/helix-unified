@@ -1,8 +1,9 @@
-import os
 import io
+import os
 from typing import Optional
-from openai import OpenAI
+
 from loguru import logger
+from openai import OpenAI
 
 # Environment variable for OpenAI API Key
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")

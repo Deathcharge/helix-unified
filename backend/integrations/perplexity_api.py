@@ -3,11 +3,11 @@ Perplexity API Integration
 Provides access to multiple LLMs through Perplexity's unified API
 """
 
-import os
-import aiohttp
 import asyncio
-from typing import Dict, List, Optional, Any
-from datetime import datetime
+import os
+from typing import Any, Dict, List, Optional
+
+import aiohttp
 from loguru import logger
 
 
@@ -158,7 +158,7 @@ class PerplexityAPI:
     async def multi_llm_comparison(
         self,
         prompt: str,
-        models: List[str] = None
+        models: Optional[List[str]] = None
     ) -> Dict[str, Dict[str, Any]]:
         """
         Get responses from multiple LLMs for comparison.

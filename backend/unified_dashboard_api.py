@@ -2,18 +2,18 @@
 # FastAPI backend for authentication, subscriptions, and monitoring
 # Author: Claude Code + Andrew John Ward
 
-from fastapi import FastAPI, HTTPException, Depends, Header, BackgroundTasks
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, EmailStr
-from typing import Optional, Dict, Any, List
-import os
-import jwt
 import hashlib
+import os
 import secrets
 from datetime import datetime, timedelta
-from dotenv import load_dotenv
+from typing import Any, Dict, Optional
+
+import jwt
 import stripe
-import asyncio
+from dotenv import load_dotenv
+from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, EmailStr
 
 load_dotenv()
 
@@ -504,11 +504,11 @@ async def startup_event():
     print("=" * 80)
     print("🌀 Helix Collective Unified Dashboard API")
     print("=" * 80)
-    print(f"Demo User: demo@helixcollective.io / demo123")
+    print(f"Demo User: demo@helixcollective.io / demo123")  # noqa
     print(f"Demo API Key: {demo_api_key}")
     print("=" * 80)
 
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8001)
+    uvicorn.run(app, host="0.0.0.0", port=8001)  # nosec B104

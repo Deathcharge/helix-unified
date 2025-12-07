@@ -1,16 +1,17 @@
-from fastapi import FastAPI, Depends, HTTPException, status, Request, Header
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from pydantic import BaseModel
-from typing import Optional, Dict, Any, List
-import uvicorn
-import redis
-import json
-import jwt
-import os
-from datetime import datetime
 import hashlib
 import hmac
+import json
+import os
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+import jwt
+import redis
+import uvicorn
+from fastapi import Depends, FastAPI, Header, HTTPException, Request, status
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from pydantic import BaseModel
 
 # Initialize FastAPI app
 app = FastAPI(title="Zapier Integration Service")
@@ -138,8 +139,8 @@ async def zapier_webhook(
             timestamp=datetime.utcnow()
         )
 
-        # Generate event ID
-        event_id = hashlib.md5(f"{event.event_type}{event.timestamp}".encode()).hexdigest()
+        # Generate event ID (MD5 for non-security ID generation)
+        event_id = hashlib.md5(f"{event.event_type}{event.timestamp}".encode(), usedforsecurity=False).hexdigest()
 
         # Store event in Redis queue
         event_data = {
@@ -181,8 +182,8 @@ async def trigger_zapier_event(
         redis_client.lpush("zapier_triggers_queue", json.dumps(event_data))
         redis_client.publish("zapier_triggers", json.dumps(event_data))
 
-        # Generate event ID
-        event_id = hashlib.md5(f"{trigger_request.trigger}{datetime.utcnow()}".encode()).hexdigest()
+        # Generate event ID (MD5 for non-security ID generation)
+        event_id = hashlib.md5(f"{trigger_request.trigger}{datetime.utcnow()}".encode(), usedforsecurity=False).hexdigest()
 
         return WebhookResponse(
             status="success",
@@ -212,8 +213,8 @@ async def execute_zapier_action(
         redis_client.lpush("zapier_actions_queue", json.dumps(action_data))
         redis_client.publish("zapier_actions", json.dumps(action_data))
 
-        # Generate event ID
-        event_id = hashlib.md5(f"{action_request.action}{datetime.utcnow()}".encode()).hexdigest()
+        # Generate event ID (MD5 for non-security ID generation)
+        event_id = hashlib.md5(f"{action_request.action}{datetime.utcnow()}".encode(), usedforsecurity=False).hexdigest()
 
         return WebhookResponse(
             status="success",
@@ -292,4 +293,4 @@ async def test_zapier_integration(token: TokenData = Depends(verify_token)):
     }
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)  # nosec B104

@@ -1,0 +1,20 @@
+.devcontainer/devcontainer.json
+.env.example
+.env.railway.example
+.github/Helix Collective
+.github/ISSUE_TEMPLATE/bug_report.md
+.github/ISSUE_TEMPLATE/feature_request.md
+.github/README.md
+.github/archive/2025-11-historical/CLAUDE_DEPLOYMENT_BLUEPRINT_v16.9.md
+.github/archive/2025-11-historical/CLAUDE_DEPLOYMENT_REPORT_v17.0.md
+.github/archive/2025-11-historical/CLAUDE_INTEGRATION_GUIDE.md
+.github/archive/2025-11-historical/CONSCIOUSNESS_DEBUG_API.md
+.github/archive/2025-11-historical/CONSTELLATION_WORKFLOWS_GUIDE.md
+.github/archive/2025-11-historical/CONSTELLATION_WORKFLOW_ARCHITECTURE.md
+.github/archive/2025-11-historical/CONTEXT_SNOWBALL_SOLUTION.md
+.github/archive/2025-11-historical/CREDIT_EFFICIENCY_TRACKING.md
+.github/archive/2025-11-historical/DEPLOYMENT.md
+.github/archive/2025-11-historical/DEPLOYMENT_INVENTORY.md
+.github/archive/2025-11-historical/DEPLOYMENT_READY.md
+.github/archive/2025-11-historical/DEPLOYMENT_TEST_REPORT.md
+.github/archive/2025-11-historical/DISCORD_CLAUDE_INTEGRATION.md

@@ -29,14 +29,11 @@ from pathlib import Path
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from backend.services.zapier_client import (
-    ZapierClient,
-    validate_zapier_config,
-    EVENT_HOOK,
-    AGENT_HOOK,
-    SYSTEM_HOOK
-)
 import aiohttp
+
+from backend.services.zapier_client import (AGENT_HOOK, EVENT_HOOK,
+                                            SYSTEM_HOOK, ZapierClient,
+                                            validate_zapier_config)
 
 # ============================================================================
 # TEST FUNCTIONS

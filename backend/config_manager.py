@@ -1,10 +1,11 @@
 # backend/config_manager.py
 # Configuration loader for helix_config.toml
 
-import toml
 import os
 from pathlib import Path
 from typing import Any, Dict
+
+import toml  # type: ignore
 
 # Determine the base directory of the project
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -15,6 +16,7 @@ class ConfigManager:
     """
     Manages loading and accessing configuration from helix_config.toml.
     """
+
     _instance = None
     _config: Dict[str, Any] = {}
 
@@ -31,7 +33,7 @@ class ConfigManager:
             # Fallback to a minimal default config to prevent total crash
             self._config = {
                 "general": {"VERSION": "v16.7-fallback", "STATE_DIR": "Helix/state"},
-                "discord": {"COMMAND_PREFIX": "!"}
+                "discord": {"COMMAND_PREFIX": "!"},
             }
             return
 

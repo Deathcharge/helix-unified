@@ -4,18 +4,16 @@ Core execution logic for automation workflows
 """
 
 import asyncio
-import logging
 import json
+import logging
 from datetime import datetime
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
-from .models import (
-    Spiral, Action, Trigger, ExecutionContext, ExecutionStatus,
-    ExecutionLog, ExecutionError, Condition, ConditionOperator,
-    TriggerType, ActionType
-)
 from .actions import ActionExecutor
+from .models import (Action, ActionType, Condition, ConditionOperator,
+                     ExecutionContext, ExecutionError, ExecutionLog,
+                     ExecutionStatus, Spiral, Trigger, TriggerType)
 from .storage import SpiralStorage
 
 logger = logging.getLogger(__name__)

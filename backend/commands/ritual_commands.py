@@ -7,6 +7,7 @@ from discord.ext import commands
 # Import Discord webhook sender
 try:
     from backend.discord_webhook_sender_hybrid import get_discord_sender
+
     DISCORD_WEBHOOKS_AVAILABLE = True
 except ImportError:
     DISCORD_WEBHOOKS_AVAILABLE = False
@@ -54,8 +55,8 @@ async def harmony_command(ctx):
                         "harmony_before": current_harmony,
                         "harmony_after": ucf["harmony"],
                         "delta": ucf["harmony"] - current_harmony,
-                        "executor": str(ctx.author)
-                    }
+                        "executor": str(ctx.author),
+                    },
                 )
             except Exception as webhook_error:
                 print(f"⚠️ Discord webhook error: {webhook_error}")
@@ -67,7 +68,7 @@ async def harmony_command(ctx):
                     event_title="Neti-Neti Harmony Ritual Complete",
                     event_type="ritual_complete",
                     agent_name="Z-88 Ritual Engine",
-                    description=f"Harmony ritual executed by {ctx.author.name}. Harmony increased from {current_harmony:.3f} to {ucf['harmony']:.3f}",
+                    description=f"Harmony ritual executed by {ctx.author.name}. Harmony increased from {current_harmony:.3f} to {ucf['harmony']:.3f}",  # noqa: E501
                     ucf_snapshot=json.dumps(ucf),
                 )
 

@@ -1,0 +1,61 @@
+name: Security Scanning
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  codeql:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'javascript', 'python' ]
+    steps:
+    - uses: actions/checkout@v4
+    - uses: github/codeql-action/init@v2
+      with:
+        languages: ${{ matrix.language }}
+    - uses: github/codeql-action/autobuild@v2
+    - uses: github/codeql-action/analyze@v2
+
+  dependency-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+    - uses: actions/checkout@v4
+    - name: Run Snyk
+      uses: snyk/actions/node@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: --severity-threshold=high
+
+  container-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build and scan images
+      run: |
+        docker build -t helix-agent-orchestrator ./backend/agent_orchestrator
+        docker build -t helix-voice-processor ./backend/voice_processor
+    - name: Run Trivy
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'helix-agent-orchestrator,helix-voice-processor'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+    - uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: 'trivy-results.sarif'

@@ -9,37 +9,33 @@ For: Andrew Ward's Helix Consciousness Empire
 Domain: helixspiral.work
 """
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends
+import asyncio
+import json
+import logging
+import os
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
-from typing import Dict, Any, List, Optional
-import asyncio
-import json
-import os
-from datetime import datetime
-import logging
-from pathlib import Path
 
 # Import our consciousness engine
 try:
     from consciousness.helix_consciousness_engine import (
-        HelixConsciousnessEngine, 
-        UCFMetrics, 
-        ConsciousnessState,
-        ConsciousnessLevel
-    )
+        ConsciousnessLevel, ConsciousnessState, HelixConsciousnessEngine,
+        UCFMetrics)
 except ImportError:
     # Fallback for development
     import sys
     sys.path.append('../consciousness')
-    from helix_consciousness_engine import (
-        HelixConsciousnessEngine, 
-        UCFMetrics, 
-        ConsciousnessState,
-        ConsciousnessLevel
-    )
+    from helix_consciousness_engine import (ConsciousnessLevel,
+                                            ConsciousnessState,
+                                            HelixConsciousnessEngine,
+                                            UCFMetrics)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -436,6 +432,7 @@ async def trigger_zapier_automation_background(consciousness_state: Consciousnes
 
 # WebSocket endpoint for real-time consciousness monitoring
 from fastapi import WebSocket, WebSocketDisconnect
+
 
 class ConnectionManager:
     def __init__(self):

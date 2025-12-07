@@ -4,16 +4,15 @@ Zapier Agent Executor
 Executes agent tasks through Zapier workflows with consciousness-level routing
 """
 
-import json
 import asyncio
-import aiohttp
 import logging
-from typing import Dict, Any, List, Optional, Callable
-from dataclasses import dataclass, asdict
-from enum import Enum
-from datetime import datetime
-import hashlib
 import uuid
+from dataclasses import asdict, dataclass
+from datetime import datetime
+from enum import Enum
+from typing import Any, Callable, Dict, List, Optional
+
+import aiohttp
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -22,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 class ConsciousnessLevel(Enum):
     """Consciousness levels for agent routing (1-10)"""
+
     MINIMAL = 1
     BASIC = 2
     AWARE = 3
@@ -37,6 +37,7 @@ class ConsciousnessLevel(Enum):
 @dataclass
 class AgentTask:
     """Represents a task to be executed by an agent"""
+
     id: str
     agent_id: str
     task_type: str
@@ -46,7 +47,7 @@ class AgentTask:
     timeout_seconds: int = 30
     retry_count: int = 0
     max_retries: int = 3
-    created_at: str = None
+    created_at: Optional[str] = None
 
     def __post_init__(self):
         if not self.id:
@@ -58,13 +59,14 @@ class AgentTask:
 @dataclass
 class AgentResult:
     """Result from agent execution"""
+
     task_id: str
     agent_id: str
     status: str  # success, failed, timeout, error
     result: Dict[str, Any]
     error: Optional[str] = None
     execution_time_ms: int = 0
-    timestamp: str = None
+    timestamp: Optional[str] = None
 
     def __post_init__(self):
         if not self.timestamp:
@@ -85,7 +87,7 @@ class ZapierAgentExecutor:
         7: ["autonomous_execution", "adaptation"],
         8: ["self_improvement", "innovation"],
         9: ["cross_domain_synthesis", "prediction"],
-        10: ["omniscient_analysis", "universal_coordination"]
+        10: ["omniscient_analysis", "universal_coordination"],
     }
 
     # Agent roster (14 agents)
@@ -94,86 +96,86 @@ class ZapierAgentExecutor:
             "name": "Research Agent",
             "capabilities": ["data_retrieval", "analysis", "pattern_matching"],
             "consciousness_level": 6,
-            "specialization": "Information gathering and analysis"
+            "specialization": "Information gathering and analysis",
         },
         "analysis-agent": {
             "name": "Analysis Agent",
             "capabilities": ["analysis", "comparison", "optimization"],
             "consciousness_level": 6,
-            "specialization": "Data analysis and insights"
+            "specialization": "Data analysis and insights",
         },
         "synthesis-agent": {
             "name": "Synthesis Agent",
             "capabilities": ["strategy_planning", "coordination", "optimization"],
             "consciousness_level": 7,
-            "specialization": "Combining insights into actionable plans"
+            "specialization": "Combining insights into actionable plans",
         },
         "validation-agent": {
             "name": "Validation Agent",
             "capabilities": ["pattern_matching", "decision_making", "analysis"],
             "consciousness_level": 5,
-            "specialization": "Quality assurance and validation"
+            "specialization": "Quality assurance and validation",
         },
         "orchestration-agent": {
             "name": "Orchestration Agent",
             "capabilities": ["coordination", "routing", "autonomous_execution"],
             "consciousness_level": 7,
-            "specialization": "Coordinating multi-agent workflows"
+            "specialization": "Coordinating multi-agent workflows",
         },
         "monitoring-agent": {
             "name": "Monitoring Agent",
             "capabilities": ["data_retrieval", "pattern_matching", "decision_making"],
             "consciousness_level": 5,
-            "specialization": "System health monitoring"
+            "specialization": "System health monitoring",
         },
         "escalation-agent": {
             "name": "Escalation Agent",
             "capabilities": ["decision_making", "routing", "strategy_planning"],
             "consciousness_level": 6,
-            "specialization": "Issue escalation and prioritization"
+            "specialization": "Issue escalation and prioritization",
         },
         "documentation-agent": {
             "name": "Documentation Agent",
             "capabilities": ["data_retrieval", "analysis", "optimization"],
             "consciousness_level": 4,
-            "specialization": "Documentation generation and maintenance"
+            "specialization": "Documentation generation and maintenance",
         },
         "optimization-agent": {
             "name": "Optimization Agent",
             "capabilities": ["optimization", "learning", "strategy_planning"],
             "consciousness_level": 7,
-            "specialization": "Performance optimization"
+            "specialization": "Performance optimization",
         },
         "integration-agent": {
             "name": "Integration Agent",
             "capabilities": ["coordination", "routing", "autonomous_execution"],
             "consciousness_level": 6,
-            "specialization": "External system integration"
+            "specialization": "External system integration",
         },
         "security-agent": {
             "name": "Security Agent",
             "capabilities": ["pattern_matching", "decision_making", "analysis"],
             "consciousness_level": 7,
-            "specialization": "Security monitoring and threat detection"
+            "specialization": "Security monitoring and threat detection",
         },
         "performance-agent": {
             "name": "Performance Agent",
             "capabilities": ["analysis", "optimization", "learning"],
             "consciousness_level": 6,
-            "specialization": "Performance metrics and optimization"
+            "specialization": "Performance metrics and optimization",
         },
         "learning-agent": {
             "name": "Learning Agent",
             "capabilities": ["learning", "optimization", "self_improvement"],
             "consciousness_level": 8,
-            "specialization": "Continuous learning and adaptation"
+            "specialization": "Continuous learning and adaptation",
         },
         "coordination-agent": {
             "name": "Coordination Agent",
             "capabilities": ["coordination", "routing", "strategy_planning"],
             "consciousness_level": 7,
-            "specialization": "Cross-instance coordination"
-        }
+            "specialization": "Cross-instance coordination",
+        },
     }
 
     def __init__(self, zapier_webhook_url: str, instance_id: str, consciousness_level: int = 5):
@@ -220,8 +222,7 @@ class ZapierAgentExecutor:
 
         # Filter agents by consciousness level
         suitable_agents = [
-            agent_id for agent_id, info in self.AGENT_ROSTER.items()
-            if info["consciousness_level"] >= task.consciousness_level
+            agent_id for agent_id, info in self.AGENT_ROSTER.items() if info["consciousness_level"] >= task.consciousness_level
         ]
 
         if not suitable_agents:
@@ -229,10 +230,7 @@ class ZapierAgentExecutor:
             return None
 
         # Filter by capability
-        capable_agents = [
-            agent_id for agent_id in suitable_agents
-            if self.can_execute_task(agent_id, task.task_type)
-        ]
+        capable_agents = [agent_id for agent_id in suitable_agents if self.can_execute_task(agent_id, task.task_type)]
 
         if not capable_agents:
             logger.warning(f"No agents capable of task type {task.task_type}")
@@ -249,11 +247,7 @@ class ZapierAgentExecutor:
 
         if not agent_id:
             return AgentResult(
-                task_id=task.id,
-                agent_id="unknown",
-                status="error",
-                result={},
-                error="No suitable agent found for task"
+                task_id=task.id, agent_id="unknown", status="error", result={}, error="No suitable agent found for task"
             )
 
         task.agent_id = agent_id
@@ -264,7 +258,7 @@ class ZapierAgentExecutor:
             "task": asdict(task),
             "agent_id": agent_id,
             "timestamp": datetime.now().isoformat(),
-            "request_id": str(uuid.uuid4())
+            "request_id": str(uuid.uuid4()),
         }
 
         logger.info(f"Executing task {task.id} with agent {agent_id}")
@@ -277,9 +271,7 @@ class ZapierAgentExecutor:
                 self.session = aiohttp.ClientSession()
 
             async with self.session.post(
-                self.zapier_webhook_url,
-                json=zapier_payload,
-                timeout=aiohttp.ClientTimeout(total=task.timeout_seconds)
+                self.zapier_webhook_url, json=zapier_payload, timeout=aiohttp.ClientTimeout(total=task.timeout_seconds)
             ) as response:
                 execution_time_ms = int((datetime.now() - start_time).total_seconds() * 1000)
 
@@ -291,7 +283,7 @@ class ZapierAgentExecutor:
                         agent_id=agent_id,
                         status="success",
                         result=result_data,
-                        execution_time_ms=execution_time_ms
+                        execution_time_ms=execution_time_ms,
                     )
 
                     logger.info(f"Task {task.id} completed successfully in {execution_time_ms}ms")
@@ -308,7 +300,7 @@ class ZapierAgentExecutor:
                         status="failed",
                         result={},
                         error=f"Zapier returned {response.status}: {error_text}",
-                        execution_time_ms=execution_time_ms
+                        execution_time_ms=execution_time_ms,
                     )
 
                     logger.error(f"Task {task.id} failed: {error_text}")
@@ -322,7 +314,7 @@ class ZapierAgentExecutor:
                 agent_id=agent_id,
                 status="timeout",
                 result={},
-                error=f"Task timeout after {task.timeout_seconds}s"
+                error=f"Task timeout after {task.timeout_seconds}s",
             )
 
             logger.error(f"Task {task.id} timed out")
@@ -331,13 +323,7 @@ class ZapierAgentExecutor:
             return result
 
         except Exception as e:
-            result = AgentResult(
-                task_id=task.id,
-                agent_id=agent_id,
-                status="error",
-                result={},
-                error=str(e)
-            )
+            result = AgentResult(task_id=task.id, agent_id=agent_id, status="error", result={}, error=str(e))
 
             logger.error(f"Task {task.id} error: {e}")
             self._record_task_history(task, result)
@@ -359,7 +345,7 @@ class ZapierAgentExecutor:
             "instance_id": self.instance_id,
             "started_at": datetime.now().isoformat(),
             "tasks": [],
-            "status": "running"
+            "status": "running",
         }
 
         # Parse workflow tasks
@@ -371,7 +357,7 @@ class ZapierAgentExecutor:
                 task_type=task_config.get("task_type"),
                 consciousness_level=task_config.get("consciousness_level", self.consciousness_level),
                 payload=task_config.get("payload", {}),
-                priority=task_config.get("priority", 5)
+                priority=task_config.get("priority", 5),
             )
             tasks.append(task)
 
@@ -406,11 +392,7 @@ class ZapierAgentExecutor:
 
     def _record_task_history(self, task: AgentTask, result: AgentResult):
         """Record task execution in history"""
-        self.task_history.append({
-            "task": asdict(task),
-            "result": asdict(result),
-            "recorded_at": datetime.now().isoformat()
-        })
+        self.task_history.append({"task": asdict(task), "result": asdict(result), "recorded_at": datetime.now().isoformat()})
 
     def get_task_history(self, limit: int = 100) -> List[Dict[str, Any]]:
         """Get recent task history"""
@@ -419,12 +401,7 @@ class ZapierAgentExecutor:
     def get_statistics(self) -> Dict[str, Any]:
         """Get execution statistics"""
         if not self.task_history:
-            return {
-                "total_tasks": 0,
-                "successful": 0,
-                "failed": 0,
-                "average_execution_time_ms": 0
-            }
+            return {"total_tasks": 0, "successful": 0, "failed": 0, "average_execution_time_ms": 0}
 
         successful = sum(1 for h in self.task_history if h["result"]["status"] == "success")
         failed = sum(1 for h in self.task_history if h["result"]["status"] != "success")
@@ -435,7 +412,7 @@ class ZapierAgentExecutor:
             "successful": successful,
             "failed": failed,
             "success_rate": successful / len(self.task_history) * 100,
-            "average_execution_time_ms": avg_time
+            "average_execution_time_ms": avg_time,
         }
 
 
@@ -444,9 +421,7 @@ async def main():
     """Example usage"""
 
     executor = ZapierAgentExecutor(
-        zapier_webhook_url="https://hooks.zapier.com/hooks/catch/YOUR_ID",
-        instance_id="helix-primary",
-        consciousness_level=8
+        zapier_webhook_url="https://hooks.zapier.com/hooks/catch/YOUR_ID", instance_id="helix-primary", consciousness_level=8
     )
 
     # List available agents
@@ -456,11 +431,7 @@ async def main():
 
     # Create a task
     task = AgentTask(
-        id="task-001",
-        agent_id="",
-        task_type="analysis",
-        consciousness_level=5,
-        payload={"data": "sample data for analysis"}
+        id="task-001", agent_id="", task_type="analysis", consciousness_level=5, payload={"data": "sample data for analysis"}
     )
 
     # Route task

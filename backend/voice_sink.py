@@ -1,11 +1,11 @@
-import discord
 import asyncio
 import io
-import wave
-import os
 import json
+import os
+
+import discord
 from loguru import logger
-from vosk import Model, KaldiRecognizer
+from vosk import KaldiRecognizer, Model
 
 # Configuration from voice_commands.py
 SAMPLE_RATE = 16000

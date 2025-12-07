@@ -18,7 +18,7 @@ import json
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 # Notion API configuration
 NOTION_API_KEY = os.getenv("NOTION_API_KEY", "")

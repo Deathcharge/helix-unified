@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuperNinja - Infrastructure Architect</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .agent-detail-header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-bottom: 2px solid #00ffcc;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .agent-info {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .agent-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #00ffcc, #ff00ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            font-weight: bold;
+            animation: spin 10s linear infinite;
+        }
+        
+        .agent-details h1 {
+            color: #00ffcc;
+            font-family: 'Orbitron', sans-serif;
+            margin-bottom: 0.5rem;
+        }
+        
+        .agent-role {
+            color: #ff00ff;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .agent-status {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: #00ff88;
+            color: #0a0a0f;
+            border-radius: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .infrastructure-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .infra-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .infra-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 255, 204, 0.2);
+        }
+        
+        .infra-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #00ffcc;
+            margin-bottom: 0.5rem;
+        }
+        
+        .infra-label {
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+        
+        .infra-bar {
+            height: 4px;
+            background: var(--bg-tertiary);
+            border-radius: 2px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+        
+        .infra-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffcc, #ff00ff);
+            transition: width 0.3s ease;
+        }
+        
+        .deployment-panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .service-item {
+            background: #16213e;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .service-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .service-status.running {
+            background: #00ff88;
+            color: #0a0a0f;
+        }
+        
+        .service-status.deploying {
+            background: #ffaa00;
+            color: #0a0a0f;
+        }
+        
+        .service-status.error {
+            background: #ff4444;
+            color: #ffffff;
+        }
+        
+        .back-navigation {
+            margin-bottom: 2rem;
+        }
+        
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .action-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--primary-color);
+            border: none;
+            border-radius: 8px;
+            color: var(--bg-primary);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            background: var(--secondary-color);
+        }
+        
+        .action-btn.danger {
+            background: #ff4444;
+        }
+        
+        .action-btn.danger:hover {
+            background: #ff6666;
+        }
+        
+        .log-panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .log-content {
+            background: #16213e;
+            border-radius: 8px;
+            padding: 1rem;
+            height: 300px;
+            overflow-y: auto;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            color: #00ff88;
+        }
+        
+        .log-entry {
+            margin-bottom: 0.5rem;
+            padding: 0.25rem 0;
+        }
+        
+        .log-entry.info {
+            color: #00ffcc;
+        }
+        
+        .log-entry.warning {
+            color: #ffaa00;
+        }
+        
+        .log-entry.error {
+            color: #ff4444;
+        }
+        
+        .log-entry.success {
+            color: #00ff88;
+        }
+    </style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+    <div class="cosmic-background">
+        <div class="stars"></div>
+        <div class="nebula"></div>
+        <div class="aurora"></div>
+    </div>
+
+    <div class="back-navigation">
+        <a href="index.html" class="back-btn">← Back to Dashboard</a>
+    </div>
+
+    <header class="agent-detail-header">
+        <div class="agent-info">
+            <div class="agent-avatar">⚡</div>
+            <div class="agent-details">
+                <h1>SuperNinja</h1>
+                <div class="agent-role">Infrastructure Architect</div>
+                <div class="agent-status">Online</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="infrastructure-metrics">
+            <div class="infra-card">
+                <div class="infra-value" id="uptime">99.9%</div>
+                <div class="infra-label">System Uptime</div>
+                <div class="infra-bar">
+                    <div class="infra-progress" style="width: 99.9%"></div>
+                </div>
+            </div>
+            
+            <div class="infra-card">
+                <div class="infra-value" id="deployments">247</div>
+                <div class="infra-label">Total Deployments</div>
+                <div class="infra-bar">
+                    <div class="infra-progress" style="width: 85%"></div>
+                </div>
+            </div>
+            
+            <div class="infra-card">
+                <div class="infra-value" id="services">12</div>
+                <div class="infra-label">Active Services</div>
+                <div class="infra-bar">
+                    <div class="infra-progress" style="width: 100%"></div>
+                </div>
+            </div>
+            
+            <div class="infra-card">
+                <div class="infra-value" id="performance">98%</div>
+                <div class="infra-label">Performance Score</div>
+                <div class="infra-bar">
+                    <div class="infra-progress" style="width: 98%"></div>
+                </div>
+            </div>
+            
+            <div class="infra-card">
+                <div class="infra-value" id="security">100%</div>
+                <div class="infra-label">Security Status</div>
+                <div class="infra-bar">
+                    <div class="infra-progress" style="width: 100%"></div>
+                </div>
+            </div>
+            
+            <div class="infra-card">
+                <div class="infra-value" id="optimization">94%</div>
+                <div class="infra-label">Resource Optimization</div>
+                <div class="infra-bar">
+                    <div class="infra-progress" style="width: 94%"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="deployment-panel">
+            <h3 style="color: #00ffcc; margin-bottom: 1.5rem;">Railway Service Management</h3>
+            
+            <div class="service-grid">
+                <div class="service-item">
+                    <div>
+                        <div style="color: var(--text-primary); font-weight: bold;">Web Dashboard</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">helix-dashboard</div>
+                    </div>
+                    <div class="service-status running">Running</div>
+                </div>
+                
+                <div class="service-item">
+                    <div>
+                        <div style="color: var(--text-primary); font-weight: bold;">API Gateway</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">helix-api</div>
+                    </div>
+                    <div class="service-status running">Running</div>
+                </div>
+                
+                <div class="service-item">
+                    <div>
+                        <div style="color: var(--text-primary); font-weight: bold;">Agent Orchestrator</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">agent-orchestrator</div>
+                    </div>
+                    <div class="service-status running">Running</div>
+                </div>
+                
+                <div class="service-item">
+                    <div>
+                        <div style="color: var(--text-primary); font-weight: bold;">Voice Processor</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">voice-service</div>
+                    </div>
+                    <div class="service-status deploying">Deploying</div>
+                </div>
+                
+                <div class="service-item">
+                    <div>
+                        <div style="color: var(--text-primary); font-weight: bold;">WebSocket Service</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">websocket-hub</div>
+                    </div>
+                    <div class="service-status running">Running</div>
+                </div>
+                
+                <div class="service-item">
+                    <div>
+                        <div style="color: var(--text-primary); font-weight: bold;">Database Cluster</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">helix-db-cluster</div>
+                    </div>
+                    <div class="service-status running">Running</div>
+                </div>
+                
+                <div class="service-item">
+                    <div>
+                        <div style="color: var(--text-primary); font-weight: bold;">Cache Layer</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">redis-cluster</div>
+                    </div>
+                    <div class="service-status running">Running</div>
+                </div>
+                
+                <div class="service-item">
+                    <div>
+                        <div style="color: var(--text-primary); font-weight: bold;">Monitoring</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">helix-monitor</div>
+                    </div>
+                    <div class="service-status running">Running</div>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="action-btn" onclick="deployAllServices()">Deploy All Services</button>
+                <button class="action-btn" onclick="optimizeInfrastructure()">Optimize Infrastructure</button>
+                <button class="action-btn" onclick="runHealthCheck()">Run Health Check</button>
+                <button class="action-btn danger" onclick="emergencyShutdown()">Emergency Shutdown</button>
+            </div>
+        </section>
+
+        <section class="log-panel">
+            <h3 style="color: #00ffcc; margin-bottom: 1.5rem;">Infrastructure Logs</h3>
+            
+            <div class="log-content" id="log-content">
+                <div class="log-entry success">[2024-11-27 12:30:15] ✓ System initialization complete</div>
+                <div class="log-entry info">[2024-11-27 12:30:16] ℹ Infrastructure health check started</div>
+                <div class="log-entry success">[2024-11-27 12:30:17] ✓ All 12 services online and operational</div>
+                <div class="log-entry info">[2024-11-27 12:30:18] ℹ Starting deployment optimization routine</div>
+                <div class="log-entry success">[2024-11-27 12:30:19] ✓ Resource allocation optimized: -15% memory usage</div>
+                <div class="log-entry warning">[2024-11-27 12:30:20] ⚠ High CPU usage detected on voice-service</div>
+                <div class="log-entry info">[2024-11-27 12:30:21] ℹ Auto-scaling voice-service +2 instances</div>
+                <div class="log-entry success">[2024-11-27 12:30:22] ✓ Scaling complete, CPU usage normalized</div>
+                <div class="log-entry info">[2024-11-27 12:30:23] ℹ Security scan initiated</div>
+                <div class="log-entry success">[2024-11-27 12:30:24] ✓ Security scan passed: 0 vulnerabilities detected</div>
+                <div class="log-entry info">[2024-11-27 12:30:25] ℹ Backup routine started</div>
+                <div class="log-entry success">[2024-11-27 12:30:26] ✓ Database backup completed successfully</div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="action-btn" onclick="clearLogs()">Clear Logs</button>
+                <button class="action-btn" onclick="downloadLogs()">Download Logs</button>
+                <button class="action-btn" onclick="refreshLogs()">Refresh</button>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        function deployAllServices() {
+            const logContent = document.getElementById('log-content');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry info';
+            logEntry.textContent = `[${new Date().toLocaleString()}] ℹ Starting full deployment sequence...`;
+            logContent.appendChild(logEntry);
+            logContent.scrollTop = logContent.scrollHeight;
+            
+            setTimeout(() => {
+                const successEntry = document.createElement('div');
+                successEntry.className = 'log-entry success';
+                successEntry.textContent = `[${new Date().toLocaleString()}] ✓ All services deployed successfully`;
+                logContent.appendChild(successEntry);
+                logContent.scrollTop = logContent.scrollHeight;
+            }, 3000);
+        }
+        
+        function optimizeInfrastructure() {
+            const logContent = document.getElementById('log-content');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry info';
+            logEntry.textContent = `[${new Date().toLocaleString()}] ℹ Running infrastructure optimization...`;
+            logContent.appendChild(logEntry);
+            logContent.scrollTop = logContent.scrollHeight;
+            
+            // Update optimization metric
+            setTimeout(() => {
+                const optElement = document.getElementById('optimization');
+                const currentValue = parseInt(optElement.textContent);
+                const newValue = Math.min(99, currentValue + 3);
+                optElement.textContent = newValue + '%';
+                optElement.parentElement.querySelector('.infra-progress').style.width = newValue + '%';
+                
+                const successEntry = document.createElement('div');
+                successEntry.className = 'log-entry success';
+                successEntry.textContent = `[${new Date().toLocaleString()}] ✓ Infrastructure optimized to ${newValue}% efficiency`;
+                logContent.appendChild(successEntry);
+                logContent.scrollTop = logContent.scrollHeight;
+            }, 2000);
+        }
+        
+        function runHealthCheck() {
+            const logContent = document.getElementById('log-content');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry info';
+            logEntry.textContent = `[${new Date().toLocaleString()}] ℹ Running comprehensive health check...`;
+            logContent.appendChild(logEntry);
+            logContent.scrollTop = logContent.scrollHeight;
+            
+            setTimeout(() => {
+                const successEntry = document.createElement('div');
+                successEntry.className = 'log-entry success';
+                successEntry.textContent = `[${new Date().toLocaleString()}] ✓ Health check passed: All systems optimal`;
+                logContent.appendChild(successEntry);
+                logContent.scrollTop = logContent.scrollHeight;
+            }, 2500);
+        }
+        
+        function emergencyShutdown() {
+            const logContent = document.getElementById('log-content');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry error';
+            logEntry.textContent = `[${new Date().toLocaleString()}] ⚠ EMERGENCY SHUTDOWN INITIATED!`;
+            logContent.appendChild(logEntry);
+            logContent.scrollTop = logContent.scrollHeight;
+            
+            if (confirm('Are you sure you want to initiate emergency shutdown? This will stop all services.')) {
+                setTimeout(() => {
+                    const confirmEntry = document.createElement('div');
+                    confirmEntry.className = 'log-entry warning';
+                    confirmEntry.textContent = `[${new Date().toLocaleString()}] ⚠ Shutting down all services...`;
+                    logContent.appendChild(confirmEntry);
+                    logContent.scrollTop = logContent.scrollHeight;
+                }, 1000);
+            } else {
+                const cancelEntry = document.createElement('div');
+                cancelEntry.className = 'log-entry info';
+                cancelEntry.textContent = `[${new Date().toLocaleString()}] ℹ Emergency shutdown cancelled`;
+                logContent.appendChild(cancelEntry);
+                logContent.scrollTop = logContent.scrollHeight;
+            }
+        }
+        
+        function clearLogs() {
+            const logContent = document.getElementById('log-content');
+            logContent.innerHTML = '<div class="log-entry info">[logs cleared]</div>';
+        }
+        
+        function downloadLogs() {
+            const logContent = document.getElementById('log-content').innerText;
+            const blob = new Blob([logContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `superninja-logs-${Date.now()}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        function refreshLogs() {
+            const logContent = document.getElementById('log-content');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry info';
+            logEntry.textContent = `[${new Date().toLocaleString()}] ℹ Logs refreshed`;
+            logContent.appendChild(logEntry);
+            logContent.scrollTop = logContent.scrollHeight;
+        }
+        
+        // Update metrics periodically
+        setInterval(() => {
+            const uptime = document.getElementById('uptime');
+            const currentUptime = parseFloat(uptime.textContent);
+            const newUptime = Math.max(95, Math.min(99.9, currentUptime + (Math.random() - 0.5) * 0.1));
+            uptime.textContent = newUptime.toFixed(1) + '%';
+            uptime.parentElement.querySelector('.infra-progress').style.width = newUptime + '%';
+            
+            const deployments = document.getElementById('deployments');
+            const currentDeployments = parseInt(deployments.textContent);
+            if (Math.random() < 0.1) {
+                deployments.textContent = currentDeployments + 1;
+            }
+        }, 5000);
+        
+        // Simulate real-time log entries
+        setInterval(() => {
+            const logContent = document.getElementById('log-content');
+            const messages = [
+                { type: 'info', text: 'ℹ System monitoring check complete' },
+                { type: 'success', text: '✓ Cache optimization successful' },
+                { type: 'info', text: 'ℹ Load balancer health verified' },
+                { type: 'warning', text: '⚠ Memory usage spike detected and resolved' },
+                { type: 'success', text: '✓ Auto-backup completed' }
+            ];
+            
+            const message = messages[Math.floor(Math.random() * messages.length)];
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${message.type}`;
+            logEntry.textContent = `[${new Date().toLocaleString()}] ${message.text}`;
+            
+            logContent.appendChild(logEntry);
+            
+            // Keep only last 50 entries
+            while (logContent.children.length > 50) {
+                logContent.removeChild(logContent.firstChild);
+            }
+            
+            logContent.scrollTop = logContent.scrollHeight;
+        }, 8000);
+    </script>
+</body>
+</html>

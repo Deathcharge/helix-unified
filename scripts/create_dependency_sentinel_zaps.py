@@ -9,6 +9,7 @@ Usage:
 
 import asyncio
 import json
+
 from fastmcp import Client
 from fastmcp.client.transports import StreamableHttpTransport
 

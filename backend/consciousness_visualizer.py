@@ -230,9 +230,7 @@ class ConsciousnessVisualizer:
 
         # Add SentientAGI output if provided
         if sentient_output:
-            fig.text(
-                0.5, 0.02, f"SentientAGI: {sentient_output[:100]}...", ha="center", color="cyan", size=8, style="italic"
-            )
+            fig.text(0.5, 0.02, f"SentientAGI: {sentient_output[:100]}...", ha="center", color="cyan", size=8, style="italic")
 
         # Save
         timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
