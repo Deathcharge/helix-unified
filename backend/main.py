@@ -518,6 +518,76 @@ try:
 except Exception as e:
     logger.error(f"❌ Failed to load Interface Integration routes: {e}")
 
+# ============================================================================
+# NEW SAAS SERVICES (v17.1) - Added by Claude 2025-12-07
+# ============================================================================
+
+# Include Admin Dashboard routes
+try:
+    from backend.routes.admin_dashboard import router as admin_router
+
+    app.include_router(admin_router, prefix="/admin", tags=["Admin Dashboard"])
+    logger.info("✅ Admin Dashboard routes loaded (v17.1)")
+    logger.info("   → /admin/ (Dashboard UI)")
+    logger.info("   → /admin/stats (Platform stats)")
+    logger.info("   → /admin/users (User management)")
+    logger.info("   → /admin/revenue (Revenue reports)")
+except Exception as e:
+    logger.error(f"❌ Failed to load Admin Dashboard routes: {e}")
+
+# Include API Documentation Portal routes
+try:
+    from backend.routes.api_docs import router as api_docs_router
+
+    app.include_router(api_docs_router, prefix="/docs/api", tags=["API Documentation"])
+    logger.info("✅ API Documentation Portal loaded (v17.1)")
+    logger.info("   → /docs/api/ (Documentation home)")
+    logger.info("   → /docs/api/catalog (API catalog)")
+    logger.info("   → /docs/api/getting-started (Quick start)")
+except Exception as e:
+    logger.error(f"❌ Failed to load API Documentation routes: {e}")
+
+# Include Multimedia Suite routes
+try:
+    from backend.routes.multimedia_suite import router as multimedia_router
+
+    app.include_router(multimedia_router, prefix="/multimedia", tags=["Multimedia Suite"])
+    logger.info("✅ Multimedia Suite routes loaded (v17.1)")
+    logger.info("   → /multimedia/ (Suite home)")
+    logger.info("   → /multimedia/documents (Document management)")
+    logger.info("   → /multimedia/ai/assist (AI assistance)")
+    logger.info("   → /multimedia/templates (Templates)")
+except Exception as e:
+    logger.error(f"❌ Failed to load Multimedia Suite routes: {e}")
+
+# Include SaaS Expansion Pack routes
+try:
+    from backend.routes.saas_expansion import router as expansion_router
+
+    app.include_router(expansion_router, prefix="/services", tags=["SaaS Expansion"])
+    logger.info("✅ SaaS Expansion Pack loaded (v17.1)")
+    logger.info("   → /services/ (Services overview)")
+    logger.info("   → /services/analytics/* (Analytics platform)")
+    logger.info("   → /services/mail/* (Email marketing)")
+    logger.info("   → /services/chat/* (Customer support)")
+    logger.info("   → /services/stream/* (Video hosting)")
+    logger.info("   → /services/schedule/* (Appointment booking)")
+    logger.info("   → /services/monitor/* (Uptime monitoring)")
+    logger.info("   → /services/cdp/* (Customer data platform)")
+except Exception as e:
+    logger.error(f"❌ Failed to load SaaS Expansion routes: {e}")
+
+# Enable Admin Bypass Middleware
+try:
+    from backend.admin_bypass import admin_bypass_middleware
+
+    app.middleware("http")(admin_bypass_middleware)
+    logger.info("✅ Admin Bypass Middleware enabled (v17.1)")
+    logger.info("   → Admin users bypass payment and tier restrictions")
+    logger.info("   → Configure ADMIN_EMAILS in environment variables")
+except Exception as e:
+    logger.error(f"❌ Failed to load Admin Bypass Middleware: {e}")
+
 # Setup templates directory (use absolute path for Railway compatibility)
 # Try multiple path resolution strategies for robustness
 
