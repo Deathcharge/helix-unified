@@ -816,8 +816,8 @@ async def claude_api_status() -> Dict[str, Any]:
         limiter = get_claude_limiter()
         return limiter.get_metrics()
     except Exception as e:
-        logger.error(f"Error getting Claude API status: {e}")
-        return {"error": str(e), "status": "unavailable"}
+        logger.error(f"Error getting Claude API status: {e}", exc_info=True)
+        return {"error": "Claude API is unavailable", "status": "unavailable"}
 
 
 # ============================================================================
