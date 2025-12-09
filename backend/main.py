@@ -306,6 +306,15 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.warning(f"⚠ WebSocket broadcast start error: {e}")
 
+    # Launch Claude API cooldown queue processor
+    try:
+        from backend.core.claude_cooldown import get_claude_limiter
+        limiter = get_claude_limiter()
+        asyncio.create_task(limiter.process_queue())  # noqa: F841
+        logger.info("🤖 Claude API cooldown manager started")
+    except Exception as e:
+        logger.warning(f"⚠ Claude cooldown manager start error: {e}")
+
     logger.info("✅ Helix Collective v16.9 - Ready for Operations (Quantum Handshake Active)")
 
     yield  # Application runs
@@ -625,8 +634,14 @@ def health_check() -> Dict[str, Any]:
     Returns system health and all integration statuses (Zapier, Notion, MEGA, etc.)
     Always returns 200 OK for Railway health checks.
     """
-    # Basic health
-    health_data = {"ok": True, "version": "16.9", "timestamp": datetime.now().isoformat()}
+    # Basic health with uptime
+    health_data = {
+        "ok": True,
+        "version": "16.9",
+        "timestamp": datetime.now().isoformat(),
+        "uptime": calculate_uptime(),
+        "start_time": APP_START_TIME.isoformat()
+    }
 
     # Integration status
     integrations = {}
@@ -713,6 +728,26 @@ def health_check() -> Dict[str, Any]:
     }
 
     return health_data
+
+
+@app.get("/api/claude/status")
+async def claude_api_status() -> Dict[str, Any]:
+    """
+    Get Claude API rate limiter status and metrics.
+
+    Returns:
+    - Current request rate
+    - Cooldown status
+    - Queue metrics
+    - Total statistics
+    """
+    try:
+        from backend.core.claude_cooldown import get_claude_limiter
+        limiter = get_claude_limiter()
+        return limiter.get_metrics()
+    except Exception as e:
+        logger.error(f"Error getting Claude API status: {e}")
+        return {"error": str(e), "status": "unavailable"}
 
 
 # ============================================================================
