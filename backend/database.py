@@ -23,7 +23,20 @@ DATABASE_URL = os.getenv(
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
-engine = create_engine(DATABASE_URL)
+# Create engine with connection pooling
+# pool_size: Number of connections to keep open
+# max_overflow: Additional connections that can be created when pool is full
+# pool_pre_ping: Test connections before using them (handles stale connections)
+# pool_recycle: Recycle connections after 1 hour to prevent stale connections
+engine = create_engine(
+    DATABASE_URL,
+    pool_size=20,  # Keep 20 connections in pool
+    max_overflow=40,  # Allow up to 40 additional connections
+    pool_pre_ping=True,  # Verify connection health before use
+    pool_recycle=3600,  # Recycle connections after 1 hour
+    echo=False,  # Set to True for SQL query logging (debug only)
+)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
