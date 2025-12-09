@@ -13,6 +13,10 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, EmailStr, validator
+from sqlalchemy.orm import Session
+
+# Import database
+from backend.database import get_db, User as DBUser
 
 # Import security utilities
 from backend.core.security import (
@@ -187,35 +191,43 @@ async def verify_google_token(req: GoogleTokenRequest) -> Token:
     return Token(access_token=access_token, user=user)
 
 # ============================================================================
-# EMAIL/PASSWORD ROUTES (Simple implementation)
+# EMAIL/PASSWORD ROUTES
 # ============================================================================
-
-# In-memory user store (replace with database in production)
-_users_store = {}
 
 @router.post("/signup")
 @limiter.limit(get_rate_limit("auth_signup"))
-async def signup(request: Request, req: SignupRequest) -> Token:
+async def signup(request: Request, req: SignupRequest, db: Session = Depends(get_db)) -> Token:
     """Sign up with email/password - JOIN THE DARK SIDE"""
     # Check if user exists
-    if req.email in _users_store:
+    existing_user = db.query(DBUser).filter(DBUser.email == req.email).first()
+    if existing_user:
         raise AlreadyExistsError("User", req.email)
 
-    # Create user
-    user = User(
-        id=f"user_{generate_secure_token(8)}",
+    # Create user in database
+    user_id = f"user_{generate_secure_token(8)}"
+    db_user = DBUser(
+        id=user_id,
         email=req.email,
         name=req.name,
+        password_hash=hash_password(req.password),
+        auth_provider="email",
         subscription_tier="free",
-        created_at=datetime.utcnow().isoformat()
+        created_at=datetime.utcnow(),
+        last_login=datetime.utcnow()
     )
 
-    # Hash password and store user
-    password_hash = hash_password(req.password)
-    _users_store[req.email] = {
-        "user": user,
-        "password_hash": password_hash,
-    }
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+
+    # Create response user model
+    user = User(
+        id=db_user.id,
+        email=db_user.email,
+        name=db_user.name,
+        subscription_tier=db_user.subscription_tier,
+        created_at=db_user.created_at.isoformat()
+    )
 
     # Create token
     access_token = create_user_token(user)
@@ -224,20 +236,32 @@ async def signup(request: Request, req: SignupRequest) -> Token:
 
 @router.post("/login")
 @limiter.limit(get_rate_limit("auth_login"))
-async def login(request: Request, req: LoginRequest) -> Token:
+async def login(request: Request, req: LoginRequest, db: Session = Depends(get_db)) -> Token:
     """Login with email/password - ENTER THE LAIR"""
     # Check if user exists
-    if req.email not in _users_store:
+    db_user = db.query(DBUser).filter(DBUser.email == req.email).first()
+    if not db_user:
         raise InvalidCredentialsError()
-
-    stored = _users_store[req.email]
 
     # Verify password using bcrypt
-    if not verify_password(req.password, stored["password_hash"]):
+    if not verify_password(req.password, db_user.password_hash):
         raise InvalidCredentialsError()
 
+    # Update last login
+    db_user.last_login = datetime.utcnow()
+    db.commit()
+
+    # Create response user model
+    user = User(
+        id=db_user.id,
+        email=db_user.email,
+        name=db_user.name,
+        picture=db_user.picture,
+        subscription_tier=db_user.subscription_tier,
+        created_at=db_user.created_at.isoformat() if db_user.created_at else None
+    )
+
     # Create token
-    user = stored["user"]
     access_token = create_user_token(user)
 
     return Token(access_token=access_token, user=user)

@@ -62,13 +62,15 @@ loguru==0.7.2  # Advanced logging for Zapier integration
 
 # Cloud Storage (Optional - will gracefully degrade if not installed)
 boto3>=1.28.0  # Backblaze B2 and AWS S3 storage
-webdav3>=3.14.0  # Nextcloud WebDAV storage
+# webdav3>=3.14.0  # Nextcloud WebDAV storage (not available for Python 3.11+)
 
 # AI Music Generation (Optional - requires HUGE downloads ~2GB, only for music features)
 # torch>=2.0.0  # PyTorch for MusicGen model
 # transformers>=4.30.0  # Hugging Face Transformers for MusicGen
 # scipy>=1.10.0  # Required by MusicGen audio processing
 
+# Database
+sqlalchemy==2.0.25  # Database ORM for user management
+
 # Optional: Commented out dependencies
 # opencv-python==4.9.0.80
-# sqlalchemy==2.0.25
