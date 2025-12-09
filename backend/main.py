@@ -385,6 +385,48 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
+# ============================================================================
+# GZIP COMPRESSION MIDDLEWARE (70-90% response size reduction)
+# ============================================================================
+from fastapi.middleware.gzip import GZIPMiddleware
+
+app.add_middleware(
+    GZIPMiddleware,
+    minimum_size=1000  # Only compress responses > 1KB
+)
+logger.info("✅ Gzip compression enabled (minimum_size=1000)")
+
+# ============================================================================
+# RATE LIMITING (prevent API abuse)
+# ============================================================================
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+
+limiter = Limiter(key_func=get_remote_address, default_limits=["1000/hour"])
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+logger.info("✅ Rate limiting enabled (1000 requests/hour default)")
+
+
+# ============================================================================
+# REQUEST CORRELATION IDs (for distributed tracing)
+# ============================================================================
+import uuid
+
+@app.middleware("http")
+async def add_correlation_id(request: Request, call_next):
+    """Add unique correlation ID to each request for tracing."""
+    correlation_id = request.headers.get("X-Correlation-ID") or str(uuid.uuid4())
+    request.state.correlation_id = correlation_id
+
+    # Process request
+    response = await call_next(request)
+
+    # Add correlation ID to response headers
+    response.headers["X-Correlation-ID"] = correlation_id
+    return response
+
 
 # ============================================================================
 # REQUEST LOGGING MIDDLEWARE (v17.0 - QOL Improvements)
