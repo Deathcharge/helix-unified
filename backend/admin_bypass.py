@@ -15,6 +15,7 @@ Date: 2025-12-07
 """
 
 import os
+from datetime import datetime
 from typing import List, Optional, Set
 from functools import wraps
 
@@ -295,7 +296,7 @@ def log_admin_action(user: dict, action: str, details: dict = None):
 
     import json
     log_entry = {
-        "timestamp": __import__("datetime").datetime.utcnow().isoformat(),
+        "timestamp": datetime.utcnow().isoformat(),
         "admin_email": user.get("email"),
         "admin_id": user.get("id"),
         "action": action,

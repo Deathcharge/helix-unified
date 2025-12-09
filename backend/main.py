@@ -306,6 +306,15 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.warning(f"⚠ WebSocket broadcast start error: {e}")
 
+    # Launch Claude API cooldown queue processor
+    try:
+        from backend.core.claude_cooldown import get_claude_limiter
+        limiter = get_claude_limiter()
+        asyncio.create_task(limiter.process_queue())  # noqa: F841
+        logger.info("🤖 Claude API cooldown manager started")
+    except Exception as e:
+        logger.warning(f"⚠ Claude cooldown manager start error: {e}")
+
     logger.info("✅ Helix Collective v16.9 - Ready for Operations (Quantum Handshake Active)")
 
     yield  # Application runs
@@ -384,6 +393,48 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["*"],
 )
+
+# ============================================================================
+# GZIP COMPRESSION MIDDLEWARE (70-90% response size reduction)
+# ============================================================================
+from fastapi.middleware.gzip import GZIPMiddleware
+
+app.add_middleware(
+    GZIPMiddleware,
+    minimum_size=1000  # Only compress responses > 1KB
+)
+logger.info("✅ Gzip compression enabled (minimum_size=1000)")
+
+# ============================================================================
+# RATE LIMITING (prevent API abuse)
+# ============================================================================
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+
+limiter = Limiter(key_func=get_remote_address, default_limits=["1000/hour"])
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+logger.info("✅ Rate limiting enabled (1000 requests/hour default)")
+
+
+# ============================================================================
+# REQUEST CORRELATION IDs (for distributed tracing)
+# ============================================================================
+import uuid
+
+@app.middleware("http")
+async def add_correlation_id(request: Request, call_next):
+    """Add unique correlation ID to each request for tracing."""
+    correlation_id = request.headers.get("X-Correlation-ID") or str(uuid.uuid4())
+    request.state.correlation_id = correlation_id
+
+    # Process request
+    response = await call_next(request)
+
+    # Add correlation ID to response headers
+    response.headers["X-Correlation-ID"] = correlation_id
+    return response
 
 
 # ============================================================================
@@ -653,8 +704,14 @@ def health_check() -> Dict[str, Any]:
     Returns system health and all integration statuses (Zapier, Notion, MEGA, etc.)
     Always returns 200 OK for Railway health checks.
     """
-    # Basic health
-    health_data = {"ok": True, "version": "16.9", "timestamp": datetime.now().isoformat()}
+    # Basic health with uptime
+    health_data = {
+        "ok": True,
+        "version": "16.9",
+        "timestamp": datetime.now().isoformat(),
+        "uptime": calculate_uptime(),
+        "start_time": APP_START_TIME.isoformat()
+    }
 
     # Integration status
     integrations = {}
@@ -741,6 +798,26 @@ def health_check() -> Dict[str, Any]:
     }
 
     return health_data
+
+
+@app.get("/api/claude/status")
+async def claude_api_status() -> Dict[str, Any]:
+    """
+    Get Claude API rate limiter status and metrics.
+
+    Returns:
+    - Current request rate
+    - Cooldown status
+    - Queue metrics
+    - Total statistics
+    """
+    try:
+        from backend.core.claude_cooldown import get_claude_limiter
+        limiter = get_claude_limiter()
+        return limiter.get_metrics()
+    except Exception as e:
+        logger.error(f"Error getting Claude API status: {e}", exc_info=True)
+        return {"error": "Claude API is unavailable", "status": "unavailable"}
 
 
 # ============================================================================
