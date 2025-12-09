@@ -10,8 +10,7 @@ from datetime import datetime
 
 from sqlalchemy import (JSON, Boolean, Column, DateTime, Float, Integer,
                         String, create_engine)
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 # Database URL (Railway provides this automatically)
 DATABASE_URL = os.getenv(
@@ -100,7 +99,7 @@ class UsageLog(Base):
     method = Column(String)
     status_code = Column(Integer)
     response_time_ms = Column(Float)
-    metadata = Column(JSON)
+    request_metadata = Column(JSON)  # Renamed from metadata (reserved keyword)
 
 class AgentRental(Base):
     """Agent rental sessions"""
