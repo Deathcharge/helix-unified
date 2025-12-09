@@ -509,7 +509,6 @@ def main():
     # Auto-refresh
     if auto_refresh:
         st.markdown("*Auto-refreshing every 60 seconds...*")
-        import time
         time.sleep(60)
         st.rerun()
 
