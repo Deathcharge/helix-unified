@@ -418,7 +418,7 @@ app.add_middleware(
 # ============================================================================
 # GZIP COMPRESSION MIDDLEWARE (70-90% response size reduction)
 # ============================================================================
-from fastapi.middleware.gzip import GZIPMiddleware
+from starlette.middleware.gzip import GZIPMiddleware
 
 app.add_middleware(
     GZIPMiddleware,
