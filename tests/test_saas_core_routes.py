@@ -17,6 +17,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
+from urllib.parse import urlparse
 
 # Note: These tests assume FastAPI app setup
 # They can be integrated into main test suite or run independently
@@ -435,7 +436,7 @@ class TestBillingEndpoints:
             result = await create_checkout(checkout, user)
 
             assert "checkout_url" in result
-            assert "checkout.stripe.com" in result["checkout_url"]
+            assert urlparse(result["checkout_url"]).hostname == "checkout.stripe.com"
 
     @pytest.mark.asyncio
     async def test_payment_history_endpoint(self):
