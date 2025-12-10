@@ -6,6 +6,7 @@ import logging
 import os
 import base64
 import hashlib
+import tempfile
 import aiohttp
 from pathlib import Path
 from typing import Optional
@@ -13,7 +14,7 @@ from typing import Optional
 logger = logging.getLogger(__name__)
 
 # Cache directory for TTS audio
-CACHE_DIR = Path("/tmp/helix_tts_cache")
+CACHE_DIR = Path(tempfile.gettempdir()) / "helix_tts_cache"
 CACHE_DIR.mkdir(exist_ok=True)
 
 
@@ -58,9 +59,9 @@ class VoiceProcessorClient:
 
     def _get_cache_path(self, text: str, voice_name: str, language_code: str) -> Path:
         """Generate cache file path for TTS audio."""
-        # Create hash of text + voice + language
+        # Create hash of text + voice + language (not for security, just cache key)
         cache_key = f"{text}:{voice_name}:{language_code}"
-        file_hash = hashlib.md5(cache_key.encode()).hexdigest()
+        file_hash = hashlib.md5(cache_key.encode(), usedforsecurity=False).hexdigest()
         return CACHE_DIR / f"{file_hash}.mp3"
 
     async def synthesize_speech(
