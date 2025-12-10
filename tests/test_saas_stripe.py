@@ -17,6 +17,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from fastapi import HTTPException
+from urllib.parse import urlparse
 
 from backend.saas_stripe import (
     STRIPE_PRICE_IDS,
@@ -335,7 +336,8 @@ class TestCheckoutSessions:
             )
 
             assert result["id"] == "cs_test123"
-            assert "checkout.stripe.com" in result["url"]
+            parsed_url = urlparse(result["url"])
+            assert parsed_url.hostname == "checkout.stripe.com"
 
             # Verify Stripe was called with correct parameters
             call_args = mock_stripe.checkout.Session.create.call_args
