@@ -47,23 +47,60 @@ async def setup(bot: 'Bot') -> None:
 
 @commands.command(name="setup")
 @commands.has_permissions(manage_channels=True)
-async def setup_helix_server(ctx: commands.Context) -> None:
+async def setup_helix_server(ctx: commands.Context, mode: Optional[str] = None) -> None:
     """
-    🌀 Setup Helix Webhooks - Creates webhooks for all existing channels.
+    🌀 Setup Helix Server - Creates channels, categories, and webhooks.
 
     This command will:
-    - Scan all text channels in the server
-    - Create webhooks for channels that don't have them
+    - Create all missing categories and channels (based on SERVER_STRUCTURE)
+    - Create webhooks for all text channels
     - Save webhook URLs to Helix/state/channel_webhooks.json
     - Display all webhook URLs for Zapier configuration
 
-    ARCHITECT-ONLY. Run this to set up webhooks for Zapier integration.
+    ARCHITECT-ONLY. Run this to set up the complete Helix server structure.
 
-    Usage: !setup
+    Usage:
+        !setup              - Full setup (channels + webhooks)
+        !setup webhooks     - Only create webhooks (skip channel creation)
     """
-    await ctx.send("🔧 **Starting Helix Webhook Setup...**\nThis may take a moment...")
-
     guild = ctx.guild
+
+    # STEP 1: Create channels and categories (unless webhooks-only mode)
+    if mode != "webhooks":
+        await ctx.send("🔧 **Step 1/2: Creating channels and categories...**\nThis may take a minute...")
+
+        try:
+            # Import ServerSetup from discord-bot
+            import sys
+            discord_bot_path = Path(__file__).parent.parent.parent / "discord-bot"
+            if str(discord_bot_path) not in sys.path:
+                sys.path.insert(0, str(discord_bot_path))
+
+            from server_setup import ServerSetup
+
+            # Create and run server setup
+            setup_manager = ServerSetup(ctx.bot)
+            await setup_manager.setup_server(guild)
+
+            await ctx.send("✅ **Channels and categories created!**\n🔧 **Step 2/2: Creating webhooks...**")
+
+        except ImportError as e:
+            logger.error(f"Could not import ServerSetup: {e}")
+            await ctx.send(
+                f"⚠️ **Warning:** Could not load channel creation module.\n"
+                f"Skipping channel creation, creating webhooks only...\n"
+                f"Error: {e}"
+            )
+        except Exception as e:
+            logger.error(f"Channel creation error: {e}", exc_info=True)
+            await ctx.send(
+                f"⚠️ **Warning:** Channel creation partially failed: {str(e)[:100]}\n"
+                f"Continuing with webhook creation..."
+            )
+    else:
+        await ctx.send("🔧 **Creating webhooks only (channels skipped)...**\nThis may take a moment...")
+
+    # STEP 2: Create webhooks for all channels
     webhooks_created = 0
     webhooks_existing = 0
     webhook_urls = {}
@@ -118,13 +155,18 @@ async def setup_helix_server(ctx: commands.Context) -> None:
     logger.info(f"💾 Saved {len(webhook_urls)} webhooks to {webhook_file}")
 
     # Create summary embed
+    title_text = "✅ Helix Server Setup Complete!" if mode != "webhooks" else "✅ Helix Webhook Setup Complete!"
+    desc_text = "Created channels, categories, and webhooks" if mode != "webhooks" else "Created webhooks for Zapier integration"
+
     embed = discord.Embed(
-        title="✅ Helix Webhook Setup Complete!",
-        description="Created webhooks for Zapier integration",
+        title=title_text,
+        description=desc_text,
         color=0x00FF00,
         timestamp=datetime.datetime.utcnow(),
     )
 
+    if mode != "webhooks":
+        embed.add_field(name="Channels Created", value="✅ All missing channels", inline=True)
     embed.add_field(name="Webhooks Created", value=str(webhooks_created), inline=True)
     embed.add_field(name="Webhooks Existing", value=str(webhooks_existing), inline=True)
     embed.add_field(name="Total Webhooks", value=str(len(webhook_urls)), inline=True)
@@ -132,9 +174,10 @@ async def setup_helix_server(ctx: commands.Context) -> None:
     embed.add_field(
         name="Next Steps",
         value=(
-            "1️⃣ Use `!webhooks` to see all webhook URLs\n"
-            "2️⃣ Use `!list-webhooks-live` to get URLs in your DMs\n"
-            "3️⃣ Configure Zapier with the webhook URLs"
+            "1️⃣ Use `!verify-setup` to confirm all channels exist\n"
+            "2️⃣ Use `!webhooks` to see all webhook URLs\n"
+            "3️⃣ Use `!list-webhooks-live` to get URLs in your DMs\n"
+            "4️⃣ Configure Zapier with the webhook URLs"
         ),
         inline=False,
     )
