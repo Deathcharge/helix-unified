@@ -6,12 +6,8 @@ Kubernetes liveness/readiness probes, system metrics
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response
 
-from ..core.monitoring import (
-    get_metrics,
-    get_system_info,
-    liveness_probe,
-    readiness_probe
-)
+from ..core.monitoring import (get_metrics, get_system_info, liveness_probe,
+                               readiness_probe)
 
 router = APIRouter(prefix="/health", tags=["Health"])
 
@@ -20,15 +16,15 @@ router = APIRouter(prefix="/health", tags=["Health"])
 async def health_liveness():
     """
     Kubernetes liveness probe.
-    
+
     Returns 200 if the application is alive.
     This endpoint should always return 200 unless the process is completely dead.
-    
+
     ## Response
     - **status**: "alive"
     - **timestamp**: Current UTC timestamp
     - **uptime_seconds**: Application uptime in seconds
-    
+
     ## Example Response
     ```json
     {
@@ -45,22 +41,22 @@ async def health_liveness():
 async def health_readiness():
     """
     Kubernetes readiness probe.
-    
+
     Returns 200 if the application is ready to serve traffic.
     Returns 503 if any critical dependency is unavailable.
-    
+
     ## Checks Performed
     - **database**: PostgreSQL connection health
     - **redis**: Redis cache connection (optional)
     - **disk**: Disk space availability
     - **memory**: Memory usage
     - **cpu**: CPU usage
-    
+
     ## Response
     - **status**: "ready" or "not_ready"
     - **timestamp**: Current UTC timestamp
     - **checks**: Health status of each dependency
-    
+
     ## Example Response
     ```json
     {
@@ -101,13 +97,13 @@ async def health_readiness():
     ```
     """
     result = await readiness_probe()
-    
+
     if result["status"] == "not_ready":
         raise HTTPException(
             status_code=503,
             detail=result
         )
-    
+
     return result
 
 
@@ -115,10 +111,10 @@ async def health_readiness():
 async def health_startup():
     """
     Kubernetes startup probe.
-    
+
     Returns 200 once the application has completed initialization.
     This is useful for slow-starting applications.
-    
+
     ## Response
     Same as /health/ready
     """
@@ -129,16 +125,16 @@ async def health_startup():
 async def health_metrics():
     """
     Prometheus metrics endpoint.
-    
+
     Returns metrics in Prometheus text format for scraping.
-    
+
     ## Metrics Exposed
     - **http_requests_total**: Total HTTP requests by method, endpoint, status
     - **http_request_duration_seconds**: HTTP request duration histogram
     - **http_request_size_bytes**: HTTP request size histogram
     - **http_response_size_bytes**: HTTP response size histogram
     - **app_info**: Application version and environment
-    
+
     ## Example Usage
     ```yaml
     # prometheus.yml
@@ -156,9 +152,9 @@ async def health_metrics():
 async def health_info():
     """
     System information endpoint.
-    
+
     Returns detailed system and application information.
-    
+
     ## Response
     - **python_version**: Python version
     - **platform**: Operating system platform
@@ -167,7 +163,7 @@ async def health_info():
     - **disk_total_gb**: Total disk space in GB
     - **process_id**: Current process ID
     - **environment**: Current environment (development/production)
-    
+
     ## Example Response
     ```json
     {
@@ -188,9 +184,9 @@ async def health_info():
 async def health_ping():
     """
     Simple ping endpoint.
-    
+
     Returns "pong" immediately. Useful for basic connectivity tests.
-    
+
     ## Response
     ```json
     {

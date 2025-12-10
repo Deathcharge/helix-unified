@@ -32,61 +32,22 @@ from typing import Any, Dict, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 
+from backend.saas_agents import (  # Agent functions; Models
+    AgentExecutionRequest, AgentExecutionResponse, execute_agent,
+    get_agent_info, list_agents)
 # Import SaaS core modules
-from backend.saas_auth import (
-    # Auth functions
-    register_user,
-    login_user,
-    create_api_key,
-    list_api_keys,
-    revoke_api_key,
-    get_user_stats,
-    # Dependencies
-    get_current_user_jwt,
-    get_current_user_api_key,
-    # Models
-    UserRegistration,
-    UserLogin,
-    APIKeyCreate,
-    TokenResponse,
-    APIKeyResponse,
-    # Database
-    Database,
-    Cache,
-)
-
-from backend.saas_router import (
-    # Chat functions
-    chat_completion,
-    get_available_models,
-    estimate_cost,
-    # Models
-    ChatRequest,
-    ChatResponse,
-)
-
-from backend.saas_agents import (
-    # Agent functions
-    execute_agent,
-    list_agents,
-    get_agent_info,
-    # Models
-    AgentExecutionRequest,
-    AgentExecutionResponse,
-)
-
-from backend.saas_stripe import (
-    # Stripe functions
-    create_subscription,
-    cancel_subscription,
-    update_subscription,
-    create_checkout_session,
-    get_payment_history,
-    handle_webhook_event,
-    # Models
-    SubscriptionRequest,
-    CheckoutSessionRequest,
-)
+from backend.saas_auth import (  # Auth functions; Dependencies; Models; Database
+    APIKeyCreate, APIKeyResponse, Cache, Database, TokenResponse, UserLogin,
+    UserRegistration, create_api_key, get_current_user_api_key,
+    get_current_user_jwt, get_user_stats, list_api_keys, login_user,
+    register_user, revoke_api_key)
+from backend.saas_router import ChatRequest  # Chat functions; Models
+from backend.saas_router import (ChatResponse, chat_completion, estimate_cost,
+                                 get_available_models)
+from backend.saas_stripe import (  # Stripe functions; Models
+    CheckoutSessionRequest, SubscriptionRequest, cancel_subscription,
+    create_checkout_session, create_subscription, get_payment_history,
+    handle_webhook_event, update_subscription)
 
 router = APIRouter()
 
@@ -685,12 +646,8 @@ async def health_check():
         health["status"] = "degraded"
 
     # Check LLM providers
-    from backend.saas_router import (
-        ANTHROPIC_API_KEY,
-        OPENAI_API_KEY,
-        XAI_API_KEY,
-        PERPLEXITY_API_KEY
-    )
+    from backend.saas_router import (ANTHROPIC_API_KEY, OPENAI_API_KEY,
+                                     PERPLEXITY_API_KEY, XAI_API_KEY)
 
     health["components"]["providers"] = {
         "anthropic": "configured" if ANTHROPIC_API_KEY else "not_configured",

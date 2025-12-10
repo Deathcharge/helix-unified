@@ -45,13 +45,13 @@ class TokenPayload(BaseModel):
 def hash_password(password: str) -> str:
     """
     Hash a password using bcrypt.
-    
+
     Args:
         password: Plain text password
-        
+
     Returns:
         Hashed password string
-        
+
     Example:
         >>> hashed = hash_password("my_secure_password")
         >>> verify_password("my_secure_password", hashed)
@@ -63,14 +63,14 @@ def hash_password(password: str) -> str:
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
     Verify a password against its hash.
-    
+
     Args:
         plain_password: Plain text password to verify
         hashed_password: Hashed password to compare against
-        
+
     Returns:
         True if password matches, False otherwise
-        
+
     Example:
         >>> hashed = hash_password("my_password")
         >>> verify_password("my_password", hashed)
@@ -84,14 +84,14 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     """
     Create a JWT access token.
-    
+
     Args:
         data: Dictionary containing token payload (user_id, email, etc.)
         expires_delta: Optional custom expiration time
-        
+
     Returns:
         Encoded JWT token string
-        
+
     Example:
         >>> token = create_access_token({"sub": "user123", "email": "user@example.com"})
         >>> payload = decode_access_token(token)
@@ -99,17 +99,17 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
         'user123'
     """
     to_encode = data.copy()
-    
+
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
         expire = datetime.utcnow() + timedelta(hours=JWT_EXPIRATION_HOURS)
-    
+
     to_encode.update({
         "exp": expire,
         "iat": datetime.utcnow()
     })
-    
+
     encoded_jwt = jwt.encode(to_encode, JWT_SECRET, algorithm=JWT_ALGORITHM)
     return encoded_jwt
 
@@ -117,13 +117,13 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
 def decode_access_token(token: str) -> Optional[dict]:
     """
     Decode and verify a JWT access token.
-    
+
     Args:
         token: JWT token string
-        
+
     Returns:
         Decoded token payload dict, or None if invalid/expired
-        
+
     Example:
         >>> token = create_access_token({"sub": "user123"})
         >>> payload = decode_access_token(token)
@@ -142,13 +142,13 @@ def decode_access_token(token: str) -> Optional[dict]:
 def generate_secure_token(length: int = 32) -> str:
     """
     Generate a cryptographically secure random token.
-    
+
     Args:
         length: Length of token in bytes (default: 32)
-        
+
     Returns:
         Hex-encoded random token
-        
+
     Example:
         >>> token = generate_secure_token()
         >>> len(token)

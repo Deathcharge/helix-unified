@@ -14,19 +14,19 @@ from loguru import logger
 
 class AsyncFileService:
     """Async file operations service"""
-    
+
     @staticmethod
     async def read_text(file_path: Union[str, Path], encoding: str = "utf-8") -> str:
         """
         Read text file asynchronously.
-        
+
         Args:
             file_path: Path to file
             encoding: File encoding (default: utf-8)
-            
+
         Returns:
             File content as string
-            
+
         Example:
             >>> content = await AsyncFileService.read_text("config.txt")
         """
@@ -41,7 +41,7 @@ class AsyncFileService:
         except Exception as e:
             logger.error(f"❌ Error reading file {file_path}: {e}")
             raise
-    
+
     @staticmethod
     async def write_text(
         file_path: Union[str, Path],
@@ -51,13 +51,13 @@ class AsyncFileService:
     ) -> None:
         """
         Write text file asynchronously.
-        
+
         Args:
             file_path: Path to file
             content: Content to write
             encoding: File encoding (default: utf-8)
             create_dirs: Create parent directories if they don't exist
-            
+
         Example:
             >>> await AsyncFileService.write_text("output.txt", "Hello World")
         """
@@ -65,25 +65,25 @@ class AsyncFileService:
             # Create parent directories if needed
             if create_dirs:
                 Path(file_path).parent.mkdir(parents=True, exist_ok=True)
-            
+
             async with aiofiles.open(file_path, "w", encoding=encoding) as f:
                 await f.write(content)
             logger.debug(f"✍️ Wrote file: {file_path}")
         except Exception as e:
             logger.error(f"❌ Error writing file {file_path}: {e}")
             raise
-    
+
     @staticmethod
     async def read_json(file_path: Union[str, Path]) -> Dict[str, Any]:
         """
         Read JSON file asynchronously.
-        
+
         Args:
             file_path: Path to JSON file
-            
+
         Returns:
             Parsed JSON data as dictionary
-            
+
         Example:
             >>> data = await AsyncFileService.read_json("config.json")
         """
@@ -98,7 +98,7 @@ class AsyncFileService:
         except Exception as e:
             logger.error(f"❌ Error reading JSON {file_path}: {e}")
             raise
-    
+
     @staticmethod
     async def write_json(
         file_path: Union[str, Path],
@@ -108,13 +108,13 @@ class AsyncFileService:
     ) -> None:
         """
         Write JSON file asynchronously.
-        
+
         Args:
             file_path: Path to JSON file
             data: Data to write
             indent: JSON indentation (default: 2)
             create_dirs: Create parent directories if they don't exist
-            
+
         Example:
             >>> await AsyncFileService.write_json("data.json", {"key": "value"})
         """
@@ -125,7 +125,7 @@ class AsyncFileService:
         except Exception as e:
             logger.error(f"❌ Error writing JSON {file_path}: {e}")
             raise
-    
+
     @staticmethod
     async def append_text(
         file_path: Union[str, Path],
@@ -135,27 +135,27 @@ class AsyncFileService:
     ) -> None:
         """
         Append to text file asynchronously.
-        
+
         Args:
             file_path: Path to file
             content: Content to append
             encoding: File encoding (default: utf-8)
             create_dirs: Create parent directories if they don't exist
-            
+
         Example:
             >>> await AsyncFileService.append_text("log.txt", "New log entry\\n")
         """
         try:
             if create_dirs:
                 Path(file_path).parent.mkdir(parents=True, exist_ok=True)
-            
+
             async with aiofiles.open(file_path, "a", encoding=encoding) as f:
                 await f.write(content)
             logger.debug(f"➕ Appended to file: {file_path}")
         except Exception as e:
             logger.error(f"❌ Error appending to file {file_path}: {e}")
             raise
-    
+
     @staticmethod
     async def read_lines(
         file_path: Union[str, Path],
@@ -163,14 +163,14 @@ class AsyncFileService:
     ) -> List[str]:
         """
         Read file lines asynchronously.
-        
+
         Args:
             file_path: Path to file
             encoding: File encoding (default: utf-8)
-            
+
         Returns:
             List of lines
-            
+
         Example:
             >>> lines = await AsyncFileService.read_lines("data.txt")
         """
@@ -182,31 +182,31 @@ class AsyncFileService:
         except Exception as e:
             logger.error(f"❌ Error reading lines from {file_path}: {e}")
             raise
-    
+
     @staticmethod
     async def file_exists(file_path: Union[str, Path]) -> bool:
         """
         Check if file exists asynchronously.
-        
+
         Args:
             file_path: Path to file
-            
+
         Returns:
             True if file exists
-            
+
         Example:
             >>> exists = await AsyncFileService.file_exists("config.json")
         """
         return Path(file_path).exists()
-    
+
     @staticmethod
     async def delete_file(file_path: Union[str, Path]) -> None:
         """
         Delete file asynchronously.
-        
+
         Args:
             file_path: Path to file
-            
+
         Example:
             >>> await AsyncFileService.delete_file("temp.txt")
         """
@@ -219,7 +219,7 @@ class AsyncFileService:
         except Exception as e:
             logger.error(f"❌ Error deleting file {file_path}: {e}")
             raise
-    
+
     @staticmethod
     async def copy_file(
         source: Union[str, Path],
@@ -228,12 +228,12 @@ class AsyncFileService:
     ) -> None:
         """
         Copy file asynchronously.
-        
+
         Args:
             source: Source file path
             destination: Destination file path
             create_dirs: Create parent directories if they don't exist
-            
+
         Example:
             >>> await AsyncFileService.copy_file("source.txt", "dest.txt")
         """
@@ -244,18 +244,18 @@ class AsyncFileService:
         except Exception as e:
             logger.error(f"❌ Error copying file {source} to {destination}: {e}")
             raise
-    
+
     @staticmethod
     async def get_file_size(file_path: Union[str, Path]) -> int:
         """
         Get file size in bytes asynchronously.
-        
+
         Args:
             file_path: Path to file
-            
+
         Returns:
             File size in bytes
-            
+
         Example:
             >>> size = await AsyncFileService.get_file_size("data.json")
         """
