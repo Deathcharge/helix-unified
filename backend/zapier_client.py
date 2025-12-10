@@ -165,7 +165,7 @@ class ZapierClient:
             "details": details,
             "commit_hash": commit_hash,
             "mega_backup_status": os.getenv("MEGA_REMOTE_DIR", "unknown"),
-            "archive_path": os.getenv("ARCHIVE_PATH", "/tmp"),
+            "archive_path": os.getenv("ARCHIVE_PATH", "/tmp"),  # nosec B108
         }
         result = await self._send_webhook(payload)
         return result is not None
@@ -232,6 +232,7 @@ async def quick_send_health_alert(health_statuses: list):
     async with aiohttp.ClientSession() as session:
         zap = ZapierClient(session)
         await zap.send_health_alert(health_statuses)
+
 
 async def quick_error_alert(error: str, component: str = "System"):
     """Quick error alert without session management"""

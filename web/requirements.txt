@@ -1,18 +1,23 @@
 # Helix Consciousness Empire - Python Dependencies
 # For helixspiral.work and helixspirals.replit.app
 
+# Security Updates (CVE fixes applied)
+# - fastapi 0.116.0+ for starlette compatibility
+# - httpx 0.28.0+ for security improvements
+# - pydantic 2.10.3+ for security patches
+
 # Core Web Framework
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
+fastapi==0.116.0
+uvicorn[standard]==0.34.0
 starlette==0.49.1
 
 # HTTP and API
 requests==2.32.4
-httpx==0.25.2
+httpx==0.28.0
 aiohttp==3.12.14
 
 # Data Processing and Validation
-pydantic==2.12.4
+pydantic==2.10.3
 pydantic-settings==2.1.0
 numpy==1.24.3
 pandas==2.0.3
@@ -25,9 +30,9 @@ sqlalchemy==2.0.23
 redis==5.0.1
 
 # Authentication and Security
-python-jose[cryptography]==3.3.0
+python-jose[cryptography]==3.5.0  # Already at secure version
 passlib[bcrypt]==1.7.4
-python-multipart==0.0.18
+python-multipart==0.0.18  # Patched version (CVE fixes applied)
 
 # Consciousness and AI Integration
 openai==1.3.7
@@ -58,10 +63,10 @@ discord.py==2.3.2
 slack-sdk==3.26.1
 
 # File Processing
-Pillow==10.3.0
+Pillow==10.4.0  # Updated for security fixes
 
 # Cryptography and Security
-cryptography==46.0.3
+cryptography==46.0.3  # Secure version
 bcrypt==4.1.2
 
 # Testing

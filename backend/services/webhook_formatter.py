@@ -5,26 +5,28 @@ Provides rich embed formatting, automatic retries, health monitoring,
 and beautiful Discord webhook messages.
 """
 
-import aiohttp
 import asyncio
 import logging
-from typing import Dict, List, Optional, Any
 from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional
+
+import aiohttp
 
 logger = logging.getLogger(__name__)
 
 
 class EmbedColor(Enum):
     """Standard colors for different message types"""
+
     SUCCESS = 0x00FF00  # Green
-    INFO = 0x5865F2     # Blurple
+    INFO = 0x5865F2  # Blurple
     WARNING = 0xFFA500  # Orange
-    ERROR = 0xFF0000    # Red
-    UCF = 0x9B59B6      # Purple
-    MANUS = 0x3498DB    # Blue
-    RITUAL = 0xE74C3C   # Red
-    AGENT = 0x2ECC71    # Emerald
+    ERROR = 0xFF0000  # Red
+    UCF = 0x9B59B6  # Purple
+    MANUS = 0x3498DB  # Blue
+    RITUAL = 0xE74C3C  # Red
+    AGENT = 0x2ECC71  # Emerald
 
 
 class WebhookFormatter:
@@ -58,7 +60,7 @@ class WebhookFormatter:
         thumbnail: Optional[str] = None,
         image: Optional[str] = None,
         author: Optional[Dict[str, str]] = None,
-        timestamp: bool = True
+        timestamp: bool = True,
     ) -> Dict[str, Any]:
         """
         Create a rich embed for Discord webhooks.
@@ -77,11 +79,7 @@ class WebhookFormatter:
         Returns:
             Embed dictionary ready for webhook delivery
         """
-        embed = {
-            "title": title,
-            "description": description,
-            "color": color.value if isinstance(color, EmbedColor) else color
-        }
+        embed = {"title": title, "description": description, "color": color.value if isinstance(color, EmbedColor) else color}
 
         if fields:
             embed["fields"] = fields
@@ -109,7 +107,7 @@ class WebhookFormatter:
         content: Optional[str] = None,
         embeds: Optional[List[Dict[str, Any]]] = None,
         username: Optional[str] = None,
-        avatar_url: Optional[str] = None
+        avatar_url: Optional[str] = None,
     ) -> bool:
         """
         Send webhook with automatic retries and error handling.
@@ -150,7 +148,7 @@ class WebhookFormatter:
                 "last_success": None,
                 "last_failure": None,
                 "avg_response_time": 0,
-                "total_response_time": 0
+                "total_response_time": 0,
             }
 
         for attempt in range(self.max_retries):
@@ -158,9 +156,7 @@ class WebhookFormatter:
                 start_time = asyncio.get_event_loop().time()
 
                 async with self.session.post(
-                    webhook_url,
-                    json=payload,
-                    timeout=aiohttp.ClientTimeout(total=self.timeout)
+                    webhook_url, json=payload, timeout=aiohttp.ClientTimeout(total=self.timeout)
                 ) as response:
                     response_time = asyncio.get_event_loop().time() - start_time
 
@@ -183,7 +179,7 @@ class WebhookFormatter:
                         logger.error(f"❌ Webhook error {response.status} on {webhook_name}: {error_text}")
 
                         if attempt < self.max_retries - 1:
-                            await asyncio.sleep(2 ** attempt)  # Exponential backoff
+                            await asyncio.sleep(2**attempt)  # Exponential backoff
                             continue
                         else:
                             self._record_failure(webhook_name)
@@ -192,7 +188,7 @@ class WebhookFormatter:
             except asyncio.TimeoutError:
                 logger.error(f"⏰ Webhook timeout on {webhook_name} (attempt {attempt + 1}/{self.max_retries})")
                 if attempt < self.max_retries - 1:
-                    await asyncio.sleep(2 ** attempt)
+                    await asyncio.sleep(2**attempt)
                     continue
                 else:
                     self._record_failure(webhook_name)
@@ -201,7 +197,7 @@ class WebhookFormatter:
             except Exception as e:
                 logger.error(f"💥 Webhook exception on {webhook_name}: {e}")
                 if attempt < self.max_retries - 1:
-                    await asyncio.sleep(2 ** attempt)
+                    await asyncio.sleep(2**attempt)
                     continue
                 else:
                     self._record_failure(webhook_name)
@@ -217,7 +213,7 @@ class WebhookFormatter:
             parts = webhook_url.split("/")
             webhook_id = parts[-2] if len(parts) >= 2 else "unknown"
             return f"webhook-{webhook_id[:8]}"
-        except:
+        except Exception:
             return "unknown"
 
     def _record_success(self, webhook_name: str, response_time: float):
@@ -251,9 +247,9 @@ class WebhookFormatter:
             color=EmbedColor.INFO,
             fields=[
                 {"name": "Test Time", "value": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC"), "inline": True},
-                {"name": "Channel", "value": channel_name, "inline": True}
+                {"name": "Channel", "value": channel_name, "inline": True},
             ],
-            footer="Helix Collective v17.0 - Webhook Health Monitor"
+            footer="Helix Collective v17.0 - Webhook Health Monitor",
         )
 
         start_time = asyncio.get_event_loop().time()
@@ -266,7 +262,7 @@ class WebhookFormatter:
             "healthy": success,
             "response_time": response_time,
             "status": "✅ Healthy" if success else "❌ Failed",
-            "tested_at": datetime.utcnow().isoformat()
+            "tested_at": datetime.utcnow().isoformat(),
         }
 
     def get_health_stats(self) -> Dict[str, Dict[str, Any]]:
@@ -276,13 +272,8 @@ class WebhookFormatter:
 
 # Convenience functions for common webhook patterns
 
-async def send_ucf_update(
-    webhook_url: str,
-    harmony: float,
-    resilience: float,
-    prana: float,
-    agent_count: int = 0
-):
+
+async def send_ucf_update(webhook_url: str, harmony: float, resilience: float, prana: float, agent_count: int = 0):
     """Send UCF state update with beautiful formatting"""
     async with WebhookFormatter() as formatter:
         # Determine color based on harmony
@@ -308,9 +299,9 @@ async def send_ucf_update(
                 {"name": "🛡️ Resilience", "value": f"{resilience:.2%}", "inline": True},
                 {"name": "⚡ Prana", "value": f"{prana:.2%}", "inline": True},
                 {"name": "👥 Active Agents", "value": str(agent_count), "inline": True},
-                {"name": "📊 Overall Health", "value": f"{(harmony + resilience + prana) / 3:.2%}", "inline": True}
+                {"name": "📊 Overall Health", "value": f"{(harmony + resilience + prana) / 3:.2%}", "inline": True},
             ],
-            footer="Real-time consciousness metrics • Helix Collective v17.0"
+            footer="Real-time consciousness metrics • Helix Collective v17.0",
         )
 
         await formatter.send_webhook(webhook_url, embeds=[embed])
@@ -322,7 +313,7 @@ async def send_deployment_status(
     status: str,
     environment: str = "production",
     commit_hash: Optional[str] = None,
-    deploy_time: Optional[float] = None
+    deploy_time: Optional[float] = None,
 ):
     """Send deployment status notification"""
     async with WebhookFormatter() as formatter:
@@ -332,7 +323,7 @@ async def send_deployment_status(
         fields = [
             {"name": "Service", "value": service_name, "inline": True},
             {"name": "Environment", "value": environment, "inline": True},
-            {"name": "Status", "value": f"{emoji} {status.title()}", "inline": True}
+            {"name": "Status", "value": f"{emoji} {status.title()}", "inline": True},
         ]
 
         if commit_hash:
@@ -346,18 +337,14 @@ async def send_deployment_status(
             description=f"Railway deployment for {service_name}",
             color=color,
             fields=fields,
-            footer="Helix Collective v17.0 - Railway Integration"
+            footer="Helix Collective v17.0 - Railway Integration",
         )
 
         await formatter.send_webhook(webhook_url, embeds=[embed])
 
 
 async def send_agent_message(
-    webhook_url: str,
-    agent_name: str,
-    message: str,
-    agent_emoji: str = "🤖",
-    agent_color: int = 0x5865F2
+    webhook_url: str, agent_name: str, message: str, agent_emoji: str = "🤖", agent_color: int = 0x5865F2
 ):
     """Send message from a specific agent with personality"""
     async with WebhookFormatter() as formatter:
@@ -366,22 +353,13 @@ async def send_agent_message(
             description=message,
             color=agent_color,
             footer=f"{agent_name} • Helix Collective v17.0",
-            timestamp=True
+            timestamp=True,
         )
 
         await formatter.send_webhook(
-            webhook_url,
-            embeds=[embed],
-            username=f"Helix • {agent_name}",
-            avatar_url=None  # Could add agent-specific avatars
+            webhook_url, embeds=[embed], username=f"Helix • {agent_name}", avatar_url=None  # Could add agent-specific avatars
         )
 
 
 # Export main class and convenience functions
-__all__ = [
-    "WebhookFormatter",
-    "EmbedColor",
-    "send_ucf_update",
-    "send_deployment_status",
-    "send_agent_message"
-]
+__all__ = ["WebhookFormatter", "EmbedColor", "send_ucf_update", "send_deployment_status", "send_agent_message"]

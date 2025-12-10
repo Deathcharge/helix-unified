@@ -4,9 +4,12 @@ Enhanced Telemetry Emitter for Helix v16.6
 Wraps the v16.5 ZapierClient for convenient one-line telemetry
 """
 import asyncio
-import aiohttp
 import os
+
+import aiohttp
+
 from backend.zapier_client import ZapierClient
+
 
 class EnhancedEmitter:
     """Simplified wrapper for common telemetry patterns"""

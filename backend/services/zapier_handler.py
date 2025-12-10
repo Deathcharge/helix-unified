@@ -277,7 +277,9 @@ async def zapier_health():
         health = await notion.health_check()
         return {"status": "healthy" if health else "degraded", "notion": "available" if health else "unavailable"}
     except Exception as e:
-        return {"status": "error", "detail": str(e)}
+        # SECURITY: Log error but don't expose details to API
+        logger.error(f"Notion health check failed: {e}")
+        return {"status": "error", "detail": "Health check failed"}
 
 
 # ============================================================================

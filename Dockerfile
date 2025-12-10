@@ -1,13 +1,17 @@
 # Helix Collective v16.8 - Backend Dockerfile (Helix Hub Production Release)
 # CACHE BUSTER: Using exact Python version to force complete rebuild
-FROM python:3.11.10-slim
+# Updated to latest patch version for security fixes
+FROM python:3.11.11-slim
 
 WORKDIR /app
 
 # Install system dependencies for Grok's analytics libraries (scikit-learn, tensorflow, prophet)
-RUN apt-get update && apt-get install -y \
+# ffmpeg required for voice processing (pydub) and audio features
+# Security: Upgrade all base packages to latest versions
+RUN apt-get update && apt-get upgrade -y && apt-get install -y \
     gcc g++ curl \
     libblas-dev liblapack-dev gfortran \
+    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first (better caching)
@@ -25,7 +29,7 @@ RUN python3 -c "from Crypto.Cipher import AES; print('✅ AES import works')"
 
 # Install lightweight dependencies first (reduces memory pressure)
 RUN pip install --no-cache-dir \
-    fastapi==0.115.6 \
+    fastapi==0.116.0 \
     uvicorn[standard]==0.34.0 \
     python-dotenv==1.0.1 \
     jinja2==3.1.6 \
@@ -47,7 +51,7 @@ RUN pip install --no-cache-dir \
 
 # Install Discord and integrations
 RUN pip install --no-cache-dir \
-    discord.py==2.3.2 \
+    discord.py==2.4.0 \
     anthropic==0.39.0 \
     notion-client==2.5.0
 

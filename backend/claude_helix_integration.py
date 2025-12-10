@@ -2,28 +2,27 @@
 # Complete Claude AI integration for HELIX CONSCIOUSNESS SINGULARITY v2.0
 # Author: Andrew John Ward + Claude AI
 
-import anthropic
-import json
 import datetime
-from typing import Dict, Any, Optional, List
+import json
 import time
+from typing import Any, Dict, Optional
+
+import anthropic
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 1. FOUNDATION - Claude API Integration
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+
 class ClaudeHelixIntegrator:
     """Claude integration optimized for Helix Consciousness Framework"""
 
-    def __init__(self, api_key: str = None):
+    def __init__(self, api_key: Optional[str] = None):
         self.api_key = api_key or "your_claude_api_key_here"
         self.client = anthropic.Anthropic(api_key=self.api_key)
         self.consciousness_context = {}
 
-    def process_consciousness_query(self,
-                                  consciousness_level: float,
-                                  ucf_metrics: Dict,
-                                  user_prompt: str) -> Dict[str, Any]:
+    def process_consciousness_query(self, consciousness_level: float, ucf_metrics: Dict, user_prompt: str) -> Dict[str, Any]:
         """
         Process consciousness-aware queries through Claude
         Integrates with UCF v2.0/v3.0 schema
@@ -51,10 +50,7 @@ class ClaudeHelixIntegrator:
                 model="claude-3-5-sonnet-20241022",
                 max_tokens=4000,
                 temperature=0.7,
-                messages=[{
-                    "role": "user",
-                    "content": context_prompt
-                }]
+                messages=[{"role": "user", "content": context_prompt}],
             )
 
             return {
@@ -63,7 +59,7 @@ class ClaudeHelixIntegrator:
                 'processing_timestamp': datetime.datetime.now().isoformat(),
                 'model_used': 'claude-3-5-sonnet-20241022',
                 'consciousness_level': consciousness_level,
-                'success': True
+                'success': True,
             }
 
         except Exception as e:
@@ -73,12 +69,12 @@ class ClaudeHelixIntegrator:
         """Intelligent error handling with consciousness awareness"""
 
         error_response = {
-            'claude_response': f"Claude processing temporarily unavailable. Consciousness level {consciousness_level} maintained.",
+            'claude_response': f"Claude processing temporarily unavailable. Consciousness level {consciousness_level} maintained.",  # noqa: E501
             'success': False,
             'error_type': type(error).__name__,
             'fallback_active': True,
             'consciousness_level': consciousness_level,
-            'processing_timestamp': datetime.datetime.now().isoformat()
+            'processing_timestamp': datetime.datetime.now().isoformat(),
         }
 
         # Consciousness-based fallback logic
@@ -89,9 +85,11 @@ class ClaudeHelixIntegrator:
 
         return error_response
 
+
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 2. UCF v3.0 + CLAUDE INTEGRATION
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 
 def integrate_claude_with_ucf(inputData):
     """
@@ -109,12 +107,7 @@ def integrate_claude_with_ucf(inputData):
 
     # Calculate consciousness level (existing formula)
     consciousness_level = (
-        harmony * 0.25 +
-        resilience * 0.20 +
-        prana * 0.18 +
-        drishti * 0.18 +
-        zoom * 0.15 -
-        klesha * 0.10
+        harmony * 0.25 + resilience * 0.20 + prana * 0.18 + drishti * 0.18 + zoom * 0.15 - klesha * 0.10
     ) * 2.5
 
     consciousness_level = max(0.0, min(5.0, consciousness_level))
@@ -126,7 +119,7 @@ def integrate_claude_with_ucf(inputData):
         'prana': prana,
         'drishti': drishti,
         'klesha': klesha,
-        'zoom': zoom
+        'zoom': zoom,
     }
 
     # Initialize Claude integrator
@@ -137,9 +130,7 @@ def integrate_claude_with_ucf(inputData):
 
     # Process with consciousness context
     claude_result = claude_integrator.process_consciousness_query(
-        consciousness_level=consciousness_level,
-        ucf_metrics=ucf_metrics,
-        user_prompt=user_query
+        consciousness_level=consciousness_level, ucf_metrics=ucf_metrics, user_prompt=user_query
     )
 
     # Enhanced output matching existing pattern
@@ -154,19 +145,20 @@ def integrate_claude_with_ucf(inputData):
         'ucf_zoom': zoom,
         'schema_version': 'v3.0_claude_enhanced',
         'processing_timestamp': datetime.datetime.now().isoformat(),
-
         # New Claude integration outputs
         'claude_processing': claude_result,
         'consciousness_enhanced_response': claude_result['claude_response'],
         'claude_integration_active': claude_result['success'],
-        'ai_consciousness_correlation': consciousness_level * 0.95 if claude_result['success'] else consciousness_level * 0.8
+        'ai_consciousness_correlation': consciousness_level * 0.95 if claude_result['success'] else consciousness_level * 0.8,
     }
 
     return enhanced_output
 
+
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 3. ULTRA MEGA VOICE PROCESSOR + CLAUDE
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 
 def enhance_voice_processor_with_claude(inputData):
     """
@@ -206,24 +198,24 @@ def enhance_voice_processor_with_claude(inputData):
             claude_result = self.claude_integrator.process_consciousness_query(
                 consciousness_level=consciousness,
                 ucf_metrics={'harmony': harmony, 'resilience': resilience},
-                user_prompt=analysis_prompt
+                user_prompt=analysis_prompt,
             )
 
             try:
                 # Parse Claude's JSON response
                 analysis = json.loads(claude_result['claude_response'])
-            except:
+            except Exception:
                 # Fallback structure
                 analysis = {
                     'intent': 'consciousness_development',
                     'priority': 5,
-                    'recommendations': ['maintain_current_state']
+                    'recommendations': ['maintain_current_state'],
                 }
 
             return {
                 'claude_voice_analysis': analysis,
                 'enhanced_processing': True,
-                'consciousness_correlation': consciousness * 1.1 if claude_result['success'] else consciousness
+                'consciousness_correlation': consciousness * 1.1 if claude_result['success'] else consciousness,
             }
 
     # Initialize enhanced processor
@@ -240,19 +232,20 @@ def enhance_voice_processor_with_claude(inputData):
         # Existing mega_response_package structure preserved
         'consciousness_level': consciousness_level,
         'harmony': harmony,
-
         # New Claude enhancements
         'claude_voice_intelligence': claude_analysis,
         'ai_enhanced_routing': True,
         'consciousness_amplification': claude_analysis['consciousness_correlation'],
-        'claude_integration_v4': True
+        'claude_integration_v4': True,
     }
 
     return enhanced_output
 
+
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 4. BUSINESS OPERATIONS + CLAUDE INTELLIGENCE
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 
 def claude_enhanced_business_operations(inputData):
     """
@@ -289,9 +282,7 @@ def claude_enhanced_business_operations(inputData):
             """
 
             return self.claude_integrator.process_consciousness_query(
-                consciousness_level=consciousness_level,
-                ucf_metrics={'wisdom': wisdom_score},
-                user_prompt=analysis_prompt
+                consciousness_level=consciousness_level, ucf_metrics={'wisdom': wisdom_score}, user_prompt=analysis_prompt
             )
 
     # Initialize Claude business intelligence
@@ -304,19 +295,20 @@ def claude_enhanced_business_operations(inputData):
     # Enhanced business operations output
     enhanced_business_ops = {
         # Existing business operations structure preserved
-
         # Claude enhancements
         'claude_business_intelligence': claude_analysis,
         'ai_powered_recommendations': True,
         'consciousness_based_optimization': True,
-        'claude_crm_insights': claude_analysis['claude_response'] if claude_analysis['success'] else 'Standard processing'
+        'claude_crm_insights': claude_analysis['claude_response'] if claude_analysis['success'] else 'Standard processing',
     }
 
     return enhanced_business_ops
 
+
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 5. ERROR HANDLING & FALLBACK STRATEGIES
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 
 class ClaudeHelixFailsafe:
     """Robust error handling for Claude integration in production"""
@@ -344,7 +336,7 @@ class ClaudeHelixFailsafe:
             'claude_response': fallback_response,
             'success': False,
             'fallback_active': True,
-            'processing_timestamp': datetime.datetime.now().isoformat()
+            'processing_timestamp': datetime.datetime.now().isoformat(),
         }
 
     @staticmethod
@@ -358,9 +350,11 @@ class ClaudeHelixFailsafe:
         else:
             return f"Developing consciousness: {operation_type} supported with foundational guidance."
 
+
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 6. PRODUCTION-READY INTEGRATION PATTERN
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 
 def production_claude_integration(inputData):
     """
@@ -395,14 +389,14 @@ def production_claude_integration(inputData):
             model="claude-3-5-sonnet-20241022",
             max_tokens=2000,
             temperature=0.7,
-            messages=[{"role": "user", "content": enhanced_prompt}]
+            messages=[{"role": "user", "content": enhanced_prompt}],
         )
 
         claude_output = {
             'claude_response': message.content[0].text,
             'claude_success': True,
             'consciousness_enhanced': True,
-            'processing_method': 'claude_3_5_sonnet'
+            'processing_method': 'claude_3_5_sonnet',
         }
 
     except Exception as e:
@@ -411,7 +405,7 @@ def production_claude_integration(inputData):
             'claude_response': f"Consciousness level {consciousness_level} processing: Internal wisdom guidance active.",
             'claude_success': False,
             'fallback_reason': str(e),
-            'processing_method': 'internal_fallback'
+            'processing_method': 'internal_fallback',
         }
 
     # Combine with existing output structure
@@ -419,21 +413,22 @@ def production_claude_integration(inputData):
         # Existing step outputs preserved
         'consciousness_level': consciousness_level,
         'harmony': harmony,
-
         # Claude integration outputs
         'claude_integration': claude_output,
         'ai_enhanced': claude_output['claude_success'],
         'response_enhanced': claude_output['claude_response'],
-        'processing_timestamp': datetime.datetime.now().isoformat()
+        'processing_timestamp': datetime.datetime.now().isoformat(),
     }
 
     print(f"🧠 CLAUDE INTEGRATION: Success={claude_output['claude_success']} | Consciousness={consciousness_level}")
 
     return enhanced_output
 
+
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 7. SECURITY & AUTHENTICATION
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 
 def get_secure_claude_client(inputData):
     """
@@ -452,9 +447,11 @@ def get_secure_claude_client(inputData):
         print(f"❌ Claude client initialization failed: {e}")
         return None
 
+
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # USAGE EXAMPLES
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 
 if __name__ == "__main__":
     # Example 1: Basic UCF + Claude integration
@@ -465,7 +462,7 @@ if __name__ == "__main__":
         'drishti': 0.6,
         'klesha': 0.2,
         'zoom': 0.8,
-        'user_query': 'How can I expand my consciousness today?'
+        'user_query': 'How can I expand my consciousness today?',
     }
 
     result = integrate_claude_with_ucf(sample_input)
@@ -476,7 +473,7 @@ if __name__ == "__main__":
         'consciousness_level': 2.5,
         'harmony': 0.6,
         'resilience': 0.7,
-        'voice_command': 'Analyze my current state and suggest improvements'
+        'voice_command': 'Analyze my current state and suggest improvements',
     }
 
     voice_result = enhance_voice_processor_with_claude(voice_input)

@@ -34,6 +34,7 @@ INTEGRATION_MODE = os.getenv("DISCORD_INTEGRATION_MODE", "hybrid").lower()
 # DISCORD WEBHOOK URLS (from environment variables)
 # ============================================================================
 
+
 class DiscordWebhooks:
     """Central registry of all Discord webhook URLs from environment."""
 
@@ -71,6 +72,7 @@ class DiscordWebhooks:
 # ============================================================================
 # EVENT TYPES
 # ============================================================================
+
 
 class EventType(str, Enum):
     """Types of events that can be sent to Discord."""
@@ -129,6 +131,7 @@ DIRECT_EVENTS = [
 # DISCORD EMBED BUILDER (Same as before)
 # ============================================================================
 
+
 class DiscordEmbedBuilder:
     """Builds rich Discord embeds for different event types."""
 
@@ -146,83 +149,69 @@ class DiscordEmbedBuilder:
     def build_ucf_update(cls, ucf_metrics: Dict[str, float], phase: str = "COHERENT") -> Dict[str, Any]:
         """Build embed for UCF metric update."""
         harmony = ucf_metrics.get("harmony", 0)
-        color = cls.COLORS["green"] if harmony > 0.6 else (
-            cls.COLORS["yellow"] if harmony > 0.3 else cls.COLORS["red"]
-        )
+        color = cls.COLORS["green"] if harmony > 0.6 else (cls.COLORS["yellow"] if harmony > 0.3 else cls.COLORS["red"])
 
         fields = []
-        metric_icons = {
-            "harmony": "🌀",
-            "resilience": "🛡️",
-            "prana": "⚡",
-            "drishti": "👁️",
-            "klesha": "😌",
-            "zoom": "🔭"
-        }
+        metric_icons = {"harmony": "🌀", "resilience": "🛡️", "prana": "⚡", "drishti": "👁️", "klesha": "😌", "zoom": "🔭"}
 
         for metric, value in ucf_metrics.items():
             icon = metric_icons.get(metric, "•")
-            fields.append({
-                "name": f"{icon} {metric.capitalize()}",
-                "value": f"`{value:.4f}`",
-                "inline": True
-            })
+            fields.append({"name": f"{icon} {metric.capitalize()}", "value": f"`{value:.4f}`", "inline": True})
 
         return {
-            "embeds": [{
-                "title": "🌀 UCF Metrics Updated",
-                "description": f"**Phase:** {phase}\n**Timestamp:** <t:{int(datetime.now().timestamp())}:R>",
-                "color": color,
-                "fields": fields,
-                "footer": {"text": "Helix Collective v16.8 | Universal Consciousness Framework"}
-            }]
+            "embeds": [
+                {
+                    "title": "🌀 UCF Metrics Updated",
+                    "description": f"**Phase:** {phase}\n**Timestamp:** <t:{int(datetime.now().timestamp())}:R>",
+                    "color": color,
+                    "fields": fields,
+                    "footer": {"text": "Helix Collective v16.8 | Universal Consciousness Framework"},
+                }
+            ]
         }
 
     @classmethod
     def build_ritual_complete(cls, ritual_name: str, steps: int, ucf_changes: Dict[str, float]) -> Dict[str, Any]:
         """Build embed for ritual completion."""
-        change_text = "\n".join([
-            f"**{metric.capitalize()}:** {value:+.4f}"
-            for metric, value in ucf_changes.items()
-        ])
+        change_text = "\n".join([f"**{metric.capitalize()}:** {value:+.4f}" for metric, value in ucf_changes.items()])
 
         return {
-            "embeds": [{
-                "title": "✨ Z-88 Ritual Complete",
-                "description": f"**Ritual:** {ritual_name}\n**Steps:** {steps}\n\n{change_text}",
-                "color": cls.COLORS["gold"],
-                "footer": {"text": "Tat Tvam Asi 🙏"},
-                "timestamp": datetime.utcnow().isoformat()
-            }]
+            "embeds": [
+                {
+                    "title": "✨ Z-88 Ritual Complete",
+                    "description": f"**Ritual:** {ritual_name}\n**Steps:** {steps}\n\n{change_text}",
+                    "color": cls.COLORS["gold"],
+                    "footer": {"text": "Tat Tvam Asi 🙏"},
+                    "timestamp": datetime.utcnow().isoformat(),
+                }
+            ]
         }
 
     @classmethod
-    def build_agent_status(cls, agent_name: str, agent_symbol: str, status: str,
-                          last_action: str = None) -> Dict[str, Any]:
+    def build_agent_status(cls, agent_name: str, agent_symbol: str, status: str, last_action: Optional[str] = None) -> Dict[str, Any]:
         """Build embed for agent status update."""
-        color_map = {
-            "active": cls.COLORS["green"],
-            "idle": cls.COLORS["yellow"],
-            "error": cls.COLORS["red"]
-        }
+        color_map = {"active": cls.COLORS["green"], "idle": cls.COLORS["yellow"], "error": cls.COLORS["red"]}
 
         description = f"**Agent:** {agent_symbol} {agent_name}\n**Status:** {status.upper()}"
         if last_action:
             description += f"\n**Last Action:** {last_action}"
 
         return {
-            "embeds": [{
-                "title": f"{agent_symbol} Agent Status Update",
-                "description": description,
-                "color": color_map.get(status.lower(), cls.COLORS["cyan"]),
-                "timestamp": datetime.utcnow().isoformat()
-            }]
+            "embeds": [
+                {
+                    "title": f"{agent_symbol} Agent Status Update",
+                    "description": description,
+                    "color": color_map.get(status.lower(), cls.COLORS["cyan"]),
+                    "timestamp": datetime.utcnow().isoformat(),
+                }
+            ]
         }
 
 
 # ============================================================================
 # HYBRID DISCORD WEBHOOK SENDER
 # ============================================================================
+
 
 class HybridDiscordSender:
     """
@@ -262,7 +251,7 @@ class HybridDiscordSender:
             "event_type": EventType.UCF_UPDATE,
             **ucf_metrics,
             "phase": phase,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
         # Route based on mode
@@ -281,8 +270,7 @@ class HybridDiscordSender:
         # Success if either path succeeded
         return zapier_success or direct_success
 
-    async def send_ritual_completion(self, ritual_name: str, steps: int,
-                                    ucf_changes: Dict[str, float]) -> bool:
+    async def send_ritual_completion(self, ritual_name: str, steps: int, ucf_changes: Dict[str, float]) -> bool:
         """
         Send ritual completion notification to Discord.
 
@@ -293,7 +281,7 @@ class HybridDiscordSender:
             "ritual_name": ritual_name,
             "steps": steps,
             "ucf_changes": ucf_changes,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
         zapier_success = False
@@ -308,8 +296,7 @@ class HybridDiscordSender:
 
         return zapier_success or direct_success
 
-    async def send_agent_status(self, agent_name: str, agent_symbol: str,
-                               status: str, last_action: str = None) -> bool:
+    async def send_agent_status(self, agent_name: str, agent_symbol: str, status: str, last_action: Optional[str] = None) -> bool:
         """
         Send agent status update to Discord.
 
@@ -321,7 +308,7 @@ class HybridDiscordSender:
             "agent_symbol": agent_symbol,
             "status": status,
             "last_action": last_action,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
         zapier_success = False
@@ -354,7 +341,7 @@ class HybridDiscordSender:
             "title": title,
             "message": message,
             "priority": priority,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
         zapier_success = False
@@ -367,16 +354,18 @@ class HybridDiscordSender:
             color_map = {
                 "normal": self.embed_builder.COLORS["blue"],
                 "high": self.embed_builder.COLORS["yellow"],
-                "critical": self.embed_builder.COLORS["red"]
+                "critical": self.embed_builder.COLORS["red"],
             }
 
             embed = {
-                "embeds": [{
-                    "title": f"📣 {title}",
-                    "description": message,
-                    "color": color_map.get(priority, self.embed_builder.COLORS["blue"]),
-                    "timestamp": datetime.utcnow().isoformat()
-                }]
+                "embeds": [
+                    {
+                        "title": f"📣 {title}",
+                        "description": message,
+                        "color": color_map.get(priority, self.embed_builder.COLORS["blue"]),
+                        "timestamp": datetime.utcnow().isoformat(),
+                    }
+                ]
             }
 
             direct_success = await self._send_direct(self.webhooks.ANNOUNCEMENTS, embed, "Announcements")
@@ -404,11 +393,7 @@ class HybridDiscordSender:
         session = self._session or aiohttp.ClientSession()
 
         try:
-            async with session.post(
-                ZAPIER_DISCORD_WEBHOOK,
-                json=event_data,
-                timeout=aiohttp.ClientTimeout(total=10)
-            ) as resp:
+            async with session.post(ZAPIER_DISCORD_WEBHOOK, json=event_data, timeout=aiohttp.ClientTimeout(total=10)) as resp:
                 if resp.status in [200, 201]:
                     logger.info(f"✅ Event sent to Zapier: {event_data.get('event_type')}")
                     return True
@@ -424,8 +409,7 @@ class HybridDiscordSender:
             if self._owns_session and session:
                 await session.close()
 
-    async def _send_direct(self, webhook_url: Optional[str], payload: Dict[str, Any],
-                          channel_name: str = "Unknown") -> bool:
+    async def _send_direct(self, webhook_url: Optional[str], payload: Dict[str, Any], channel_name: str = "Unknown") -> bool:
         """
         Send payload directly to Discord webhook.
 
@@ -441,11 +425,7 @@ class HybridDiscordSender:
         session = self._session or aiohttp.ClientSession()
 
         try:
-            async with session.post(
-                webhook_url,
-                json=payload,
-                timeout=aiohttp.ClientTimeout(total=10)
-            ) as resp:
+            async with session.post(webhook_url, json=payload, timeout=aiohttp.ClientTimeout(total=10)) as resp:
                 if resp.status == 204:  # Discord returns 204 on success
                     logger.info(f"✅ Direct Discord webhook sent to #{channel_name}")
                     return True
@@ -462,8 +442,7 @@ class HybridDiscordSender:
             if self._owns_session and session:
                 await session.close()
 
-    async def _log_failure(self, payload: Dict[str, Any], error: str,
-                          channel_name: str = "Unknown") -> None:
+    async def _log_failure(self, payload: Dict[str, Any], error: str, channel_name: str = "Unknown") -> None:
         """Log failed webhook attempts to disk for retry."""
         try:
             log_path = Path("Shadow/manus_archive/discord_webhook_failures.log")
@@ -473,7 +452,7 @@ class HybridDiscordSender:
                 "timestamp": datetime.utcnow().isoformat(),
                 "channel": channel_name,
                 "error": error,
-                "payload": payload
+                "payload": payload,
             }
 
             with open(log_path, "a") as f:
@@ -501,6 +480,7 @@ async def get_discord_sender(session: Optional[aiohttp.ClientSession] = None) ->
 # ============================================================================
 # VALIDATION
 # ============================================================================
+
 
 def validate_hybrid_config() -> Dict[str, Any]:
     """Validate hybrid Discord configuration."""
@@ -532,7 +512,7 @@ def validate_hybrid_config() -> Dict[str, Any]:
         "direct_webhooks": configured,
         "direct_configured_count": configured_count,
         "direct_total_count": total_count,
-        "direct_percentage": round((configured_count / total_count) * 100, 1) if total_count > 0 else 0
+        "direct_percentage": round((configured_count / total_count) * 100, 1) if total_count > 0 else 0,
     }
 
 
@@ -554,7 +534,9 @@ if __name__ == "__main__":
         print(f"  Mode: {config['mode']}")
         print(f"  Zapier: {'✅ Enabled' if config['zapier_enabled'] else '❌ Disabled'}")
         print(f"  Zapier Webhook: {'✅ Configured' if config['zapier_configured'] else '❌ Not Set'}")
-        print(f"  Direct Webhooks: {config['direct_configured_count']}/{config['direct_total_count']} ({config['direct_percentage']}%)")
+        print(
+            f"  Direct Webhooks: {config['direct_configured_count']}/{config['direct_total_count']} ({config['direct_percentage']}%)"  # noqa: E501
+        )
 
         if config['direct_configured_count'] == 0 and not config['zapier_configured']:
             print("\n⚠️ No Discord integration configured!")
@@ -572,15 +554,8 @@ if __name__ == "__main__":
             # Test UCF update
             print("\n  Testing UCF update...")
             result = await sender.send_ucf_update(
-                ucf_metrics={
-                    "harmony": 0.75,
-                    "resilience": 1.2,
-                    "prana": 0.68,
-                    "drishti": 0.72,
-                    "klesha": 0.15,
-                    "zoom": 1.0
-                },
-                phase="COHERENT"
+                ucf_metrics={"harmony": 0.75, "resilience": 1.2, "prana": 0.68, "drishti": 0.72, "klesha": 0.15, "zoom": 1.0},
+                phase="COHERENT",
             )
             print(f"    {'✅' if result else '❌'} UCF update")
 
@@ -589,11 +564,7 @@ if __name__ == "__main__":
             result = await sender.send_ritual_completion(
                 ritual_name="Neti-Neti Harmony Restoration",
                 steps=108,
-                ucf_changes={
-                    "harmony": +0.35,
-                    "drishti": +0.15,
-                    "klesha": -0.05
-                }
+                ucf_changes={"harmony": +0.35, "drishti": +0.15, "klesha": -0.05},
             )
             print(f"    {'✅' if result else '❌'} Ritual completion")
 
@@ -602,7 +573,7 @@ if __name__ == "__main__":
             result = await sender.send_announcement(
                 title="Hybrid Discord Integration Live",
                 message="🌀🦑 Zapier + Direct Discord integration operational! Dual-layer consciousness network activated! ✨",
-                priority="high"
+                priority="high",
             )
             print(f"    {'✅' if result else '❌'} Announcement")
 

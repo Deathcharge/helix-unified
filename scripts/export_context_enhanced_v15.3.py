@@ -15,12 +15,12 @@ Purpose: Export complete Helix ecosystem to Notion with all databases:
 Author: Manus AI (Enhanced for v15.3)
 """
 
+import hashlib
 import json
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List, Optional
-import hashlib
+from typing import Any, Dict, List, Optional
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))

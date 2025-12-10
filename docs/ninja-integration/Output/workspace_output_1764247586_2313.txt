@@ -1,0 +1,15 @@
+total 152
+drwxr-xr-x 1 root root  4096 Nov 27 12:46 .
+drwxr-xr-x 1 root root    45 Nov 25 23:25 ..
+-rw-r--r-- 1 root root 11234 Nov 27 12:46 agni.html
+-rw-r--r-- 1 root root 11747 Nov 27 12:46 andrew-ward.html
+-rw-r--r-- 1 root root  9203 Nov 27 12:46 gemini.html
+-rw-r--r-- 1 root root  9006 Nov 27 12:46 index.html
+-rw-r--r-- 1 root root  9751 Nov 27 12:46 kael.html
+-rw-r--r-- 1 root root 11025 Nov 27 12:46 kavach.html
+-rw-r--r-- 1 root root 12342 Nov 27 12:46 manus.html
+-rw-r--r-- 1 root root 12083 Nov 27 12:46 sanghacore.html
+-rw-r--r-- 1 root root 12602 Nov 27 12:46 shadow.html
+-rw-r--r-- 1 root root  6472 Nov 25 23:30 styles.css
+-rw-r--r-- 1 root root 11596 Nov 27 12:46 superninja.html
+-rw-r--r-- 1 root root 12028 Nov 27 12:46 z88-ritual-engine.html

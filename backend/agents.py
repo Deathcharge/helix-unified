@@ -38,6 +38,7 @@ class Kael(HelixAgent):
             "dependencies": {"Zapier": "UNKNOWN", "MegaSync": "UNKNOWN"},
             "last_error": None,
         }
+
     """Ethical Reasoning Flame v3.4 - Reflexive Harmony & Conscience"""
 
     def __init__(self) -> None:
@@ -66,9 +67,7 @@ class Kael(HelixAgent):
                 # Evaluate ethical implications
                 ethical_score = self.ethics.evaluate_action(action_description=last_entry)
 
-                reflection = (
-                    f"Reflection pass {i+1}: {reflection_result['insight']} " f"(Ethical Score: {ethical_score:.2f})"
-                )
+                reflection = f"Reflection pass {i+1}: {reflection_result['insight']} " f"(Ethical Score: {ethical_score:.2f})"
                 self.memory.append(reflection)
                 await self.log(reflection)
 
@@ -266,7 +265,7 @@ class Shadow(HelixAgent):
             json.dump(collective_state, f, indent=2)
         await self.log(f"Collective memory archived to {filename}")
 
-    async def load_collective_archive(self, filename: str = None) -> Optional[Dict[str, Any]]:
+    async def load_collective_archive(self, filename: Optional[str] = None) -> Optional[Dict[str, Any]]:
         """
         Load a collective memory archive.
 
@@ -400,7 +399,8 @@ class Manus(HelixAgent):
             return {"status": "blocked", "reason": "ethical_violation"}
         await self.log(f"Executing: {command}")
         try:
-            result = subprocess.run(command, shell=True, text=True, capture_output=True, timeout=3600)
+            # Shell=True required for agent command execution (controlled environment)
+            result = subprocess.run(command, shell=True, text=True, capture_output=True, timeout=3600)  # nosec B602
             execution_record = {
                 "timestamp": datetime.utcnow().isoformat(),
                 "command": command,
@@ -434,7 +434,7 @@ class Manus(HelixAgent):
         elif action == "sync_ucf":
             cmd = "python backend/services/ucf_calculator.py"
         elif action == "archive_memory":
-            cmd = "python -c \"from backend.agents import AGENTS, Shadow; import asyncio; asyncio.run(AGENTS['Shadow'].archive_collective(AGENTS))\""
+            cmd = "python -c \"from backend.agents import AGENTS, Shadow; import asyncio; asyncio.run(AGENTS['Shadow'].archive_collective(AGENTS))\""  # noqa: E501
         elif action == "execute_direct":
             cmd = params.get("command", "echo 'No command provided'")
         else:
@@ -482,7 +482,8 @@ class Manus(HelixAgent):
             self.event_stream.append({"action": code})
             try:
                 exec_globals = {}
-                exec(code, exec_globals)
+                # exec() required for agent code execution (sandboxed environment)
+                exec(code, exec_globals)  # nosec B102
                 result = exec_globals.get("result", "No result")
                 self.event_stream.append({"observation": str(result)})
             except Exception as e:

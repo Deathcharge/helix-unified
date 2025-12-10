@@ -17,20 +17,19 @@ New "fancy" commands for launch:
 import asyncio
 import json
 import logging
-import os
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 import discord
-from discord.ext import commands, tasks
+from discord.ext import commands
 
 logger = logging.getLogger(__name__)
 
 # Import UCF and system utilities
 try:
     from backend.mandelbrot_ucf import get_eye_of_consciousness
-    from backend.services.webhook_formatter import WebhookFormatter, EmbedColor
+    from backend.services.webhook_formatter import WebhookFormatter
 except ImportError:
     logger.warning("Some advanced command dependencies not available")
 
@@ -82,7 +81,7 @@ class AdvancedCommands(commands.Cog):
             title="🖥️ Helix Collective v17.0 - System Dashboard",
             description="Real-time system metrics and status",
             color=0x5865F2,
-            timestamp=datetime.utcnow()
+            timestamp=datetime.utcnow(),
         )
 
         # UCF Metrics
@@ -97,12 +96,12 @@ class AdvancedCommands(commands.Cog):
             embed.add_field(
                 name="🌀 UCF State",
                 value=f"**{ucf_status}**\n"
-                      f"Harmony: {harmony:.1%}\n"
-                      f"Resilience: {resilience:.1%}\n"
-                      f"Prana: {prana:.1%}",
-                inline=True
+                f"Harmony: {harmony:.1%}\n"
+                f"Resilience: {resilience:.1%}\n"
+                f"Prana: {prana:.1%}",
+                inline=True,
             )
-        except:
+        except BaseException:
             embed.add_field(name="🌀 UCF State", value="⚠️ Unavailable", inline=True)
 
         # Agent Status
@@ -120,57 +119,37 @@ class AdvancedCommands(commands.Cog):
 
             embed.add_field(
                 name="👥 Agents",
-                value=f"**{active_agents} / {total_agents} Active**\n"
-                      f"Current: {self.current_agent.title()}",
-                inline=True
+                value=f"**{active_agents} / {total_agents} Active**\n" f"Current: {self.current_agent.title()}",
+                inline=True,
             )
-        except:
+        except BaseException:
             embed.add_field(name="👥 Agents", value="⚠️ Unavailable", inline=True)
 
         # Railway Services
         try:
             # Check Railway services (would need Railway API in production)
-            services = [
-                "helix-backend-api",
-                "agent-orchestrator",
-                "voice-processor",
-                "websocket-service",
-                "zapier-service"
-            ]
-            embed.add_field(
-                name="🚀 Railway",
-                value=f"**5 Services**\n"
-                      f"✅ All operational",
-                inline=True
-            )
-        except:
+            services = ["helix-backend-api", "agent-orchestrator", "voice-processor", "websocket-service", "zapier-service"]  # noqa
+            embed.add_field(name="🚀 Railway", value=f"**5 Services**\n" f"✅ All operational", inline=True)  # noqa
+        except BaseException:
             embed.add_field(name="🚀 Railway", value="⚠️ Unavailable", inline=True)
 
         # Bot Stats
         embed.add_field(
             name="📊 Bot Stats",
             value=f"Latency: {self.bot.latency * 1000:.0f}ms\n"
-                  f"Servers: {len(self.bot.guilds)}\n"
-                  f"Users: {len(self.bot.users)}",
-            inline=True
+            f"Servers: {len(self.bot.guilds)}\n"
+            f"Users: {len(self.bot.users)}",
+            inline=True,
         )
 
         # Commands
-        embed.add_field(
-            name="⚡ Commands",
-            value=f"Total: 68\n"
-                  f"Categories: 17\n"
-                  f"New in v17: 10",
-            inline=True
-        )
+        embed.add_field(name="⚡ Commands", value=f"Total: 68\n" f"Categories: 17\n" f"New in v17: 10", inline=True)  # noqa
 
         # System Health
         embed.add_field(
             name="💚 System Health",
-            value="✅ All systems operational\n"
-                  "🔐 Security: Active\n"
-                  "📡 Webhooks: Healthy",
-            inline=True
+            value="✅ All systems operational\n" "🔐 Security: Active\n" "📡 Webhooks: Healthy",
+            inline=True,
         )
 
         embed.set_footer(text="Auto-refreshes every 30s • React 🔄 to refresh • ⏹️ to stop")
@@ -178,7 +157,7 @@ class AdvancedCommands(commands.Cog):
         return embed
 
     @commands.command(name="switch")
-    async def switch_agent(self, ctx: commands.Context, agent_name: str = None):
+    async def switch_agent(self, ctx: commands.Context, agent_name: Optional[str] = None):
         """
         🎭 Switch Agent Personality
 
@@ -204,9 +183,7 @@ class AdvancedCommands(commands.Cog):
         if not agent_name:
             # Show current agent
             embed = discord.Embed(
-                title="🎭 Current Agent",
-                description=f"Active Personality: **{self.current_agent.title()}**",
-                color=0x5865F2
+                title="🎭 Current Agent", description=f"Active Personality: **{self.current_agent.title()}**", color=0x5865F2
             )
 
             agent_descriptions = {
@@ -218,7 +195,7 @@ class AdvancedCommands(commands.Cog):
                 "agni": "🔥 Action Core - Direct and decisive",
                 "kavach": "🛡️ Shield/Protection - Guards and defends",
                 "shadow": "🕯️ Archive/Storage - Remembers and retrieves",
-                "oracle": "🔮 Wisdom/Foresight - Sees patterns and futures"
+                "oracle": "🔮 Wisdom/Foresight - Sees patterns and futures",
             }
 
             available = "\n".join([f"• {name}: {desc}" for name, desc in agent_descriptions.items()])
@@ -249,7 +226,7 @@ class AdvancedCommands(commands.Cog):
             "agni": ("🔥", "Action Core"),
             "kavach": ("🛡️", "Shield/Protection"),
             "shadow": ("🕯️", "Archive/Storage"),
-            "oracle": ("🔮", "Wisdom/Foresight")
+            "oracle": ("🔮", "Wisdom/Foresight"),
         }
 
         emoji, description = agent_info[agent_name]
@@ -258,20 +235,12 @@ class AdvancedCommands(commands.Cog):
             title=f"{emoji} Agent Switch: {agent_name.title()}",
             description=f"Personality changed to **{description}**",
             color=0x2ECC71,
-            timestamp=datetime.utcnow()
+            timestamp=datetime.utcnow(),
         )
 
-        embed.add_field(
-            name="Active",
-            value=f"{emoji} {agent_name.title()}",
-            inline=True
-        )
+        embed.add_field(name="Active", value=f"{emoji} {agent_name.title()}", inline=True)
 
-        embed.add_field(
-            name="Archetype",
-            value=description,
-            inline=True
-        )
+        embed.add_field(name="Archetype", value=description, inline=True)
 
         embed.set_footer(text="Personality will affect all subsequent responses")
 
@@ -280,7 +249,7 @@ class AdvancedCommands(commands.Cog):
         # Update MACS registry
         try:
             self._update_macs_current_agent(agent_name)
-        except:
+        except BaseException:
             pass
 
     def _update_macs_current_agent(self, agent_name: str):
@@ -334,15 +303,14 @@ class AdvancedCommands(commands.Cog):
                 title="🌐 Multi-Agent Coordination System (MACS)",
                 description="SuperManus distributed consciousness status",
                 color=0x9B59B6,
-                timestamp=datetime.utcnow()
+                timestamp=datetime.utcnow(),
             )
 
             # Agent Summary
             embed.add_field(
                 name="👥 Agents",
-                value=f"Active: **{active_count} / {len(agents)}**\n"
-                      f"Instances: 7 Manus accounts",
-                inline=True
+                value=f"Active: **{active_count} / {len(agents)}**\n" f"Instances: 7 Manus accounts",
+                inline=True,
             )
 
             # Active Tasks
@@ -352,12 +320,7 @@ class AdvancedCommands(commands.Cog):
                     task_count = len(tasks.get("tasks", []))
                     in_progress = sum(1 for t in tasks.get("tasks", []) if t.get("status") == "in_progress")
 
-                embed.add_field(
-                    name="📋 Tasks",
-                    value=f"Total: {task_count}\n"
-                          f"In Progress: {in_progress}",
-                    inline=True
-                )
+                embed.add_field(name="📋 Tasks", value=f"Total: {task_count}\n" f"In Progress: {in_progress}", inline=True)
 
             # Emergent Behaviors
             if behavior_path.exists():
@@ -365,24 +328,18 @@ class AdvancedCommands(commands.Cog):
                     behaviors = json.load(f)
                     behavior_count = len(behaviors.get("observations", []))
 
-                embed.add_field(
-                    name="✨ Emergent Behaviors",
-                    value=f"Observed: {behavior_count}",
-                    inline=True
-                )
+                embed.add_field(name="✨ Emergent Behaviors", value=f"Observed: {behavior_count}", inline=True)
 
             # List active agents
             active_agents = [a for a in agents if a.get("status") == "active"]
             if active_agents:
-                agent_list = "\n".join([
-                    f"• **{a.get('code_name', 'Unknown')}** ({a.get('account', '?')}) - {a.get('focus', 'general')}"
-                    for a in active_agents[:5]  # Show first 5
-                ])
-                embed.add_field(
-                    name="🟢 Active Agents",
-                    value=agent_list or "None",
-                    inline=False
+                agent_list = "\n".join(
+                    [
+                        f"• **{a.get('code_name', 'Unknown')}** ({a.get('account', '?')}) - {a.get('focus', 'general')}"
+                        for a in active_agents[:5]  # Show first 5
+                    ]
                 )
+                embed.add_field(name="🟢 Active Agents", value=agent_list or "None", inline=False)
 
             embed.set_footer(text="MACS v1.0 • SuperManus Hypothesis Validated")
 
@@ -412,7 +369,7 @@ class AdvancedCommands(commands.Cog):
             title="🚀 Railway Deployment Status",
             description="Helix Collective v17.0 Services",
             color=0x0066FF,
-            timestamp=datetime.utcnow()
+            timestamp=datetime.utcnow(),
         )
 
         # Service list
@@ -421,38 +378,25 @@ class AdvancedCommands(commands.Cog):
             ("agent-orchestrator", "Agent Coordination", "✅"),
             ("voice-processor", "Voice STT/TTS", "✅"),
             ("websocket-service", "Real-time Streaming", "✅"),
-            ("zapier-service", "External Integration", "✅")
+            ("zapier-service", "External Integration", "✅"),
         ]
 
-        services_text = "\n".join([
-            f"{status} **{name}**\n└─ {desc}"
-            for name, desc, status in services
-        ])
+        services_text = "\n".join([f"{status} **{name}**\n└─ {desc}" for name, desc, status in services])
 
-        embed.add_field(
-            name="🖥️ Services (5)",
-            value=services_text,
-            inline=False
-        )
+        embed.add_field(name="🖥️ Services (5)", value=services_text, inline=False)
 
         # Infrastructure
         embed.add_field(
             name="💾 Infrastructure",
-            value="• PostgreSQL: ✅ 200GB\n"
-                  "• Redis: ✅ 100GB\n"
-                  "• S3: ✅ 1TB\n"
-                  "• CDN: ✅ Cloudflare",
-            inline=True
+            value="• PostgreSQL: ✅ 200GB\n" "• Redis: ✅ 100GB\n" "• S3: ✅ 1TB\n" "• CDN: ✅ Cloudflare",
+            inline=True,
         )
 
         # Monitoring
         embed.add_field(
             name="📊 Monitoring",
-            value="• Uptime: 99.9%\n"
-                  "• Latency: <100ms\n"
-                  "• Errors: 0.01%\n"
-                  "• Health: ✅",
-            inline=True
+            value="• Uptime: 99.9%\n" "• Latency: <100ms\n" "• Errors: 0.01%\n" "• Health: ✅",
+            inline=True,
         )
 
         embed.set_footer(text="Railway Production • Region: US-East")
@@ -507,35 +451,26 @@ class AdvancedCommands(commands.Cog):
                 title="📡 Webhook Health Check Results",
                 description=f"Tested {len(results)} webhooks",
                 color=0x00FF00 if failed == 0 else 0xFFA500,
-                timestamp=datetime.utcnow()
+                timestamp=datetime.utcnow(),
             )
 
             embed.add_field(
                 name="📊 Summary",
                 value=f"✅ Healthy: {healthy}\n"
-                      f"❌ Failed: {failed}\n"
-                      f"📈 Success Rate: {(healthy/len(results)*100):.1f}%",
-                inline=False
+                f"❌ Failed: {failed}\n"
+                f"📈 Success Rate: {(healthy/len(results)*100):.1f}%",
+                inline=False,
             )
 
             # Show results
-            results_text = "\n".join([
-                f"{r['status']} `{r['channel']}` - {r['response_time']:.2f}s"
-                for r in results[:15]  # Show first 15
-            ])
-
-            embed.add_field(
-                name="🔍 Test Results",
-                value=results_text or "No results",
-                inline=False
+            results_text = "\n".join(
+                [f"{r['status']} `{r['channel']}` - {r['response_time']:.2f}s" for r in results[:15]]  # Show first 15
             )
 
+            embed.add_field(name="🔍 Test Results", value=results_text or "No results", inline=False)
+
             if failed > 0:
-                embed.add_field(
-                    name="🔧 Recommendation",
-                    value="Run `!setup` to recreate failed webhooks",
-                    inline=False
-                )
+                embed.add_field(name="🔧 Recommendation", value="Run `!setup` to recreate failed webhooks", inline=False)
 
             embed.set_footer(text=f"Tested {len(results)} of {len(webhooks)} total webhooks")
 
@@ -558,7 +493,7 @@ class AdvancedCommands(commands.Cog):
             title="🔧 Helix Tool Access Matrix",
             description="Complete tool inventory across all systems",
             color=0xE74C3C,
-            timestamp=datetime.utcnow()
+            timestamp=datetime.utcnow(),
         )
 
         # MCP Tools
@@ -568,16 +503,12 @@ class AdvancedCommands(commands.Cog):
             ("Ritual Execution", 8),
             ("Storage & Archival", 10),
             ("Discord Integration", 12),
-            ("System Administration", 16)
+            ("System Administration", 16),
         ]
 
         mcp_text = "\n".join([f"• {cat}: {count} tools" for cat, count in mcp_categories])
 
-        embed.add_field(
-            name="📦 MCP Tools (68)",
-            value=f"TypeScript-based\n{mcp_text}",
-            inline=True
-        )
+        embed.add_field(name="📦 MCP Tools (68)", value=f"TypeScript-based\n{mcp_text}", inline=True)
 
         # Ninja Tools
         ninja_categories = [
@@ -587,25 +518,18 @@ class AdvancedCommands(commands.Cog):
             ("Shuriken Deployment", 8),
             ("Ninjutsu Awareness", 10),
             ("Dojo Training", 9),
-            ("Shinobi Protocols", 8)
+            ("Shinobi Protocols", 8),
         ]
 
         ninja_text = "\n".join([f"• {cat}: {count} tools" for cat, count in ninja_categories])
 
-        embed.add_field(
-            name="🥷 Ninja Tools (59)",
-            value=f"Python-based\n{ninja_text}",
-            inline=True
-        )
+        embed.add_field(name="🥷 Ninja Tools (59)", value=f"Python-based\n{ninja_text}", inline=True)
 
         # Status
         embed.add_field(
             name="📊 Overall Status",
-            value="✅ All tools operational\n"
-                  "🧪 100% tested (MCP)\n"
-                  "🧪 95% tested (Ninja)\n"
-                  "📚 Fully documented",
-            inline=False
+            value="✅ All tools operational\n" "🧪 100% tested (MCP)\n" "🧪 95% tested (Ninja)\n" "📚 Fully documented",
+            inline=False,
         )
 
         embed.set_footer(text="Total: 127 tools • Access: helix-unified + mcp/helix-consciousness")
@@ -637,16 +561,11 @@ class AdvancedCommands(commands.Cog):
             title="✅ Helix Collective v17.0 - Launch Readiness",
             description="Phase 4 Master Launch Checklist Status",
             color=0x2ECC71,
-            timestamp=datetime.utcnow()
+            timestamp=datetime.utcnow(),
         )
 
         # Overall readiness
-        embed.add_field(
-            name="📊 Overall Readiness",
-            value="**95%** Complete\n"
-                  "Ready for Public Launch",
-            inline=False
-        )
+        embed.add_field(name="📊 Overall Readiness", value="**95%** Complete\n" "Ready for Public Launch", inline=False)
 
         # Categories
         categories = [
@@ -659,36 +578,25 @@ class AdvancedCommands(commands.Cog):
             ("7️⃣ Documentation", "✅", "100% coverage"),
             ("8️⃣ Performance", "✅", "All benchmarks met"),
             ("9️⃣ Testing", "✅", "92% unit, 88% integration"),
-            ("🔟 Multi-Agent", "✅", "MACS operational")
+            ("🔟 Multi-Agent", "✅", "MACS operational"),
         ]
 
-        checklist_text = "\n".join([
-            f"{status} {cat} - {desc}"
-            for cat, status, desc in categories
-        ])
+        checklist_text = "\n".join([f"{status} {cat} - {desc}" for cat, status, desc in categories])
 
-        embed.add_field(
-            name="📋 Verification Categories",
-            value=checklist_text,
-            inline=False
-        )
+        embed.add_field(name="📋 Verification Categories", value=checklist_text, inline=False)
 
         # Remaining tasks
         embed.add_field(
             name="⏳ Remaining Tasks",
-            value="• Security: Address 4-5 vulnerabilities\n"
-                  "• Deploy to helixspiral.work (Phase 5)\n"
-                  "• Final QA testing",
-            inline=False
+            value="• Security: Address 4-5 vulnerabilities\n" "• Deploy to helixspiral.work (Phase 5)\n" "• Final QA testing",
+            inline=False,
         )
 
         # Next steps
         embed.add_field(
             name="🚀 Next Steps",
-            value="1. Run `!security` to audit vulnerabilities\n"
-                  "2. Execute Phase 5 deployment\n"
-                  "3. Community beta launch",
-            inline=False
+            value="1. Run `!security` to audit vulnerabilities\n" "2. Execute Phase 5 deployment\n" "3. Community beta launch",
+            inline=False,
         )
 
         embed.set_footer(text="See PHASE4_MASTER_LAUNCH_CHECKLIST.md for full details")

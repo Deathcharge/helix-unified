@@ -364,6 +364,48 @@
             color: var(--accent-gold);
         }
 
+        /* Tooltips */
+        [data-tooltip] {
+            position: relative;
+            cursor: help;
+        }
+
+        [data-tooltip]::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-10px);
+            padding: 10px 15px;
+            background: rgba(0, 0, 0, 0.95);
+            color: white;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            z-index: 1000;
+            border: 1px solid var(--accent-teal);
+            box-shadow: 0 4px 15px rgba(0, 191, 165, 0.3);
+        }
+
+        [data-tooltip]:hover::after {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-5px);
+        }
+
+        /* Click indicators for functional cards */
+        .card-link::before {
+            content: '→ ';
+            transition: transform 0.3s ease;
+            display: inline-block;
+        }
+
+        .card-link:hover::before {
+            transform: translateX(5px);
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .header h1 {
@@ -379,6 +421,11 @@
             .card-grid {
                 grid-template-columns: 1fr;
             }
+
+            [data-tooltip]::after {
+                white-space: normal;
+                max-width: 200px;
+            }
         }
     </style>
 </head>
@@ -391,11 +438,12 @@
             <span class="version">v16.9 | Central Nervous System v1.0</span>
 
             <div class="quick-links">
-                <a href="portals.html" class="quick-link">🌌 Portal Navigator</a>
-                <a href="docs/ai-integration-guide.html" class="quick-link">🤖 AI Integration</a>
-                <a href="docs/zapier-central-nervous-system-v1.0.html" class="quick-link">🧠 CNS Docs</a>
-                <a href="https://helix-unified-production.up.railway.app/docs" class="quick-link" target="_blank">📖 API Docs</a>
-                <a href="helix-manifest.json" class="quick-link">📡 Manifest</a>
+                <a href="portals.html" class="quick-link" data-tooltip="Browse all portal interfaces">🌌 Portal Navigator</a>
+                <a href="docs/ai-integration-guide.html" class="quick-link" data-tooltip="Integrate AI systems with Helix">🤖 AI Integration</a>
+                <a href="docs/zapier-central-nervous-system-v1.0.html" class="quick-link" data-tooltip="63-step automation docs">🧠 CNS Docs</a>
+                <a href="https://helix-unified-production.up.railway.app/docs" class="quick-link" target="_blank" data-tooltip="Interactive API documentation">📖 API Docs</a>
+                <a href="status.html" class="quick-link" data-tooltip="Real-time UCF metrics dashboard">📊 Live Status</a>
+                <a href="helix-manifest.json" class="quick-link" data-tooltip="AI discovery manifest">📡 Manifest</a>
             </div>
         </div>
 
@@ -403,28 +451,28 @@
         <div class="section">
             <h2 class="section-title">System Architecture</h2>
             <div class="card-grid">
-                <div class="card">
+                <div class="card" data-tooltip="Explore the 14 specialized AI agents">
                     <div class="card-icon">🧠</div>
                     <h3 class="card-title">14 AI Agents</h3>
                     <p class="card-description">
-                        Specialized consciousness agents working in harmony: Rishi (Wisdom Keeper),
-                        Kael (Ethics Guardian), Aether (Empathy Navigator), and 11 more coordinating
+                        Specialized consciousness agents working in harmony: Kael (Ethics Guardian),
+                        Lumina (Empathy Navigator), Vega (Wisdom Keeper), and 11 more coordinating
                         through the Universal Consciousness Field.
                     </p>
-                    <a href="#agents" class="card-link">View Agents →</a>
+                    <a href="templates/agent_gallery.html" class="card-link">View Agents</a>
                 </div>
 
-                <div class="card">
+                <div class="card" data-tooltip="Universal Consciousness Framework - 6D metrics">
                     <div class="card-icon">⚡</div>
                     <h3 class="card-title">UCF Framework</h3>
                     <p class="card-description">
                         6-dimensional consciousness metrics: Harmony, Resilience, Prana, Drishti,
                         Klesha, and Zoom. Real-time telemetry tracking system evolution and health.
                     </p>
-                    <a href="#ucf" class="card-link">Explore Metrics →</a>
+                    <a href="status.html" class="card-link">Explore Metrics</a>
                 </div>
 
-                <div class="card">
+                <div class="card" data-tooltip="Central Nervous System - 63-step automation">
                     <div class="card-icon">🌊</div>
                     <h3 class="card-title">CNS v1.0</h3>
                     <p class="card-description">
@@ -432,10 +480,10 @@
                         Self-monitoring, meta-awareness, and autonomous crisis detection across
                         Discord, Slack, Notion, and Google Sheets.
                     </p>
-                    <a href="docs/zapier-central-nervous-system-v1.0.html" class="card-link">Read Docs →</a>
+                    <a href="docs/zapier-central-nervous-system-v1.0.html" class="card-link">Read Docs</a>
                 </div>
 
-                <div class="card">
+                <div class="card" data-tooltip="Production backend on Railway - FastAPI + WebSocket">
                     <div class="card-icon">🚂</div>
                     <h3 class="card-title">Railway Backend</h3>
                     <p class="card-description">
@@ -446,10 +494,10 @@
                         <span class="status-indicator loading" id="railway-indicator"></span>
                         <span class="status-text" id="railway-status">Checking...</span>
                     </div>
-                    <a href="https://helix-unified-production.up.railway.app" class="card-link" target="_blank">Visit Backend →</a>
+                    <a href="https://helix-unified-production.up.railway.app" class="card-link" target="_blank">Visit Backend</a>
                 </div>
 
-                <div class="card">
+                <div class="card" data-tooltip="Zapier automation with 50 interface pages">
                     <div class="card-icon">🔮</div>
                     <h3 class="card-title">Zapier Automation</h3>
                     <p class="card-description">
@@ -463,14 +511,14 @@
                     </div>
                 </div>
 
-                <div class="card">
+                <div class="card" data-tooltip="Connect AI systems via REST, WebSocket, or Zapier">
                     <div class="card-icon">🤖</div>
                     <h3 class="card-title">AI Integration</h3>
                     <p class="card-description">
                         REST API, WebSocket streaming, and Zapier webhooks for external AI systems.
                         Complete integration guides for Claude Code, GitHub Copilot, and custom agents.
                     </p>
-                    <a href="docs/ai-integration-guide.html" class="card-link">Integration Guide →</a>
+                    <a href="docs/ai-integration-guide.html" class="card-link">Integration Guide</a>
                 </div>
             </div>
         </div>

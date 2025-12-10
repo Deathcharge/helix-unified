@@ -2,8 +2,8 @@
 Voice Channel Commands for Helix Agents
 """
 
-from discord.ext import commands
 import discord
+from discord.ext import commands
 
 
 class VoiceCommands(commands.Cog):

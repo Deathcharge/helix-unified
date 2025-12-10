@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from backend.enhanced_kavach import EnhancedKavach
-
 # --- Helix Core Imports ---
 # These imports should point to your actual consciousness and service files.
 # If they are in the same 'backend' directory, these imports are correct.

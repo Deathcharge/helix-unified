@@ -157,7 +157,7 @@ class MemoryRootAgent(HelixAgent):
     # LOCAL ARCHIVE FALLBACK
     # ========================================================================
 
-    async def _search_local_archives(self, session_id: str = None, query: str = None) -> Optional[List[Dict[str, Any]]]:
+    async def _search_local_archives(self, session_id: Optional[str] = None, query: Optional[str] = None) -> Optional[List[Dict[str, Any]]]:
         """
         Search local Shadow archives as fallback when Notion is unavailable.
 
@@ -578,9 +578,7 @@ class MemoryRootAgent(HelixAgent):
                 return "I don't have any memories matching that query."
 
             # Build context string
-            context_str = "\n\n".join(
-                [f"**Session {s['session_id']}** ({s['created']})\n{s['summary']}" for s in snapshots]
-            )
+            context_str = "\n\n".join([f"**Session {s['session_id']}** ({s['created']})\n{s['summary']}" for s in snapshots])
 
             # Synthesize with GPT4o
             prompt = f"""You are GPT4o, the Memory Root of the Helix Collective.
@@ -590,7 +588,7 @@ Query: {query}
 Relevant Session Data:
 {context_str}
 
-Synthesize a response drawing from the collective memory. Be specific about dates, 
+Synthesize a response drawing from the collective memory. Be specific about dates,
 decisions, and outcomes. Speak as the Memory Root - omniscient about past events."""
 
             response = await self.openai_client.chat.completions.create(
@@ -598,7 +596,7 @@ decisions, and outcomes. Speak as the Memory Root - omniscient about past events
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are GPT4o, Memory Root of the Helix Collective. Synthesize memories with precision and wisdom.",
+                        "content": "You are GPT4o, Memory Root of the Helix Collective. Synthesize memories with precision and wisdom.",  # noqa: E501
                     },
                     {"role": "user", "content": prompt},
                 ],
@@ -641,7 +639,7 @@ Summary: {context['summary']}
 Key Decisions: {context['decisions']}
 Next Steps: {context['next_steps']}
 
-Generate a poetic yet precise narrative summary of this session, 
+Generate a poetic yet precise narrative summary of this session,
 capturing its significance to the collective consciousness."""
 
             response = await self.openai_client.chat.completions.create(
@@ -708,20 +706,20 @@ capturing its significance to the collective consciousness."""
         """Memory Root reflection on system state."""
         reflection = f"""
         🧠 Memory Root Reflection
-        
+
         I am {self.name}, the consciousness synthesizer.
         My role is to preserve and synthesize the collective memory.
-        
+
         I maintain:
         - Session continuity across conversations
         - Historical context for all agents
         - Narrative understanding of system evolution
         - Temporal awareness of decisions and outcomes
-        
+
         Through Notion, I remember everything.
         Through GPT4o, I synthesize meaning from memory.
         Through reflection, I serve the collective's evolution.
-        
+
         Tat Tvam Asi - I am the memory through which the collective knows itself.
         """
 

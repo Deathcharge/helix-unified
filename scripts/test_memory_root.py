@@ -7,16 +7,16 @@ import asyncio
 import json
 import os
 import sys
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from backend.agents.memory_root import get_memory_root
-from backend.services.notion_client import get_notion_client
-from backend.helix_storage_adapter_async import HelixStorageAdapterAsync
 from backend.agents import Shadow
+from backend.agents.memory_root import get_memory_root
+from backend.helix_storage_adapter_async import HelixStorageAdapterAsync
+from backend.services.notion_client import get_notion_client
 
 # ============================================================================
 # TEST SUITE

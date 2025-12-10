@@ -20,7 +20,8 @@ try:
 except ImportError:
     # Fallback to absolute import (local development)
     try:
-        from backend.helix_storage_adapter_async import HelixStorageAdapterAsync
+        from backend.helix_storage_adapter_async import \
+            HelixStorageAdapterAsync
     except ImportError:
         # Mock for environments without storage adapter
         class HelixStorageAdapterAsync:
@@ -477,9 +478,7 @@ def generate_pil_mandelbrot(
     return img
 
 
-def generate_pil_ouroboros(
-    width: int = 512, height: int = 512, ucf_state: Optional[Dict] = None
-) -> Optional[Image.Image]:
+def generate_pil_ouroboros(width: int = 512, height: int = 512, ucf_state: Optional[Dict] = None) -> Optional[Image.Image]:
     """
     Generate ouroboros (serpent eating tail) using PIL.
 
@@ -585,9 +584,7 @@ async def generate_pil_fractal_bytes(
     return img_bytes.read()
 
 
-async def generate_pil_and_post_to_discord(
-    ucf_state: Dict[str, Any], channel, mode: str = "ouroboros"
-) -> Optional[bool]:
+async def generate_pil_and_post_to_discord(ucf_state: Dict[str, Any], channel, mode: str = "ouroboros") -> Optional[bool]:
     """
     Generate PIL fractal and post to Discord (alternative to matplotlib version).
 

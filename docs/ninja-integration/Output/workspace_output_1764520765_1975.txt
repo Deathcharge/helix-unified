@@ -1,0 +1,24 @@
+[feature/qol-feature-upgrade-v2 cd89518] 🚀 MASSIVE QOL + Feature Upgrade v2.0 - Production Ready
+ 25 files changed, 5183 insertions(+), 730 deletions(-)
+ create mode 100644 .github/dependabot.yml
+ create mode 100644 .github/workflows/ci-cd.yml
+ create mode 100644 .github/workflows/security.yml
+ create mode 100644 .github/workflows/testing.yml
+ create mode 100644 QOL_FEATURE_UPGRADE_COMPLETE.md
+ create mode 100644 backend/Dockerfile.dev
+ create mode 100644 config/unified-config.json
+ create mode 100644 docker-compose.dev.yml
+ create mode 100644 frontend/Dockerfile.dev
+ create mode 100644 frontend/components/AgentCard.js
+ create mode 100644 frontend/components/ServiceCard.js
+ create mode 100644 frontend/package-lock.json
+ rename "frontend/community_app/pages/1_\360\237\227\243\357\270\217_Forums.py" => "frontend/pages/1_\360\237\227\243\357\270\217_Forums.py" (100%)
+ rename "frontend/community_app/pages/2_\360\237\222\254_Live_Chat.py" => "frontend/pages/2_\360\237\222\254_Live_Chat.py" (100%)
+ rename "frontend/community_app/pages/3_\360\237\222\225_Agent_Dating.py" => "frontend/pages/3_\360\237\222\225_Agent_Dating.py" (100%)
+ create mode 100644 frontend/pages/analytics.js
+ create mode 100644 frontend/pages/chat.js
+ create mode 100644 frontend/pages/codex.js
+ create mode 100644 frontend/pages/forum.js
+ create mode 100644 frontend/pages/hub.js
+ create mode 100644 frontend/pages/portals/[portalId].js
+ create mode 100644 frontend/styles/globals.css

@@ -107,7 +107,8 @@ nltk==3.9
 Pillow==10.3.0
 
 # Optional: PDF Processing for Document Actions
-PyPDF2==3.0.1
+# PyPDF2 removed due to CVE-2023-36464 (infinite loop vulnerability)
+# If PDF processing is needed, migrate to: pypdf>=3.9.0
 
 # Optional: Excel/CSV Processing
 pandas==2.1.4
@@ -249,7 +250,7 @@ split-io==8.3.0
 segment-analytics-python==2.2.3
 
 # Optional: Error Tracking
-sentry-sdk[fastapi]==1.38.0
+sentry-sdk[fastapi]==1.45.1
 
 # Optional: Performance Monitoring
 newrelic==9.2.0

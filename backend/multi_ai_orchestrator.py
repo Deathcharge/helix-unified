@@ -4,12 +4,12 @@ Coordinates task execution across Manus, Perplexity, Grok, and Claude
 """
 
 import asyncio
-import logging
-from typing import Any, Dict, List, Optional, Tuple
-from dataclasses import dataclass
-from enum import Enum
 import json
+import logging
+from dataclasses import dataclass
 from datetime import datetime
+from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -43,8 +43,8 @@ class AIResponse:
     confidence: float
     execution_time_ms: float
     error: Optional[str] = None
-    timestamp: str = None
-    
+    timestamp: Optional[str] = None
+
     def __post_init__(self):
         if self.timestamp is None:
             self.timestamp = datetime.utcnow().isoformat()
@@ -64,7 +64,7 @@ class MultiAIOrchestrator:
     Orchestrates task execution across multiple AI systems
     Implements routing, consensus, fallback, and collaboration patterns
     """
-    
+
     def __init__(
         self,
         manus_enabled: bool = True,
@@ -81,7 +81,7 @@ class MultiAIOrchestrator:
         self.claude_api_key = claude_api_key
         self.consensus_threshold = consensus_threshold
         self.fallback_enabled = fallback_enabled
-        
+
         # Task routing matrix
         self.routing_matrix = {
             TaskType.RESEARCH: [
@@ -121,7 +121,7 @@ class MultiAIOrchestrator:
                 AISystem.PERPLEXITY
             ]
         }
-        
+
         # Metrics tracking
         self.metrics = {
             "total_tasks": 0,
@@ -131,9 +131,9 @@ class MultiAIOrchestrator:
             "consensus_decisions": {"total": 0, "approved": 0, "rejected": 0},
             "fallback_usage": {"primary_failures": 0, "fallback_successes": 0}
         }
-        
+
         logger.info(f"MultiAIOrchestrator initialized with consensus_threshold={consensus_threshold}")
-    
+
     async def delegate(
         self,
         task_type: TaskType,
@@ -144,19 +144,19 @@ class MultiAIOrchestrator:
     ) -> AIResponse:
         """
         Delegate a task to the appropriate AI system
-        
+
         Args:
             task_type: Type of task to execute
             query: Task description/query
             ai_preference: Preferred AI system (optional)
             context: Additional context for the task
             timeout_seconds: Task timeout
-            
+
         Returns:
             AIResponse with result from the AI system
         """
         self.metrics["total_tasks"] += 1
-        
+
         # Determine AI routing
         if ai_preference and ai_preference in self.routing_matrix[task_type]:
             ai_chain = [ai_preference] + [
@@ -164,9 +164,9 @@ class MultiAIOrchestrator:
             ]
         else:
             ai_chain = self.routing_matrix[task_type]
-        
+
         logger.info(f"Delegating {task_type.value} task: {query[:50]}...")
-        
+
         # Try each AI in the chain
         for ai_system in ai_chain:
             try:
@@ -177,28 +177,28 @@ class MultiAIOrchestrator:
                     context=context,
                     timeout_seconds=timeout_seconds
                 )
-                
+
                 self.metrics["successful_tasks"] += 1
                 self.metrics["ai_utilization"][ai_system.value] += 1
-                
+
                 logger.info(f"Task completed by {ai_system.value} in {response.execution_time_ms}ms")
                 return response
-                
+
             except Exception as e:
                 logger.warning(f"{ai_system.value} failed: {str(e)}")
-                
+
                 if ai_system == ai_chain[0]:
                     self.metrics["fallback_usage"]["primary_failures"] += 1
-                
+
                 if not self.fallback_enabled or ai_system == ai_chain[-1]:
                     self.metrics["failed_tasks"] += 1
                     raise Exception(f"All AI systems failed for task: {query}")
-                
+
                 continue
-        
+
         self.metrics["failed_tasks"] += 1
         raise Exception(f"Task delegation failed: {query}")
-    
+
     async def consensus_vote(
         self,
         decision: str,
@@ -207,17 +207,17 @@ class MultiAIOrchestrator:
     ) -> Dict[str, Any]:
         """
         Get consensus vote from all AI systems on a critical decision
-        
+
         Args:
             decision: Decision to vote on
             context: Additional context
             timeout_seconds: Vote timeout
-            
+
         Returns:
             Consensus result with approval status
         """
         logger.info(f"Requesting consensus vote on: {decision}")
-        
+
         # Get votes from all AI systems in parallel
         votes = await asyncio.gather(
             self._get_vote(AISystem.MANUS, decision, context, timeout_seconds),
@@ -226,27 +226,27 @@ class MultiAIOrchestrator:
             self._get_vote(AISystem.CLAUDE, decision, context, timeout_seconds),
             return_exceptions=True
         )
-        
+
         # Filter out exceptions
         valid_votes = [v for v in votes if isinstance(v, ConsensusVote)]
-        
+
         if not valid_votes:
             raise Exception("No valid votes received")
-        
+
         # Calculate consensus
         approval_votes = sum(1 for v in valid_votes if v.recommendation == "approve")
         approval_rate = approval_votes / len(valid_votes)
-        
+
         approved = approval_rate >= self.consensus_threshold
-        
+
         self.metrics["consensus_decisions"]["total"] += 1
         if approved:
             self.metrics["consensus_decisions"]["approved"] += 1
         else:
             self.metrics["consensus_decisions"]["rejected"] += 1
-        
+
         logger.info(f"Consensus vote: {approval_rate:.2%} approval ({approval_votes}/{len(valid_votes)})")
-        
+
         return {
             "approved": approved,
             "approval_rate": approval_rate,
@@ -261,7 +261,7 @@ class MultiAIOrchestrator:
             ],
             "timestamp": datetime.utcnow().isoformat()
         }
-    
+
     async def collaborative_solve(
         self,
         problem: str,
@@ -270,17 +270,17 @@ class MultiAIOrchestrator:
     ) -> Dict[str, Any]:
         """
         Solve a complex problem using collaborative input from all AI systems
-        
+
         Args:
             problem: Problem statement
             constraints: List of constraints
             timeout_seconds: Solving timeout
-            
+
         Returns:
             Collaborative solution with perspectives from all AIs
         """
         logger.info(f"Starting collaborative problem solving: {problem[:50]}...")
-        
+
         # Get perspectives from all AI systems in parallel
         perspectives = await asyncio.gather(
             self._get_perspective(AISystem.MANUS, "infrastructure", problem, constraints),
@@ -289,13 +289,13 @@ class MultiAIOrchestrator:
             self._get_perspective(AISystem.CLAUDE, "strategy", problem, constraints),
             return_exceptions=True
         )
-        
+
         # Synthesize perspectives
         valid_perspectives = [p for p in perspectives if isinstance(p, dict)]
-        
+
         if not valid_perspectives:
             raise Exception("No valid perspectives received")
-        
+
         # Use Manus to synthesize if available
         if self.manus_enabled:
             synthesis = await self._synthesize_perspectives(
@@ -305,16 +305,16 @@ class MultiAIOrchestrator:
             )
         else:
             synthesis = self._simple_synthesis(valid_perspectives)
-        
+
         logger.info(f"Collaborative solution generated with {len(valid_perspectives)} perspectives")
-        
+
         return {
             "problem": problem,
             "perspectives": valid_perspectives,
             "synthesis": synthesis,
             "timestamp": datetime.utcnow().isoformat()
         }
-    
+
     async def sequential_delegation(
         self,
         task_chain: List[Tuple[TaskType, str]],
@@ -322,35 +322,35 @@ class MultiAIOrchestrator:
     ) -> List[AIResponse]:
         """
         Execute a sequence of tasks, passing results between them
-        
+
         Args:
             task_chain: List of (task_type, query) tuples
             timeout_seconds: Total timeout for all tasks
-            
+
         Returns:
             List of responses in order
         """
         logger.info(f"Starting sequential delegation with {len(task_chain)} tasks")
-        
+
         responses = []
         context = {}
-        
+
         for i, (task_type, query) in enumerate(task_chain):
             logger.info(f"Executing task {i+1}/{len(task_chain)}: {task_type.value}")
-            
+
             response = await self.delegate(
                 task_type=task_type,
                 query=query,
                 context=context,
                 timeout_seconds=timeout_seconds
             )
-            
+
             responses.append(response)
             context[f"step_{i}_result"] = response.result
-        
+
         logger.info(f"Sequential delegation completed with {len(responses)} tasks")
         return responses
-    
+
     def get_metrics(self) -> Dict[str, Any]:
         """Get current metrics"""
         return {
@@ -365,9 +365,9 @@ class MultiAIOrchestrator:
             "consensus_decisions": self.metrics["consensus_decisions"],
             "fallback_usage": self.metrics["fallback_usage"]
         }
-    
+
     # Private methods
-    
+
     async def _execute_with_ai(
         self,
         ai_system: AISystem,
@@ -377,10 +377,10 @@ class MultiAIOrchestrator:
         timeout_seconds: int
     ) -> AIResponse:
         """Execute a task with a specific AI system"""
-        
+
         import time
         start_time = time.time()
-        
+
         try:
             if ai_system == AISystem.MANUS:
                 result = await self._execute_manus(task_type, query, context)
@@ -392,9 +392,9 @@ class MultiAIOrchestrator:
                 result = await self._execute_claude(query, context)
             else:
                 raise ValueError(f"Unknown AI system: {ai_system}")
-            
+
             execution_time = (time.time() - start_time) * 1000
-            
+
             return AIResponse(
                 ai_system=ai_system,
                 task_type=task_type,
@@ -402,12 +402,12 @@ class MultiAIOrchestrator:
                 confidence=0.95,
                 execution_time_ms=execution_time
             )
-            
+
         except asyncio.TimeoutError:
             raise Exception(f"{ai_system.value} timeout after {timeout_seconds}s")
         except Exception as e:
             raise Exception(f"{ai_system.value} execution failed: {str(e)}")
-    
+
     async def _execute_manus(
         self,
         task_type: TaskType,
@@ -423,7 +423,7 @@ class MultiAIOrchestrator:
             "result": f"Manus processed: {query}",
             "status": "completed"
         }
-    
+
     async def _execute_perplexity(
         self,
         query: str,
@@ -439,7 +439,7 @@ class MultiAIOrchestrator:
             "sources": ["source1", "source2"],
             "status": "completed"
         }
-    
+
     async def _execute_grok(
         self,
         query: str,
@@ -455,7 +455,7 @@ class MultiAIOrchestrator:
             "patterns": ["pattern1", "pattern2"],
             "status": "completed"
         }
-    
+
     async def _execute_claude(
         self,
         query: str,
@@ -471,7 +471,7 @@ class MultiAIOrchestrator:
             "recommendation": "Proceed with caution",
             "status": "completed"
         }
-    
+
     async def _get_vote(
         self,
         ai_system: AISystem,
@@ -481,7 +481,7 @@ class MultiAIOrchestrator:
     ) -> ConsensusVote:
         """Get a vote from an AI system"""
         await asyncio.sleep(0.1)  # Simulate processing
-        
+
         # Simulated voting logic
         recommendations = {
             AISystem.MANUS: "approve",
@@ -489,14 +489,14 @@ class MultiAIOrchestrator:
             AISystem.GROK: "approve",
             AISystem.CLAUDE: "approve"
         }
-        
+
         return ConsensusVote(
             ai_system=ai_system,
             recommendation=recommendations.get(ai_system, "abstain"),
             confidence=0.95,
             reasoning=f"{ai_system.value} analysis of decision"
         )
-    
+
     async def _get_perspective(
         self,
         ai_system: AISystem,
@@ -506,7 +506,7 @@ class MultiAIOrchestrator:
     ) -> Dict:
         """Get a perspective from an AI system"""
         await asyncio.sleep(0.15)  # Simulate processing
-        
+
         return {
             "ai": ai_system.value,
             "perspective_type": perspective_type,
@@ -514,7 +514,7 @@ class MultiAIOrchestrator:
             "recommendations": ["rec1", "rec2"],
             "confidence": 0.9
         }
-    
+
     async def _synthesize_perspectives(
         self,
         problem: str,
@@ -523,7 +523,7 @@ class MultiAIOrchestrator:
     ) -> Dict:
         """Synthesize perspectives into a unified solution"""
         await asyncio.sleep(0.2)  # Simulate processing
-        
+
         return {
             "approach": "Synthesized multi-AI solution",
             "steps": [
@@ -534,7 +534,7 @@ class MultiAIOrchestrator:
             "expected_outcome": "Optimal problem resolution",
             "risk_level": "low"
         }
-    
+
     def _simple_synthesis(self, perspectives: List[Dict]) -> Dict:
         """Simple synthesis without Manus"""
         return {
@@ -547,33 +547,33 @@ class MultiAIOrchestrator:
 # Example usage
 async def example_usage():
     """Example of using the MultiAIOrchestrator"""
-    
+
     orchestrator = MultiAIOrchestrator(
         manus_enabled=True,
         perplexity_api_key="YOUR_KEY",
         grok_api_key="YOUR_KEY",
         claude_api_key="YOUR_KEY"
     )
-    
+
     # Example 1: Simple delegation
     response = await orchestrator.delegate(
         task_type=TaskType.RESEARCH,
         query="Latest developments in AI orchestration"
     )
     print(f"Research result: {response.result}")
-    
+
     # Example 2: Consensus decision
     consensus = await orchestrator.consensus_vote(
         decision="Deploy new portal to production"
     )
     print(f"Consensus: {consensus['approved']} ({consensus['approval_rate']:.2%})")
-    
+
     # Example 3: Collaborative solving
     solution = await orchestrator.collaborative_solve(
         problem="Scale Helix Collective to 100 portals"
     )
     print(f"Solution: {solution['synthesis']}")
-    
+
     # Example 4: Sequential delegation
     chain = [
         (TaskType.RESEARCH, "Current portal deployment best practices"),
@@ -583,7 +583,7 @@ async def example_usage():
     ]
     results = await orchestrator.sequential_delegation(chain)
     print(f"Chain completed with {len(results)} steps")
-    
+
     # Get metrics
     metrics = orchestrator.get_metrics()
     print(f"Metrics: {json.dumps(metrics, indent=2)}")
@@ -591,4 +591,3 @@ async def example_usage():
 
 if __name__ == "__main__":
     asyncio.run(example_usage())
-

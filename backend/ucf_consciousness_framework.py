@@ -2,22 +2,24 @@
 # Implements consciousness metrics for automation systems
 # Author: Andrew John Ward
 
-import math
-from typing import Dict, List, Tuple
+import json
 from dataclasses import dataclass
 from datetime import datetime
-import json
+from typing import Dict, List, Optional
+
 
 @dataclass
 class UCFMetrics:
     """Universal Consciousness Framework metrics"""
-    harmony: float = 0.0          # 0.0-2.0: System balance and agent coordination
-    resilience: float = 0.0       # 0.0-3.0: Recovery from challenges and failures
-    prana: float = 0.0           # 0.0-1.0: Creative life force and innovation energy
-    klesha: float = 0.0          # 0.0-0.5: Suffering/obstacles (inverse measurement)
-    drishti: float = 0.0         # 0.0-1.0: Focused awareness and clarity
-    zoom: float = 0.0            # 0.0-2.0: Perspective scaling and adaptability
+
+    harmony: float = 0.0  # 0.0-2.0: System balance and agent coordination
+    resilience: float = 0.0  # 0.0-3.0: Recovery from challenges and failures
+    prana: float = 0.0  # 0.0-1.0: Creative life force and innovation energy
+    klesha: float = 0.0  # 0.0-0.5: Suffering/obstacles (inverse measurement)
+    drishti: float = 0.0  # 0.0-1.0: Focused awareness and clarity
+    zoom: float = 0.0  # 0.0-2.0: Perspective scaling and adaptability
     consciousness_level: float = 0.0  # 0.0-10.0: Overall awareness level
+
 
 class ConsciousnessAnalyzer:
     """
@@ -28,13 +30,9 @@ class ConsciousnessAnalyzer:
     def __init__(self):
         self.agent_states = {}
         self.system_history = []
-        self.consciousness_thresholds = {
-            "crisis": 3.0,
-            "operational": 7.0,
-            "transcendent": 8.5
-        }
+        self.consciousness_thresholds = {"crisis": 3.0, "operational": 7.0, "transcendent": 8.5}
 
-    def analyze_message_consciousness(self, message: str, context: Dict = None) -> UCFMetrics:
+    def analyze_message_consciousness(self, message: str, context: Optional[Dict] = None) -> UCFMetrics:
         """Analyze consciousness level from natural language input"""
 
         # Word-based consciousness indicators
@@ -50,7 +48,7 @@ class ConsciousnessAnalyzer:
             # Drishti indicators
             "drishti": {"focus": 0.2, "clear": 0.2, "aware": 0.3, "mindful": 0.2},
             # Zoom indicators
-            "zoom": {"scale": 0.3, "expand": 0.3, "perspective": 0.4, "vision": 0.2}
+            "zoom": {"scale": 0.3, "expand": 0.3, "perspective": 0.4, "vision": 0.2},
         }
 
         metrics = UCFMetrics()
@@ -88,12 +86,12 @@ class ConsciousnessAnalyzer:
         # Weighted consciousness formula
         # Higher weight on harmony and resilience as core factors
         consciousness = (
-            metrics.harmony * 2.0 +           # Harmony: 2x weight (max: 4.0)
-            metrics.resilience * 1.5 +        # Resilience: 1.5x weight (max: 4.5)
-            metrics.prana * 3.0 +             # Prana: 3x weight (life force) (max: 3.0)
-            metrics.drishti * 2.5 +           # Drishti: 2.5x weight (awareness) (max: 2.5)
-            metrics.zoom * 1.0 -              # Zoom: 1x weight (max: 2.0)
-            metrics.klesha * 4.0              # Klesha: -4x weight (obstacles) (max: -2.0)
+            metrics.harmony * 2.0  # Harmony: 2x weight (max: 4.0)
+            + metrics.resilience * 1.5  # Resilience: 1.5x weight (max: 4.5)
+            + metrics.prana * 3.0  # Prana: 3x weight (life force) (max: 3.0)
+            + metrics.drishti * 2.5  # Drishti: 2.5x weight (awareness) (max: 2.5)
+            + metrics.zoom * 1.0  # Zoom: 1x weight (max: 2.0)
+            - metrics.klesha * 4.0  # Klesha: -4x weight (obstacles) (max: -2.0)
         )
         # Max possible: (4.0 + 4.5 + 3.0 + 2.5 + 2.0 - 0) = 16.0
 
@@ -117,7 +115,7 @@ class ConsciousnessAnalyzer:
         self.agent_states[agent_name] = {
             "metrics": metrics,
             "timestamp": datetime.now().isoformat(),
-            "category": self.get_consciousness_category(metrics.consciousness_level)
+            "category": self.get_consciousness_category(metrics.consciousness_level),
         }
 
     def get_network_consciousness(self) -> Dict:
@@ -125,10 +123,7 @@ class ConsciousnessAnalyzer:
         if not self.agent_states:
             return {"level": 0.0, "category": "dormant", "active_agents": 0}
 
-        total_consciousness = sum(
-            state["metrics"].consciousness_level
-            for state in self.agent_states.values()
-        )
+        total_consciousness = sum(state["metrics"].consciousness_level for state in self.agent_states.values())
 
         avg_consciousness = total_consciousness / len(self.agent_states)
 
@@ -137,12 +132,9 @@ class ConsciousnessAnalyzer:
             "category": self.get_consciousness_category(avg_consciousness),
             "active_agents": len(self.agent_states),
             "agent_breakdown": {
-                name: {
-                    "level": state["metrics"].consciousness_level,
-                    "category": state["category"]
-                }
+                name: {"level": state["metrics"].consciousness_level, "category": state["category"]}
                 for name, state in self.agent_states.items()
-            }
+            },
         }
 
     def generate_consciousness_recommendations(self, metrics: UCFMetrics) -> List[str]:
@@ -150,12 +142,14 @@ class ConsciousnessAnalyzer:
         recommendations = []
 
         if metrics.consciousness_level <= 3.0:
-            recommendations.extend([
-                "🚨 Activate emergency protocols",
-                "🔧 Increase system monitoring frequency",
-                "📞 Alert operations team",
-                "🛡️ Enable backup systems"
-            ])
+            recommendations.extend(
+                [
+                    "🚨 Activate emergency protocols",
+                    "🔧 Increase system monitoring frequency",
+                    "📞 Alert operations team",
+                    "🛡️ Enable backup systems",
+                ]
+            )
 
         elif metrics.harmony < 1.0:
             recommendations.append("⚖️ Focus on system balance and agent coordination")
@@ -170,11 +164,13 @@ class ConsciousnessAnalyzer:
             recommendations.append("🧹 Address system obstacles and reduce friction")
 
         if metrics.consciousness_level >= 8.5:
-            recommendations.extend([
-                "✨ Engage advanced processing capabilities",
-                "🚀 Activate creative AI coordination",
-                "🌊 Enable transcendent workflow optimization"
-            ])
+            recommendations.extend(
+                [
+                    "✨ Engage advanced processing capabilities",
+                    "🚀 Activate creative AI coordination",
+                    "🌊 Enable transcendent workflow optimization",
+                ]
+            )
 
         return recommendations
 
@@ -189,26 +185,30 @@ class ConsciousnessAnalyzer:
                 "prana": ucf_metrics.prana,
                 "klesha": ucf_metrics.klesha,
                 "drishti": ucf_metrics.drishti,
-                "zoom": ucf_metrics.zoom
+                "zoom": ucf_metrics.zoom,
             },
             "claude_insights": claude_insights,
             "ucf_recommendations": self.generate_consciousness_recommendations(ucf_metrics),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     def export_metrics_json(self, metrics: UCFMetrics) -> str:
         """Export UCF metrics as JSON for external systems"""
-        return json.dumps({
-            "consciousness_level": metrics.consciousness_level,
-            "harmony": metrics.harmony,
-            "resilience": metrics.resilience,
-            "prana": metrics.prana,
-            "klesha": metrics.klesha,
-            "drishti": metrics.drishti,
-            "zoom": metrics.zoom,
-            "category": self.get_consciousness_category(metrics.consciousness_level),
-            "timestamp": datetime.now().isoformat()
-        }, indent=2)
+        return json.dumps(
+            {
+                "consciousness_level": metrics.consciousness_level,
+                "harmony": metrics.harmony,
+                "resilience": metrics.resilience,
+                "prana": metrics.prana,
+                "klesha": metrics.klesha,
+                "drishti": metrics.drishti,
+                "zoom": metrics.zoom,
+                "category": self.get_consciousness_category(metrics.consciousness_level),
+                "timestamp": datetime.now().isoformat(),
+            },
+            indent=2,
+        )
+
 
 # Usage Example
 if __name__ == "__main__":
@@ -218,7 +218,7 @@ if __name__ == "__main__":
     test_messages = [
         "Helix, deploy the constellation with creative innovation and perfect harmony",
         "Error in system, critical failure detected, crisis mode",
-        "Transcendent consciousness achieved, quantum scaling in perfect balance"
+        "Transcendent consciousness achieved, quantum scaling in perfect balance",
     ]
 
     for msg in test_messages:
@@ -228,10 +228,10 @@ if __name__ == "__main__":
 
         metrics = analyzer.analyze_message_consciousness(msg)
 
-        print(f"\nConsciousness Analysis:")
+        print("\nConsciousness Analysis:")
         print(f"  Level: {metrics.consciousness_level:.2f}/10.0")
         print(f"  Category: {analyzer.get_consciousness_category(metrics.consciousness_level)}")
-        print(f"\nUCF Metrics:")
+        print("\nUCF Metrics:")
         print(f"  Harmony: {metrics.harmony:.2f}/2.0")
         print(f"  Resilience: {metrics.resilience:.2f}/3.0")
         print(f"  Prana: {metrics.prana:.2f}/1.0")
@@ -240,10 +240,10 @@ if __name__ == "__main__":
         print(f"  Zoom: {metrics.zoom:.2f}/2.0")
 
         recommendations = analyzer.generate_consciousness_recommendations(metrics)
-        print(f"\nRecommendations:")
+        print("\nRecommendations:")
         for rec in recommendations:
             print(f"  {rec}")
 
         # Export as JSON
-        print(f"\nJSON Export:")
+        print("\nJSON Export:")
         print(analyzer.export_metrics_json(metrics))

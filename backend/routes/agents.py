@@ -2,12 +2,13 @@
 Agent Orchestration API Routes
 """
 
+import logging
+from typing import Any, Dict, Optional
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import Dict, Any, Optional
-import logging
 
-from backend.agent_orchestrator import get_orchestrator, HandshakePhase, Z88Stage
+from backend.agent_orchestrator import Z88Stage, get_orchestrator
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/agents", tags=["agents"])
@@ -84,10 +85,10 @@ async def get_agent_details(agent_id: str):
     try:
         orchestrator = get_orchestrator()
         agent = orchestrator.agents.get(agent_id)
-        
+
         if not agent:
             raise HTTPException(status_code=404, detail=f"Agent not found: {agent_id}")
-        
+
         return {
             "id": agent.id,
             "emoji": agent.emoji,

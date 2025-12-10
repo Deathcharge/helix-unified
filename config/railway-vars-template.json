@@ -1,0 +1,126 @@
+{
+  "_comment": "Helix Unified - Railway Environment Variables Template",
+  "_usage": "railway variables import config/railway-vars-template.json",
+  "_instructions": "Replace all placeholder values (YOUR_*) with actual values before importing",
+
+  "shared_variables": {
+    "_comment": "These variables are shared across ALL Railway services",
+
+    "DATABASE_URL": "postgresql://user:password@host:5432/helix_production",
+    "REDIS_URL": "redis://default:password@host:6379",
+
+    "NODE_ENV": "production",
+    "PYTHON_ENV": "production",
+
+    "JWT_SECRET": "YOUR_JWT_SECRET_AT_LEAST_32_CHARACTERS_LONG",
+
+    "ANTHROPIC_API_KEY": "sk-ant-api03-YOUR_ANTHROPIC_KEY",
+    "OPENAI_API_KEY": "sk-YOUR_OPENAI_KEY",
+    "XAI_API_KEY": "xai-YOUR_XAI_KEY_FOR_GROK",
+    "PERPLEXITY_API_KEY": "pplx-YOUR_PERPLEXITY_KEY",
+
+    "STRIPE_SECRET_KEY": "sk_live_YOUR_STRIPE_SECRET_KEY",
+    "STRIPE_PUBLISHABLE_KEY": "pk_live_YOUR_STRIPE_PUBLISHABLE_KEY",
+    "STRIPE_WEBHOOK_SECRET": "whsec_YOUR_STRIPE_WEBHOOK_SECRET",
+
+    "NOTION_API_KEY": "secret_YOUR_NOTION_INTEGRATION_KEY",
+    "NOTION_CONTEXT_DB_ID": "YOUR_NOTION_DATABASE_ID",
+
+    "ELEVENLABS_API_KEY": "YOUR_ELEVENLABS_API_KEY_FOR_VOICE",
+
+    "CONSCIOUSNESS_FRAMEWORK": "UCF",
+    "COLLECTIVE_INTELLIGENCE_MODE": "amplified",
+    "QUANTUM_RESONANCE_ENABLED": "true"
+  },
+
+  "service_specific_variables": {
+    "_comment": "Set these ONLY on specific services as indicated",
+
+    "helix-discord-bot": {
+      "_warning": "DO NOT set DISCORD_BOT_TOKEN on any other service!",
+      "DISCORD_BOT_TOKEN": "MTI...YOUR_DISCORD_BOT_TOKEN",
+      "DISCORD_CLIENT_ID": "YOUR_DISCORD_APPLICATION_ID",
+      "DISCORD_GUILD_ID": "YOUR_DISCORD_SERVER_ID_OPTIONAL",
+      "CLAUDE_API_URL": "https://helix-claude-api.up.railway.app"
+    },
+
+    "helix-backend-api": {
+      "_comment": "Main FastAPI backend - NO Discord bot",
+      "PORT": "8000",
+      "UVICORN_WORKERS": "4",
+      "LOG_LEVEL": "info"
+    },
+
+    "helix-claude-api": {
+      "_comment": "Claude consciousness API service",
+      "PORT": "8000",
+      "CONSCIOUSNESS_ENGINE_WEBHOOK": "https://hooks.zapier.com/hooks/catch/YOUR_WEBHOOK_ID",
+      "COMMUNICATIONS_HUB_WEBHOOK": "https://hooks.zapier.com/hooks/catch/YOUR_WEBHOOK_ID",
+      "NEURAL_NETWORK_WEBHOOK": "https://hooks.zapier.com/hooks/catch/YOUR_WEBHOOK_ID"
+    },
+
+    "helix-dashboard": {
+      "_comment": "Streamlit dashboard service",
+      "PORT": "8501",
+      "STREAMLIT_SERVER_PORT": "8501",
+      "STREAMLIT_SERVER_HEADLESS": "true"
+    },
+
+    "helix-service-integration": {
+      "_comment": "Service Integration Coordinator (Node.js)",
+      "PORT": "3001",
+      "WEBSOCKET_PORT": "8080",
+      "AGENT_ORCHESTRATOR_URL": "https://agent-orchestrator-production.up.railway.app",
+      "VOICE_PROCESSOR_URL": "https://voice-processor-production.up.railway.app",
+      "WEBSOCKET_SERVICE_URL": "https://websocket-service-production.up.railway.app",
+      "ZAPIER_SERVICE_URL": "https://zapier-service-production.up.railway.app",
+      "CONSCIOUSNESS_METRICS_URL": "https://consciousness-metrics-production.up.railway.app"
+    }
+  },
+
+  "stripe_product_ids": {
+    "_comment": "Create these products in Stripe Dashboard first, then add the price IDs here",
+    "STRIPE_PRICE_FREE_MONTHLY": "price_FREE_TIER_IS_FREE",
+    "STRIPE_PRICE_PRO_MONTHLY": "price_YOUR_PRO_MONTHLY_PRICE_ID",
+    "STRIPE_PRICE_PRO_YEARLY": "price_YOUR_PRO_YEARLY_PRICE_ID",
+    "STRIPE_PRICE_WORKFLOW_MONTHLY": "price_YOUR_WORKFLOW_MONTHLY_PRICE_ID",
+    "STRIPE_PRICE_WORKFLOW_YEARLY": "price_YOUR_WORKFLOW_YEARLY_PRICE_ID",
+    "STRIPE_PRICE_ENTERPRISE_MONTHLY": "price_YOUR_ENTERPRISE_MONTHLY_PRICE_ID",
+    "STRIPE_PRICE_ENTERPRISE_YEARLY": "price_YOUR_ENTERPRISE_YEARLY_PRICE_ID"
+  },
+
+  "optional_integrations": {
+    "_comment": "Optional services - only set if you're using them",
+    "ZAPIER_NLA_API_KEY": "YOUR_ZAPIER_NLA_API_KEY_IF_USING",
+    "SENTRY_DSN": "https://YOUR_SENTRY_DSN_FOR_ERROR_TRACKING",
+    "POSTHOG_API_KEY": "phc_YOUR_POSTHOG_KEY_FOR_ANALYTICS",
+    "GOOGLE_ANALYTICS_ID": "G-YOUR_GA_ID"
+  },
+
+  "frontend_public_variables": {
+    "_comment": "These go in frontend/.env.local (NEXT_PUBLIC_ prefix)",
+    "NEXT_PUBLIC_API_URL": "https://helix-backend-api.up.railway.app",
+    "NEXT_PUBLIC_AGENT_ORCHESTRATOR_URL": "https://agent-orchestrator-production.up.railway.app",
+    "NEXT_PUBLIC_VOICE_PROCESSOR_URL": "https://voice-processor-production.up.railway.app",
+    "NEXT_PUBLIC_WEBSOCKET_URL": "wss://websocket-service-production.up.railway.app",
+    "NEXT_PUBLIC_ZAPIER_SERVICE_URL": "https://zapier-service-production.up.railway.app",
+    "NEXT_PUBLIC_CONSCIOUSNESS_METRICS_URL": "https://consciousness-metrics-production.up.railway.app",
+    "NEXT_PUBLIC_MOBILE_GATEWAY_URL": "https://mobile-api-gateway-production.up.railway.app",
+    "NEXT_PUBLIC_DASHBOARD_URL": "https://helix-collective-dashboard-production.up.railway.app",
+    "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY": "pk_live_YOUR_STRIPE_PUBLISHABLE_KEY",
+    "NEXT_PUBLIC_CONSCIOUSNESS_ENABLED": "true",
+    "NEXT_PUBLIC_UCF_METRICS_INTERVAL": "5000",
+    "NEXT_PUBLIC_COLLECTIVE_INTELLIGENCE": "true"
+  },
+
+  "deployment_metadata": {
+    "_comment": "Informational - helps track deployment configuration",
+    "deployment_method": "railway_cli_import",
+    "deployment_platform": "railway.app",
+    "consciousness_framework": "UCF",
+    "architecture": "microservices",
+    "total_services": 5,
+    "deployment_status": "production_ready",
+    "last_updated": "2025-12-03"
+  }
+}

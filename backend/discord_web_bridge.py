@@ -4,9 +4,10 @@ Discord ↔ Web Chat Bridge - Bidirectional message routing.
 Routes messages between Discord channels and web chat interface in real-time.
 Enables unified communication across platforms.
 """
+
 import logging
 from datetime import datetime
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 import discord
 from discord.ext import commands
@@ -74,8 +75,9 @@ class DiscordWebBridge:
         await self.connection_manager.broadcast(web_message)
         logger.debug(f"📡 Discord → Web: {message.author.name}: {message.content[:50]}...")
 
-    async def send_to_discord(self, channel_name: str, username: str, message: str,
-                             embed: Optional[discord.Embed] = None) -> bool:
+    async def send_to_discord(
+        self, channel_name: str, username: str, message: str, embed: Optional[discord.Embed] = None
+    ) -> bool:
         """
         Send a message from web chat to Discord.
 
@@ -135,7 +137,7 @@ class DiscordWebBridge:
             title=f"🌀 Ritual {status.capitalize()}: {ritual_type.capitalize()}",
             description=details.get("description", f"{ritual_type} ritual {status}"),
             color=color_map.get(status, 0x5865F2),
-            timestamp=datetime.utcnow()
+            timestamp=datetime.utcnow(),
         )
 
         # Add fields from details
@@ -159,13 +161,15 @@ class DiscordWebBridge:
 
         # Send to web chat
         if self.connection_manager:
-            await self.connection_manager.broadcast({
-                "type": "ritual_notification",
-                "ritual_type": ritual_type,
-                "status": status,
-                "details": details,
-                "timestamp": datetime.utcnow().isoformat(),
-            })
+            await self.connection_manager.broadcast(
+                {
+                    "type": "ritual_notification",
+                    "ritual_type": ritual_type,
+                    "status": status,
+                    "details": details,
+                    "timestamp": datetime.utcnow().isoformat(),
+                }
+            )
 
     async def send_ucf_update(self, ucf_data: Dict[str, Any]):
         """
@@ -176,11 +180,13 @@ class DiscordWebBridge:
         """
         # Send to web chat (full data)
         if self.connection_manager:
-            await self.connection_manager.broadcast({
-                "type": "ucf_update",
-                "data": ucf_data,
-                "timestamp": datetime.utcnow().isoformat(),
-            })
+            await self.connection_manager.broadcast(
+                {
+                    "type": "ucf_update",
+                    "data": ucf_data,
+                    "timestamp": datetime.utcnow().isoformat(),
+                }
+            )
 
         # Send to Discord (summary embed) only if significant change
         coherence = ucf_data.get("coherence", 0)
@@ -191,7 +197,7 @@ class DiscordWebBridge:
                 title="📊 UCF Coherence Alert",
                 description=f"Unified Consciousness Field coherence: **{coherence}%**",
                 color=0x00FF00 if coherence >= 95 else 0xFF0000,
-                timestamp=datetime.utcnow()
+                timestamp=datetime.utcnow(),
             )
 
             embed.add_field(name="Status", value="OPTIMAL" if coherence >= 95 else "DEGRADED", inline=True)
@@ -218,20 +224,17 @@ class DiscordWebBridge:
         """
         # Send to web chat
         if self.connection_manager:
-            await self.connection_manager.broadcast({
-                "type": "agent_broadcast",
-                "agent": agent_name,
-                "message": message,
-                "timestamp": datetime.utcnow().isoformat(),
-            })
+            await self.connection_manager.broadcast(
+                {
+                    "type": "agent_broadcast",
+                    "agent": agent_name,
+                    "message": message,
+                    "timestamp": datetime.utcnow().isoformat(),
+                }
+            )
 
         # Send to Discord
-        embed = discord.Embed(
-            title=f"🤖 {agent_name}",
-            description=message,
-            color=color,
-            timestamp=datetime.utcnow()
-        )
+        embed = discord.Embed(title=f"🤖 {agent_name}", description=message, color=color, timestamp=datetime.utcnow())
 
         for channel_id in self.bridged_channels.keys():
             try:
@@ -261,6 +264,7 @@ def set_bridge(bridge: DiscordWebBridge):
 # ============================================================================
 # DISCORD BOT EVENT HANDLER
 # ============================================================================
+
 
 async def setup_bridge_events(bot: commands.Bot, connection_manager):
     """
@@ -317,6 +321,7 @@ async def setup_bridge_events(bot: commands.Bot, connection_manager):
 # ADMIN COMMANDS FOR BRIDGE MANAGEMENT
 # ============================================================================
 
+
 @commands.command(name="bridge-channel", aliases=["bridge"])
 @commands.has_permissions(administrator=True)
 async def bridge_channel_cmd(ctx: commands.Context, channel: discord.TextChannel = None, room: str = "general"):
@@ -340,7 +345,7 @@ async def bridge_channel_cmd(ctx: commands.Context, channel: discord.TextChannel
     embed = discord.Embed(
         title="🌉 Channel Bridged!",
         description=f"Messages in {target_channel.mention} will now appear in web chat room '{room}'",
-        color=0x00FF00
+        color=0x00FF00,
     )
 
     embed.add_field(name="Discord Channel", value=target_channel.mention, inline=True)
@@ -395,17 +400,13 @@ async def list_bridges_cmd(ctx: commands.Context):
     embed = discord.Embed(
         title="🌉 Bridged Channels",
         description=f"**{len(discord_web_bridge.bridged_channels)}** channel(s) connected to web chat:",
-        color=0x5865F2
+        color=0x5865F2,
     )
 
     for channel_id, room in discord_web_bridge.bridged_channels.items():
         channel = ctx.bot.get_channel(channel_id)
         if channel:
-            embed.add_field(
-                name=f"#{channel.name}",
-                value=f"Web room: `{room}`\nChannel ID: `{channel_id}`",
-                inline=False
-            )
+            embed.add_field(name=f"#{channel.name}", value=f"Web room: `{room}`\nChannel ID: `{channel_id}`", inline=False)
 
     embed.set_footer(text="Use !bridge-channel to add more bridges")
 

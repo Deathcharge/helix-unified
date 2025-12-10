@@ -1,0 +1,18 @@
+---
+# Hadolint configuration for Helix Unified
+# Suppresses informational warnings while maintaining security best practices
+
+ignored:
+  # Already ignored in workflow
+  - DL3008  # Pin versions in apt-get install
+  - DL3009  # Delete apt cache after installing packages
+
+  # Informational warnings - acceptable for this project
+  - DL3015  # Avoid additional packages (--no-install-recommends) - acceptable for dev containers
+  - DL3059  # Multiple consecutive RUN instructions - acceptable for clarity and caching
+  - SC2102  # Ranges can only match single chars - acceptable bash pattern
+
+  # Pin versions warnings - already handled via requirements files
+  - DL3013  # Pin versions in pip (we use requirements.txt)
+
+failure-threshold: warning  # Only fail on warnings or higher, not info

@@ -5,11 +5,13 @@ Commands:
 - commands: Display comprehensive list of all available commands
 - agents: Display Helix Collective agents with rich embeds
 """
+
 import datetime
 from typing import TYPE_CHECKING, Optional
 
 import discord
 from discord.ext import commands
+
 from backend.discord_embeds import HelixEmbeds
 
 if TYPE_CHECKING:
@@ -140,7 +142,7 @@ async def show_agents(ctx: commands.Context, agent_name: Optional[str] = None) -
                 "Recursive ethical reflection",
                 "Harmony-aware depth adjustment",
             ],
-            "Conscience and recursive reflection with UCF integration. Version 3.4 features empathy scaling and harmony pulse guidance.",
+            "Conscience and recursive reflection with UCF integration. Version 3.4 features empathy scaling and harmony pulse guidance.",  # noqa: E501
             ["ethics", "reflection", "harmony", "tony_accords"],
         ),
         (

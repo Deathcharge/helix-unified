@@ -1,0 +1,8 @@
+Switched to a new branch 'feature/qol-feature-upgrade-v2'
+M	docs/index.html
+D	"frontend/community_app/pages/1_\360\237\227\243\357\270\217_Forums.py"
+D	"frontend/community_app/pages/2_\360\237\222\254_Live_Chat.py"
+D	"frontend/community_app/pages/3_\360\237\222\225_Agent_Dating.py"
+M	frontend/package.json
+M	todo.md
+branch 'feature/qol-feature-upgrade-v2' set up to track 'origin/main'.

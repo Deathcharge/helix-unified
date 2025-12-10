@@ -3,17 +3,19 @@ Environment Variable Validation & Health Checks
 Validates required environment variables and API keys on startup
 """
 
+import asyncio
 import os
 import sys
-from typing import Dict, List, Optional, Tuple
 from datetime import datetime
-import asyncio
+from typing import Dict, List, Optional
+
 import aiohttp
 from loguru import logger
 
 
 class ValidationResult:
     """Result of an environment validation check"""
+
     def __init__(self, passed: bool, message: str, severity: str = "error"):
         self.passed = passed
         self.message = message
@@ -591,7 +593,7 @@ async def validate_claude_api_environment() -> bool:
 
 if __name__ == '__main__':
     """Run validation based on service type"""
-    import sys
+    import sys  # noqa
 
     service_type = os.getenv('SERVICE_TYPE', 'backend')
 

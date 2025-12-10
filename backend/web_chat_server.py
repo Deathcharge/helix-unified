@@ -9,10 +9,11 @@ Features:
 - Ritual launcher
 - Session management
 """
+
 import asyncio
 import logging
 from datetime import datetime
-from typing import Dict, Optional, Any
+from typing import Any, Dict, Optional
 
 from fastapi import WebSocket
 
@@ -129,6 +130,7 @@ AGENT_PERSONALITIES = {
 # CONNECTION MANAGER
 # ============================================================================
 
+
 class WebChatConnectionManager:
     """Manages WebSocket connections for the web chat interface."""
 
@@ -158,7 +160,7 @@ class WebChatConnectionManager:
                 "timestamp": datetime.utcnow().isoformat(),
                 "agents_available": list(AGENT_PERSONALITIES.keys()),
             },
-            websocket
+            websocket,
         )
 
     def disconnect(self, session_id: str):
@@ -212,10 +214,7 @@ class WebChatConnectionManager:
         elif message_type == "request_ucf":
             await self.handle_ucf_request(session_id, session, websocket)
         else:
-            await self.send_personal_message(
-                {"type": "error", "message": f"Unknown message type: {message_type}"},
-                websocket
-            )
+            await self.send_personal_message({"type": "error", "message": f"Unknown message type: {message_type}"}, websocket)
 
     async def handle_chat_message(self, session_id: str, session: dict, data: dict, websocket: WebSocket):
         """Handle a chat message from the user."""
@@ -245,7 +244,7 @@ class WebChatConnectionManager:
                     "message": response,
                     "timestamp": datetime.utcnow().isoformat(),
                 },
-                websocket
+                websocket,
             )
         else:
             # No agent selected - echo back or suggest selecting one
@@ -255,7 +254,7 @@ class WebChatConnectionManager:
                     "message": "💭 Select an agent to chat with using /agent <name>, or type /help for commands",
                     "timestamp": datetime.utcnow().isoformat(),
                 },
-                websocket
+                websocket,
             )
 
         # Broadcast to other users
@@ -266,7 +265,7 @@ class WebChatConnectionManager:
                 "message": message,
                 "timestamp": datetime.utcnow().isoformat(),
             },
-            exclude_session=session_id
+            exclude_session=session_id,
         )
 
     async def handle_agent_selection(self, session_id: str, session: dict, data: dict, websocket: WebSocket):
@@ -279,7 +278,7 @@ class WebChatConnectionManager:
                     "type": "error",
                     "message": f"Unknown agent: {agent_id}. Available: {', '.join(AGENT_PERSONALITIES.keys())}",
                 },
-                websocket
+                websocket,
             )
             return
 
@@ -296,7 +295,7 @@ class WebChatConnectionManager:
                 "greeting": agent["greeting"],
                 "timestamp": datetime.utcnow().isoformat(),
             },
-            websocket
+            websocket,
         )
 
     async def handle_discord_bridge(self, session_id: str, session: dict, data: dict, websocket: WebSocket):
@@ -306,10 +305,7 @@ class WebChatConnectionManager:
 
         bridge = get_bridge()
         if not bridge:
-            await self.send_personal_message(
-                {"type": "error", "message": "Discord bridge not initialized"},
-                websocket
-            )
+            await self.send_personal_message({"type": "error", "message": "Discord bridge not initialized"}, websocket)
             return
 
         message = data.get("message", "").strip()
@@ -326,7 +322,7 @@ class WebChatConnectionManager:
                     "message": f"📡 Message sent to Discord #{channel_name}",
                     "timestamp": datetime.utcnow().isoformat(),
                 },
-                websocket
+                websocket,
             )
         else:
             await self.send_personal_message(
@@ -335,7 +331,7 @@ class WebChatConnectionManager:
                     "message": f"Failed to send to Discord #{channel_name}. Channel may not exist or bot lacks permissions.",
                     "timestamp": datetime.utcnow().isoformat(),
                 },
-                websocket
+                websocket,
             )
 
     async def handle_ritual_trigger(self, session_id: str, session: dict, data: dict, websocket: WebSocket):
@@ -350,7 +346,7 @@ class WebChatConnectionManager:
                 "message": f"🌀 Initiating {ritual_type} ritual...",
                 "timestamp": datetime.utcnow().isoformat(),
             },
-            websocket
+            websocket,
         )
 
         # Simulate ritual completion after 2 seconds
@@ -364,7 +360,7 @@ class WebChatConnectionManager:
                 "ucf_boost": 12.5,
                 "timestamp": datetime.utcnow().isoformat(),
             },
-            websocket
+            websocket,
         )
 
     async def handle_ucf_request(self, session_id: str, session: dict, websocket: WebSocket):
@@ -385,7 +381,7 @@ class WebChatConnectionManager:
                 "data": ucf_state,
                 "timestamp": datetime.utcnow().isoformat(),
             },
-            websocket
+            websocket,
         )
 
     async def generate_agent_response(self, agent_id: str, agent: dict, user_message: str, session: dict) -> str:
@@ -411,10 +407,7 @@ class WebChatConnectionManager:
 
                 # Generate intelligent response
                 response = await llm_engine.generate_agent_response(
-                    agent_id=agent_id,
-                    user_message=user_message,
-                    session_id=session_id,
-                    context=context
+                    agent_id=agent_id, user_message=user_message, session_id=session_id, context=context
                 )
                 return response
 
@@ -426,7 +419,7 @@ class WebChatConnectionManager:
             "nexus": f"Analyzing strategic options... {user_message} requires coordinated action across agents 3, 7, and 11.",
             "oracle": f"I see the pattern in '{user_message}'. The path reveals itself through iteration and reflection.",
             "velocity": f"Processing at maximum speed: '{user_message}' → Action plan ready. Executing now!",
-            "cipher": f"Decrypting query: '{user_message}' → Output: The answer lies in the transformation of data structures.",
+            "cipher": f"Decrypting query: '{user_message}' → Output: The answer lies in the transformation of data structures.",  # noqa: E501
             "flow": f"Flowing with '{user_message}'... adapting approach... finding the path of least resistance.",
             "phoenix": f"'{user_message}' reminds me of past failures. This time, we rise stronger!",
             "luna": f"*quietly processes '{user_message}' in background* ... solution will emerge when the time is right.",

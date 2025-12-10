@@ -1,8 +1,8 @@
-import os
-import json
 import asyncio
-from typing import Any, Dict, Optional
+import json
+import os
 from datetime import datetime
+from typing import Any, Dict, Optional
 
 import httpx
 from loguru import logger
@@ -10,11 +10,13 @@ from loguru import logger
 # This is a placeholder for the actual Zapier webhook URL, which should be loaded from environment variables
 ZAPIER_WEBHOOK_URL = os.getenv("ZAPIER_WEBHOOK_URL")
 
+
 class ZapierSender:
     """
     A robust, asynchronous sender for Zapier webhooks.
     Handles event logging and non-blocking delivery.
     """
+
     def __init__(self, webhook_url: Optional[str] = ZAPIER_WEBHOOK_URL):
         self.webhook_url = webhook_url
         self.client = httpx.AsyncClient(timeout=10.0)
@@ -53,10 +55,13 @@ class ZapierSender:
         asyncio.create_task(self.send_event(event_name, payload))
         logger.debug(f"Zapier Event Triggered: {event_name}")
 
+
 # Global instance (placeholder for proper initialization in main.py)
 zapier_sender = ZapierSender()
 
 # Placeholder for integration with system events (e.g., from agents_loop)
+
+
 def log_agent_event(agent_name: str, event_type: str, details: Dict[str, Any]):
     """
     Example function to be called by the agents_loop to log events.

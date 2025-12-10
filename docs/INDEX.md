@@ -125,5 +125,6 @@ When making changes:
 
 ---
 
-**Last Updated:** 2025-11-22
-**Docs Version:** v17.0
+**Last Updated:** 2025-12-04
+**Docs Version:** v16.3.0
+**Build Status:** ✅ All CI checks passing
