@@ -1,16 +1,7 @@
-"""
-Admin and Setup Commands for Helix Discord Bot.
+"""Admin and Setup Commands for Helix Discord Bot.
 
-Commands:
-- setup: Complete Helix v15.3 Server Setup - Creates all 30 channels
-- verify-setup: Verify Helix server setup completeness
-- webhooks: Retrieve all channel webhook URLs from saved configuration
-- clean: Clean duplicate channels - Identify channels not in canonical structure
-- refresh: Refresh server structure - Clean and recreate all channels
-- seed: Seed all channels with explanatory messages and pin them
-- notion-sync: Manually triggers the Notion sync for UCF State and Agent Registry
+Commands: setup, verify-setup, webhooks, clean, refresh, seed, notion-sync
 """
-
 import asyncio
 import datetime
 import json
@@ -48,20 +39,9 @@ async def setup(bot: 'Bot') -> None:
 @commands.command(name="setup")
 @commands.has_permissions(manage_channels=True)
 async def setup_helix_server(ctx: commands.Context, mode: Optional[str] = None) -> None:
-    """
-    🌀 Setup Helix Server - Creates channels, categories, and webhooks.
-
-    This command will:
-    - Create all missing categories and channels (based on SERVER_STRUCTURE)
-    - Create webhooks for all text channels
-    - Save webhook URLs to Helix/state/channel_webhooks.json
-    - Display all webhook URLs for Zapier configuration
-
-    ARCHITECT-ONLY. Run this to set up the complete Helix server structure.
-
-    Usage:
-        !setup              - Full setup (channels + webhooks)
-        !setup webhooks     - Only create webhooks (skip channel creation)
+    """🌀 Setup Helix Server - Creates channels, categories, and webhooks.
+    This command will create all missing categories/channels and webhooks.
+    Usage: !setup (full) or !setup webhooks (webhooks only)
     """
     guild = ctx.guild
 
@@ -88,8 +68,7 @@ async def setup_helix_server(ctx: commands.Context, mode: Optional[str] = None) 
             logger.error(f"Could not import ServerSetup: {e}")
             await ctx.send(
                 f"⚠️ **Warning:** Could not load channel creation module.\n"
-                f"Skipping channel creation, creating webhooks only...\n"
-                f"Error: {e}"
+                f"Skipping channel creation, creating webhooks only...\nError: {e}"
             )
         except Exception as e:
             logger.error(f"Channel creation error: {e}", exc_info=True)
@@ -155,12 +134,12 @@ async def setup_helix_server(ctx: commands.Context, mode: Optional[str] = None) 
     logger.info(f"💾 Saved {len(webhook_urls)} webhooks to {webhook_file}")
 
     # Create summary embed
-    title_text = "✅ Helix Server Setup Complete!" if mode != "webhooks" else "✅ Helix Webhook Setup Complete!"
-    desc_text = (
-        "Created channels, categories, and webhooks"
-        if mode != "webhooks"
-        else "Created webhooks for Zapier integration"
-    )
+    if mode != "webhooks":
+        title_text = "✅ Helix Server Setup Complete!"
+        desc_text = "Created channels, categories, and webhooks"
+    else:
+        title_text = "✅ Helix Webhook Setup Complete!"
+        desc_text = "Created webhooks for Zapier integration"
 
     embed = discord.Embed(
         title=title_text,
@@ -175,27 +154,23 @@ async def setup_helix_server(ctx: commands.Context, mode: Optional[str] = None) 
     embed.add_field(name="Webhooks Existing", value=str(webhooks_existing), inline=True)
     embed.add_field(name="Total Webhooks", value=str(len(webhook_urls)), inline=True)
 
-    embed.add_field(
-        name="Next Steps",
-        value=(
-            "1️⃣ Use `!verify-setup` to confirm all channels exist\n"
-            "2️⃣ Use `!webhooks` to see all webhook URLs\n"
-            "3️⃣ Use `!list-webhooks-live` to get URLs in your DMs\n"
-            "4️⃣ Configure Zapier with the webhook URLs"
-        ),
-        inline=False,
+    next_steps = (
+        "1️⃣ Use `!verify-setup` to confirm all channels exist\n"
+        "2️⃣ Use `!webhooks` to see all webhook URLs\n"
+        "3️⃣ Use `!list-webhooks-live` to get URLs in your DMs\n"
+        "4️⃣ Configure Zapier with the webhook URLs"
     )
+    embed.add_field(name="Next Steps", value=next_steps, inline=False)
 
     embed.set_footer(text=f"Saved to {webhook_file}")
 
     await ctx.send(embed=embed)
-
-    # Send follow-up with how to access webhooks
-    await ctx.send(
+    webhook_help = (
         "🔗 **To get your webhook URLs:**\n"
         "• `!webhooks` - See webhooks in this channel\n"
         "• `!list-webhooks-live` - Get webhooks via DM (includes Railway env var format)"
     )
+    await ctx.send(webhook_help)
 
 
 @commands.command(name="webhooks", aliases=["get-webhooks", "list-webhooks"])
@@ -486,7 +461,6 @@ async def verify_setup(ctx: commands.Context) -> None:
     await ctx.send(embed=embed)
 
 
-# Seed channels command - fully restored from v15.3
 @commands.command(name="seed", aliases=["seed_channels", "init_channels"])
 @commands.has_permissions(administrator=True)
 async def seed_channels(ctx: commands.Context) -> None:
