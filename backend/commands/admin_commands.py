@@ -156,7 +156,11 @@ async def setup_helix_server(ctx: commands.Context, mode: Optional[str] = None) 
 
     # Create summary embed
     title_text = "✅ Helix Server Setup Complete!" if mode != "webhooks" else "✅ Helix Webhook Setup Complete!"
-    desc_text = "Created channels, categories, and webhooks" if mode != "webhooks" else "Created webhooks for Zapier integration"
+    desc_text = (
+        "Created channels, categories, and webhooks"
+        if mode != "webhooks"
+        else "Created webhooks for Zapier integration"
+    )
 
     embed = discord.Embed(
         title=title_text,
@@ -311,7 +315,11 @@ async def list_webhooks_live(ctx: commands.Context) -> None:
 
         # Send webhooks organized by channel
         for channel_name, webhooks in webhooks_by_channel.items():
-            embed = discord.Embed(title=f"🔗 #{channel_name}", description=f"Found {len(webhooks)} webhook(s)", color=0x5865F2)
+            embed = discord.Embed(
+                title=f"🔗 #{channel_name}",
+                description=f"Found {len(webhooks)} webhook(s)",
+                color=0x5865F2,
+            )
 
             for wh in webhooks:
                 embed.add_field(name=f"📌 {wh['name']}", value=f"```{wh['url']}```", inline=False)
@@ -381,7 +389,11 @@ async def verify_setup(ctx: commands.Context) -> None:
 
     # Define canonical 30-channel structure (matches !setup command)
     canonical_channels = {
-        "🌀 WELCOME": ["📜│manifesto", "🪞│rules-and-ethics", "💬│introductions"],
+        "🌀 WELCOME": [
+            "📜│manifesto",
+            "🪞│rules-and-ethics",
+            "💬│introductions",
+        ],
         "🧠 SYSTEM": ["🧾│telemetry", "📊│weekly-digest", "🦑│shadow-storage", "🧩│ucf-sync"],
         "🔮 PROJECTS": ["📁│helix-repository", "🎨│fractal-lab", "🎧│samsaraverse-music", "🧬│ritual-engine-z88"],
         "🤖 AGENTS": ["🎭│gemini-scout", "🛡️│kavach-shield", "🌸│sanghacore", "🔥│agni-core", "🕯️│shadow-archive"],
@@ -437,7 +449,8 @@ async def verify_setup(ctx: commands.Context) -> None:
             value_parts = []
 
             if found_channels:
-                value_parts.append(f"✅ Found ({len(found_channels)}):\n" + "\n".join(f"  • {ch}" for ch in found_channels))
+                found_list = "\n".join(f"  • {ch}" for ch in found_channels)
+                value_parts.append(f"✅ Found ({len(found_channels)}):\n{found_list}")
 
             if missing_channels:
                 value_parts.append(
@@ -805,7 +818,10 @@ async def seed_channels(ctx: commands.Context) -> None:
         try:
             # Create embed
             embed = discord.Embed(
-                title=content["title"], description=content["description"], color=0x667EEA, timestamp=datetime.datetime.now()
+                title=content["title"],
+                description=content["description"],
+                color=0x667EEA,
+                timestamp=datetime.datetime.now(),
             )
             embed.set_footer(text="🌀 Helix Collective v16.8 | Tat Tvam Asi 🙏")
 

@@ -28,11 +28,9 @@ Date: 2025-12-10
 
 import os
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Header
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, HTTPException, Request
 
 # Import SaaS core modules
 from backend.saas_auth import (
@@ -40,14 +38,12 @@ from backend.saas_auth import (
     register_user,
     login_user,
     create_api_key,
-    verify_api_key,
     list_api_keys,
     revoke_api_key,
     get_user_stats,
     # Dependencies
     get_current_user_jwt,
     get_current_user_api_key,
-    require_tier,
     # Models
     UserRegistration,
     UserLogin,
@@ -57,8 +53,6 @@ from backend.saas_auth import (
     # Database
     Database,
     Cache,
-    init_auth_system,
-    cleanup_auth_system,
 )
 
 from backend.saas_router import (
@@ -69,7 +63,6 @@ from backend.saas_router import (
     # Models
     ChatRequest,
     ChatResponse,
-    Message,
 )
 
 from backend.saas_agents import (
