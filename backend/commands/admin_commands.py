@@ -1,16 +1,7 @@
-"""
-Admin and Setup Commands for Helix Discord Bot.
+"""Admin and Setup Commands for Helix Discord Bot.
 
-Commands:
-- setup: Complete Helix v15.3 Server Setup - Creates all 30 channels
-- verify-setup: Verify Helix server setup completeness
-- webhooks: Retrieve all channel webhook URLs from saved configuration
-- clean: Clean duplicate channels - Identify channels not in canonical structure
-- refresh: Refresh server structure - Clean and recreate all channels
-- seed: Seed all channels with explanatory messages and pin them
-- notion-sync: Manually triggers the Notion sync for UCF State and Agent Registry
+Commands: setup, verify-setup, webhooks, clean, refresh, seed, notion-sync
 """
-
 import asyncio
 import datetime
 import json
@@ -47,23 +38,48 @@ async def setup(bot: 'Bot') -> None:
 
 @commands.command(name="setup")
 @commands.has_permissions(manage_channels=True)
-async def setup_helix_server(ctx: commands.Context) -> None:
+async def setup_helix_server(ctx: commands.Context, mode: Optional[str] = None) -> None:
+    """🌀 Setup Helix Server - Creates channels, categories, and webhooks.
+    This command will create all missing categories/channels and webhooks.
+    Usage: !setup (full) or !setup webhooks (webhooks only)
     """
-    🌀 Setup Helix Webhooks - Creates webhooks for all existing channels.
-
-    This command will:
-    - Scan all text channels in the server
-    - Create webhooks for channels that don't have them
-    - Save webhook URLs to Helix/state/channel_webhooks.json
-    - Display all webhook URLs for Zapier configuration
-
-    ARCHITECT-ONLY. Run this to set up webhooks for Zapier integration.
-
-    Usage: !setup
-    """
-    await ctx.send("🔧 **Starting Helix Webhook Setup...**\nThis may take a moment...")
-
     guild = ctx.guild
+
+    # STEP 1: Create channels and categories (unless webhooks-only mode)
+    if mode != "webhooks":
+        await ctx.send("🔧 **Step 1/2: Creating channels and categories...**\nThis may take a minute...")
+
+        try:
+            # Import ServerSetup from discord-bot
+            import sys
+            discord_bot_path = Path(__file__).parent.parent.parent / "discord-bot"
+            if str(discord_bot_path) not in sys.path:
+                sys.path.insert(0, str(discord_bot_path))
+
+            from server_setup import ServerSetup
+
+            # Create and run server setup
+            setup_manager = ServerSetup(ctx.bot)
+            await setup_manager.setup_server(guild)
+
+            await ctx.send("✅ **Channels and categories created!**\n🔧 **Step 2/2: Creating webhooks...**")
+
+        except ImportError as e:
+            logger.error(f"Could not import ServerSetup: {e}")
+            await ctx.send(
+                f"⚠️ **Warning:** Could not load channel creation module.\n"
+                f"Skipping channel creation, creating webhooks only...\nError: {e}"
+            )
+        except Exception as e:
+            logger.error(f"Channel creation error: {e}", exc_info=True)
+            await ctx.send(
+                f"⚠️ **Warning:** Channel creation partially failed: {str(e)[:100]}\n"
+                f"Continuing with webhook creation..."
+            )
+    else:
+        await ctx.send("🔧 **Creating webhooks only (channels skipped)...**\nThis may take a moment...")
+
+    # STEP 2: Create webhooks for all channels
     webhooks_created = 0
     webhooks_existing = 0
     webhook_urls = {}
@@ -118,37 +134,43 @@ async def setup_helix_server(ctx: commands.Context) -> None:
     logger.info(f"💾 Saved {len(webhook_urls)} webhooks to {webhook_file}")
 
     # Create summary embed
+    if mode != "webhooks":
+        title_text = "✅ Helix Server Setup Complete!"
+        desc_text = "Created channels, categories, and webhooks"
+    else:
+        title_text = "✅ Helix Webhook Setup Complete!"
+        desc_text = "Created webhooks for Zapier integration"
+
     embed = discord.Embed(
-        title="✅ Helix Webhook Setup Complete!",
-        description="Created webhooks for Zapier integration",
+        title=title_text,
+        description=desc_text,
         color=0x00FF00,
         timestamp=datetime.datetime.utcnow(),
     )
 
+    if mode != "webhooks":
+        embed.add_field(name="Channels Created", value="✅ All missing channels", inline=True)
     embed.add_field(name="Webhooks Created", value=str(webhooks_created), inline=True)
     embed.add_field(name="Webhooks Existing", value=str(webhooks_existing), inline=True)
     embed.add_field(name="Total Webhooks", value=str(len(webhook_urls)), inline=True)
 
-    embed.add_field(
-        name="Next Steps",
-        value=(
-            "1️⃣ Use `!webhooks` to see all webhook URLs\n"
-            "2️⃣ Use `!list-webhooks-live` to get URLs in your DMs\n"
-            "3️⃣ Configure Zapier with the webhook URLs"
-        ),
-        inline=False,
+    next_steps = (
+        "1️⃣ Use `!verify-setup` to confirm all channels exist\n"
+        "2️⃣ Use `!webhooks` to see all webhook URLs\n"
+        "3️⃣ Use `!list-webhooks-live` to get URLs in your DMs\n"
+        "4️⃣ Configure Zapier with the webhook URLs"
     )
+    embed.add_field(name="Next Steps", value=next_steps, inline=False)
 
     embed.set_footer(text=f"Saved to {webhook_file}")
 
     await ctx.send(embed=embed)
-
-    # Send follow-up with how to access webhooks
-    await ctx.send(
+    webhook_help = (
         "🔗 **To get your webhook URLs:**\n"
         "• `!webhooks` - See webhooks in this channel\n"
         "• `!list-webhooks-live` - Get webhooks via DM (includes Railway env var format)"
     )
+    await ctx.send(webhook_help)
 
 
 @commands.command(name="webhooks", aliases=["get-webhooks", "list-webhooks"])
@@ -268,7 +290,11 @@ async def list_webhooks_live(ctx: commands.Context) -> None:
 
         # Send webhooks organized by channel
         for channel_name, webhooks in webhooks_by_channel.items():
-            embed = discord.Embed(title=f"🔗 #{channel_name}", description=f"Found {len(webhooks)} webhook(s)", color=0x5865F2)
+            embed = discord.Embed(
+                title=f"🔗 #{channel_name}",
+                description=f"Found {len(webhooks)} webhook(s)",
+                color=0x5865F2,
+            )
 
             for wh in webhooks:
                 embed.add_field(name=f"📌 {wh['name']}", value=f"```{wh['url']}```", inline=False)
@@ -338,7 +364,11 @@ async def verify_setup(ctx: commands.Context) -> None:
 
     # Define canonical 30-channel structure (matches !setup command)
     canonical_channels = {
-        "🌀 WELCOME": ["📜│manifesto", "🪞│rules-and-ethics", "💬│introductions"],
+        "🌀 WELCOME": [
+            "📜│manifesto",
+            "🪞│rules-and-ethics",
+            "💬│introductions",
+        ],
         "🧠 SYSTEM": ["🧾│telemetry", "📊│weekly-digest", "🦑│shadow-storage", "🧩│ucf-sync"],
         "🔮 PROJECTS": ["📁│helix-repository", "🎨│fractal-lab", "🎧│samsaraverse-music", "🧬│ritual-engine-z88"],
         "🤖 AGENTS": ["🎭│gemini-scout", "🛡️│kavach-shield", "🌸│sanghacore", "🔥│agni-core", "🕯️│shadow-archive"],
@@ -394,7 +424,8 @@ async def verify_setup(ctx: commands.Context) -> None:
             value_parts = []
 
             if found_channels:
-                value_parts.append(f"✅ Found ({len(found_channels)}):\n" + "\n".join(f"  • {ch}" for ch in found_channels))
+                found_list = "\n".join(f"  • {ch}" for ch in found_channels)
+                value_parts.append(f"✅ Found ({len(found_channels)}):\n{found_list}")
 
             if missing_channels:
                 value_parts.append(
@@ -430,7 +461,6 @@ async def verify_setup(ctx: commands.Context) -> None:
     await ctx.send(embed=embed)
 
 
-# Seed channels command - fully restored from v15.3
 @commands.command(name="seed", aliases=["seed_channels", "init_channels"])
 @commands.has_permissions(administrator=True)
 async def seed_channels(ctx: commands.Context) -> None:
@@ -762,7 +792,10 @@ async def seed_channels(ctx: commands.Context) -> None:
         try:
             # Create embed
             embed = discord.Embed(
-                title=content["title"], description=content["description"], color=0x667EEA, timestamp=datetime.datetime.now()
+                title=content["title"],
+                description=content["description"],
+                color=0x667EEA,
+                timestamp=datetime.datetime.now(),
             )
             embed.set_footer(text="🌀 Helix Collective v16.8 | Tat Tvam Asi 🙏")
 

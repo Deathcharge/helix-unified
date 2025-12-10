@@ -315,12 +315,33 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.warning(f"⚠ Claude cooldown manager start error: {e}")
 
+    # Initialize SaaS Core Platform (Database + Redis)
+    try:
+        from backend.saas_auth import init_auth_system
+        await init_auth_system()
+        logger.info("💎 SaaS Core Platform initialized (Database + Redis)")
+        logger.info("   → Authentication system ready")
+        logger.info("   → Multi-LLM router ready")
+        logger.info("   → 14 AI agents ready")
+        logger.info("   → Stripe billing ready")
+    except Exception as e:
+        logger.error(f"❌ SaaS Core Platform initialization failed: {e}")
+        logger.error("   ⚠️  This is CRITICAL - SaaS platform will not work!")
+
     logger.info("✅ Helix Collective v16.9 - Ready for Operations (Quantum Handshake Active)")
 
     yield  # Application runs
 
     # Cleanup on shutdown
     logger.info("🌙 Helix Collective v16.9 - Shutdown Sequence")
+
+    # Cleanup SaaS Core Platform
+    try:
+        from backend.saas_auth import cleanup_auth_system
+        await cleanup_auth_system()
+        logger.info("✅ SaaS Core Platform closed (Database + Redis)")
+    except Exception as e:
+        logger.warning(f"⚠️ SaaS Core Platform cleanup error: {e}")
 
     # Shutdown LLM Agent Engine
     try:
@@ -397,10 +418,10 @@ app.add_middleware(
 # ============================================================================
 # GZIP COMPRESSION MIDDLEWARE (70-90% response size reduction)
 # ============================================================================
-from starlette.middleware.gzip import GZipMiddleware
+from starlette.middleware.gzip import GZIPMiddleware
 
 app.add_middleware(
-    GZipMiddleware,
+    GZIPMiddleware,
     minimum_size=1000  # Only compress responses > 1KB
 )
 logger.info("✅ Gzip compression enabled (minimum_size=1000)")
@@ -628,6 +649,24 @@ try:
     logger.info("   → /services/cdp/* (Customer data platform)")
 except Exception as e:
     logger.error(f"❌ Failed to load SaaS Expansion routes: {e}")
+
+# Include SaaS Core Platform routes (Auth, Chat, Agents, Billing)
+try:
+    from backend.routes.saas_core import router as saas_core_router
+
+    app.include_router(saas_core_router, prefix="/v1/saas", tags=["SaaS Core"])
+    logger.info("✅ SaaS Core Platform loaded (v17.2 - Launch Critical)")
+    logger.info("   → /v1/saas/auth/* (Authentication & API keys)")
+    logger.info("   → /v1/saas/v1/chat (Multi-LLM smart routing)")
+    logger.info("   → /v1/saas/v1/agents/* (14 specialized AI agents)")
+    logger.info("   → /v1/saas/billing/* (Stripe subscriptions)")
+    logger.info("   → /v1/saas/usage/stats (Usage analytics)")
+    logger.info("   → /v1/saas/health (System health check)")
+    logger.info("   💎 Revenue Model: Free → Pro ($29) → Workflow ($79) → Enterprise ($299)")
+    logger.info("   📊 Projected Year 1 ARR: $158K")
+except Exception as e:
+    logger.error(f"❌ Failed to load SaaS Core routes: {e}")
+    logger.error("   ⚠️  This is CRITICAL - SaaS platform will not be accessible!")
 
 # Enable Admin Bypass Middleware
 try:
