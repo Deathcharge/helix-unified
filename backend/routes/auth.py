@@ -57,7 +57,7 @@ class SignupRequest(BaseModel):
     email: EmailStr
     password: str
     name: str
-    
+
     @validator('password')
     def password_strength(cls, v):
         """Validate password strength"""
@@ -70,7 +70,7 @@ class SignupRequest(BaseModel):
         if not any(c.isdigit() for c in v):
             raise ValueError('Password must contain at least one digit')
         return v
-    
+
     @validator('name')
     def name_length(cls, v):
         """Validate name length"""

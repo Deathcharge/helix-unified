@@ -14,14 +14,14 @@ logger = logging.getLogger(__name__)
 
 class HelixAPIClient:
     """Unified client for Helix ecosystem APIs"""
-    
+
     def __init__(self):
         self.spiral_url = "https://helixspiral.work"
         self.railway_url = "https://helixdashboard.up.railway.app"
         self.timeout = aiohttp.ClientTimeout(total=30)
         self.cache = {}
         self.cache_ttl = 300  # 5 minutes
-        
+
     async def get_agents(self) -> list:
         """Get all agents from helixspiral.work"""
         try:
@@ -34,7 +34,7 @@ class HelixAPIClient:
         except Exception as e:
             logger.error(f"Error fetching agents: {e}")
             return []
-    
+
     async def get_ucf_metrics(self) -> Dict[str, float]:
         """Get real-time UCF metrics"""
         try:
@@ -46,7 +46,7 @@ class HelixAPIClient:
         except Exception as e:
             logger.error(f"Error fetching UCF metrics: {e}")
             return self._default_ucf_metrics()
-    
+
     async def get_portals(self) -> list:
         """Get all portals from federation"""
         try:
@@ -58,7 +58,7 @@ class HelixAPIClient:
         except Exception as e:
             logger.error(f"Error fetching portals: {e}")
             return []
-    
+
     async def stream_consciousness(self):
         """Stream consciousness data via WebSocket"""
         try:
@@ -72,7 +72,7 @@ class HelixAPIClient:
                             break
         except Exception as e:
             logger.error(f"Error streaming consciousness: {e}")
-    
+
     async def invoke_ritual(self, ritual_id: str, params: Optional[Dict] = None) -> Dict:
         """Invoke a ritual from the Z-88 engine"""
         try:
@@ -88,7 +88,7 @@ class HelixAPIClient:
         except Exception as e:
             logger.error(f"Error invoking ritual: {e}")
             return {"success": False}
-    
+
     async def send_alert(self, alert_type: str, message: str, severity: str = "info") -> bool:
         """Send alert via emergency system"""
         try:
@@ -101,7 +101,7 @@ class HelixAPIClient:
         except Exception as e:
             logger.error(f"Error sending alert: {e}")
             return False
-    
+
     @staticmethod
     def _default_ucf_metrics() -> Dict[str, float]:
         """Return default UCF metrics"""
@@ -122,7 +122,7 @@ async def get_system_status() -> Dict[str, Any]:
     agents = await api_client.get_agents()
     metrics = await api_client.get_ucf_metrics()
     portals = await api_client.get_portals()
-    
+
     return {
         "timestamp": datetime.now().isoformat(),
         "agents_count": len(agents),

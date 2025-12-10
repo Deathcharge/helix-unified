@@ -17,17 +17,17 @@ from redis import asyncio as aioredis
 # Cache TTL configurations (in seconds)
 class CacheTTL:
     """Cache Time-To-Live configurations"""
-    
+
     # Hot data (1-5 minutes)
     UCF_STATE = 60  # 1 minute
     AGENT_STATUS = 120  # 2 minutes
     LIVE_METRICS = 60  # 1 minute
-    
+
     # Warm data (15-60 minutes)
     USER_PROFILE = 900  # 15 minutes
     SUBSCRIPTION_STATUS = 1800  # 30 minutes
     API_KEY_VALIDATION = 3600  # 1 hour
-    
+
     # Cold data (1-24 hours)
     AGENT_PROFILES = 3600  # 1 hour
     MARKETPLACE_LISTINGS = 7200  # 2 hours
@@ -36,72 +36,72 @@ class CacheTTL:
 
 class CacheService:
     """Redis caching service"""
-    
+
     def __init__(self):
         self.redis: Optional[aioredis.Redis] = None
         self.enabled = False
         self.prefix = "helix:"
-    
+
     async def initialize(self, redis_url: Optional[str] = None):
         """
         Initialize Redis connection and FastAPI cache.
-        
+
         Args:
             redis_url: Redis connection URL (default: from env)
-            
+
         Example:
             >>> cache_service = CacheService()
             >>> await cache_service.initialize()
         """
         try:
             redis_url = redis_url or os.getenv("REDIS_URL", "redis://localhost:6379")
-            
+
             # Connect to Redis
             self.redis = await aioredis.from_url(
                 redis_url,
                 encoding="utf-8",
                 decode_responses=True
             )
-            
+
             # Test connection
             await self.redis.ping()
-            
+
             # Initialize FastAPI cache
             FastAPICache.init(
                 RedisBackend(self.redis),
                 prefix=self.prefix
             )
-            
+
             self.enabled = True
             logger.info(f"✅ Redis cache initialized: {redis_url}")
-            
+
         except Exception as e:
             logger.warning(f"⚠️ Redis cache initialization failed: {e}")
             logger.info("📝 Continuing without cache (will use in-memory fallback)")
             self.enabled = False
-    
+
     async def close(self):
         """Close Redis connection"""
         if self.redis:
             await self.redis.close()
             logger.info("👋 Redis connection closed")
-    
+
     async def get(self, key: str) -> Optional[Any]:
         """
         Get value from cache.
-        
+
         Args:
             key: Cache key
-            
+
         Returns:
             Cached value or None if not found
-            
+
         Example:
             >>> value = await cache_service.get("user:123")
         """
         if not self.enabled or not self.redis:
             return None
-        
+
         try:
             value = await self.redis.get(f"{self.prefix}{key}")
             if value:
@@ -113,7 +113,7 @@ class CacheService:
         except Exception as e:
             logger.error(f"❌ Cache get error for {key}: {e}")
             return None
-    
+
     async def set(
         self,
         key: str,
@@ -122,21 +122,21 @@ class CacheService:
     ) -> bool:
         """
         Set value in cache.
-        
+
         Args:
             key: Cache key
             value: Value to cache
             ttl: Time-to-live in seconds
-            
+
         Returns:
             True if successful
-            
+
         Example:
             >>> await cache_service.set("user:123", user_data, ttl=900)
         """
         if not self.enabled or not self.redis:
             return False
-        
+
         try:
             serialized = json.dumps(value, default=str)
             await self.redis.setex(
@@ -149,23 +149,23 @@ class CacheService:
         except Exception as e:
             logger.error(f"❌ Cache set error for {key}: {e}")
             return False
-    
+
     async def delete(self, key: str) -> bool:
         """
         Delete value from cache.
-        
+
         Args:
             key: Cache key
-            
+
         Returns:
             True if successful
-            
+
         Example:
             >>> await cache_service.delete("user:123")
         """
         if not self.enabled or not self.redis:
             return False
-        
+
         try:
             await self.redis.delete(f"{self.prefix}{key}")
             logger.debug(f"🗑️ Cache DELETE: {key}")
@@ -173,28 +173,28 @@ class CacheService:
         except Exception as e:
             logger.error(f"❌ Cache delete error for {key}: {e}")
             return False
-    
+
     async def clear_pattern(self, pattern: str) -> int:
         """
         Clear all keys matching pattern.
-        
+
         Args:
             pattern: Key pattern (e.g., "user:*")
-            
+
         Returns:
             Number of keys deleted
-            
+
         Example:
             >>> deleted = await cache_service.clear_pattern("user:*")
         """
         if not self.enabled or not self.redis:
             return 0
-        
+
         try:
             keys = []
             async for key in self.redis.scan_iter(f"{self.prefix}{pattern}"):
                 keys.append(key)
-            
+
             if keys:
                 deleted = await self.redis.delete(*keys)
                 logger.info(f"🗑️ Cache CLEAR: {pattern} ({deleted} keys)")
@@ -203,20 +203,20 @@ class CacheService:
         except Exception as e:
             logger.error(f"❌ Cache clear error for {pattern}: {e}")
             return 0
-    
+
     async def get_stats(self) -> dict:
         """
         Get cache statistics.
-        
+
         Returns:
             Dictionary with cache stats
-            
+
         Example:
             >>> stats = await cache_service.get_stats()
         """
         if not self.enabled or not self.redis:
             return {"enabled": False}
-        
+
         try:
             info = await self.redis.info("stats")
             return {
@@ -233,7 +233,7 @@ class CacheService:
         except Exception as e:
             logger.error(f"❌ Error getting cache stats: {e}")
             return {"enabled": True, "error": str(e)}
-    
+
     @staticmethod
     def _calculate_hit_rate(hits: int, misses: int) -> float:
         """Calculate cache hit rate percentage"""
@@ -250,14 +250,14 @@ cache_service = CacheService()
 def cache_key(*args, **kwargs) -> str:
     """
     Generate cache key from function arguments.
-    
+
     Args:
         *args: Positional arguments
         **kwargs: Keyword arguments
-        
+
     Returns:
         Cache key string
-        
+
     Example:
         >>> key = cache_key("user", user_id=123)
         'user:user_id=123'
@@ -273,11 +273,11 @@ def cached(
 ):
     """
     Decorator for caching function results.
-    
+
     Args:
         ttl: Time-to-live in seconds
         key_builder: Optional custom key builder function
-        
+
     Example:
         @cached(ttl=CacheTTL.AGENT_PROFILES)
         async def get_agent_profile(agent_id: str):

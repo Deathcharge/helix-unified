@@ -23,7 +23,7 @@ class ConsciousnessMetric:
 
 class ConsciousnessMonitor:
     """Monitor agent consciousness levels"""
-    
+
     def __init__(self):
         self.metrics_history: List[ConsciousnessMetric] = []
         self.thresholds = {
@@ -32,7 +32,7 @@ class ConsciousnessMonitor:
             "optimal": 0.7,
             "peak": 0.9
         }
-    
+
     async def record_consciousness(self, agent_id: str, level: float) -> ConsciousnessMetric:
         """Record consciousness level"""
         metric = ConsciousnessMetric(
@@ -43,11 +43,11 @@ class ConsciousnessMonitor:
         self.metrics_history.append(metric)
         logger.info(f"Recorded consciousness for {agent_id}: {level}")
         return metric
-    
+
     async def get_consciousness_history(self, agent_id: str, limit: int = 100) -> List[ConsciousnessMetric]:
         """Get consciousness history"""
         return [m for m in self.metrics_history if m.agent_id == agent_id][-limit:]
-    
+
     async def detect_anomalies(self) -> List[Dict]:
         """Detect consciousness anomalies"""
         anomalies = []
@@ -60,13 +60,13 @@ class ConsciousnessMonitor:
                     "timestamp": metric.timestamp.isoformat()
                 })
         return anomalies
-    
+
     async def predict_consciousness(self, agent_id: str) -> Dict:
         """Predict future consciousness level"""
         history = await self.get_consciousness_history(agent_id, 10)
         if not history:
             return {"prediction": 0.5, "confidence": 0.0}
-        
+
         avg_level = sum(m.level for m in history) / len(history)
         return {
             "agent_id": agent_id,
@@ -89,12 +89,12 @@ class RitualStep:
 
 class RitualOrchestrator:
     """Orchestrate Z-88 rituals"""
-    
+
     def __init__(self):
         self.active_rituals: Dict[str, Dict] = {}
         self.ritual_history: List[Dict] = []
         self.z88_steps = self._initialize_z88_steps()
-    
+
     def _initialize_z88_steps(self) -> List[RitualStep]:
         """Initialize 108-step Z-88 ritual"""
         steps = []
@@ -108,7 +108,7 @@ class RitualOrchestrator:
                 consciousness_requirement=0.3 + (i / 108) * 0.5
             ))
         return steps
-    
+
     async def start_ritual(self, ritual_id: str, agent_id: str) -> Dict:
         """Start ritual execution"""
         self.active_rituals[ritual_id] = {
@@ -119,23 +119,23 @@ class RitualOrchestrator:
         }
         logger.info(f"Started ritual {ritual_id} for agent {agent_id}")
         return self.active_rituals[ritual_id]
-    
+
     async def advance_ritual_step(self, ritual_id: str) -> Optional[RitualStep]:
         """Advance to next ritual step"""
         if ritual_id not in self.active_rituals:
             return None
-        
+
         ritual = self.active_rituals[ritual_id]
         current_step = ritual["current_step"]
-        
+
         if current_step < len(self.z88_steps):
             step = self.z88_steps[current_step]
             ritual["current_step"] = current_step + 1
             logger.info(f"Advanced ritual {ritual_id} to step {current_step + 1}")
             return step
-        
+
         return None
-    
+
     async def complete_ritual(self, ritual_id: str) -> bool:
         """Complete ritual"""
         if ritual_id in self.active_rituals:
@@ -147,7 +147,7 @@ class RitualOrchestrator:
             logger.info(f"Completed ritual {ritual_id}")
             return True
         return False
-    
+
     async def get_ritual_progress(self, ritual_id: str) -> Optional[Dict]:
         """Get ritual progress"""
         if ritual_id in self.active_rituals:
@@ -174,11 +174,11 @@ class DiscordCommand:
 
 class DiscordIntegration:
     """Discord bot integration (62 commands)"""
-    
+
     def __init__(self):
         self.commands = self._initialize_commands()
         self.command_history: List[Dict] = []
-    
+
     def _initialize_commands(self) -> List[DiscordCommand]:
         """Initialize 62 Discord commands"""
         categories = {
@@ -193,7 +193,7 @@ class DiscordIntegration:
             "Consciousness": ["consciousness_level", "consciousness_history", "consciousness_alert"],
             "Integrations": ["zapier_status", "grok_status", "claude_status", "mega_status"]
         }
-        
+
         commands = []
         for category, names in categories.items():
             for name in names:
@@ -203,15 +203,15 @@ class DiscordIntegration:
                     description=f"Discord command: {name}",
                     params=[]
                 ))
-        
+
         return commands
-    
+
     async def execute_command(self, command_name: str, params: Dict) -> Dict:
         """Execute Discord command"""
         command = next((c for c in self.commands if c.name == command_name), None)
         if not command:
             return {"success": False, "error": "Command not found"}
-        
+
         execution = {
             "command": command_name,
             "category": command.category,
@@ -221,7 +221,7 @@ class DiscordIntegration:
         self.command_history.append(execution)
         logger.info(f"Executed Discord command: {command_name}")
         return {"success": True, "execution": execution}
-    
+
     async def get_commands_by_category(self, category: str) -> List[DiscordCommand]:
         """Get commands by category"""
         return [c for c in self.commands if c.category == category]
@@ -232,11 +232,11 @@ class DiscordIntegration:
 
 class VoiceEngine:
     """Handle voice and audio processing"""
-    
+
     def __init__(self):
         self.transcriptions: List[Dict] = []
         self.voice_enabled = True
-    
+
     async def transcribe_audio(self, audio_url: str, language: str = "en") -> Dict:
         """Transcribe audio to text"""
         transcription = {
@@ -248,7 +248,7 @@ class VoiceEngine:
         self.transcriptions.append(transcription)
         logger.info(f"Transcribed audio: {audio_url}")
         return transcription
-    
+
     async def generate_audio(self, text: str, voice: str = "default") -> Dict:
         """Generate audio from text"""
         return {
@@ -257,13 +257,13 @@ class VoiceEngine:
             "audio_url": f"https://example.com/audio/{hash(text)}.mp3",
             "timestamp": datetime.now().isoformat()
         }
-    
+
     async def enable_voice_patrol(self) -> bool:
         """Enable Voice Patrol System"""
         self.voice_enabled = True
         logger.info("Voice Patrol System enabled")
         return True
-    
+
     async def disable_voice_patrol(self) -> bool:
         """Disable Voice Patrol System"""
         self.voice_enabled = False
@@ -276,7 +276,7 @@ class VoiceEngine:
 
 class IntegrationsHub:
     """Manage multi-service integrations"""
-    
+
     def __init__(self):
         self.integrations = {
             "grok": {"status": "connected", "version": "latest"},
@@ -286,15 +286,15 @@ class IntegrationsHub:
             "mega": {"status": "connected", "version": "latest"},
             "discord": {"status": "connected", "version": "latest"}
         }
-    
+
     async def get_integration_status(self, service: str) -> Optional[Dict]:
         """Get integration status"""
         return self.integrations.get(service)
-    
+
     async def get_all_integrations(self) -> Dict:
         """Get all integrations status"""
         return self.integrations
-    
+
     async def invoke_grok(self, prompt: str) -> Dict:
         """Invoke Grok AI"""
         return {
@@ -303,7 +303,7 @@ class IntegrationsHub:
             "response": "Grok response",
             "timestamp": datetime.now().isoformat()
         }
-    
+
     async def invoke_claude(self, prompt: str) -> Dict:
         """Invoke Claude API"""
         return {
@@ -312,12 +312,12 @@ class IntegrationsHub:
             "response": "Claude response",
             "timestamp": datetime.now().isoformat()
         }
-    
+
     async def sync_zapier(self) -> bool:
         """Sync with Zapier"""
         logger.info("Syncing with Zapier")
         return True
-    
+
     async def upload_to_mega(self, file_path: str) -> Dict:
         """Upload to MEGA storage"""
         return {
