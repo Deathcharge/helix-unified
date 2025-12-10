@@ -6,12 +6,8 @@ Kubernetes liveness/readiness probes, system metrics
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response
 
-from ..core.monitoring import (
-    get_metrics,
-    get_system_info,
-    liveness_probe,
-    readiness_probe
-)
+from ..core.monitoring import (get_metrics, get_system_info, liveness_probe,
+                               readiness_probe)
 
 router = APIRouter(prefix="/health", tags=["Health"])
 

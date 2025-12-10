@@ -409,8 +409,8 @@ logger.info("✅ Gzip compression enabled (minimum_size=1000)")
 # RATE LIMITING (prevent API abuse)
 # ============================================================================
 from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 
 limiter = Limiter(key_func=get_remote_address, default_limits=["1000/hour"])
 app.state.limiter = limiter
@@ -422,6 +422,7 @@ logger.info("✅ Rate limiting enabled (1000 requests/hour default)")
 # REQUEST CORRELATION IDs (for distributed tracing)
 # ============================================================================
 import uuid
+
 
 @app.middleware("http")
 async def add_correlation_id(request: Request, call_next):

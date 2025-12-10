@@ -2,13 +2,14 @@
 Voice Processor API Client - Connects to voice_processor microservice for TTS/STT.
 """
 import asyncio
-import logging
-import os
 import base64
 import hashlib
-import aiohttp
+import logging
+import os
 from pathlib import Path
 from typing import Optional
+
+import aiohttp
 
 logger = logging.getLogger(__name__)
 

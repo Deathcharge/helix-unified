@@ -15,8 +15,8 @@ Handles:
 
 import os
 from datetime import datetime
-from typing import List, Optional
 from enum import Enum
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field

@@ -2,11 +2,11 @@
 Batches 11-15: Consciousness Monitoring, Rituals, Discord, Voice, Integrations
 """
 
-from typing import List, Dict, Any, Optional
+import logging
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-import logging
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
