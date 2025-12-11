@@ -1,6 +1,7 @@
-import { type ClassValue, clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
+/**
+ * 🌀 Helix Utils - Using @helix/utils
+ */
+import { cn, type ClassValue, cva, type VariantProps } from "@helix/utils"
 
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
+// Re-export for backwards compatibility
+export { cn, type ClassValue, cva, type VariantProps }

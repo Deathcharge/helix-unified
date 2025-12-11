@@ -10,7 +10,7 @@ from fastapi import HTTPException, status
 
 class HelixException(HTTPException):
     """Base exception for all Helix errors"""
-    
+
     def __init__(
         self,
         status_code: int,

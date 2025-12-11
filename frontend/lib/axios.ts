@@ -1,12 +1,12 @@
 /**
- * 🌐 Axios Configuration
- * Configured axios instance with interceptors for auth and error handling
+ * 🌐 Helix HTTP - Using @helix/http
+ * Modern fetch-based API client with interceptors for auth and error handling
  */
 
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { createHelixHttp, type HelixResponse, type HelixError } from '@helix/http';
 
-// Create axios instance with default config
-const api = axios.create({
+// Create Helix HTTP instance with default config
+const api = createHelixHttp({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
   timeout: 30000, // 30 second timeout
   headers: {
@@ -15,39 +15,33 @@ const api = axios.create({
 });
 
 // Request interceptor - Add auth token to requests
-api.interceptors.request.use(
-  (config: AxiosRequestConfig) => {
-    // Get token from localStorage
-    const token = typeof window !== 'undefined' ? localStorage.getItem('helix_token') : null;
-    
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+api.interceptors.request.use((config) => {
+  // Get token from localStorage
+  const token = typeof window !== 'undefined' ? localStorage.getItem('helix_token') : null;
 
-    // Log request in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`, config.data);
-    }
-
-    return config;
-  },
-  (error: AxiosError) => {
-    console.error('[API Request Error]', error);
-    return Promise.reject(error);
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-);
+
+  // Log request in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`[API Request] ${config.method?.toUpperCase()} ${config.baseURL}`, config.body);
+  }
+
+  return config;
+});
 
 // Response interceptor - Handle errors globally
 api.interceptors.response.use(
-  (response: AxiosResponse) => {
+  (response: HelixResponse) => {
     // Log response in development
     if (process.env.NODE_ENV === 'development') {
-      console.log(`[API Response] ${response.config.method?.toUpperCase()} ${response.config.url}`, response.data);
+      console.log(`[API Response] ${response.status}`, response.data);
     }
 
     return response;
   },
-  (error: AxiosError) => {
+  async (error: HelixError) => {
     // Handle different error types
     if (error.response) {
       // Server responded with error status
@@ -60,7 +54,7 @@ api.interceptors.response.use(
           if (typeof window !== 'undefined') {
             localStorage.removeItem('helix_token');
             localStorage.removeItem('helix_user');
-            
+
             // Only redirect if not already on auth page
             if (!window.location.pathname.startsWith('/auth')) {
               window.location.href = '/auth/login?expired=true';
@@ -75,12 +69,12 @@ api.interceptors.response.use(
 
         case 404:
           // Not found
-          console.error('[API] Not found:', error.config?.url);
+          console.error('[API] Not found:', error.config?.baseURL);
           break;
 
         case 429:
           // Rate limit exceeded
-          const retryAfter = error.response.headers['retry-after'];
+          const retryAfter = error.response.headers.get('retry-after');
           console.error(`[API] Rate limit exceeded. Retry after ${retryAfter} seconds`);
           break;
 
@@ -95,17 +89,12 @@ api.interceptors.response.use(
         default:
           console.error('[API] Error:', status, data?.message || error.message);
       }
-    } else if (error.request) {
-      // Request made but no response received
-      console.error('[API] No response received:', error.message);
-      
-      // Check if it's a network error
-      if (error.message === 'Network Error') {
-        console.error('[API] Network error - check your internet connection');
-      }
+    } else if (error.code === 'TIMEOUT') {
+      // Request timeout
+      console.error('[API] Request timeout');
     } else {
-      // Error setting up request
-      console.error('[API] Request setup error:', error.message);
+      // Network or other error
+      console.error('[API] Network error:', error.message);
     }
 
     return Promise.reject(error);
@@ -127,13 +116,13 @@ export const apiHelpers = {
    */
   async login(email: string, password: string) {
     const response = await api.post('/auth/login', { email, password });
-    
+
     // Store token and user info
     if (typeof window !== 'undefined' && response.data) {
       localStorage.setItem('helix_token', response.data.access_token);
       localStorage.setItem('helix_user', JSON.stringify(response.data.user));
     }
-    
+
     return response.data;
   },
 
@@ -142,13 +131,13 @@ export const apiHelpers = {
    */
   async signup(email: string, password: string, name: string) {
     const response = await api.post('/auth/signup', { email, password, name });
-    
+
     // Store token and user info
     if (typeof window !== 'undefined' && response.data) {
       localStorage.setItem('helix_token', response.data.access_token);
       localStorage.setItem('helix_user', JSON.stringify(response.data.user));
     }
-    
+
     return response.data;
   },
 
@@ -173,13 +162,13 @@ export const apiHelpers = {
    */
   async demoLogin() {
     const response = await api.post('/auth/demo-login');
-    
+
     // Store token and user info
     if (typeof window !== 'undefined' && response.data) {
       localStorage.setItem('helix_token', response.data.access_token);
       localStorage.setItem('helix_user', JSON.stringify(response.data.user));
     }
-    
+
     return response.data;
   },
 };

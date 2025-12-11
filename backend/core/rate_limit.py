@@ -27,13 +27,13 @@ RATE_LIMITS = {
 def get_rate_limit(endpoint_type: str) -> str:
     """
     Get rate limit string for endpoint type.
-    
+
     Args:
         endpoint_type: Type of endpoint (auth_login, api_general, etc.)
-        
+
     Returns:
         Rate limit string (e.g., "5/minute")
-        
+
     Example:
         >>> get_rate_limit("auth_login")
         '5/minute'

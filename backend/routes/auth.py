@@ -15,23 +15,16 @@ from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, EmailStr, validator
 from sqlalchemy.orm import Session
 
-# Import database
-from backend.database import get_db, User as DBUser
-
+from backend.core.errors import (AlreadyExistsError, InvalidCredentialsError,
+                                 InvalidTokenError)
+from backend.core.rate_limit import get_rate_limit, limiter
 # Import security utilities
-from backend.core.security import (
-    hash_password,
-    verify_password,
-    create_access_token,
-    decode_access_token,
-    generate_secure_token,
-)
-from backend.core.errors import (
-    InvalidCredentialsError,
-    AlreadyExistsError,
-    InvalidTokenError,
-)
-from backend.core.rate_limit import limiter, get_rate_limit
+from backend.core.security import (create_access_token, decode_access_token,
+                                   generate_secure_token, hash_password,
+                                   verify_password)
+# Import database
+from backend.database import User as DBUser
+from backend.database import get_db
 
 router = APIRouter()
 
@@ -64,7 +57,7 @@ class SignupRequest(BaseModel):
     email: EmailStr
     password: str
     name: str
-    
+
     @validator('password')
     def password_strength(cls, v):
         """Validate password strength"""
@@ -77,7 +70,7 @@ class SignupRequest(BaseModel):
         if not any(c.isdigit() for c in v):
             raise ValueError('Password must contain at least one digit')
         return v
-    
+
     @validator('name')
     def name_length(cls, v):
         """Validate name length"""

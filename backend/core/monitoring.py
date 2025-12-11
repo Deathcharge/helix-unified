@@ -54,65 +54,65 @@ shutdown_event = asyncio.Event()
 
 class MetricsMiddleware(BaseHTTPMiddleware):
     """Middleware to collect HTTP metrics"""
-    
+
     async def dispatch(self, request: Request, call_next):
         # Start timer
         start_time = time.time()
-        
+
         # Get request size
         request_size = int(request.headers.get("content-length", 0))
-        
+
         # Process request
         response = await call_next(request)
-        
+
         # Calculate duration
         duration = time.time() - start_time
-        
+
         # Get response size
         response_size = int(response.headers.get("content-length", 0))
-        
+
         # Record metrics
         method = request.method
         endpoint = request.url.path
         status = response.status_code
-        
+
         http_requests_total.labels(
             method=method,
             endpoint=endpoint,
             status=status
         ).inc()
-        
+
         http_request_duration_seconds.labels(
             method=method,
             endpoint=endpoint
         ).observe(duration)
-        
+
         if request_size > 0:
             http_request_size_bytes.labels(
                 method=method,
                 endpoint=endpoint
             ).observe(request_size)
-        
+
         if response_size > 0:
             http_response_size_bytes.labels(
                 method=method,
                 endpoint=endpoint
             ).observe(response_size)
-        
+
         # Add custom headers
         response.headers["X-Process-Time"] = str(duration)
-        
+
         return response
 
 
 class HealthChecker:
     """Health check utilities"""
-    
+
     @staticmethod
     async def check_database() -> Dict[str, Any]:
         """
         Check database connection health.
-        
+
         Returns:
             Health status dictionary
         """
@@ -134,24 +134,24 @@ class HealthChecker:
                 "status": "unhealthy",
                 "error": str(e)
             }
-    
+
     @staticmethod
     async def check_redis() -> Dict[str, Any]:
         """
         Check Redis connection health.
-        
+
         Returns:
             Health status dictionary
         """
         try:
             from .cache import cache_service
-            
+
             if not cache_service.enabled:
                 return {
                     "status": "disabled",
                     "message": "Redis caching is disabled"
                 }
-            
+
             # Ping Redis
             if cache_service.redis:
                 await cache_service.redis.ping()
@@ -172,25 +172,25 @@ class HealthChecker:
                 "status": "unhealthy",
                 "error": str(e)
             }
-    
+
     @staticmethod
     async def check_disk_space() -> Dict[str, Any]:
         """
         Check disk space availability.
-        
+
         Returns:
             Disk space status dictionary
         """
         try:
             disk = psutil.disk_usage("/")
             percent_used = disk.percent
-            
+
             status = "healthy"
             if percent_used > 90:
                 status = "critical"
             elif percent_used > 80:
                 status = "warning"
-            
+
             return {
                 "status": status,
                 "total_gb": round(disk.total / (1024**3), 2),
@@ -204,25 +204,25 @@ class HealthChecker:
                 "status": "unknown",
                 "error": str(e)
             }
-    
+
     @staticmethod
     async def check_memory() -> Dict[str, Any]:
         """
         Check memory usage.
-        
+
         Returns:
             Memory status dictionary
         """
         try:
             memory = psutil.virtual_memory()
             percent_used = memory.percent
-            
+
             status = "healthy"
             if percent_used > 90:
                 status = "critical"
             elif percent_used > 80:
                 status = "warning"
-            
+
             return {
                 "status": status,
                 "total_gb": round(memory.total / (1024**3), 2),
@@ -236,25 +236,25 @@ class HealthChecker:
                 "status": "unknown",
                 "error": str(e)
             }
-    
+
     @staticmethod
     async def check_cpu() -> Dict[str, Any]:
         """
         Check CPU usage.
-        
+
         Returns:
             CPU status dictionary
         """
         try:
             cpu_percent = psutil.cpu_percent(interval=1)
             cpu_count = psutil.cpu_count()
-            
+
             status = "healthy"
             if cpu_percent > 90:
                 status = "critical"
             elif cpu_percent > 80:
                 status = "warning"
-            
+
             return {
                 "status": status,
                 "percent_used": cpu_percent,
@@ -272,7 +272,7 @@ class HealthChecker:
 async def liveness_probe() -> Dict[str, Any]:
     """
     Kubernetes liveness probe.
-    
+
     Returns:
         Liveness status
     """
@@ -286,7 +286,7 @@ async def liveness_probe() -> Dict[str, Any]:
 async def readiness_probe() -> Dict[str, Any]:
     """
     Kubernetes readiness probe.
-    
+
     Returns:
         Readiness status with all health checks
     """
@@ -297,17 +297,17 @@ async def readiness_probe() -> Dict[str, Any]:
         "memory": await HealthChecker.check_memory(),
         "cpu": await HealthChecker.check_cpu()
     }
-    
+
     # Determine overall status
     critical_checks = ["database"]  # These must be healthy
     optional_checks = ["redis"]  # These can be disabled
-    
+
     is_ready = True
     for check_name in critical_checks:
         if checks[check_name]["status"] not in ["healthy", "warning"]:
             is_ready = False
             break
-    
+
     return {
         "status": "ready" if is_ready else "not_ready",
         "timestamp": datetime.utcnow().isoformat(),
@@ -318,51 +318,51 @@ async def readiness_probe() -> Dict[str, Any]:
 def setup_graceful_shutdown(app: FastAPI):
     """
     Setup graceful shutdown handlers.
-    
+
     Args:
         app: FastAPI application instance
     """
     def handle_shutdown(signum, frame):
         logger.info(f"🛑 Received signal {signum}, initiating graceful shutdown...")
         shutdown_event.set()
-    
+
     # Register signal handlers
     signal.signal(signal.SIGTERM, handle_shutdown)
     signal.signal(signal.SIGINT, handle_shutdown)
-    
+
     logger.info("✅ Graceful shutdown handlers registered")
 
 
 async def graceful_shutdown_sequence():
     """
     Execute graceful shutdown sequence.
-    
+
     This should be called in the lifespan shutdown phase.
     """
     logger.info("🛑 Starting graceful shutdown sequence...")
-    
+
     # Wait for shutdown signal
     await shutdown_event.wait()
-    
+
     # Give in-flight requests time to complete
     logger.info("⏳ Waiting for in-flight requests to complete (5s grace period)...")
     await asyncio.sleep(5)
-    
+
     # Close connections
     logger.info("🔌 Closing database connections...")
     # await database.disconnect()
-    
+
     logger.info("🔌 Closing Redis connections...")
     from .cache import cache_service
     await cache_service.close()
-    
+
     logger.info("✅ Graceful shutdown complete")
 
 
 def get_metrics() -> Response:
     """
     Get Prometheus metrics.
-    
+
     Returns:
         Prometheus metrics in text format
     """
@@ -375,7 +375,7 @@ def get_metrics() -> Response:
 def get_system_info() -> Dict[str, Any]:
     """
     Get system information.
-    
+
     Returns:
         System information dictionary
     """
