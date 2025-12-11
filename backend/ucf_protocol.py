@@ -98,15 +98,14 @@ class UCFProtocol:
                 "╠═══════════════════════════════════════════════════════════╣",
                 "║ METRICS                                                   ║",
                 "╠═══════════════════════════════════════════════════════════╣",
-                f"║ Harmony:     {harmony:6.4f}  {'▲' if harmony_delta >= 0 else '▼'} {abs(harmony_delta):6.4f}  (target: {UCFProtocol.TARGETS['harmony']:.2f}) ║",
-                f"║ Resilience:  {resilience:6.4f}  {'▲' if resilience_delta >= 0 else '▼'} {abs(resilience_delta):6.4f}  (target: {UCFProtocol.TARGETS['resilience']:.2f}) ║",
+                f"║ Harmony:     {harmony:6.4f}  {'▲' if harmony_delta >= 0 else '▼'} {abs(harmony_delta):6.4f}  (target: {UCFProtocol.TARGETS['harmony']:.2f}) ║",  # noqa: E501
+                f"║ Resilience:  {resilience:6.4f}  {'▲' if resilience_delta >= 0 else '▼'} {abs(resilience_delta):6.4f}  (target: {UCFProtocol.TARGETS['resilience']:.2f}) ║",  # noqa: E501
                 f"║ Prana:       {prana:6.4f}                    (target: {UCFProtocol.TARGETS['prana']:.2f}) ║",
                 f"║ Drishti:     {drishti:6.4f}                    (target: {UCFProtocol.TARGETS['drishti']:.2f}) ║",
                 f"║ Klesha:      {klesha:6.4f}                    (target: {UCFProtocol.TARGETS['klesha']:.2f}) ║",
                 f"║ Zoom:        {zoom:6.4f}                    (target: {UCFProtocol.TARGETS['zoom']:.2f}) ║",
                 "╚═══════════════════════════════════════════════════════════╝",
-            ]
-        )
+            ])
 
         return "\n".join(lines)
 
@@ -122,8 +121,7 @@ class UCFProtocol:
         """
         phase = UCFProtocol.get_phase(harmony)
         return (
-            f"UCF: H={harmony:.4f} R={resilience:.4f} P={prana:.4f} "
-            f"D={drishti:.4f} K={klesha:.4f} Z={zoom:.4f} [{phase}]"
+            f"UCF: H={harmony:.4f} R={resilience:.4f} P={prana:.4f} " f"D={drishti:.4f} K={klesha:.4f} Z={zoom:.4f} [{phase}]"
         )
 
     @staticmethod

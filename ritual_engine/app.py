@@ -1,12 +1,13 @@
 # app.py – Z-88 Ritual Engine v3.5 (ψ-Linked A/V Integrated Edition)
-import streamlit as st
-import numpy as np
-import time
 import io
+import time
+
 import matplotlib.pyplot as plt
-from fractal_renderer import FractalRenderer
-from audio_generator import AudioEngine
+import numpy as np
 import soundfile as sf
+import streamlit as st
+from audio_generator import AudioEngine
+from fractal_renderer import FractalRenderer
 from matplotlib.colors import LinearSegmentedColormap
 
 st.set_page_config(page_title="Samsara Helix Ritual Engine", layout="wide")

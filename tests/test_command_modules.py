@@ -1,9 +1,10 @@
 """
 Tests for modular command structure.
 """
-import pytest
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 
 @pytest.mark.unit
@@ -75,8 +76,8 @@ async def test_command_setup_functions():
 @pytest.mark.unit
 def test_command_count():
     """Test total command count across modules."""
-    import subprocess
     import os
+    import subprocess
 
     if not os.path.exists("backend/commands"):
         pytest.skip("Commands directory not available")

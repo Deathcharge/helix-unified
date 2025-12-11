@@ -7,9 +7,10 @@ Quick status checks for mobile/SSH access without full Discord bot.
 """
 
 import json
-import click
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+
+import click
 
 # Path setup
 BASE_DIR = Path(__file__).resolve().parent.parent

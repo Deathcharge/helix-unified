@@ -1,7 +1,7 @@
 # sync_mega.py
-import os
 import json
 import logging
+import os
 import sys
 
 # FIX: Verify pycryptodome is installed (installs as 'Crypto', not 'Cryptodome')
@@ -14,6 +14,7 @@ except ImportError:
     Crypto = None
 
 from mega import Mega
+
 
 class MegaSync:
     def __init__(self):

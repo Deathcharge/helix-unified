@@ -17,10 +17,11 @@ services:
     networks:
       - helix-network
 
-  # PostgreSQL Database (Optional)
+  # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
     container_name: helix-postgres
+    restart: unless-stopped
     environment:
       POSTGRES_USER: helix_user
       POSTGRES_PASSWORD: helix_password
@@ -36,8 +37,45 @@ services:
       retries: 5
     networks:
       - helix-network
-    profiles:
+
+  # pgAdmin - Database Management UI (Optional)
+  # Access: http://localhost:5050
+  # Login: admin@helix.local / admin
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: helix-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@helix.local
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
       - postgres
+    networks:
+      - helix-network
+    profiles:
+      - tools
+
+  # Redis Commander - Redis Management UI (Optional)
+  # Access: http://localhost:8081
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: helix-redis-commander
+    restart: unless-stopped
+    environment:
+      REDIS_HOSTS: local:redis:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    networks:
+      - helix-network
+    profiles:
+      - tools
 
   # FastAPI Backend
   backend:
@@ -91,6 +129,7 @@ services:
 volumes:
   redis_data:
   postgres_data:
+  pgadmin_data:
 
 networks:
   helix-network:

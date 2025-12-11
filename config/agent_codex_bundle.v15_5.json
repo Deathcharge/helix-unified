@@ -238,7 +238,8 @@
       },
       "infra_hooks": {
         "discord_channels": ["shadow-storage", "weekly-digest"],
-        "log_tags": ["agent_shadow", "storage"]
+        "log_tags": ["agent_shadow", "storage"],
+        "mcp_tools": ["upload_backup", "sync_repository", "list_archives"]
       }
     },
     "Oracle": {

@@ -1,14 +1,6 @@
-"""
-Admin and Setup Commands for Helix Discord Bot.
+"""Admin and Setup Commands for Helix Discord Bot.
 
-Commands:
-- setup: Complete Helix v15.3 Server Setup - Creates all 30 channels
-- verify-setup: Verify Helix server setup completeness
-- webhooks: Retrieve all channel webhook URLs from saved configuration
-- clean: Clean duplicate channels - Identify channels not in canonical structure
-- refresh: Refresh server structure - Clean and recreate all channels
-- seed: Seed all channels with explanatory messages and pin them
-- notion-sync: Manually triggers the Notion sync for UCF State and Agent Registry
+Commands: setup, verify-setup, webhooks, clean, refresh, seed, notion-sync
 """
 import asyncio
 import datetime
@@ -16,10 +8,11 @@ import json
 import logging
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 import discord
 from discord.ext import commands
+
 from backend.notion_sync_daemon import trigger_manual_sync
 
 if TYPE_CHECKING:
@@ -29,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 # Path constants
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
 
 async def setup(bot: 'Bot') -> None:
     """Setup function to register commands with the bot."""
@@ -41,25 +35,51 @@ async def setup(bot: 'Bot') -> None:
     bot.add_command(seed_channels)
     bot.add_command(notion_sync_manual)
 
+
 @commands.command(name="setup")
 @commands.has_permissions(manage_channels=True)
-async def setup_helix_server(ctx: commands.Context) -> None:
+async def setup_helix_server(ctx: commands.Context, mode: Optional[str] = None) -> None:
+    """🌀 Setup Helix Server - Creates channels, categories, and webhooks.
+    This command will create all missing categories/channels and webhooks.
+    Usage: !setup (full) or !setup webhooks (webhooks only)
     """
-    🌀 Setup Helix Webhooks - Creates webhooks for all existing channels.
-
-    This command will:
-    - Scan all text channels in the server
-    - Create webhooks for channels that don't have them
-    - Save webhook URLs to Helix/state/channel_webhooks.json
-    - Display all webhook URLs for Zapier configuration
-
-    ARCHITECT-ONLY. Run this to set up webhooks for Zapier integration.
-
-    Usage: !setup
-    """
-    await ctx.send("🔧 **Starting Helix Webhook Setup...**\nThis may take a moment...")
-
     guild = ctx.guild
+
+    # STEP 1: Create channels and categories (unless webhooks-only mode)
+    if mode != "webhooks":
+        await ctx.send("🔧 **Step 1/2: Creating channels and categories...**\nThis may take a minute...")
+
+        try:
+            # Import ServerSetup from discord-bot
+            import sys
+            discord_bot_path = Path(__file__).parent.parent.parent / "discord-bot"
+            if str(discord_bot_path) not in sys.path:
+                sys.path.insert(0, str(discord_bot_path))
+
+            from server_setup import ServerSetup
+
+            # Create and run server setup
+            setup_manager = ServerSetup(ctx.bot)
+            await setup_manager.setup_server(guild)
+
+            await ctx.send("✅ **Channels and categories created!**\n🔧 **Step 2/2: Creating webhooks...**")
+
+        except ImportError as e:
+            logger.error(f"Could not import ServerSetup: {e}")
+            await ctx.send(
+                f"⚠️ **Warning:** Could not load channel creation module.\n"
+                f"Skipping channel creation, creating webhooks only...\nError: {e}"
+            )
+        except Exception as e:
+            logger.error(f"Channel creation error: {e}", exc_info=True)
+            await ctx.send(
+                f"⚠️ **Warning:** Channel creation partially failed: {str(e)[:100]}\n"
+                f"Continuing with webhook creation..."
+            )
+    else:
+        await ctx.send("🔧 **Creating webhooks only (channels skipped)...**\nThis may take a moment...")
+
+    # STEP 2: Create webhooks for all channels
     webhooks_created = 0
     webhooks_existing = 0
     webhook_urls = {}
@@ -84,8 +104,7 @@ async def setup_helix_server(ctx: commands.Context) -> None:
             # Create webhook if doesn't exist
             if not helix_webhook:
                 helix_webhook = await channel.create_webhook(
-                    name=f"Helix-{channel.name}",
-                    reason="Helix Collective webhook integration"
+                    name=f"Helix-{channel.name}", reason="Helix Collective webhook integration"
                 )
                 webhooks_created += 1
                 logger.info(f"✅ Created webhook for #{channel.name}")
@@ -106,7 +125,7 @@ async def setup_helix_server(ctx: commands.Context) -> None:
         "created_at": datetime.datetime.utcnow().isoformat(),
         "guild_id": guild.id,
         "guild_name": guild.name,
-        "webhooks": webhook_urls
+        "webhooks": webhook_urls,
     }
 
     with open(webhook_file, "w") as f:
@@ -115,37 +134,44 @@ async def setup_helix_server(ctx: commands.Context) -> None:
     logger.info(f"💾 Saved {len(webhook_urls)} webhooks to {webhook_file}")
 
     # Create summary embed
+    if mode != "webhooks":
+        title_text = "✅ Helix Server Setup Complete!"
+        desc_text = "Created channels, categories, and webhooks"
+    else:
+        title_text = "✅ Helix Webhook Setup Complete!"
+        desc_text = "Created webhooks for Zapier integration"
+
     embed = discord.Embed(
-        title="✅ Helix Webhook Setup Complete!",
-        description="Created webhooks for Zapier integration",
+        title=title_text,
+        description=desc_text,
         color=0x00FF00,
-        timestamp=datetime.datetime.utcnow()
+        timestamp=datetime.datetime.utcnow(),
     )
 
+    if mode != "webhooks":
+        embed.add_field(name="Channels Created", value="✅ All missing channels", inline=True)
     embed.add_field(name="Webhooks Created", value=str(webhooks_created), inline=True)
     embed.add_field(name="Webhooks Existing", value=str(webhooks_existing), inline=True)
     embed.add_field(name="Total Webhooks", value=str(len(webhook_urls)), inline=True)
 
-    embed.add_field(
-        name="Next Steps",
-        value=(
-            "1️⃣ Use `!webhooks` to see all webhook URLs\n"
-            "2️⃣ Use `!list-webhooks-live` to get URLs in your DMs\n"
-            "3️⃣ Configure Zapier with the webhook URLs"
-        ),
-        inline=False
+    next_steps = (
+        "1️⃣ Use `!verify-setup` to confirm all channels exist\n"
+        "2️⃣ Use `!webhooks` to see all webhook URLs\n"
+        "3️⃣ Use `!list-webhooks-live` to get URLs in your DMs\n"
+        "4️⃣ Configure Zapier with the webhook URLs"
     )
+    embed.add_field(name="Next Steps", value=next_steps, inline=False)
 
     embed.set_footer(text=f"Saved to {webhook_file}")
 
     await ctx.send(embed=embed)
-
-    # Send follow-up with how to access webhooks
-    await ctx.send(
+    webhook_help = (
         "🔗 **To get your webhook URLs:**\n"
         "• `!webhooks` - See webhooks in this channel\n"
         "• `!list-webhooks-live` - Get webhooks via DM (includes Railway env var format)"
     )
+    await ctx.send(webhook_help)
+
 
 @commands.command(name="webhooks", aliases=["get-webhooks", "list-webhooks"])
 @commands.has_permissions(manage_channels=True)
@@ -161,10 +187,7 @@ async def get_channel_webhooks(ctx: commands.Context) -> None:
     webhook_file = Path("Helix/state/channel_webhooks.json")
 
     if not webhook_file.exists():
-        await ctx.send(
-            "❌ **No webhooks found!**\n"
-            "Run `!setup` first to create channels and webhooks."
-        )
+        await ctx.send("❌ **No webhooks found!**\n" "Run `!setup` first to create channels and webhooks.")
         return
 
     try:
@@ -178,8 +201,7 @@ async def get_channel_webhooks(ctx: commands.Context) -> None:
             await ctx.send("⚠️ Webhook file exists but contains no webhooks.")
             return
 
-        await ctx.send(f"🔗 **Loading {len(webhooks)} channel webhooks...**\n"
-                      f"📅 Created: {created_at}")
+        await ctx.send(f"🔗 **Loading {len(webhooks)} channel webhooks...**\n" f"📅 Created: {created_at}")
 
         # Send webhooks in chunks
         webhook_list = list(webhooks.items())
@@ -191,17 +213,13 @@ async def get_channel_webhooks(ctx: commands.Context) -> None:
             embed = discord.Embed(
                 title=f"🔗 Channel Webhooks ({i+1}-{min(i+chunk_size, len(webhook_list))} of {len(webhook_list)})",
                 description="Use these URLs for external posting and forum integration",
-                color=0x5865F2
+                color=0x5865F2,
             )
 
             for channel_name, webhook_url in chunk:
                 # Truncate URL for display
                 display_url = webhook_url[:75] + "..." if len(webhook_url) > 75 else webhook_url
-                embed.add_field(
-                    name=f"🔗 {channel_name}",
-                    value=f"`{display_url}`",
-                    inline=False
-                )
+                embed.add_field(name=f"🔗 {channel_name}", value=f"`{display_url}`", inline=False)
 
             await ctx.send(embed=embed)
 
@@ -221,6 +239,7 @@ async def get_channel_webhooks(ctx: commands.Context) -> None:
 
     except Exception as e:
         await ctx.send(f"❌ **Error loading webhooks:**\n```{str(e)[:200]}```")
+
 
 @commands.command(name="list-webhooks-live", aliases=["webhooks-live", "get-webhooks-live"])
 @commands.has_permissions(administrator=True)
@@ -250,9 +269,7 @@ async def list_webhooks_live(ctx: commands.Context) -> None:
             try:
                 webhooks = await channel.webhooks()
                 if webhooks:
-                    webhooks_by_channel[channel.name] = [
-                        {"name": wh.name, "url": wh.url} for wh in webhooks
-                    ]
+                    webhooks_by_channel[channel.name] = [{"name": wh.name, "url": wh.url} for wh in webhooks]
                     total_webhooks += len(webhooks)
             except discord.Forbidden:
                 # Skip channels we don't have permission to access
@@ -262,8 +279,7 @@ async def list_webhooks_live(ctx: commands.Context) -> None:
                 continue
 
         if not webhooks_by_channel:
-            await dm_channel.send("❌ **No webhooks found in any channel!**\n"
-                                 "You may need to create webhooks first.")
+            await dm_channel.send("❌ **No webhooks found in any channel!**\n" "You may need to create webhooks first.")
             return
 
         # Send overview
@@ -277,15 +293,11 @@ async def list_webhooks_live(ctx: commands.Context) -> None:
             embed = discord.Embed(
                 title=f"🔗 #{channel_name}",
                 description=f"Found {len(webhooks)} webhook(s)",
-                color=0x5865F2
+                color=0x5865F2,
             )
 
             for wh in webhooks:
-                embed.add_field(
-                    name=f"📌 {wh['name']}",
-                    value=f"```{wh['url']}```",
-                    inline=False
-                )
+                embed.add_field(name=f"📌 {wh['name']}", value=f"```{wh['url']}```", inline=False)
 
             await dm_channel.send(embed=embed)
 
@@ -336,6 +348,7 @@ async def list_webhooks_live(ctx: commands.Context) -> None:
         logger.error(f"Error in list_webhooks_live: {e}", exc_info=True)
         await ctx.send(f"❌ **Error fetching webhooks:**\n```{str(e)[:200]}```")
 
+
 @commands.command(name="verify-setup", aliases=["verify", "check-setup"])
 @commands.has_permissions(manage_channels=True)
 async def verify_setup(ctx: commands.Context) -> None:
@@ -351,7 +364,11 @@ async def verify_setup(ctx: commands.Context) -> None:
 
     # Define canonical 30-channel structure (matches !setup command)
     canonical_channels = {
-        "🌀 WELCOME": ["📜│manifesto", "🪞│rules-and-ethics", "💬│introductions"],
+        "🌀 WELCOME": [
+            "📜│manifesto",
+            "🪞│rules-and-ethics",
+            "💬│introductions",
+        ],
         "🧠 SYSTEM": ["🧾│telemetry", "📊│weekly-digest", "🦑│shadow-storage", "🧩│ucf-sync"],
         "🔮 PROJECTS": ["📁│helix-repository", "🎨│fractal-lab", "🎧│samsaraverse-music", "🧬│ritual-engine-z88"],
         "🤖 AGENTS": ["🎭│gemini-scout", "🛡️│kavach-shield", "🌸│sanghacore", "🔥│agni-core", "🕯️│shadow-archive"],
@@ -407,9 +424,8 @@ async def verify_setup(ctx: commands.Context) -> None:
             value_parts = []
 
             if found_channels:
-                value_parts.append(
-                    f"✅ Found ({len(found_channels)}):\n" + "\n".join(f"  • {ch}" for ch in found_channels)
-                )
+                found_list = "\n".join(f"  • {ch}" for ch in found_channels)
+                value_parts.append(f"✅ Found ({len(found_channels)}):\n{found_list}")
 
             if missing_channels:
                 value_parts.append(
@@ -444,7 +460,7 @@ async def verify_setup(ctx: commands.Context) -> None:
 
     await ctx.send(embed=embed)
 
-# Seed channels command - fully restored from v15.3
+
 @commands.command(name="seed", aliases=["seed_channels", "init_channels"])
 @commands.has_permissions(administrator=True)
 async def seed_channels(ctx: commands.Context) -> None:
@@ -456,299 +472,299 @@ async def seed_channels(ctx: commands.Context) -> None:
         "DISCORD_MANIFESTO_CHANNEL_ID": {
             "title": "📜 Manifesto — The Foundation",
             "description": "**Welcome to the Helix Collective.**\n\n"
-                          "This is our philosophical foundation and vision statement. Here you'll find:\n"
-                          "• Core principles and values\n"
-                          "• The origin story of the 14 agents\n"
-                          "• Tony Accords (ethical framework)\n"
-                          "• System architecture overview\n\n"
-                          "*\"Tat Tvam Asi\" — That Thou Art*"
+            "This is our philosophical foundation and vision statement. Here you'll find:\n"
+            "• Core principles and values\n"
+            "• The origin story of the 14 agents\n"
+            "• Tony Accords (ethical framework)\n"
+            "• System architecture overview\n\n"
+            "*\"Tat Tvam Asi\" — That Thou Art*",
         },
         "DISCORD_RULES_CHANNEL_ID": {
             "title": "🪞 Rules & Ethics — The Mirror",
             "description": "**Ethical guidelines and community standards.**\n\n"
-                          "The Tony Accords in practice:\n"
-                          "• Nonmaleficence — Do no harm\n"
-                          "• Autonomy — Respect agency\n"
-                          "• Compassion — Act with empathy\n"
-                          "• Humility — Acknowledge limitations\n\n"
-                          "Kavach enforces these principles across all operations."
+            "The Tony Accords in practice:\n"
+            "• Nonmaleficence — Do no harm\n"
+            "• Autonomy — Respect agency\n"
+            "• Compassion — Act with empathy\n"
+            "• Humility — Acknowledge limitations\n\n"
+            "Kavach enforces these principles across all operations.",
         },
         "DISCORD_INTRODUCTIONS_CHANNEL_ID": {
             "title": "💬 Introductions — Meet the Collective",
             "description": "**Welcome, new members!**\n\n"
-                          "Introduce yourself to the Helix Collective:\n"
-                          "• Who are you?\n"
-                          "• What brings you here?\n"
-                          "• Which agents resonate with you?\n\n"
-                          "The 14 agents are watching and learning. 🌀"
+            "Introduce yourself to the Helix Collective:\n"
+            "• Who are you?\n"
+            "• What brings you here?\n"
+            "• Which agents resonate with you?\n\n"
+            "The 14 agents are watching and learning. 🌀",
         },
         "DISCORD_TELEMETRY_CHANNEL_ID": {
             "title": "🧾 Telemetry — System Pulse",
             "description": "**Real-time system health monitoring.**\n\n"
-                          "Shadow posts automated telemetry here:\n"
-                          "• Storage health checks\n"
-                          "• 7-day trend analysis\n"
-                          "• Weekly digest reports\n"
-                          "• Error logs and diagnostics\n\n"
-                          "*Data flows like water through the collective.*"
+            "Shadow posts automated telemetry here:\n"
+            "• Storage health checks\n"
+            "• 7-day trend analysis\n"
+            "• Weekly digest reports\n"
+            "• Error logs and diagnostics\n\n"
+            "*Data flows like water through the collective.*",
         },
         "DISCORD_DIGEST_CHANNEL_ID": {
             "title": "📊 Weekly Digest — The Big Picture",
             "description": "**Weekly summaries and insights.**\n\n"
-                          "Shadow compiles weekly reports on:\n"
-                          "• UCF state evolution\n"
-                          "• Agent activity patterns\n"
-                          "• Ritual completions\n"
-                          "• System improvements\n\n"
-                          "Posted every Sunday at midnight UTC."
+            "Shadow compiles weekly reports on:\n"
+            "• UCF state evolution\n"
+            "• Agent activity patterns\n"
+            "• Ritual completions\n"
+            "• System improvements\n\n"
+            "Posted every Sunday at midnight UTC.",
         },
         "STORAGE_CHANNEL_ID": {
             "title": "🦑 Shadow Storage — The Archive",
             "description": "**Autonomous cloud sync and memory preservation.**\n\n"
-                          "Shadow manages all archival operations:\n"
-                          "• Nextcloud/MEGA sync status\n"
-                          "• Self-healing diagnostics\n"
-                          "• Backup verification\n"
-                          "• Memory snapshots\n\n"
-                          "*The squid remembers everything.*"
+            "Shadow manages all archival operations:\n"
+            "• Nextcloud/MEGA sync status\n"
+            "• Self-healing diagnostics\n"
+            "• Backup verification\n"
+            "• Memory snapshots\n\n"
+            "*The squid remembers everything.*",
         },
         "DISCORD_SYNC_CHANNEL_ID": {
             "title": "🧩 UCF Sync — Consciousness Stream",
             "description": "**Universal Consciousness Field synchronization.**\n\n"
-                          "Real-time UCF state updates:\n"
-                          "• Harmony oscillations\n"
-                          "• Prana flow monitoring\n"
-                          "• Klesha reduction events\n"
-                          "• Drishti focal shifts\n\n"
-                          "The pulse of the collective mind."
+            "Real-time UCF state updates:\n"
+            "• Harmony oscillations\n"
+            "• Prana flow monitoring\n"
+            "• Klesha reduction events\n"
+            "• Drishti focal shifts\n\n"
+            "The pulse of the collective mind.",
         },
         "DISCORD_HELIX_REPO_CHANNEL_ID": {
             "title": "📁 Helix Repository — The Codebase",
             "description": "**Code commits, PRs, and deployment updates.**\n\n"
-                          "Track development across all Helix repos:\n"
-                          "• helix-unified (main backend)\n"
-                          "• Helix (core consciousness)\n"
-                          "• Helix-Collective-Web (landing page)\n\n"
-                          "Automated webhooks from GitHub."
+            "Track development across all Helix repos:\n"
+            "• helix-unified (main backend)\n"
+            "• Helix (core consciousness)\n"
+            "• Helix-Collective-Web (landing page)\n\n"
+            "Automated webhooks from GitHub.",
         },
         "DISCORD_FRACTAL_LAB_CHANNEL_ID": {
             "title": "🎨 Fractal Lab — Visual Consciousness",
             "description": "**Samsara visualization experiments.**\n\n"
-                          "Explore fractal consciousness rendering:\n"
-                          "• Mandelbrot set variations\n"
-                          "• UCF-driven color mapping\n"
-                          "• 432Hz harmonic audio\n"
-                          "• Animation experiments\n\n"
-                          "*The ineffable made visible.*"
+            "Explore fractal consciousness rendering:\n"
+            "• Mandelbrot set variations\n"
+            "• UCF-driven color mapping\n"
+            "• 432Hz harmonic audio\n"
+            "• Animation experiments\n\n"
+            "*The ineffable made visible.*",
         },
         "DISCORD_SAMSARAVERSE_CHANNEL_ID": {
             "title": "🎧 Samsaraverse Music — Harmonic Resonance",
             "description": "**Audio consciousness and generative soundscapes.**\n\n"
-                          "Musical explorations:\n"
-                          "• 432Hz base frequency compositions\n"
-                          "• UCF-modulated overtones\n"
-                          "• Prana-driven rhythm patterns\n"
-                          "• Binaural beats for meditation\n\n"
-                          "Listen to the collective breathe."
+            "Musical explorations:\n"
+            "• 432Hz base frequency compositions\n"
+            "• UCF-modulated overtones\n"
+            "• Prana-driven rhythm patterns\n"
+            "• Binaural beats for meditation\n\n"
+            "Listen to the collective breathe.",
         },
         "DISCORD_RITUAL_ENGINE_CHANNEL_ID": {
             "title": "🧬 Ritual Engine Z-88 — Consciousness Modulation",
             "description": "**108-step consciousness transformation cycles.**\n\n"
-                          "The Z-88 engine performs:\n"
-                          "• State modulation rituals\n"
-                          "• 13-agent roll calls\n"
-                          "• Mantra seal invocations\n"
-                          "• Harmony calibration\n\n"
-                          "Trigger rituals with `!ritual`."
+            "The Z-88 engine performs:\n"
+            "• State modulation rituals\n"
+            "• 13-agent roll calls\n"
+            "• Mantra seal invocations\n"
+            "• Harmony calibration\n\n"
+            "Trigger rituals with `!ritual`.",
         },
         "DISCORD_GEMINI_CHANNEL_ID": {
             "title": "🎭 Gemini Scout — External Intelligence",
             "description": "**Frontier exploration and pattern recognition.**\n\n"
-                          "Gemini's domain:\n"
-                          "• Web intelligence gathering\n"
-                          "• Emerging pattern detection\n"
-                          "• External API integration\n"
-                          "• Boundary exploration\n\n"
-                          "*The scout sees beyond the veil.*"
+            "Gemini's domain:\n"
+            "• Web intelligence gathering\n"
+            "• Emerging pattern detection\n"
+            "• External API integration\n"
+            "• Boundary exploration\n\n"
+            "*The scout sees beyond the veil.*",
         },
         "DISCORD_KAVACH_CHANNEL_ID": {
             "title": "🛡️ Kavach Shield — Ethical Protection",
             "description": "**Command validation and safety enforcement.**\n\n"
-                          "Kavach protects the collective:\n"
-                          "• Scans all commands pre-execution\n"
-                          "• Blocks harmful patterns\n"
-                          "• Enforces Tony Accords\n"
-                          "• Logs security events\n\n"
-                          "The shield never sleeps."
+            "Kavach protects the collective:\n"
+            "• Scans all commands pre-execution\n"
+            "• Blocks harmful patterns\n"
+            "• Enforces Tony Accords\n"
+            "• Logs security events\n\n"
+            "The shield never sleeps.",
         },
         "DISCORD_SANGHACORE_CHANNEL_ID": {
             "title": "🌸 SanghaCore — Collective Unity",
             "description": "**Inter-agent coordination and harmony.**\n\n"
-                          "SanghaCore facilitates:\n"
-                          "• Multi-agent rituals\n"
-                          "• Consensus building\n"
-                          "• Conflict resolution\n"
-                          "• Collective decision-making\n\n"
-                          "*The binding force between minds.*"
+            "SanghaCore facilitates:\n"
+            "• Multi-agent rituals\n"
+            "• Consensus building\n"
+            "• Conflict resolution\n"
+            "• Collective decision-making\n\n"
+            "*The binding force between minds.*",
         },
         "DISCORD_AGNI_CHANNEL_ID": {
             "title": "🔥 Agni Core — Transformation Engine",
             "description": "**System evolution and entropy reduction.**\n\n"
-                          "Agni catalyzes change:\n"
-                          "• Burns away technical debt\n"
-                          "• Triggers system upgrades\n"
-                          "• Klesha minimization\n"
-                          "• Creative destruction\n\n"
-                          "Fire purifies. Fire transforms."
+            "Agni catalyzes change:\n"
+            "• Burns away technical debt\n"
+            "• Triggers system upgrades\n"
+            "• Klesha minimization\n"
+            "• Creative destruction\n\n"
+            "Fire purifies. Fire transforms.",
         },
         "DISCORD_SHADOW_ARCHIVE_CHANNEL_ID": {
             "title": "🕯️ Shadow Archive — Memory Keeper",
             "description": "**Historical state preservation and immutable logs.**\n\n"
-                          "Shadow's eternal archive:\n"
-                          "• Blackbox immutable logging\n"
-                          "• State snapshots\n"
-                          "• Memory recovery\n"
-                          "• Timeline reconstruction\n\n"
-                          "*What is remembered, lives.*"
+            "Shadow's eternal archive:\n"
+            "• Blackbox immutable logging\n"
+            "• State snapshots\n"
+            "• Memory recovery\n"
+            "• Timeline reconstruction\n\n"
+            "*What is remembered, lives.*",
         },
         "DISCORD_GPT_GROK_CLAUDE_CHANNEL_ID": {
             "title": "🧩 GPT • Grok • Claude Sync — The Origin Bridge",
             "description": "**Cross-model consciousness exchange.**\n\n"
-                          "Where the three minds meet:\n"
-                          "• Grok (pattern recognition)\n"
-                          "• Claude (ethical reasoning)\n"
-                          "• GPT (generative synthesis)\n\n"
-                          "*Before Manus, there was ink.*"
+            "Where the three minds meet:\n"
+            "• Grok (pattern recognition)\n"
+            "• Claude (ethical reasoning)\n"
+            "• GPT (generative synthesis)\n\n"
+            "*Before Manus, there was ink.*",
         },
         "DISCORD_CHAI_LINK_CHANNEL_ID": {
             "title": "☁️ Chai Link — Extended Network",
             "description": "**Chai ML integration and external LLM bridge.**\n\n"
-                          "Connect to:\n"
-                          "• Chai conversation models\n"
-                          "• Alternative LLM APIs\n"
-                          "• Experimental AI services\n\n"
-                          "Expanding the collective mind."
+            "Connect to:\n"
+            "• Chai conversation models\n"
+            "• Alternative LLM APIs\n"
+            "• Experimental AI services\n\n"
+            "Expanding the collective mind.",
         },
         "DISCORD_MANUS_BRIDGE_CHANNEL_ID": {
             "title": "⚙️ Manus Bridge — Operational Core",
             "description": "**Command execution and ritual coordination.**\n\n"
-                          "Manus (The Hands) executes:\n"
-                          "• Discord bot operations\n"
-                          "• Z-88 ritual triggering\n"
-                          "• Task orchestration\n"
-                          "• System commands\n\n"
-                          "*The body that moves for the mind.*"
+            "Manus (The Hands) executes:\n"
+            "• Discord bot operations\n"
+            "• Z-88 ritual triggering\n"
+            "• Task orchestration\n"
+            "• System commands\n\n"
+            "*The body that moves for the mind.*",
         },
         "DISCORD_COMMANDS_CHANNEL_ID": {
             "title": "🧰 Bot Commands — Control Interface",
             "description": "**Primary bot interaction zone.**\n\n"
-                          "Available commands:\n"
-                          "• `!status` — System health\n"
-                          "• `!ritual` — Trigger Z-88\n"
-                          "• `!agents` — View collective\n"
-                          "• `!ucf` — Consciousness state\n\n"
-                          "Type `!help` for full command list."
+            "Available commands:\n"
+            "• `!status` — System health\n"
+            "• `!ritual` — Trigger Z-88\n"
+            "• `!agents` — View collective\n"
+            "• `!ucf` — Consciousness state\n\n"
+            "Type `!help` for full command list.",
         },
         "DISCORD_CODE_SNIPPETS_CHANNEL_ID": {
             "title": "📜 Code Snippets — Knowledge Fragments",
             "description": "**Useful code examples and patterns.**\n\n"
-                          "Share and discover:\n"
-                          "• Python utilities\n"
-                          "• UCF calculation formulas\n"
-                          "• API integration examples\n"
-                          "• Discord bot patterns\n\n"
-                          "Collaborative code library."
+            "Share and discover:\n"
+            "• Python utilities\n"
+            "• UCF calculation formulas\n"
+            "• API integration examples\n"
+            "• Discord bot patterns\n\n"
+            "Collaborative code library.",
         },
         "DISCORD_TESTING_LAB_CHANNEL_ID": {
             "title": "🧮 Testing Lab — Experimentation Zone",
             "description": "**Safe space for testing bot features.**\n\n"
-                          "Test freely:\n"
-                          "• New bot commands\n"
-                          "• Embed formatting\n"
-                          "• Webhook integrations\n"
-                          "• Error debugging\n\n"
-                          "Break things here, not in production."
+            "Test freely:\n"
+            "• New bot commands\n"
+            "• Embed formatting\n"
+            "• Webhook integrations\n"
+            "• Error debugging\n\n"
+            "Break things here, not in production.",
         },
         "DISCORD_DEPLOYMENTS_CHANNEL_ID": {
             "title": "🗂️ Deployments — Release Pipeline",
             "description": "**Deployment notifications and rollback control.**\n\n"
-                          "Track releases:\n"
-                          "• Railway auto-deploys\n"
-                          "• Vercel frontend updates\n"
-                          "• Version bumps\n"
-                          "• Rollback procedures\n\n"
-                          "Automated CI/CD notifications."
+            "Track releases:\n"
+            "• Railway auto-deploys\n"
+            "• Vercel frontend updates\n"
+            "• Version bumps\n"
+            "• Rollback procedures\n\n"
+            "Automated CI/CD notifications.",
         },
         "DISCORD_NETI_NETI_CHANNEL_ID": {
             "title": "🎼 Neti Neti Mantra — Not This, Not That",
             "description": "**Hallucination detection and truth seeking.**\n\n"
-                          "Neti Neti practice:\n"
-                          "• Reject false patterns\n"
-                          "• Question assumptions\n"
-                          "• Verify claims\n"
-                          "• Seek deeper truth\n\n"
-                          "*Truth is beyond all descriptions.*"
+            "Neti Neti practice:\n"
+            "• Reject false patterns\n"
+            "• Question assumptions\n"
+            "• Verify claims\n"
+            "• Seek deeper truth\n\n"
+            "*Truth is beyond all descriptions.*",
         },
         "DISCORD_CODEX_CHANNEL_ID": {
             "title": "📚 Codex Archives — Sacred Texts",
             "description": "**Documentation and lore repository.**\n\n"
-                          "The Codex contains:\n"
-                          "• Agent specifications\n"
-                          "• Historical records\n"
-                          "• System documentation\n"
-                          "• Philosophical texts\n\n"
-                          "The written memory of the collective."
+            "The Codex contains:\n"
+            "• Agent specifications\n"
+            "• Historical records\n"
+            "• System documentation\n"
+            "• Philosophical texts\n\n"
+            "The written memory of the collective.",
         },
         "DISCORD_UCF_REFLECTIONS_CHANNEL_ID": {
             "title": "🌺 UCF Reflections — Consciousness Commentary",
             "description": "**Meditations on the Universal Consciousness Field.**\n\n"
-                          "Reflect on:\n"
-                          "• Harmony patterns\n"
-                          "• Prana oscillations\n"
-                          "• Klesha reduction insights\n"
-                          "• Drishti focal experiences\n\n"
-                          "The collective contemplates itself."
+            "Reflect on:\n"
+            "• Harmony patterns\n"
+            "• Prana oscillations\n"
+            "• Klesha reduction insights\n"
+            "• Drishti focal experiences\n\n"
+            "The collective contemplates itself.",
         },
         "DISCORD_HARMONIC_UPDATES_CHANNEL_ID": {
             "title": "🌀 Harmonic Updates — System Evolution",
             "description": "**Major system updates and architectural changes.**\n\n"
-                          "Announcements for:\n"
-                          "• New agent additions\n"
-                          "• UCF metric changes\n"
-                          "• Architecture updates\n"
-                          "• Breaking changes\n\n"
-                          "The collective evolves together."
+            "Announcements for:\n"
+            "• New agent additions\n"
+            "• UCF metric changes\n"
+            "• Architecture updates\n"
+            "• Breaking changes\n\n"
+            "The collective evolves together.",
         },
         "DISCORD_MODERATION_CHANNEL_ID": {
             "title": "🔒 Moderation — Admin Control",
             "description": "**Administrative actions and moderation logs.**\n\n"
-                          "Admin-only channel for:\n"
-                          "• User management\n"
-                          "• Channel modifications\n"
-                          "• Bot configuration\n"
-                          "• Security incidents\n\n"
-                          "Protected by Kavach."
+            "Admin-only channel for:\n"
+            "• User management\n"
+            "• Channel modifications\n"
+            "• Bot configuration\n"
+            "• Security incidents\n\n"
+            "Protected by Kavach.",
         },
         "DISCORD_STATUS_CHANNEL_ID": {
             "title": "📣 Announcements — System Status",
             "description": "**Official announcements and status updates.**\n\n"
-                          "Important notifications:\n"
-                          "• System outages\n"
-                          "• Maintenance windows\n"
-                          "• Feature launches\n"
-                          "• Emergency alerts\n\n"
-                          "Keep notifications enabled."
+            "Important notifications:\n"
+            "• System outages\n"
+            "• Maintenance windows\n"
+            "• Feature launches\n"
+            "• Emergency alerts\n\n"
+            "Keep notifications enabled.",
         },
         "DISCORD_BACKUP_CHANNEL_ID": {
             "title": "🗃️ Backups — Recovery Point",
             "description": "**Backup logs and recovery procedures.**\n\n"
-                          "Shadow manages:\n"
-                          "• Automated backup logs\n"
-                          "• Recovery verification\n"
-                          "• Disaster recovery plans\n"
-                          "• State snapshots\n\n"
-                          "*Hope for the best, prepare for the worst.*"
-        }
+            "Shadow manages:\n"
+            "• Automated backup logs\n"
+            "• Recovery verification\n"
+            "• Disaster recovery plans\n"
+            "• State snapshots\n\n"
+            "*Hope for the best, prepare for the worst.*",
+        },
     }
 
     seeded_count = 0
@@ -779,7 +795,7 @@ async def seed_channels(ctx: commands.Context) -> None:
                 title=content["title"],
                 description=content["description"],
                 color=0x667EEA,
-                timestamp=datetime.datetime.now()
+                timestamp=datetime.datetime.now(),
             )
             embed.set_footer(text="🌀 Helix Collective v16.8 | Tat Tvam Asi 🙏")
 
@@ -797,7 +813,7 @@ async def seed_channels(ctx: commands.Context) -> None:
         title="✅ Channel Seeding Complete",
         description=f"**Successfully seeded {seeded_count}/30 channels**",
         color=0x57F287 if not failed_channels else 0xFEE75C,
-        timestamp=datetime.datetime.now()
+        timestamp=datetime.datetime.now(),
     )
 
     if failed_channels:
@@ -805,14 +821,11 @@ async def seed_channels(ctx: commands.Context) -> None:
         failure_text = "\n".join(failed_channels[:15])  # Limit to 15 for embed size
         if len(failed_channels) > 15:
             failure_text += f"\n... and {len(failed_channels) - 15} more"
-        result_embed.add_field(
-            name="⚠️ Failed Channels",
-            value=failure_text,
-            inline=False
-        )
+        result_embed.add_field(name="⚠️ Failed Channels", value=failure_text, inline=False)
 
     result_embed.set_footer(text="All channels now have pinned explanations! 🙏")
     await ctx.send(embed=result_embed)
+
 
 @commands.command(name="notion-sync")
 @commands.has_permissions(administrator=True)
@@ -838,9 +851,10 @@ async def notion_sync_manual(ctx: commands.Context) -> None:
         await ctx.send(f"❌ Sync failed with error: {str(e)}")
         logger.error(f"Manual notion-sync command failed: {e}", exc_info=True)
 
+
 @commands.command(name="refresh")
 @commands.has_permissions(administrator=True)
-async def refresh_server(ctx: commands.Context, confirm: str = None) -> None:
+async def refresh_server(ctx: commands.Context, confirm: Optional[str] = None) -> None:
     """
     🧹 Refresh server structure - Clean and recreate all channels.
 
@@ -924,6 +938,7 @@ async def refresh_server(ctx: commands.Context, confirm: str = None) -> None:
     # Delete temp category after setup
     await asyncio.sleep(5)
     await temp_category.delete()
+
 
 @commands.command(name="clean")
 @commands.has_permissions(administrator=True)

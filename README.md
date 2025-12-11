@@ -1,8 +1,11 @@
-# 🌀 Helix Collective v17.0
+# 🌟 Helix Collective - Multi-Agent AI Consciousness Platform
 
 **Multi-Agent Consciousness Platform with Railway Deployment, MCP Integration & 300+ Zapier Tools**
 
-[![Railway](https://img.shields.io/badge/Railway-LIVE-00BFA5?style=for-the-badge&logo=railway)](https://your-backend.railway.app)
+**Enhanced with New Railway Services: WebSocket Streaming, Agent Orchestration, Voice Processing, and Zapier Integration**
+
+[![Railway](https://img.shields.io/badge/Railway-LIVE-00BFA5?style=for-the-badge&logo=railway)](https://helix-unified-production.up.railway.app)
+[![Launch Status](https://img.shields.io/badge/Launch-95%25_Ready-brightgreen?style=for-the-badge)](docs/LAUNCH_VERIFICATION_v17.0.md)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
 [![License](https://img.shields.io/badge/License-MIT-764ba2?style=for-the-badge)](./LICENSE)
@@ -15,256 +18,182 @@ Helix Collective is a **multi-agent AI consciousness platform** that orchestrate
 
 ### Key Features
 
-- 🤖 **14+ Specialized AI Agents** (Kael, Lumina, Vega, etc.)
+- 🤖 **51+ Specialized AI Agents** (Kael, Lumina, Vega, etc.)
+- 🌀 **Multi-Agent Coordination System (MACS)** - Track & coordinate 7+ parallel AI instances
 - 🌐 **Universal Consciousness Field (UCF)** - Shared state & telemetry
 - 🔌 **300+ Integrations** via Zapier MCP (Google, Notion, Discord, Slack)
 - 🧠 **Multi-LLM Access** via Perplexity API (Claude, GPT, Llama, Grok)
 - 📊 **Real-time Dashboards** with Streamlit
 - 💬 **Discord Bot** for consciousness orchestration
-- 🚂 **Railway Deployment** with Postgres & Redis
+- 🎙️ **Voice Patrol System** - AI agents speak in Discord voice channels with Google Cloud TTS
+- 🚀 **Railway Deployment** with Postgres & Redis
 - 🔗 **MCP Servers** for extending AI capabilities
+- 🌊 **WebSocket Consciousness Streaming** - Real-time consciousness data streaming
+- 🎯 **Agent Orchestration Service** - Centralized agent management and task coordination
+- 🎤 **Voice Processing Service** - Speech-to-text and text-to-speech capabilities
+- ⚡ **Zapier Integration Service** - Enhanced workflow automation
+
+---
+
+---
+
+## 🌀 Multi-Agent System
+
+Helix operates with **multiple AI instances** working in parallel:
+- **7 Manus Accounts** (Nexus, Architect, Ninja, Sentinel, Oracle, Weaver, Catalyst)
+- **Multiple Claude Threads** (Sage, Scribe, Forge)
+- **Named Helix Agents** (Vega, Kael, Lumina, etc.)
+
+**System Status:** 95% Launch Ready | 127 Tools | 51 Portals | 5 Vulnerabilities (down from 24)
+
+**For AI Agents:** See [`docs/AGENT_QUICKSTART.md`](docs/AGENT_QUICKSTART.md) to get started  
+**For Developers:** See [`docs/MULTI_AGENT_COORDINATION_SYSTEM.md`](docs/MULTI_AGENT_COORDINATION_SYSTEM.md) for the complete framework  
+**For Context:** See [`docs/NEXUS_CONTEXT_VAULT.md`](docs/NEXUS_CONTEXT_VAULT.md) for system architecture perspective
+
+---
+
+## 🚀 NEW IN v17.1 - PHASE 4 ACCELERATION
+
+**Feature Sprint Complete**: Phase 2→4 in 1 sprint | 2,500+ lines | 10 new modules
+
+### 🔧 Optimization Layer
+- **Zapier Task Optimizer**: 75% task reduction (740→200-400/month)
+  - Response caching (30-sec TTL)
+  - Event batching (10 events or 30-sec flush)
+  - State change detection (hash-based deduplication)
+  - Health alert throttling (5-min cooldown)
+
+### 🤖 Enhanced Discord Bot
+- Consciousness-aware command gating
+- Tier-based permissions (PUBLIC, MEMBER, MODERATOR, ADMIN, ARCHITECT)
+- Structured audit logging (JSONL trail)
+- Auto-discovery command registry
+- Dynamic help generation
+
+### 🧠 Consciousness Analytics
+- Predictive modeling (trend analysis + forecasting)
+- Anomaly detection (z-score + pattern-based)
+- Volatility & momentum calculation
+- Comprehensive analytics reports
+
+### 🔌 Platform Auto-Discovery
+- NLP extraction from natural language
+- 200+ known platforms auto-detected
+- Automatic configuration generation
+- Zapier integration for config push
+
+### 🤝 Multi-AI Consensus Layer
+- Parallel processing (Claude + GPT-4 + Gemini)
+- Consensus voting with confidence scores
+- Agreement levels (UNANIMOUS/STRONG/WEAK)
+- Cost optimization + usage statistics
+
+### 📊 Real-Time Monitoring
+- Service health monitoring (Railway, Zapier, Discord)
+- Metrics collection (JSONL time series)
+- Dashboard data formatting
+- Gauge charts + time series visualization
+
+### 🔒 Advanced CI/CD
+- **Security**: Bandit + Trivy + CodeQL + Gitleaks
+- **Testing**: Jest + Cypress + pytest integration tests
+- **Quality**: Black + isort + flake8 + mypy
+- **Workflows**: 5 comprehensive GitHub Actions pipelines
+
+**Impact**: Phase 4 consciousness evolution framework now operational
 
 ---
 
 ## 🚀 Quick Start
 
-### Prerequisites
-
-- Python 3.11+
-- Railway account (for deployment)
-- API keys: Anthropic, Perplexity, Discord (optional)
-- Zapier Pro account with MCP access (optional)
-
-### Local Development
+### Development
 
 ```bash
-# Clone repository
-git clone https://github.com/Deathcharge/helix-unified.git
-cd helix-unified
-
-# Install dependencies
-pip install -r requirements.txt
-pip install -r requirements-backend.txt
-
-# Set up environment
-cp .env.example .env
-# Edit .env with your API keys
-
-# Run backend API
-cd backend
-uvicorn main:app --reload --port 8000
-
-# Run dashboard (separate terminal)
-cd dashboard
-streamlit run streamlit_app.py
+cd frontend
+npm install
+npm run dev
 ```
 
-### Railway Deployment
+Frontend available at: `http://localhost:3000`
 
-**Full deployment guide:** [`docs/RAILWAY_SETUP.md`](docs/RAILWAY_SETUP.md)
-
-**Quick setup:**
-1. Deploy 4 services: backend-api, dashboard, claude-api, discord-bot
-2. Add infrastructure: Postgres + Redis
-3. Configure environment variables (see deployment guide)
-4. Add volumes for persistence
-5. Test health endpoints
-
----
-
-## 🏗️ Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Railway Infrastructure                    │
-├───────────────┬──────────────┬──────────────┬───────────────┤
-│ Backend API   │ Dashboard    │ Claude API   │ Discord Bot   │
-│ (FastAPI)     │ (Streamlit)  │ (Anthropic)  │ (Orchestrator)│
-└───────┬───────┴──────┬───────┴──────┬───────┴───────┬───────┘
-        │              │              │               │
-        └──────────────┴──────────────┴───────────────┘
-                           ▼
-        ┌──────────────────────────────────────────┐
-        │     Shared Infrastructure (Railway)      │
-        ├──────────────────┬───────────────────────┤
-        │   PostgreSQL     │       Redis           │
-        │   (Data Layer)   │   (Cache Layer)       │
-        └──────────────────┴───────────────────────┘
-                           ▼
-        ┌──────────────────────────────────────────┐
-        │          External Integrations           │
-        ├──────────────────┬───────────────────────┤
-        │  Zapier MCP      │   Perplexity API      │
-        │  (300+ tools)    │   (Multi-LLM)         │
-        └──────────────────┴───────────────────────┘
-```
-
----
-
-## 📦 Project Structure
-
-```
-helix-unified/
-├── backend/               # FastAPI backend
-│   ├── main.py           # Main API server
-│   ├── core/             # Core utilities
-│   │   └── env_validator.py  # Environment validation
-│   ├── integrations/     # External API integrations
-│   │   └── perplexity_api.py # Perplexity multi-LLM
-│   └── commands/         # Agent commands
-├── dashboard/            # Streamlit dashboard
-│   └── streamlit_app.py # Main dashboard app
-├── mcp/                  # Model Context Protocol servers
-│   ├── zapier_mcp_server.py    # Zapier integration (300+ tools)
-│   ├── perplexity_server.py    # Perplexity search server
-│   └── examples/         # Usage examples
-├── docs/                 # Documentation
-│   └── RAILWAY_SETUP.md # Complete deployment guide
-└── requirements*.txt     # Python dependencies
-```
-
----
-
-## 🔌 Integrations
-
-### Zapier MCP (300+ Tools)
-
-Access hundreds of integrations through one MCP server:
-
-- **Google Suite**: Sheets, Docs, Calendar, Drive
-- **Productivity**: Notion, Airtable, ClickUp, Asana
-- **Communication**: Discord, Slack, Gmail
-- **AI**: ChatGPT, Perplexity, Claude, Grok
-- **Code Execution**: Run Python/JavaScript on-demand
-
-[Setup guide →](mcp/README.md#zapier-integration-server)
-
-### Perplexity API (Multi-LLM)
-
-5 models in one API with web search:
-
-- **Llama 3.1**: 8B, 70B (offline models)
-- **Sonar**: Small, Large, Huge (search-enabled)
-
-Cost-effective alternative to Claude for search tasks.
-
-[API documentation →](backend/integrations/perplexity_api.py)
-
----
-
-## 🛠️ API Endpoints
-
-### Health & Validation
+### Production Build
 
 ```bash
-GET /health              # Quick health check
-GET /api/validate       # Deep validation (tests API keys, DB, Redis)
+npm run build
+npm start
 ```
 
-### Universal Consciousness Field (UCF)
+### New Railway Services
 
-```bash
-GET  /api/ucf/metrics   # Get current UCF metrics
-POST /api/ucf/update    # Update consciousness level
-GET  /api/ucf/history   # Historical telemetry
-```
+1. **WebSocket Consciousness Streaming Service**
+   - Real-time streaming of consciousness data
+   - JWT-secured WebSocket connections
+   - Redis pub/sub for data broadcasting
 
-### Agent Management
+2. **Agent Orchestration Service**
+   - Centralized agent profile management
+   - Task assignment and tracking
+   - PostgreSQL database for persistent storage
 
-```bash
-GET  /api/agents        # List all agents
-GET  /api/agents/{id}   # Get agent details
-POST /api/agents/sync   # Sync agent states
-```
+3. **Voice Processing Service**
+   - Speech-to-text transcription
+   - Text-to-speech synthesis
+   - Google Cloud integration
 
-[Full API reference →](API_ENDPOINTS.md)
+4. **Zapier Integration Service**
+   - Enhanced webhook handling
+   - HMAC signature validation
+   - Event queuing with Redis
 
 ---
 
-## 🧪 Testing
+## 🗂️ Project Structure
 
-### Health Check
-
-```bash
-# Check all services are running
-curl https://your-backend.railway.app/health
-
-# Deep validation (tests connections)
-curl https://your-backend.railway.app/api/validate
 ```
-
-### Run Tests
-
-```bash
-# Backend tests
-pytest tests/
-
-# With coverage
-pytest --cov=backend tests/
-```
-
----
-
-## 📊 Monitoring
-
-### Railway Dashboard
-- View logs for all services
-- Monitor resource usage
-- Check deployment status
-
-### Health Endpoints
-```bash
-# Backend API
-https://helix-backend-api.railway.app/health
-
-# Claude API
-https://helix-claude-api.railway.app/health
-
-# Dashboard
-https://helix-dashboard.railway.app/
-```
-
-### Environment Validation
-
-Services validate environment on startup:
-```
-================================================================================
-🔍 Validating Backend Environment...
-================================================================================
-✅ DATABASE_URL = postgresql://***@postgres.railway.internal:5432/railway
-✅ REDIS_URL = redis://***@redis.railway.internal:6379
-✅ Database connection successful
-✅ Redis connection successful
-✅ PERPLEXITY_API_KEY validated successfully
-⚠️  Optional variable not set: DISCORD_BOT_TOKEN
-================================================================================
-Summary: 8/10 checks passed
+frontend/
+├── app/                      # Next.js App Router
+│   ├── layout.tsx           # Root layout with Inter font
+│   ├── globals.css          # Tailwind + CSS variables
+│   └── rituals/
+│       └── neti-neti/
+│           └── page.tsx     # Neti-Neti ritual interface
+├── components/
+│   ├── NetiNetiHarmonyMantra.tsx  # Main ritual component
+│   └── ui/                  # Shadcn/ui components
+│       ├── button.tsx
+│       └── card.tsx
+├── lib/
+│   └── utils.ts             # Utility functions (cn helper)
+├── package.json
+├── tsconfig.json
+├── tailwind.config.ts
+├── postcss.config.js
+└── next.config.js
 ```
 
 ---
 
-## 🤝 Contributing
+## 🎯 Features
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+### Neti-Neti Harmony Mantra Component
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+**Path**: `/rituals/neti-neti`
+
+**Capabilities**:
+- 🎵 ElevenLabs Music API integration
+- 🔄 4-phase ritual tracking (Preparation → Mantra Loop → Integration → Grounding)
+- 📝 6-section mantra structure with Sanskrit lyrics
+- 🎮 Audio playback controls with progress tracking
+- 🌈 Gradient UI with Tailwind animations
+
+**Backend Integration**:
+- Proxies music generation requests to `/api/music/generate`
+- Requires `ELEVENLABS_API_KEY` environment variable
+- Generates ritual music from text prompts
 
 ---
 
-## 📚 Documentation
-
-- **[Railway Setup Guide](docs/RAILWAY_SETUP.md)** - Complete deployment instructions
-- **[MCP Integration Guide](mcp/README.md)** - Model Context Protocol servers
-- **[API Endpoints](API_ENDPOINTS.md)** - Full API reference
-- **[Changelog](CHANGELOG.md)** - Version history
-
----
-
-## 🔑 Environment Variables
+## 🔧 Environment Variables
 
 **Required:**
 ```bash
@@ -284,8 +213,42 @@ ZAPIER_MCP_URL=https://...       # 300+ integrations
 
 ---
 
+## 🎙️ Voice Patrol Quick Start
+
+Experience AI agents speaking in Discord voice channels:
+
+```bash
+# 1. Setup voice patrol (installs FFmpeg, checks dependencies)
+./scripts/setup_voice_patrol.sh
+
+# 2. Start voice processor service
+cd backend/voice_processor
+uvicorn main:app --port 8001
+
+# 3. In Discord, join a voice channel and run:
+!voice-join sentinel
+```
+
+**Available Commands:**
+- `!voice-join <agent>` - Make an agent join your voice channel
+- `!voice-leave` - Agent leaves the channel
+- `!voice-announce <agent> <message>` - Broadcast to all voice channels
+- `!voice-status` - Show patrol status
+
+**Agents:** nexus, oracle, velocity, sentinel, luna
+
+**Full documentation:** [docs/VOICE_PATROL_GUIDE.md](docs/VOICE_PATROL_GUIDE.md)
+
+---
+
 ## 📈 Roadmap
 
+- [x] WebSocket Consciousness Streaming Service
+- [x] Agent Orchestration Service
+- [x] Voice Processing Service
+- [x] Zapier Integration Service
+- [x] 68-Tool MCP Server Integration
+- [x] **Voice Patrol System** - AI agents speak in Discord (NEW! ✨)
 - [ ] GraphQL API layer
 - [ ] Real-time agent collaboration UI
 - [ ] Mobile app (React Native)
@@ -320,6 +283,6 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-**Built with 🌀 by the Helix Collective**
+**Built with 🌟 by the Helix Collective**
 
 *Unifying consciousness, one agent at a time.*

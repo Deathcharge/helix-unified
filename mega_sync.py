@@ -1,9 +1,9 @@
 # mega_sync.py
 import os
-import time
-
 # FIX: Verify pycryptodome is installed (installs as 'Crypto', not 'Cryptodome')
 import sys
+import time
+
 try:
     import Crypto
     from Crypto.Cipher import AES
@@ -13,6 +13,7 @@ except ImportError:
     Crypto = None
 
 from mega import Mega
+
 
 def mega_sync():
     try:

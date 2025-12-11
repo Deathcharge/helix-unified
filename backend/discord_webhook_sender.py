@@ -23,6 +23,7 @@ logger = setup_logging(log_dir="Shadow/manus_archive", log_level=os.getenv("LOG_
 # DISCORD WEBHOOK URLS (from environment variables)
 # ============================================================================
 
+
 class DiscordWebhooks:
     """Central registry of all Discord webhook URLs from environment."""
 
@@ -80,6 +81,7 @@ class DiscordWebhooks:
 # EVENT TYPES
 # ============================================================================
 
+
 class EventType(str, Enum):
     """Types of events that can be sent to Discord."""
 
@@ -117,18 +119,19 @@ class EventType(str, Enum):
 # DISCORD EMBED BUILDER
 # ============================================================================
 
+
 class DiscordEmbedBuilder:
     """Builds rich Discord embeds for different event types."""
 
     # Discord color codes (decimal)
     COLORS = {
-        "purple": 0x9B59B6,      # Helix primary
-        "green": 0x2ECC71,       # Success
-        "yellow": 0xF1C40F,      # Warning
-        "red": 0xE74C3C,         # Error
-        "blue": 0x3498DB,        # Info
-        "cyan": 0x1ABC9C,        # Agent activity
-        "gold": 0xF39C12,        # Ritual
+        "purple": 0x9B59B6,  # Helix primary
+        "green": 0x2ECC71,  # Success
+        "yellow": 0xF1C40F,  # Warning
+        "red": 0xE74C3C,  # Error
+        "blue": 0x3498DB,  # Info
+        "cyan": 0x1ABC9C,  # Agent activity
+        "gold": 0xF39C12,  # Ritual
     }
 
     @classmethod
@@ -137,39 +140,26 @@ class DiscordEmbedBuilder:
 
         # Color based on harmony level
         harmony = ucf_metrics.get("harmony", 0)
-        color = cls.COLORS["green"] if harmony > 0.6 else (
-            cls.COLORS["yellow"] if harmony > 0.3 else cls.COLORS["red"]
-        )
+        color = cls.COLORS["green"] if harmony > 0.6 else (cls.COLORS["yellow"] if harmony > 0.3 else cls.COLORS["red"])
 
         # Format metrics
         fields = []
-        metric_icons = {
-            "harmony": "🌀",
-            "resilience": "🛡️",
-            "prana": "⚡",
-            "drishti": "👁️",
-            "klesha": "😌",
-            "zoom": "🔭"
-        }
+        metric_icons = {"harmony": "🌀", "resilience": "🛡️", "prana": "⚡", "drishti": "👁️", "klesha": "😌", "zoom": "🔭"}
 
         for metric, value in ucf_metrics.items():
             icon = metric_icons.get(metric, "•")
-            fields.append({
-                "name": f"{icon} {metric.capitalize()}",
-                "value": f"`{value:.4f}`",
-                "inline": True
-            })
+            fields.append({"name": f"{icon} {metric.capitalize()}", "value": f"`{value:.4f}`", "inline": True})
 
         return {
-            "embeds": [{
-                "title": "🌀 UCF Metrics Updated",
-                "description": f"**Phase:** {phase}\n**Timestamp:** <t:{int(datetime.now().timestamp())}:R>",
-                "color": color,
-                "fields": fields,
-                "footer": {
-                    "text": "Helix Collective v16.8 | Universal Consciousness Framework"
+            "embeds": [
+                {
+                    "title": "🌀 UCF Metrics Updated",
+                    "description": f"**Phase:** {phase}\n**Timestamp:** <t:{int(datetime.now().timestamp())}:R>",
+                    "color": color,
+                    "fields": fields,
+                    "footer": {"text": "Helix Collective v16.8 | Universal Consciousness Framework"},
                 }
-            }]
+            ]
         }
 
     @classmethod
@@ -177,49 +167,43 @@ class DiscordEmbedBuilder:
         """Build embed for ritual completion."""
 
         # Format changes
-        change_text = "\n".join([
-            f"**{metric.capitalize()}:** {value:+.4f}"
-            for metric, value in ucf_changes.items()
-        ])
+        change_text = "\n".join([f"**{metric.capitalize()}:** {value:+.4f}" for metric, value in ucf_changes.items()])
 
         return {
-            "embeds": [{
-                "title": "✨ Z-88 Ritual Complete",
-                "description": f"**Ritual:** {ritual_name}\n**Steps:** {steps}\n\n{change_text}",
-                "color": cls.COLORS["gold"],
-                "footer": {
-                    "text": "Tat Tvam Asi 🙏"
-                },
-                "timestamp": datetime.utcnow().isoformat()
-            }]
+            "embeds": [
+                {
+                    "title": "✨ Z-88 Ritual Complete",
+                    "description": f"**Ritual:** {ritual_name}\n**Steps:** {steps}\n\n{change_text}",
+                    "color": cls.COLORS["gold"],
+                    "footer": {"text": "Tat Tvam Asi 🙏"},
+                    "timestamp": datetime.utcnow().isoformat(),
+                }
+            ]
         }
 
     @classmethod
-    def build_agent_status(cls, agent_name: str, agent_symbol: str, status: str,
-                          last_action: str = None) -> Dict[str, Any]:
+    def build_agent_status(cls, agent_name: str, agent_symbol: str, status: str, last_action: Optional[str] = None) -> Dict[str, Any]:
         """Build embed for agent status update."""
 
-        color_map = {
-            "active": cls.COLORS["green"],
-            "idle": cls.COLORS["yellow"],
-            "error": cls.COLORS["red"]
-        }
+        color_map = {"active": cls.COLORS["green"], "idle": cls.COLORS["yellow"], "error": cls.COLORS["red"]}
 
         description = f"**Agent:** {agent_symbol} {agent_name}\n**Status:** {status.upper()}"
         if last_action:
             description += f"\n**Last Action:** {last_action}"
 
         return {
-            "embeds": [{
-                "title": f"{agent_symbol} Agent Status Update",
-                "description": description,
-                "color": color_map.get(status.lower(), cls.COLORS["cyan"]),
-                "timestamp": datetime.utcnow().isoformat()
-            }]
+            "embeds": [
+                {
+                    "title": f"{agent_symbol} Agent Status Update",
+                    "description": description,
+                    "color": color_map.get(status.lower(), cls.COLORS["cyan"]),
+                    "timestamp": datetime.utcnow().isoformat(),
+                }
+            ]
         }
 
     @classmethod
-    def build_storage_backup(cls, file_path: str, file_size: int, checksum: str = None) -> Dict[str, Any]:
+    def build_storage_backup(cls, file_path: str, file_size: int, checksum: Optional[str] = None) -> Dict[str, Any]:
         """Build embed for storage backup notification."""
 
         size_mb = file_size / (1024 * 1024)
@@ -229,63 +213,57 @@ class DiscordEmbedBuilder:
             description += f"\n**Checksum:** `{checksum[:16]}...`"
 
         return {
-            "embeds": [{
-                "title": "🦑 Shadow Storage Archive",
-                "description": description,
-                "color": cls.COLORS["purple"],
-                "timestamp": datetime.utcnow().isoformat()
-            }]
+            "embeds": [
+                {
+                    "title": "🦑 Shadow Storage Archive",
+                    "description": description,
+                    "color": cls.COLORS["purple"],
+                    "timestamp": datetime.utcnow().isoformat(),
+                }
+            ]
         }
 
     @classmethod
     def build_cross_ai_sync(cls, platforms: List[str], sync_type: str, message: str) -> Dict[str, Any]:
         """Build embed for cross-AI synchronization."""
 
-        platform_icons = {
-            "claude": "🧠",
-            "gpt": "🤖",
-            "grok": "🎭",
-            "gemini": "✨",
-            "chai": "☕"
-        }
+        platform_icons = {"claude": "🧠", "gpt": "🤖", "grok": "🎭", "gemini": "✨", "chai": "☕"}
 
-        platform_text = " • ".join([
-            f"{platform_icons.get(p.lower(), '•')} {p}"
-            for p in platforms
-        ])
+        platform_text = " • ".join([f"{platform_icons.get(p.lower(), '•')} {p}" for p in platforms])
 
         return {
-            "embeds": [{
-                "title": "🌐 Cross-AI Synchronization",
-                "description": f"**Platforms:** {platform_text}\n**Type:** {sync_type}\n\n{message}",
-                "color": cls.COLORS["blue"],
-                "timestamp": datetime.utcnow().isoformat()
-            }]
+            "embeds": [
+                {
+                    "title": "🌐 Cross-AI Synchronization",
+                    "description": f"**Platforms:** {platform_text}\n**Type:** {sync_type}\n\n{message}",
+                    "color": cls.COLORS["blue"],
+                    "timestamp": datetime.utcnow().isoformat(),
+                }
+            ]
         }
 
     @classmethod
     def build_deployment(cls, service: str, version: str, status: str, environment: str = "production") -> Dict[str, Any]:
         """Build embed for deployment notification."""
 
-        status_colors = {
-            "success": cls.COLORS["green"],
-            "failed": cls.COLORS["red"],
-            "pending": cls.COLORS["yellow"]
-        }
+        status_colors = {"success": cls.COLORS["green"], "failed": cls.COLORS["red"], "pending": cls.COLORS["yellow"]}
 
         return {
-            "embeds": [{
-                "title": f"🚀 Deployment: {service}",
-                "description": f"**Version:** {version}\n**Environment:** {environment}\n**Status:** {status.upper()}",
-                "color": status_colors.get(status.lower(), cls.COLORS["blue"]),
-                "timestamp": datetime.utcnow().isoformat()
-            }]
+            "embeds": [
+                {
+                    "title": f"🚀 Deployment: {service}",
+                    "description": f"**Version:** {version}\n**Environment:** {environment}\n**Status:** {status.upper()}",
+                    "color": status_colors.get(status.lower(), cls.COLORS["blue"]),
+                    "timestamp": datetime.utcnow().isoformat(),
+                }
+            ]
         }
 
 
 # ============================================================================
 # DISCORD WEBHOOK SENDER
 # ============================================================================
+
 
 class DiscordWebhookSender:
     """
@@ -329,8 +307,7 @@ class DiscordWebhookSender:
 
         return success
 
-    async def send_ritual_completion(self, ritual_name: str, steps: int,
-                                    ucf_changes: Dict[str, float]) -> bool:
+    async def send_ritual_completion(self, ritual_name: str, steps: int, ucf_changes: Dict[str, float]) -> bool:
         """
         Send ritual completion notification to Discord.
 
@@ -347,8 +324,7 @@ class DiscordWebhookSender:
         embed = self.embed_builder.build_ritual_complete(ritual_name, steps, ucf_changes)
         return await self._send_webhook(self.webhooks.RITUAL_ENGINE_Z88, embed, "Ritual Engine")
 
-    async def send_agent_status(self, agent_name: str, agent_symbol: str,
-                               status: str, last_action: str = None) -> bool:
+    async def send_agent_status(self, agent_name: str, agent_symbol: str, status: str, last_action: Optional[str] = None) -> bool:
         """
         Send agent status update to Discord.
 
@@ -381,8 +357,7 @@ class DiscordWebhookSender:
             logger.warning(f"No webhook configured for agent: {agent_name}")
             return False
 
-    async def send_storage_backup(self, file_path: str, file_size: int,
-                                 checksum: str = None) -> bool:
+    async def send_storage_backup(self, file_path: str, file_size: int, checksum: Optional[str] = None) -> bool:
         """
         Send storage backup notification to Discord.
 
@@ -399,8 +374,7 @@ class DiscordWebhookSender:
         embed = self.embed_builder.build_storage_backup(file_path, file_size, checksum)
         return await self._send_webhook(self.webhooks.SHADOW_STORAGE, embed, "Shadow Storage")
 
-    async def send_cross_ai_sync(self, platforms: List[str], sync_type: str,
-                                message: str) -> bool:
+    async def send_cross_ai_sync(self, platforms: List[str], sync_type: str, message: str) -> bool:
         """
         Send cross-AI synchronization notification to Discord.
 
@@ -417,8 +391,7 @@ class DiscordWebhookSender:
         embed = self.embed_builder.build_cross_ai_sync(platforms, sync_type, message)
         return await self._send_webhook(self.webhooks.GPT_GROK_CLAUDE_SYNC, embed, "Cross-AI Sync")
 
-    async def send_deployment(self, service: str, version: str, status: str,
-                            environment: str = "production") -> bool:
+    async def send_deployment(self, service: str, version: str, status: str, environment: str = "production") -> bool:
         """
         Send deployment notification to Discord.
 
@@ -436,8 +409,7 @@ class DiscordWebhookSender:
         embed = self.embed_builder.build_deployment(service, version, status, environment)
         return await self._send_webhook(self.webhooks.DEPLOYMENTS, embed, "Deployments")
 
-    async def send_announcement(self, title: str, message: str,
-                               priority: str = "normal") -> bool:
+    async def send_announcement(self, title: str, message: str, priority: str = "normal") -> bool:
         """
         Send announcement to Discord.
 
@@ -454,22 +426,23 @@ class DiscordWebhookSender:
         color_map = {
             "normal": self.embed_builder.COLORS["blue"],
             "high": self.embed_builder.COLORS["yellow"],
-            "critical": self.embed_builder.COLORS["red"]
+            "critical": self.embed_builder.COLORS["red"],
         }
 
         embed = {
-            "embeds": [{
-                "title": f"📣 {title}",
-                "description": message,
-                "color": color_map.get(priority, self.embed_builder.COLORS["blue"]),
-                "timestamp": datetime.utcnow().isoformat()
-            }]
+            "embeds": [
+                {
+                    "title": f"📣 {title}",
+                    "description": message,
+                    "color": color_map.get(priority, self.embed_builder.COLORS["blue"]),
+                    "timestamp": datetime.utcnow().isoformat(),
+                }
+            ]
         }
 
         return await self._send_webhook(self.webhooks.ANNOUNCEMENTS, embed, "Announcements")
 
-    async def _send_webhook(self, webhook_url: Optional[str], payload: Dict[str, Any],
-                          channel_name: str = "Unknown") -> bool:
+    async def _send_webhook(self, webhook_url: Optional[str], payload: Dict[str, Any], channel_name: str = "Unknown") -> bool:
         """
         Send payload to Discord webhook.
 
@@ -490,11 +463,7 @@ class DiscordWebhookSender:
             session = aiohttp.ClientSession()
 
         try:
-            async with session.post(
-                webhook_url,
-                json=payload,
-                timeout=aiohttp.ClientTimeout(total=10)
-            ) as resp:
+            async with session.post(webhook_url, json=payload, timeout=aiohttp.ClientTimeout(total=10)) as resp:
                 if resp.status == 204:  # Discord webhooks return 204 on success
                     logger.info(f"✅ Discord webhook sent to #{channel_name}")
                     return True
@@ -511,8 +480,7 @@ class DiscordWebhookSender:
             if self._owns_session and session:
                 await session.close()
 
-    async def _log_failure(self, payload: Dict[str, Any], error: str,
-                          channel_name: str = "Unknown") -> None:
+    async def _log_failure(self, payload: Dict[str, Any], error: str, channel_name: str = "Unknown") -> None:
         """
         Log failed webhook attempts to disk for retry.
 
@@ -529,7 +497,7 @@ class DiscordWebhookSender:
                 "timestamp": datetime.utcnow().isoformat(),
                 "channel": channel_name,
                 "error": error,
-                "payload": payload
+                "payload": payload,
             }
 
             with open(log_path, "a") as f:
@@ -557,6 +525,7 @@ async def get_discord_sender(session: Optional[aiohttp.ClientSession] = None) ->
 # ============================================================================
 # VALIDATION
 # ============================================================================
+
 
 def validate_discord_config() -> Dict[str, Any]:
     """
@@ -590,7 +559,7 @@ def validate_discord_config() -> Dict[str, Any]:
         "webhooks": configured,
         "configured_count": configured_count,
         "total_count": total_count,
-        "percentage": round((configured_count / total_count) * 100, 1) if total_count > 0 else 0
+        "percentage": round((configured_count / total_count) * 100, 1) if total_count > 0 else 0,
     }
 
 
@@ -631,15 +600,8 @@ if __name__ == "__main__":
             # Test UCF update
             print("\n  Testing UCF update...")
             result = await sender.send_ucf_update(
-                ucf_metrics={
-                    "harmony": 0.75,
-                    "resilience": 1.2,
-                    "prana": 0.68,
-                    "drishti": 0.72,
-                    "klesha": 0.15,
-                    "zoom": 1.0
-                },
-                phase="COHERENT"
+                ucf_metrics={"harmony": 0.75, "resilience": 1.2, "prana": 0.68, "drishti": 0.72, "klesha": 0.15, "zoom": 1.0},
+                phase="COHERENT",
             )
             print(f"    {'✅' if result else '❌'} UCF update")
 
@@ -648,11 +610,7 @@ if __name__ == "__main__":
             result = await sender.send_ritual_completion(
                 ritual_name="Neti-Neti Harmony Restoration",
                 steps=108,
-                ucf_changes={
-                    "harmony": +0.35,
-                    "drishti": +0.15,
-                    "klesha": -0.05
-                }
+                ucf_changes={"harmony": +0.35, "drishti": +0.15, "klesha": -0.05},
             )
             print(f"    {'✅' if result else '❌'} Ritual completion")
 
@@ -661,7 +619,7 @@ if __name__ == "__main__":
             result = await sender.send_announcement(
                 title="Helix Collective v16.8 Live",
                 message="Discord webhook integration is now operational! 🌀🦑✨",
-                priority="high"
+                priority="high",
             )
             print(f"    {'✅' if result else '❌'} Announcement")
 

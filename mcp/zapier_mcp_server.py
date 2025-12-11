@@ -8,11 +8,13 @@ import asyncio
 import json
 import os
 from typing import Any, Dict, List, Optional
-from mcp.server import Server
-from mcp.types import Tool, TextContent
-from mcp.server.stdio import stdio_server
+
 from fastmcp import Client
 from fastmcp.client.transports import StreamableHttpTransport
+
+from mcp.server import Server
+from mcp.server.stdio import stdio_server
+from mcp.types import TextContent, Tool
 
 
 class ZapierMCPServer:

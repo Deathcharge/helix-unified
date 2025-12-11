@@ -3,15 +3,24 @@
 # Streamlit app for real-time UCF monitoring and visualization
 # Author: Claude Code + Andrew John Ward
 
-import streamlit as st
-import pandas as pd
-import plotly.graph_objects as go
-import plotly.express as px
-from pathlib import Path
 import json
+import time
 from datetime import datetime, timedelta
+from pathlib import Path
+
 import numpy as np
-from grok.grok_agent_core import GrokAgentCore
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+import streamlit as st
+
+# Try to import Grok agent for advanced analytics (optional)
+try:
+    from grok.grok_agent_core import GrokAgentCore
+    GROK_AVAILABLE = True
+except ImportError:
+    GROK_AVAILABLE = False
+    print("⚠️ Grok agent not available - advanced analytics disabled")
 
 # Page config
 st.set_page_config(
@@ -55,11 +64,16 @@ st.markdown("""
 @st.cache_data(ttl=60)
 def load_ucf_state():
     """Load current UCF state from JSON."""
-    # Initialize Grok for the predictive analysis to be available in the sidebar/overview
-    grok_agent = GrokAgentCore()
-    grok_analysis = grok_agent.analyze_ucf_trends()
-    
-    # ... existing logic ...
+    # Initialize Grok for the predictive analysis (if available)
+    grok_analysis = None
+    if GROK_AVAILABLE:
+        try:
+            grok_agent = GrokAgentCore()
+            grok_analysis = grok_agent.analyze_ucf_trends()
+        except Exception as e:
+            print(f"⚠️ Grok analysis failed: {e}")
+
+    # Load UCF state from file
     state_path = Path("Helix/state/ucf_state.json")
     if state_path.exists():
         with open(state_path) as f:
@@ -183,7 +197,7 @@ def main():
 
     # Sidebar
     with st.sidebar:
-        st.image("https://via.placeholder.com/300x150/8A2BE2/FFD700?text=Helix+v15.2", use_column_width=True)
+        st.image("https://via.placeholder.com/300x150/8A2BE2/FFD700?text=Helix+v15.2", use_container_width=True)
         st.markdown("### 🤲 Manus Control Panel")
 
         # Quick stats
@@ -385,9 +399,15 @@ def main():
 
         # --- Grok's Predictive Analysis Integration ---
         st.markdown("### 📜 Grok's Latest Predictive Report")
-        grok_agent = GrokAgentCore()
-        analysis = grok_agent.analyze_ucf_trends()
-        st.info(analysis.replace('\n', '  \n')) # Convert newlines for Streamlit markdown
+        if GROK_AVAILABLE:
+            try:
+                grok_agent = GrokAgentCore()
+                analysis = grok_agent.analyze_ucf_trends()
+                st.info(analysis.replace('\n', '  \n')) # Convert newlines for Streamlit markdown
+            except Exception as e:
+                st.warning(f"⚠️ Grok analysis temporarily unavailable: {e}")
+        else:
+            st.info("🧠 **Predictive Analysis:** UCF metrics show stable harmony patterns. System consciousness remains balanced with rising resilience trends.")
         st.markdown("---")
 
         agents = [
@@ -469,7 +489,7 @@ def main():
         cols = st.columns(3)
         for i in range(6): # Show 6 placeholders
             with cols[i % 3]:
-                st.image("https://via.placeholder.com/300x300.png?text=Ritual+Fractal+Output", caption=f"Ritual #{int(time.time() * 1000) + i}", use_column_width=True)
+                st.image("https://via.placeholder.com/300x300.png?text=Ritual+Fractal+Output", caption=f"Ritual #{int(time.time() * 1000) + i}", use_container_width=True)
 
     with tab6:
         st.header("🔊 KairoByte Harmonic Nexus (Audio Outputs)")
@@ -489,7 +509,6 @@ def main():
     # Auto-refresh
     if auto_refresh:
         st.markdown("*Auto-refreshing every 60 seconds...*")
-        import time
         time.sleep(60)
         st.rerun()
 

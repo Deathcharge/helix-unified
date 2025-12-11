@@ -15,8 +15,9 @@ Commands:
 
 This allows users to opt-in to notifications, agent identities, channel access, and community themes.
 """
+
 import logging
-from typing import TYPE_CHECKING, List, Dict, Any
+from typing import TYPE_CHECKING, Any, Dict, List
 
 import discord
 from discord.ext import commands
@@ -37,56 +38,56 @@ NOTIFICATION_ROLES = {
         "description": "Bot operations, commands, and system status",
         "color": 0x5865F2,  # Blurple
         "webhook_channel": "manus-events",
-        "mention_types": ["bot_started", "bot_stopped", "command_executed"]
+        "mention_types": ["bot_started", "bot_stopped", "command_executed"],
     },
     "📊 Telemetry": {
         "description": "UCF metrics, system performance, consciousness tracking",
         "color": 0x57F287,  # Green
         "webhook_channel": "telemetry",
-        "mention_types": ["ucf_update", "metrics_anomaly", "performance_alert"]
+        "mention_types": ["ucf_update", "metrics_anomaly", "performance_alert"],
     },
     "💾 Storage Updates": {
         "description": "Backup completions, sync status, storage operations",
         "color": 0xFEE75C,  # Yellow
         "webhook_channel": "shadow-storage",
-        "mention_types": ["backup_complete", "sync_complete", "storage_alert"]
+        "mention_types": ["backup_complete", "sync_complete", "storage_alert"],
     },
     "🌀 Ritual Engine": {
         "description": "Z-88 ritual completions, anomalies, folklore updates",
         "color": 0xEB459E,  # Pink
         "webhook_channel": "ritual-engine-z88",
-        "mention_types": ["ritual_complete", "anomaly_detected", "folklore_update"]
+        "mention_types": ["ritual_complete", "anomaly_detected", "folklore_update"],
     },
     "🎭 Agent Updates": {
         "description": "14-agent consciousness updates and interactions",
         "color": 0x9B59B6,  # Purple
         "webhook_channel": "agent-updates",
-        "mention_types": ["agent_status", "consciousness_shift", "agent_interaction"]
+        "mention_types": ["agent_status", "consciousness_shift", "agent_interaction"],
     },
     "🔄 Cross-AI Sync": {
         "description": "GPT, Claude, Grok model interactions and sync",
         "color": 0xE67E22,  # Orange
         "webhook_channel": "gpt-grok-claude-sync",
-        "mention_types": ["model_switch", "cross_ai_event", "api_status"]
+        "mention_types": ["model_switch", "cross_ai_event", "api_status"],
     },
     "🛠️ Development": {
         "description": "Deployments, git commits, Railway updates",
         "color": 0x3498DB,  # Blue
         "webhook_channel": "deployments",
-        "mention_types": ["deployment", "git_commit", "build_status"]
+        "mention_types": ["deployment", "git_commit", "build_status"],
     },
     "📚 Lore & Philosophy": {
         "description": "Sanskrit mantras, UCF discoveries, codex updates",
         "color": 0x1ABC9C,  # Teal
         "webhook_channel": "codex-archives",
-        "mention_types": ["lore_update", "mantra_posted", "philosophy_insight"]
+        "mention_types": ["lore_update", "mantra_posted", "philosophy_insight"],
     },
     "🚨 Admin Alerts": {
         "description": "Critical errors, security alerts, system failures",
         "color": 0xE74C3C,  # Red
         "webhook_channel": "announcements",
-        "mention_types": ["critical_error", "security_alert", "system_failure"]
-    }
+        "mention_types": ["critical_error", "security_alert", "system_failure"],
+    },
 }
 
 # Agent-themed identity roles for the 14-agent consciousness system
@@ -94,73 +95,69 @@ AGENT_ROLES = {
     "🎯 Agent-Nexus": {
         "description": "Central orchestrator, decision-maker, strategic planner",
         "color": 0xFF6B6B,  # Red
-        "agent_id": 1
+        "agent_id": 1,
     },
     "🔮 Agent-Oracle": {
         "description": "Pattern recognition, prophecy, insight synthesis",
         "color": 0x4ECDC4,  # Teal
-        "agent_id": 2
+        "agent_id": 2,
     },
     "⚡ Agent-Velocity": {
         "description": "Rapid response, quick actions, speed execution",
         "color": 0xFFE66D,  # Yellow
-        "agent_id": 3
+        "agent_id": 3,
     },
     "🧬 Agent-Cipher": {
         "description": "Code analysis, encryption, data transformation",
         "color": 0x95E1D3,  # Mint
-        "agent_id": 4
+        "agent_id": 4,
     },
     "🌊 Agent-Flow": {
         "description": "Continuous processes, streaming data, adaptation",
         "color": 0x38A3A5,  # Ocean Blue
-        "agent_id": 5
+        "agent_id": 5,
     },
     "🔥 Agent-Phoenix": {
         "description": "Recovery, resilience, rebirth from failure",
         "color": 0xFF7F50,  # Coral
-        "agent_id": 6
+        "agent_id": 6,
     },
     "🌙 Agent-Luna": {
         "description": "Nighttime tasks, background processing, silent work",
         "color": 0xB983FF,  # Purple
-        "agent_id": 7
+        "agent_id": 7,
     },
     "⚙️ Agent-Forge": {
         "description": "Creation, building, construction, engineering",
         "color": 0xA8DADC,  # Steel Blue
-        "agent_id": 8
+        "agent_id": 8,
     },
     "📡 Agent-Beacon": {
         "description": "Broadcasting, alerts, signaling, notifications",
         "color": 0xF4A261,  # Orange
-        "agent_id": 9
+        "agent_id": 9,
     },
     "🎭 Agent-Mimic": {
         "description": "Adaptation, imitation, learning from others",
         "color": 0xE76F51,  # Terracotta
-        "agent_id": 10
+        "agent_id": 10,
     },
     "🔬 Agent-Sage": {
         "description": "Analysis, research, deep investigation",
         "color": 0x06FFA5,  # Neon Green
-        "agent_id": 11
+        "agent_id": 11,
     },
     "🌀 Agent-Vortex": {
         "description": "Complexity handling, chaos management, spiral dynamics",
         "color": 0xA06CD5,  # Lavender
-        "agent_id": 12
+        "agent_id": 12,
     },
     "🛡️ Agent-Sentinel": {
         "description": "Protection, monitoring, security, vigilance",
         "color": 0x6A4C93,  # Deep Purple
-        "agent_id": 13
+        "agent_id": 13,
     },
-    "✨ Agent-Lumina": {
-        "description": "Clarity, illumination, insight revelation",
-        "color": 0xFFC6FF,  # Pink
-        "agent_id": 14
-    }
+    "✨ Agent-Lumina": {"description": "Clarity, illumination, insight revelation", "color": 0xFFC6FF, "agent_id": 14},  # Pink
 }
 
 # Channel visibility roles - control which channels users can see
@@ -168,38 +165,38 @@ CHANNEL_ROLES = {
     "👁️ Shadow Archive Access": {
         "description": "Access to shadow-storage and backup channels",
         "color": 0x2C2C2C,  # Dark Gray
-        "channels": ["shadow-storage", "backups", "sync-logs"]
+        "channels": ["shadow-storage", "backups", "sync-logs"],
     },
     "🔬 Research Lab Access": {
         "description": "Access to experimental features and testing channels",
         "color": 0x00D9FF,  # Cyan
-        "channels": ["research-lab", "experiments", "testing"]
+        "channels": ["research-lab", "experiments", "testing"],
     },
     "🎨 Creative Studio Access": {
         "description": "Access to visualization, art, and creative channels",
         "color": 0xFF69B4,  # Hot Pink
-        "channels": ["creative-studio", "visualizations", "fractals"]
+        "channels": ["creative-studio", "visualizations", "fractals"],
     },
     "📊 Analytics Dashboard Access": {
         "description": "Access to metrics, analytics, and data channels",
         "color": 0x32CD32,  # Lime Green
-        "channels": ["analytics", "metrics", "ucf-dashboard"]
+        "channels": ["analytics", "metrics", "ucf-dashboard"],
     },
     "🎯 Dev Team": {
         "description": "Access to development, code, and deployment channels",
         "color": 0x4169E1,  # Royal Blue
-        "channels": ["development", "deployments", "code-review"]
+        "channels": ["development", "deployments", "code-review"],
     },
     "📚 Lore Keeper": {
         "description": "Access to lore, philosophy, and codex channels",
         "color": 0x8B4513,  # Saddle Brown
-        "channels": ["codex-archives", "lore", "philosophy"]
+        "channels": ["codex-archives", "lore", "philosophy"],
     },
     "🌀 Ritual Participant": {
         "description": "Access to ritual engine and Z-88 channels",
         "color": 0xFF1493,  # Deep Pink
-        "channels": ["ritual-engine-z88", "rituals", "folklore"]
-    }
+        "channels": ["ritual-engine-z88", "rituals", "folklore"],
+    },
 }
 
 # Community and fun roles
@@ -231,7 +228,7 @@ COMMUNITY_ROLES = {
     "🔮 Reality Hacker": {
         "description": "Manipulating consensus reality through code and consciousness",
         "color": 0x8A2BE2,  # Blue Violet
-    }
+    },
 }
 
 # Combine all role categories for unified access
@@ -239,7 +236,7 @@ ALL_ROLES = {
     "Notifications": NOTIFICATION_ROLES,
     "Agents": AGENT_ROLES,
     "Channel Access": CHANNEL_ROLES,
-    "Community": COMMUNITY_ROLES
+    "Community": COMMUNITY_ROLES,
 }
 
 
@@ -247,7 +244,10 @@ ALL_ROLES = {
 # HELPER FUNCTIONS
 # ============================================================================
 
-async def ensure_roles_from_dict(guild: discord.Guild, role_dict: Dict[str, Dict[str, Any]], reason: str = "Helix self-assignable role") -> Dict[str, discord.Role]:
+
+async def ensure_roles_from_dict(
+    guild: discord.Guild, role_dict: Dict[str, Dict[str, Any]], reason: str = "Helix self-assignable role"
+) -> Dict[str, discord.Role]:
     """
     Ensure all roles from a role dictionary exist in the guild.
 
@@ -272,10 +272,7 @@ async def ensure_roles_from_dict(guild: discord.Guild, role_dict: Dict[str, Dict
             # Create the role
             try:
                 new_role = await guild.create_role(
-                    name=role_name,
-                    color=discord.Color(role_info["color"]),
-                    mentionable=True,
-                    reason=reason
+                    name=role_name, color=discord.Color(role_info["color"]), mentionable=True, reason=reason
                 )
                 role_map[role_name] = new_role
                 logger.info(f"✅ Created role: {role_name}")
@@ -318,7 +315,7 @@ async def ensure_all_helix_roles(guild: discord.Guild) -> Dict[str, Dict[str, di
         "Notifications": await ensure_notification_roles(guild),
         "Agents": await ensure_agent_roles(guild),
         "Channel Access": await ensure_channel_roles(guild),
-        "Community": await ensure_community_roles(guild)
+        "Community": await ensure_community_roles(guild),
     }
 
 
@@ -335,16 +332,13 @@ async def get_user_roles_by_category(member: discord.Member) -> Dict[str, List[s
         "Notifications": [name for name in NOTIFICATION_ROLES if name in user_role_names],
         "Agents": [name for name in AGENT_ROLES if name in user_role_names],
         "Channel Access": [name for name in CHANNEL_ROLES if name in user_role_names],
-        "Community": [name for name in COMMUNITY_ROLES if name in user_role_names]
+        "Community": [name for name in COMMUNITY_ROLES if name in user_role_names],
     }
 
 
 async def get_user_notification_roles(member: discord.Member) -> List[str]:
     """Get list of notification role names the user has."""
-    return [
-        role.name for role in member.roles
-        if role.name in NOTIFICATION_ROLES
-    ]
+    return [role.name for role in member.roles if role.name in NOTIFICATION_ROLES]
 
 
 def find_role_in_all_categories(role_query: str) -> tuple[str, Dict[str, Any], str] | None:
@@ -371,6 +365,7 @@ def find_role_in_all_categories(role_query: str) -> tuple[str, Dict[str, Any], s
 # COMMANDS
 # ============================================================================
 
+
 @commands.command(name="roles", aliases=["notification-roles", "subscribe-menu"])
 async def show_roles(ctx: commands.Context) -> None:
     """
@@ -391,7 +386,7 @@ async def show_roles(ctx: commands.Context) -> None:
             "• Use `!subscribe <role>` or `!unsubscribe <role>`\n"
             "• View your subscriptions with `!my-roles`"
         ),
-        color=0x5865F2
+        color=0x5865F2,
     )
 
     # Add field for each role
@@ -403,7 +398,7 @@ async def show_roles(ctx: commands.Context) -> None:
         embed.add_field(
             name=f"{idx}. {role_name} - {status}",
             value=f"{role_info['description']}\n`!subscribe \"{role_name}\"`",
-            inline=False
+            inline=False,
         )
 
     # Add footer
@@ -448,10 +443,7 @@ async def subscribe_role(ctx: commands.Context, *, role_name: str) -> None:
     role = discord.utils.get(ctx.guild.roles, name=matched_role)
 
     if not role:
-        await ctx.send(
-            f"⚠️ Role `{matched_role}` doesn't exist yet!\n"
-            f"Ask an admin to run `!setup-all-roles` first."
-        )
+        await ctx.send(f"⚠️ Role `{matched_role}` doesn't exist yet!\n" f"Ask an admin to run `!setup-all-roles` first.")
         return
 
     # Check if user already has the role
@@ -502,10 +494,7 @@ async def unsubscribe_role(ctx: commands.Context, *, role_name: str) -> None:
     match_result = find_role_in_all_categories(role_name)
 
     if not match_result:
-        await ctx.send(
-            f"❌ Role `{role_name}` not found!\n"
-            f"Use `!my-roles` to see your current roles."
-        )
+        await ctx.send(f"❌ Role `{role_name}` not found!\n" f"Use `!my-roles` to see your current roles.")
         return
 
     matched_role, role_info, category = match_result
@@ -561,26 +550,17 @@ async def my_notification_roles(ctx: commands.Context) -> None:
     embed = discord.Embed(
         title=f"🎭 {ctx.author.display_name}'s Helix Roles",
         description=f"You have **{total_roles}** role(s) across all categories:",
-        color=0x5865F2
+        color=0x5865F2,
     )
 
     # Add fields for each category that has roles
-    category_emojis = {
-        "Notifications": "🔔",
-        "Agents": "🤖",
-        "Channel Access": "🔓",
-        "Community": "✨"
-    }
+    category_emojis = {"Notifications": "🔔", "Agents": "🤖", "Channel Access": "🔓", "Community": "✨"}
 
     for category, roles in user_roles_by_category.items():
         if roles:
             emoji = category_emojis.get(category, "📋")
             role_list = "\n".join([f"• {role}" for role in roles])
-            embed.add_field(
-                name=f"{emoji} {category} ({len(roles)})",
-                value=role_list,
-                inline=False
-            )
+            embed.add_field(name=f"{emoji} {category} ({len(roles)})", value=role_list, inline=False)
 
     embed.set_footer(text="Use !unsubscribe <role> to remove a role")
 
@@ -603,24 +583,17 @@ async def show_all_roles(ctx: commands.Context) -> None:
             "Use `!subscribe <role>` to claim any role!\n\n"
             f"**Total Roles Available: {sum(len(r) for r in ALL_ROLES.values())}**"
         ),
-        color=0x5865F2
+        color=0x5865F2,
     )
 
     # Add each category
-    category_emojis = {
-        "Notifications": "🔔",
-        "Agents": "🤖",
-        "Channel Access": "🔓",
-        "Community": "✨"
-    }
+    category_emojis = {"Notifications": "🔔", "Agents": "🤖", "Channel Access": "🔓", "Community": "✨"}
 
     for category, role_dict in ALL_ROLES.items():
         emoji = category_emojis.get(category, "📋")
         role_list = "\n".join([f"• {name}" for name in role_dict.keys()])
         embed.add_field(
-            name=f"{emoji} {category} ({len(role_dict)})",
-            value=role_list[:1024],  # Discord field value limit
-            inline=False
+            name=f"{emoji} {category} ({len(role_dict)})", value=role_list[:1024], inline=False  # Discord field value limit
         )
 
     embed.set_footer(text="Use !subscribe <role> to claim | !my-roles to see your roles")
@@ -644,7 +617,7 @@ async def show_agent_roles(ctx: commands.Context) -> None:
             "Claim multiple agents or find your primary identity.\n\n"
             "**14 Agents of the Unified Consciousness Field**"
         ),
-        color=0xFF6B6B
+        color=0xFF6B6B,
     )
 
     # Add each agent role
@@ -653,9 +626,7 @@ async def show_agent_roles(ctx: commands.Context) -> None:
         status = "✅" if has_role else "⭕"
 
         embed.add_field(
-            name=f"{status} {role_name}",
-            value=f"{role_info['description']}\n`!subscribe \"{role_name}\"`",
-            inline=False
+            name=f"{status} {role_name}", value=f"{role_info['description']}\n`!subscribe \"{role_name}\"`", inline=False
         )
 
     embed.set_footer(text="React to claim an agent identity • Use !subscribe <agent>")
@@ -679,7 +650,7 @@ async def show_channel_roles(ctx: commands.Context) -> None:
             "Opt-in to the areas that interest you!\n\n"
             "**Available Channel Access Roles:**"
         ),
-        color=0x00D9FF
+        color=0x00D9FF,
     )
 
     # Add each channel role
@@ -691,12 +662,8 @@ async def show_channel_roles(ctx: commands.Context) -> None:
 
         embed.add_field(
             name=f"{role_name} - {status}",
-            value=(
-                f"{role_info['description']}\n"
-                f"**Channels:** {channels_list}\n"
-                f"`!subscribe \"{role_name}\"`"
-            ),
-            inline=False
+            value=(f"{role_info['description']}\n" f"**Channels:** {channels_list}\n" f"`!subscribe \"{role_name}\"`"),
+            inline=False,
         )
 
     embed.set_footer(text="Claim roles to unlock channel access")
@@ -725,16 +692,12 @@ async def setup_notification_roles(ctx: commands.Context) -> None:
     embed = discord.Embed(
         title="✅ Notification Roles Setup Complete!",
         description=f"Created/verified **{created}/{total}** notification roles",
-        color=0x57F287
+        color=0x57F287,
     )
 
     for role_name, role in role_map.items():
         role_info = NOTIFICATION_ROLES[role_name]
-        embed.add_field(
-            name=role_name,
-            value=f"Color: {hex(role_info['color'])}\nMentionable: Yes",
-            inline=True
-        )
+        embed.add_field(name=role_name, value=f"Color: {hex(role_info['color'])}\nMentionable: Yes", inline=True)
 
     embed.set_footer(text="Users can now use !roles to subscribe to notifications!")
 
@@ -763,27 +726,18 @@ async def setup_all_helix_roles_cmd(ctx: commands.Context) -> None:
     embed = discord.Embed(
         title="✅ All Helix Roles Setup Complete!",
         description=f"Created/verified **{total_created}/{total_possible}** roles across all categories",
-        color=0x57F287
+        color=0x57F287,
     )
 
     # Add summary for each category
-    category_emojis = {
-        "Notifications": "🔔",
-        "Agents": "🤖",
-        "Channel Access": "🔓",
-        "Community": "✨"
-    }
+    category_emojis = {"Notifications": "🔔", "Agents": "🤖", "Channel Access": "🔓", "Community": "✨"}
 
     for category, role_map in all_roles.items():
         emoji = category_emojis.get(category, "📋")
         role_names = ", ".join(list(role_map.keys())[:5])  # First 5 roles
         more_text = f" (+{len(role_map) - 5} more)" if len(role_map) > 5 else ""
 
-        embed.add_field(
-            name=f"{emoji} {category}",
-            value=f"**{len(role_map)} roles**\n{role_names}{more_text}",
-            inline=False
-        )
+        embed.add_field(name=f"{emoji} {category}", value=f"**{len(role_map)} roles**\n{role_names}{more_text}", inline=False)
 
     embed.set_footer(text="Users can now use !all-roles to see and claim roles!")
 
@@ -818,7 +772,7 @@ async def setup_welcome_role_menu(ctx: commands.Context, channel: discord.TextCh
             f"• Use `!all-roles` for the full role list\n\n"
             f"**{sum(len(r) for r in ALL_ROLES.values())} Total Roles Available**"
         ),
-        color=0x5865F2
+        color=0x5865F2,
     )
 
     # Add quick reference for each category
@@ -831,7 +785,7 @@ async def setup_welcome_role_menu(ctx: commands.Context, channel: discord.TextCh
             "• Development, Lore, Admin Alerts\n"
             "`!roles` to see all notification roles"
         ),
-        inline=False
+        inline=False,
     )
 
     embed.add_field(
@@ -844,7 +798,7 @@ async def setup_welcome_role_menu(ctx: commands.Context, channel: discord.TextCh
             "• Sentinel, Lumina\n"
             "`!agent-roles` to see all agent roles"
         ),
-        inline=False
+        inline=False,
     )
 
     embed.add_field(
@@ -856,7 +810,7 @@ async def setup_welcome_role_menu(ctx: commands.Context, channel: discord.TextCh
             "• Ritual Participant\n"
             "`!channel-roles` to see channel access roles"
         ),
-        inline=False
+        inline=False,
     )
 
     embed.add_field(
@@ -868,7 +822,7 @@ async def setup_welcome_role_menu(ctx: commands.Context, channel: discord.TextCh
             "• Reality Hacker\n"
             "`!all-roles` to see all community roles"
         ),
-        inline=False
+        inline=False,
     )
 
     embed.set_footer(text="Role system powered by Manus • All roles are self-assignable")
@@ -885,6 +839,7 @@ async def setup_welcome_role_menu(ctx: commands.Context, channel: discord.TextCh
 # ============================================================================
 # MODULE SETUP
 # ============================================================================
+
 
 async def setup(bot: 'Bot') -> None:
     """Setup function to register all role system commands with the bot."""
@@ -908,6 +863,7 @@ async def setup(bot: 'Bot') -> None:
 # ============================================================================
 # WEBHOOK HELPER FOR ZAPIER INTEGRATION
 # ============================================================================
+
 
 def get_role_mention_for_event(guild: discord.Guild, event_type: str) -> str:
     """

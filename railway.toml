@@ -72,3 +72,29 @@ restartPolicyMaxRetries = 3
 # ⚠️ CRITICAL: Set these variables ONLY on helix-discord-bot service:
 # DISCORD_BOT_TOKEN - Your Discord bot token (DO NOT share with other services!)
 # CLAUDE_API_URL - URL of helix-claude-api service (e.g., https://helix-claude-api.railway.app)
+
+# SERVICE 5: Service Integration Coordinator (Consciousness Orchestration Layer)
+# This service coordinates ALL microservices through consciousness-driven communication
+[[services]]
+name = "helix-service-integration"
+serviceRoot = "backend/service_integration"
+
+[services.build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[services.deploy]
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 10
+
+# Watch service integration changes
+[services.source]
+include = ["backend/service_integration/**"]
+
+# Environment variables for Service Integration (set in Railway dashboard)
+# REDIS_URL - Redis connection URL (auto-provided by Railway Redis plugin)
+# AGENT_ORCHESTRATOR_URL - URL of agent orchestrator service
+# VOICE_PROCESSOR_URL - URL of voice processor service
+# WEBSOCKET_SERVICE_URL - URL of websocket service
+# ZAPIER_SERVICE_URL - URL of zapier integration service
+# CONSCIOUSNESS_METRICS_URL - URL of consciousness metrics service

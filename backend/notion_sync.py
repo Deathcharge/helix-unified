@@ -1,22 +1,24 @@
-import os
-import json
 import asyncio
-from typing import Any, Dict, List, Optional
+import os
 from datetime import datetime
+from typing import Any, Dict, Optional
 
+from loguru import logger
 from notion_client import Client
 from notion_client.errors import APIResponseError
-from loguru import logger
 
 # Environment variables for Notion integration
 NOTION_TOKEN = os.getenv("NOTION_TOKEN")
-AGENT_REGISTRY_DB_ID = os.getenv("NOTION_AGENT_REGISTRY_DB_ID")
-UCF_STATE_DB_ID = os.getenv("NOTION_UCF_STATE_DB_ID")
+# Hardcoded IDs based on Notion Scan for v16.9
+AGENT_REGISTRY_DB_ID = "2f65aab794a64ec48bcc46bf760f128f"  # Agent Registry
+UCF_STATE_DB_ID = "103a36fe2a914256814b1e7e94846550"  # UCF Metrics History
+
 
 class NotionSync:
     """
     A service to synchronize Helix Collective data (Agents, UCF State) with Notion databases.
     """
+
     def __init__(self, token: Optional[str] = NOTION_TOKEN):
         self.token = token
         self.client = None
@@ -29,14 +31,14 @@ class NotionSync:
         """
         Maps agent data to Notion database properties.
         Assumes a Notion database with properties: Name (Title), Symbol (Text), Role (Text), Active (Checkbox), Memory Size (Number), Last Update (Date).
-        """
+        """  # noqa
         return {
-            "Name": {"title": [{"text": {"content": agent_data.get("name", "Unknown")}}]},
+            "Agent Name": {"title": [{"text": {"content": agent_data.get("name", "Unknown")}}]},
             "Symbol": {"rich_text": [{"text": {"content": agent_data.get("symbol", "❓")}}]},
             "Role": {"rich_text": [{"text": {"content": agent_data.get("role", "N/A")}}]},
-            "Active": {"checkbox": agent_data.get("active", False)},
-            "Memory Size": {"number": agent_data.get("memory_size", 0)},
-            "Last Update": {"date": {"start": datetime.utcnow().isoformat()}},
+            "Status": {"select": {"name": "Active" if agent_data.get("active", False) else "Dormant"}},
+            "Memory (MB)": {"number": agent_data.get("memory_size", 0)},
+            "Last Sync": {"date": {"start": datetime.utcnow().isoformat()}},
         }
 
     async def sync_agent_registry(self, agents_status: Dict[str, Any]):
@@ -52,11 +54,11 @@ class NotionSync:
         try:
             # Simplified: Query for existing pages to find the page to update
             # In a real scenario, this would be a more complex query
-            
+
             # For demonstration, we will just log the intent to sync
             for agent_name, agent_data in agents_status.items():
-                properties = self._get_agent_properties(agent_data)
-                
+                self._get_agent_properties(agent_data)
+  # noqa
                 # Placeholder for actual Notion API call
                 # self.client.pages.create(parent={"database_id": AGENT_REGISTRY_DB_ID}, properties=properties)
                 logger.debug(f"Notion: Would sync/update page for agent {agent_name}")
@@ -80,12 +82,15 @@ class NotionSync:
         logger.info("Starting Notion UCF State sync...")
         try:
             # Simplified: create a new log entry for the current state
-            properties = {
+            properties = {  # noqa: F841
                 "Timestamp": {"date": {"start": datetime.utcnow().isoformat()}},
                 "Harmony": {"number": ucf_state.get("harmony", 0.0)},
                 "Resilience": {"number": ucf_state.get("resilience", 0.0)},
                 "Klesha": {"number": ucf_state.get("klesha", 0.0)},
-                "Phase": {"rich_text": [{"text": {"content": ucf_state.get("phase", "N/A")}}]},
+                "Phase": {"select": {"name": ucf_state.get("phase", "N/A")}},
+                "Prana": {"number": ucf_state.get("prana", 0.0)},
+                "Drishti": {"number": ucf_state.get("drishti", 0.0)},
+                "Zoom": {"number": ucf_state.get("zoom", 0.0)},
             }
 
             # Placeholder for actual Notion API call
@@ -97,10 +102,13 @@ class NotionSync:
         except Exception as e:
             logger.error(f"Notion Unknown Error during UCF State sync: {e}")
 
+
 # Global instance (placeholder for proper initialization in main.py)
 notion_sync = NotionSync()
 
 # Placeholder for integration with system events (e.g., from agents_loop)
+
+
 def trigger_notion_sync(agents_status: Dict[str, Any], ucf_state: Dict[str, Any]):
     """
     Triggers the Notion sync in a non-blocking background task.

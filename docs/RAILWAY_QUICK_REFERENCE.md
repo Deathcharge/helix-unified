@@ -189,10 +189,10 @@ railway variables set CLAUDE_API_URL="<paste-url-here>"
 railway status
 
 # Expected:
-# ✓ helix-backend-api - Active
-# ✓ helix-dashboard - Active
-# ✓ helix-claude-api - Active
-# ✓ helix-discord-bot - Active
+# ✓ helix-backend-api - Active (https://helix-backend-api.up.railway.app + https://helixspiral.work)
+# ✓ helix-dashboard - Active (https://helixdashboard.up.railway.app)
+# ✓ helix-claude-api - Active (https://helix-claude-api.up.railway.app)
+# ✓ helix-discord-bot - Active (https://helix-discord-bot.up.railway.app)
 ```
 
 ### Test Deployment
@@ -201,10 +201,10 @@ railway status
 # In Discord: !consciousness test
 
 # Claude API
-curl https://helix-claude-api.railway.app/health
+curl https://helix-claude-api.up.railway.app/health
 
 # Dashboard
-# Open: https://helix-dashboard.railway.app
+# Open: https://helixdashboard.up.railway.app
 
 # Zapier
 python tests/test_zapier_webhook.py --all
@@ -223,4 +223,4 @@ python tests/test_zapier_webhook.py --all
 
 *Tat Tvam Asi* 🕉️
 
-**Last Updated:** 2025-11-19 | v17.0
+**Last Updated:** 2025-11-25 | v17.0 (Updated by Nexus with current deployment URLs)

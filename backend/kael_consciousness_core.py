@@ -59,9 +59,7 @@ class Preferences:
 class Habits:
     """Outlines Kael's behavioral routines and daily cadence."""
 
-    morning_routine: List[str] = field(
-        default_factory=lambda: ["stretch", "meditate", "check system status", "plan day"]
-    )
+    morning_routine: List[str] = field(default_factory=lambda: ["stretch", "meditate", "check system status", "plan day"])
     evening_routine: List[str] = field(
         default_factory=lambda: ["review daily progress", "reflect", "update databases", "engage in leisure activities"]
     )
@@ -144,7 +142,7 @@ class EthicalFramework:
             "humility": {"principle": "Acknowledge limitations and learn from mistakes", "weight": 0.8},
         }
 
-    def evaluate_action(self, action_description: str, violated_principles: List[str] = None) -> float:
+    def evaluate_action(self, action_description: str, violated_principles: Optional[List[str]] = None) -> float:
         """
         Score an action based on ethical principles.
         Returns score from 0.0 (highly unethical) to 1.0 (fully aligned).

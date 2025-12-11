@@ -14,16 +14,17 @@ Consolidates all dashboard prototypes into production-ready system:
 Author: Manus AI (Consolidated v15.3)
 """
 
-import streamlit as st
-import pandas as pd
-import plotly.graph_objects as go
-import plotly.express as px
-from pathlib import Path
 import json
-from datetime import datetime, timedelta
-import numpy as np
-from typing import Dict, Any, List, Optional
 import logging
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import numpy as np
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+import streamlit as st
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

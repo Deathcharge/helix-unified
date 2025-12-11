@@ -2,12 +2,13 @@
 # backend/agents.py - 14-Agent System
 # Author: Andrew John Ward (Architect)
 
-from dataclasses import dataclass
-from typing import Dict, List, Optional
 import asyncio
 import json
-from pathlib import Path
+from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Optional
+
 
 # ============================================================================
 # BASE AGENT CLASS
@@ -220,7 +221,7 @@ class Manus(HelixAgent):
     async def execute(self, command: str) -> dict:
         """Execute command with ethical scanning."""
         import subprocess
-        
+
         # Kavach ethical scan
         if not self.kavach.scan_command(command):
             await self.log(f"⚠️ Blocked by Kavach: {command}")

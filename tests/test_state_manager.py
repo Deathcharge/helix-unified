@@ -1,10 +1,11 @@
 """
 Tests for state management system (Redis + PostgreSQL + JSON fallback).
 """
-import pytest
 import json
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 
 @pytest.mark.unit

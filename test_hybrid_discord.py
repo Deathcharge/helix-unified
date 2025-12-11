@@ -13,12 +13,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent / "backend"))
 
 import aiohttp
-from discord_webhook_sender_hybrid import (
-    HybridDiscordSender,
-    validate_hybrid_config,
-    ZAPIER_DISCORD_WEBHOOK,
-    INTEGRATION_MODE,
-)
+from discord_webhook_sender_hybrid import (INTEGRATION_MODE,
+                                           ZAPIER_DISCORD_WEBHOOK,
+                                           HybridDiscordSender,
+                                           validate_hybrid_config)
 
 
 async def test_zapier_webhook():

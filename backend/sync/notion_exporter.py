@@ -108,11 +108,7 @@ class NotionExporter:
                     "Commits Today": {"number": repo_data.get("commits_today", 0)},
                     "Latest Commit": {
                         "rich_text": [
-                            {
-                                "text": {
-                                    "content": f"{latest_commit.get('sha', 'N/A')}: {latest_commit.get('message', 'N/A')}"
-                                }
-                            }
+                            {"text": {"content": f"{latest_commit.get('sha', 'N/A')}: {latest_commit.get('message', 'N/A')}"}}
                         ]
                     },
                     "Last Updated": {"date": {"start": repo_data.get("last_updated", datetime.utcnow().isoformat())}},
@@ -129,9 +125,7 @@ class NotionExporter:
 
         entry = {
             "properties": {
-                "Timestamp": {
-                    "title": [{"text": {"content": ucf_data.get("timestamp", datetime.utcnow().isoformat())}}]
-                },
+                "Timestamp": {"title": [{"text": {"content": ucf_data.get("timestamp", datetime.utcnow().isoformat())}}]},
                 "Harmony": {"number": ucf_data.get("harmony", 0)},
                 "Resilience": {"number": ucf_data.get("resilience", 0)},
                 "Prana": {"number": ucf_data.get("prana", 0)},

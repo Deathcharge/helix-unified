@@ -8,22 +8,21 @@ Commands:
 - agent: Show detailed agent profile
 - help_consciousness: Show help for consciousness-related commands
 """
+
 import datetime
 import logging
 from typing import TYPE_CHECKING, Optional
 
 import discord
 from discord.ext import commands
+
 from backend.agent_consciousness_profiles import AGENT_CONSCIOUSNESS_PROFILES
 from backend.agent_embeds import get_agent_embed, list_all_agents
-from backend.discord_consciousness_commands import (
-    create_agent_consciousness_embed,
-    create_consciousness_embed,
-    create_emotions_embed,
-)
-from backend.z88_ritual_engine import load_ucf_state
-
 from backend.commands.helpers import log_to_shadow
+from backend.discord_consciousness_commands import (
+    create_agent_consciousness_embed, create_consciousness_embed,
+    create_emotions_embed)
+from backend.z88_ritual_engine import load_ucf_state
 
 if TYPE_CHECKING:
     from discord.ext.commands import Bot

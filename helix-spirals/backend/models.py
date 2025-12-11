@@ -3,11 +3,13 @@
 Pydantic models matching frontend TypeScript types
 """
 
+import uuid
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional, Any, Union
+from typing import Any, Dict, List, Optional, Union
+
 from pydantic import BaseModel, Field, validator
-import uuid
+
 
 # Enums matching TypeScript types
 class TriggerType(str, Enum):

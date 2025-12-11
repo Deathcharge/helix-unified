@@ -2,21 +2,24 @@
 # Manages encrypted storage of API keys for 200+ platform integrations
 # Author: Andrew John Ward + Claude AI
 
-import os
-from typing import Dict, Optional
 import json
-from pathlib import Path
-from datetime import datetime
 import logging
+import os
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, Optional
 
 # Try to import cryptography, fallback to base64 if not available
 try:
     from cryptography.fernet import Fernet
+
     CRYPTO_AVAILABLE = True
 except ImportError:
-    import base64
+    pass
+
     CRYPTO_AVAILABLE = False
-    logging.warning("cryptography not available, using base64 encoding (NOT SECURE for production!)")
+    logging.error("CRITICAL: cryptography not available. HelixAuthManager is disabled.")
+
 
 class HelixAuthManager:
     """Secure authentication management for all platform integrations"""
@@ -41,26 +44,24 @@ class HelixAuthManager:
             if CRYPTO_AVAILABLE:
                 key = Fernet.generate_key()
             else:
-                # Fallback: not secure!
-                key = base64.b64encode(b"helix_fallback_key_not_secure")
+                raise RuntimeError("CRITICAL: cryptography not available. Cannot generate secure key.")
             key_file.write_bytes(key)
             logging.info("Created new encryption key")
             return key
 
-    def store_api_key(self, platform: str, api_key: str, additional_data: Dict = None):
+    def store_api_key(self, platform: str, api_key: str, additional_data: Optional[Dict] = None):
         """Securely store API key for platform"""
         auth_data = {
             "api_key": api_key,
             "platform": platform,
             "created_at": datetime.now().isoformat(),
-            **(additional_data or {})
+            **(additional_data or {}),
         }
 
         if CRYPTO_AVAILABLE and self.cipher_suite:
             encrypted_data = self.cipher_suite.encrypt(json.dumps(auth_data).encode())
         else:
-            # Fallback: base64 encoding (NOT SECURE!)
-            encrypted_data = base64.b64encode(json.dumps(auth_data).encode())
+            raise RuntimeError("CRITICAL: cryptography not available. Cannot securely store data.")
 
         auth_file = self.secrets_path / f"{platform}_auth.enc"
         auth_file.write_bytes(encrypted_data)
@@ -84,8 +85,7 @@ class HelixAuthManager:
             if CRYPTO_AVAILABLE and self.cipher_suite:
                 decrypted_data = self.cipher_suite.decrypt(encrypted_data)
             else:
-                # Fallback: base64 decoding
-                decrypted_data = base64.b64decode(encrypted_data)
+                raise RuntimeError("CRITICAL: cryptography not available. Cannot securely retrieve data.")
 
             auth_data = json.loads(decrypted_data.decode())
 
@@ -108,7 +108,7 @@ class HelixAuthManager:
             "anthropic": os.getenv("ANTHROPIC_API_KEY"),
             "railway": os.getenv("RAILWAY_TOKEN"),
             "dropbox": os.getenv("DROPBOX_ACCESS_TOKEN"),
-            "calendly": os.getenv("CALENDLY_API_KEY")
+            "calendly": os.getenv("CALENDLY_API_KEY"),
         }
 
         configured_count = 0
@@ -136,6 +136,7 @@ class HelixAuthManager:
             del self.auth_cache[platform]
         logging.info(f"🗑️ Removed authentication for {platform}")
 
+
 # Usage Example
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
@@ -143,6 +144,6 @@ if __name__ == "__main__":
     auth_manager = HelixAuthManager()
     configured = auth_manager.setup_all_integrations()
 
-    print(f"\n🔐 Authentication Manager Status:")
+    print("\n🔐 Authentication Manager Status:")
     print(f"Configured platforms: {configured}")
     print(f"Platforms: {', '.join(auth_manager.get_all_configured_platforms())}")

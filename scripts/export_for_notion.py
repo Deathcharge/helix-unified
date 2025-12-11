@@ -12,7 +12,7 @@ import json
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -75,6 +75,7 @@ class NotionExporter:
                 # Handle multi-object files (object + array common in logs)
                 # Split by closing brace/bracket followed by opening brace/bracket
                 import re
+
                 # Find all complete JSON objects/arrays
                 json_objects = []
                 depth = 0

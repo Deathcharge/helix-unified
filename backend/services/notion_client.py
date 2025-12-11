@@ -1,8 +1,7 @@
-# 🌀 Helix Collective v14.5 — Quantum Handshake
+# 🌀 Helix Collective v17.0 — Notion API 2025-09-03 Compatible
 # backend/services/notion_client.py — Notion Integration Client
-# Author: Andrew John Ward (Architect)
+# Author: Andrew John Ward (Architect) + Manus AI (Root Coordinator)
 
-import asyncio
 import logging
 import os
 from datetime import datetime
@@ -14,29 +13,85 @@ from notion_client import Client
 logger = logging.getLogger(__name__)
 
 # ============================================================================
-# NOTION CLIENT
+# NOTION CLIENT (2025-09-03 API Compatible)
 # ============================================================================
 
 
 class HelixNotionClient:
-    """Client for Notion integration with Helix Collective databases."""
+    """
+    Client for Notion integration with Helix Collective databases.
+
+    Compatible with Notion API version 2025-09-03, which introduces
+    multi-source database support and requires data_source_id instead
+    of database_id for most operations.
+    """
 
     def __init__(self) -> None:
-        """Initialize Notion client with database IDs."""
+        """Initialize Notion client with database IDs and API version."""
         notion_token = os.getenv("NOTION_API_KEY")
         if not notion_token:
-            raise ValueError("NOTION_API_KEY environment variable not set")
+            logger.warning("⚠️ NOTION_API_KEY not set. Notion integration will be disabled.")
+            self.notion = None
+            self._disabled = True
+            return
 
-        self.notion = Client(auth=notion_token)
+        self._disabled = False
+
+        # Initialize client with 2025-09-03 API version
+        self.notion = Client(auth=notion_token, notion_version="2025-09-03")  # NEW: Explicitly set API version
 
         # Database IDs (from Notion workspace)
         self.system_state_db = os.getenv("NOTION_SYSTEM_STATE_DB", "009a946d04fb46aa83e4481be86f09ef")
         self.agent_registry_db = os.getenv("NOTION_AGENT_REGISTRY_DB", "2f65aab794a64ec48bcc46bf760f128f")
         self.event_log_db = os.getenv("NOTION_EVENT_LOG_DB", "acb01d4a955d4775aaeb2310d1da1102")
         self.context_db = os.getenv("NOTION_CONTEXT_DB", "d704854868474666b4b774750f8b134a")
+        self.deployment_log_db = os.getenv("NOTION_DEPLOYMENT_LOG_DB", "8c1a6bf4a7984eee9802c8af1979c3f9")
 
-        # Cache for agent page IDs
+        # Cache for agent page IDs and data source IDs
         self._agent_cache: Dict[str, str] = {}
+        self._data_source_cache: Dict[str, str] = {}  # NEW: Cache data source IDs
+
+    # ========================================================================
+    # DATA SOURCE DISCOVERY (NEW for 2025-09-03)
+    # ========================================================================
+
+    async def _get_data_source_id(self, database_id: str) -> Optional[str]:
+        """
+        Get the data source ID for a database.
+
+        This is required for the 2025-09-03 API version. We fetch the first
+        data source from the database. If multiple data sources exist, this
+        will use the first one.
+
+        Args:
+            database_id: The database ID
+
+        Returns:
+            The data source ID, or None if not found
+        """
+        if getattr(self, '_disabled', False):
+            return None
+
+        if database_id in self._data_source_cache:
+            return self._data_source_cache[database_id]
+
+        try:
+            # Use the new Get Database API to retrieve data sources
+            response = self.notion.databases.retrieve(database_id=database_id)
+
+            # Extract the first data source ID
+            data_sources = response.get("data_sources", [])
+            if data_sources and len(data_sources) > 0:
+                data_source_id = data_sources[0]["id"]
+                self._data_source_cache[database_id] = data_source_id
+                logger.info(f"✅ Cached data source ID for database {database_id[:8]}...")
+                return data_source_id
+            else:
+                logger.warning(f"⚠️ No data sources found for database {database_id[:8]}...")
+                return None
+        except Exception as e:
+            logger.error(f"❌ Error getting data source ID for {database_id[:8]}...: {e}")
+            return None
 
     # ========================================================================
     # AGENT REGISTRY OPERATIONS
@@ -48,16 +103,25 @@ class HelixNotionClient:
             return self._agent_cache[agent_name]
 
         try:
-            results = self.notion.databases.query(
-                database_id=self.agent_registry_db, filter={"property": "Agent Name", "title": {"equals": agent_name}}
+            # Get data source ID for the agent registry database
+            data_source_id = await self._get_data_source_id(self.agent_registry_db)
+            if not data_source_id:
+                logger.error("❌ Could not get data source ID for agent registry")
+                return None
+
+            # Query using the new data source endpoint
+            results = self.notion.request(
+                path=f"data_sources/{data_source_id}/query",
+                method="POST",
+                body={"filter": {"property": "Agent Name", "title": {"equals": agent_name}}},
             )
 
-            if results["results"]:
+            if results.get("results"):
                 page_id = results["results"][0]["id"]
                 self._agent_cache[agent_name] = page_id
                 return page_id
         except Exception as e:
-            logger.warning(f"⚠ Error getting agent page ID for {agent_name}: {e}")
+            logger.warning(f"⚠️ Error getting agent page ID for {agent_name}: {e}")
 
         return None
 
@@ -66,8 +130,15 @@ class HelixNotionClient:
     ) -> Optional[str]:
         """Create a new agent in the Agent Registry."""
         try:
+            # Get data source ID for the agent registry database
+            data_source_id = await self._get_data_source_id(self.agent_registry_db)
+            if not data_source_id:
+                logger.error("❌ Could not get data source ID for agent registry")
+                return None
+
+            # Create page with data_source_id parent (NEW)
             response = self.notion.pages.create(
-                parent={"database_id": self.agent_registry_db},
+                parent={"type": "data_source_id", "data_source_id": data_source_id},
                 properties={
                     "Agent Name": {"title": [{"text": {"content": agent_name}}]},
                     "Symbol": {"rich_text": [{"text": {"content": symbol}}]},
@@ -92,7 +163,7 @@ class HelixNotionClient:
         try:
             agent_page_id = await self._get_agent_page_id(agent_name)
             if not agent_page_id:
-                logger.warning(f"⚠ Agent {agent_name} not found in Notion")
+                logger.warning(f"⚠️ Agent {agent_name} not found in Notion")
                 return False
 
             self.notion.pages.update(
@@ -121,8 +192,15 @@ class HelixNotionClient:
         try:
             agent_page_id = await self._get_agent_page_id(agent_name)
 
+            # Get data source ID for the event log database
+            data_source_id = await self._get_data_source_id(self.event_log_db)
+            if not data_source_id:
+                logger.error("❌ Could not get data source ID for event log")
+                return None
+
+            # Create page with data_source_id parent (NEW)
             response = self.notion.pages.create(
-                parent={"database_id": self.event_log_db},
+                parent={"type": "data_source_id", "data_source_id": data_source_id},
                 properties={
                     "Event": {"title": [{"text": {"content": event_title[:100]}}]},
                     "Timestamp": {"date": {"start": datetime.utcnow().isoformat()}},
@@ -148,9 +226,17 @@ class HelixNotionClient:
     ) -> bool:
         """Update or create system component in System State."""
         try:
-            # Query for existing component
-            results = self.notion.databases.query(
-                database_id=self.system_state_db, filter={"property": "Component", "title": {"equals": component_name}}
+            # Get data source ID for the system state database
+            data_source_id = await self._get_data_source_id(self.system_state_db)
+            if not data_source_id:
+                logger.error("❌ Could not get data source ID for system state")
+                return False
+
+            # Query for existing component using new data source endpoint
+            results = self.notion.request(
+                path=f"data_sources/{data_source_id}/query",
+                method="POST",
+                body={"filter": {"property": "Component", "title": {"equals": component_name}}},
             )
 
             properties = {
@@ -161,15 +247,17 @@ class HelixNotionClient:
                 "Verification": {"checkbox": verified},
             }
 
-            if results["results"]:
+            if results.get("results"):
                 # Update existing
                 page_id = results["results"][0]["id"]
                 self.notion.pages.update(page_id=page_id, properties=properties)
                 logger.info(f"✅ Updated component {component_name}")
             else:
-                # Create new
+                # Create new with data_source_id parent (NEW)
                 properties["Component"] = {"title": [{"text": {"content": component_name}}]}
-                self.notion.pages.create(parent={"database_id": self.system_state_db}, properties=properties)
+                self.notion.pages.create(
+                    parent={"type": "data_source_id", "data_source_id": data_source_id}, properties=properties
+                )
                 logger.info(f"✅ Created component {component_name}")
 
             return True
@@ -192,8 +280,15 @@ class HelixNotionClient:
     ) -> Optional[str]:
         """Save context snapshot for session continuity."""
         try:
+            # Get data source ID for the context database
+            data_source_id = await self._get_data_source_id(self.context_db)
+            if not data_source_id:
+                logger.error("❌ Could not get data source ID for context database")
+                return None
+
+            # Create page with data_source_id parent (NEW)
             response = self.notion.pages.create(
-                parent={"database_id": self.context_db},
+                parent={"type": "data_source_id", "data_source_id": data_source_id},
                 properties={
                     "Session ID": {"title": [{"text": {"content": session_id}}]},
                     "AI System": {"select": {"name": ai_system}},
@@ -230,14 +325,30 @@ class HelixNotionClient:
         self._agent_cache.clear()
         logger.info("✅ Agent cache cleared")
 
+    async def clear_data_source_cache(self) -> None:
+        """Clear the data source ID cache."""
+        self._data_source_cache.clear()
+        logger.info("✅ Data source cache cleared")
+
     async def get_context_snapshot(self, session_id: str) -> Optional[Dict[str, Any]]:
         """Retrieve a context snapshot by session ID."""
         try:
-            results = self.notion.databases.query(
-                database_id=self.context_db, filter={"property": "Session ID", "title": {"equals": session_id}}
-            )
-            if not results["results"]:
+            # Get data source ID for the context database
+            data_source_id = await self._get_data_source_id(self.context_db)
+            if not data_source_id:
+                logger.error("❌ Could not get data source ID for context database")
                 return None
+
+            # Query using new data source endpoint
+            results = self.notion.request(
+                path=f"data_sources/{data_source_id}/query",
+                method="POST",
+                body={"filter": {"property": "Session ID", "title": {"equals": session_id}}},
+            )
+
+            if not results.get("results"):
+                return None
+
             page = results["results"][0]
             return {
                 "session_id": session_id,
@@ -247,7 +358,7 @@ class HelixNotionClient:
                 "decisions": page["properties"]["Key Decisions"]["rich_text"][0]["text"]["content"],
             }
         except Exception as e:
-            logger.warning(f"⚠ Error getting context snapshot: {e}")
+            logger.warning(f"⚠️ Error getting context snapshot: {e}")
             return None
 
     async def query_events_by_agent(self, agent_name: str, limit: int = 10) -> List[Dict[str, Any]]:
@@ -256,86 +367,209 @@ class HelixNotionClient:
             agent_page_id = await self._get_agent_page_id(agent_name)
             if not agent_page_id:
                 return []
-            results = self.notion.databases.query(
-                database_id=self.event_log_db,
-                filter={"property": "Agent", "relation": {"contains": agent_page_id}},
-                sorts=[{"property": "Timestamp", "direction": "descending"}],
+
+            # Get data source ID for the event log database
+            data_source_id = await self._get_data_source_id(self.event_log_db)
+            if not data_source_id:
+                logger.error("❌ Could not get data source ID for event log")
+                return []
+
+            # Query using new data source endpoint
+            results = self.notion.request(
+                path=f"data_sources/{data_source_id}/query",
+                method="POST",
+                body={
+                    "filter": {"property": "Agent", "relation": {"contains": agent_page_id}},
+                    "sorts": [{"property": "Timestamp", "direction": "descending"}],
+                    "page_size": limit,
+                },
             )
+
             events = []
-            for page in results["results"][:limit]:
-                event = {
-                    "title": page["properties"]["Event"]["title"][0]["text"]["content"],
-                    "timestamp": page["properties"]["Timestamp"]["date"]["start"],
-                    "type": page["properties"]["Event Type"]["select"]["name"],
-                }
-                events.append(event)
+            for page in results.get("results", []):
+                events.append(
+                    {
+                        "event": page["properties"]["Event"]["title"][0]["text"]["content"],
+                        "timestamp": page["properties"]["Timestamp"]["date"]["start"],
+                        "type": page["properties"]["Event Type"]["select"]["name"],
+                        "description": (
+                            page["properties"]["Description"]["rich_text"][0]["text"]["content"]
+                            if page["properties"]["Description"]["rich_text"]
+                            else ""
+                        ),
+                    }
+                )
+
             return events
         except Exception as e:
-            logger.warning(f"⚠ Error querying events: {e}")
+            logger.warning(f"⚠️ Error querying events: {e}")
             return []
 
     async def get_all_agents(self) -> List[Dict[str, Any]]:
-        """Get all agents from Agent Registry."""
+        """Get all agents from the Agent Registry."""
         try:
-            results = self.notion.databases.query(database_id=self.agent_registry_db)
+            # Get data source ID for the agent registry database
+            data_source_id = await self._get_data_source_id(self.agent_registry_db)
+            if not data_source_id:
+                logger.error("❌ Could not get data source ID for agent registry")
+                return []
+
+            # Query using new data source endpoint
+            results = self.notion.request(path=f"data_sources/{data_source_id}/query", method="POST", body={})
+
             agents = []
-            for page in results["results"]:
-                agent = {
-                    "name": page["properties"]["Agent Name"]["title"][0]["text"]["content"],
-                    "status": page["properties"]["Status"]["select"]["name"],
-                    "health": page["properties"]["Health Score"]["number"],
-                }
-                agents.append(agent)
+            for page in results.get("results", []):
+                props = page["properties"]
+                agents.append(
+                    {
+                        "name": props["Agent Name"]["title"][0]["text"]["content"],
+                        "symbol": props["Symbol"]["rich_text"][0]["text"]["content"] if props["Symbol"]["rich_text"] else "",
+                        "role": props["Role"]["rich_text"][0]["text"]["content"] if props["Role"]["rich_text"] else "",
+                        "status": props["Status"]["select"]["name"] if props["Status"]["select"] else "Unknown",
+                        "health_score": props["Health Score"]["number"] if props["Health Score"]["number"] else 0,
+                    }
+                )
+
             return agents
         except Exception as e:
-            logger.warning(f"⚠ Error getting agents: {e}")
+            logger.warning(f"⚠️ Error getting all agents: {e}")
+            return []
+
+    # ========================================================================
+    # DEPLOYMENT LOG OPERATIONS (NEW)
+    # ========================================================================
+
+    async def log_deployment(
+        self,
+        name: str,
+        platform: str,
+        status: str,
+        version: Optional[str] = None,
+        triggered_by: Optional[str] = None,
+        deploy_url: Optional[str] = None,
+        duration: Optional[float] = None,
+        error_details: Optional[str] = None,
+    ) -> bool:
+        """
+        Log a deployment event to the Deployment Log database.
+
+        Args:
+            name: Name of the deployment
+            platform: Platform (Railway, Vercel, GitHub Pages, Streamlit)
+            status: Status (✅ Success, ❌ Failed, 🔄 In Progress, ⏸️ Paused)
+            version: Version string (optional)
+            triggered_by: Who/what triggered the deployment (optional)
+            deploy_url: URL of the deployed service (optional)
+            duration: Duration in seconds (optional)
+            error_details: Error details if failed (optional)
+
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            # Get data source ID for the deployment log database
+            data_source_id = await self._get_data_source_id(self.deployment_log_db)
+            if not data_source_id:
+                logger.error("❌ Could not get data source ID for deployment log")
+                return False
+
+            # Build properties
+            properties = {
+                "Name": {"title": [{"text": {"content": name}}]},
+                "Platform": {"select": {"name": platform}},
+                "Status": {"select": {"name": status}},
+                "Timestamp": {"date": {"start": datetime.now().isoformat()}},
+            }
+
+            if version:
+                properties["Version"] = {"rich_text": [{"text": {"content": version}}]}
+            if triggered_by:
+                properties["Triggered By"] = {"rich_text": [{"text": {"content": triggered_by}}]}
+            if deploy_url:
+                properties["Deploy URL"] = {"url": deploy_url}
+            if duration is not None:
+                properties["Duration"] = {"number": duration}
+            if error_details:
+                properties["Error Details"] = {"rich_text": [{"text": {"content": error_details}}]}
+
+            # Create page using data_source_id
+            self.notion.pages.create(parent={"data_source_id": data_source_id}, properties=properties)
+
+            logger.info(f"✅ Logged deployment: {name} ({status})")
+            return True
+
+        except Exception as e:
+            logger.error(f"❌ Error logging deployment: {e}")
+            return False
+
+    async def get_recent_deployments(self, limit: int = 10) -> List[Dict[str, Any]]:
+        """Get recent deployments from the Deployment Log."""
+        try:
+            # Get data source ID for the deployment log database
+            data_source_id = await self._get_data_source_id(self.deployment_log_db)
+            if not data_source_id:
+                logger.error("❌ Could not get data source ID for deployment log")
+                return []
+
+            # Query using new data source endpoint
+            results = self.notion.request(
+                path=f"data_sources/{data_source_id}/query",
+                method="POST",
+                body={"sorts": [{"property": "Timestamp", "direction": "descending"}], "page_size": limit},
+            )
+
+            deployments = []
+            for page in results.get("results", []):
+                props = page["properties"]
+                deployments.append(
+                    {
+                        "name": props["Name"]["title"][0]["text"]["content"],
+                        "platform": props["Platform"]["select"]["name"] if props["Platform"]["select"] else "Unknown",
+                        "status": props["Status"]["select"]["name"] if props["Status"]["select"] else "Unknown",
+                        "timestamp": props["Timestamp"]["date"]["start"] if props["Timestamp"]["date"] else None,
+                        "version": (
+                            props["Version"]["rich_text"][0]["text"]["content"] if props["Version"]["rich_text"] else None
+                        ),
+                        "triggered_by": (
+                            props["Triggered By"]["rich_text"][0]["text"]["content"]
+                            if props["Triggered By"]["rich_text"]
+                            else None
+                        ),
+                        "deploy_url": props["Deploy URL"]["url"] if props["Deploy URL"]["url"] else None,
+                        "duration": props["Duration"]["number"] if props["Duration"]["number"] else None,
+                    }
+                )
+
+            return deployments
+        except Exception as e:
+            logger.warning(f"⚠️ Error getting recent deployments: {e}")
             return []
 
 
 # ============================================================================
-# SINGLETON INSTANCE
+# HELPER FUNCTIONS
 # ============================================================================
 
-
-_notion_client = None
-
-
-async def get_notion_client() -> Optional[HelixNotionClient]:
-    """Get or create Notion client instance."""
-    global _notion_client
-    if _notion_client is None:
-        try:
-            _notion_client = HelixNotionClient()
-            if not await _notion_client.health_check():
-                _notion_client = None
-                return None
-        except Exception as e:
-            logger.warning(f"⚠ Notion client initialization failed: {e}")
-            return None
-    return _notion_client
+_notion_client_instance: Optional[HelixNotionClient] = None
 
 
-# ============================================================================
-# ENTRY POINT
-# ============================================================================
+def get_notion_client() -> Optional[HelixNotionClient]:
+    """
+    Get or create a singleton Notion client instance.
 
-if __name__ == "__main__":
+    Returns None if NOTION_API_KEY is not set, allowing graceful degradation.
+    """
+    global _notion_client_instance
 
-    async def main() -> None:
-        client = await get_notion_client()
-        if not client:
-            logger.error("❌ Failed to initialize Notion client")
-            return
+    if _notion_client_instance is not None:
+        return _notion_client_instance
 
-        # Test creating an agent
-        await client.create_agent("TestAgent", "🧪", "Testing", "Active", 100)
-
-        # Test logging an event
-        await client.log_event("Test Event", "Status", "TestAgent", "This is a test event", {"harmony": 0.355})
-
-        # Test updating system component
-        await client.update_system_component("Test Component", "Ready", 0.355, "", True)
-
-        logger.info("✅ Notion client tests completed")
-
-    asyncio.run(main())
+    try:
+        _notion_client_instance = HelixNotionClient()
+        return _notion_client_instance
+    except ValueError as e:
+        logger.warning(f"⚠️ Notion client not available: {e}")
+        return None
+    except Exception as e:
+        logger.error(f"❌ Error creating Notion client: {e}")
+        return None

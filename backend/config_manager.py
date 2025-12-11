@@ -1,19 +1,22 @@
 # backend/config_manager.py
 # Configuration loader for helix_config.toml
 
-import toml
 import os
 from pathlib import Path
 from typing import Any, Dict
+
+import toml  # type: ignore
 
 # Determine the base directory of the project
 BASE_DIR = Path(__file__).resolve().parent.parent
 CONFIG_PATH = BASE_DIR / "helix_config.toml"
 
+
 class ConfigManager:
     """
     Manages loading and accessing configuration from helix_config.toml.
     """
+
     _instance = None
     _config: Dict[str, Any] = {}
 
@@ -30,7 +33,7 @@ class ConfigManager:
             # Fallback to a minimal default config to prevent total crash
             self._config = {
                 "general": {"VERSION": "v16.7-fallback", "STATE_DIR": "Helix/state"},
-                "discord": {"COMMAND_PREFIX": "!"}
+                "discord": {"COMMAND_PREFIX": "!"},
             }
             return
 
@@ -48,7 +51,7 @@ class ConfigManager:
         Prioritizes environment variables (SECTION_KEY) over TOML file.
         """
         env_key = f"{section.upper()}_{key.upper()}"
-        
+
         # 1. Check Environment Variable
         env_value = os.getenv(env_key)
         if env_value is not None:
@@ -74,6 +77,7 @@ class ConfigManager:
         # 3. Return Default Value
         return default
 
+
 # Global instance for easy access
 config = ConfigManager()
 
@@ -83,9 +87,8 @@ if __name__ == '__main__':
     print(f"Command Prefix: {config.get('discord', 'COMMAND_PREFIX')}")
     print(f"Initial Harmony: {config.get('ucf', 'INITIAL_HARMONY')}")
     print(f"Non-existent Key: {config.get('nonexistent', 'key', default='default_value')}")
-    
+
     # Test environment variable override
     os.environ['UCF_INITIAL_HARMONY'] = '0.99'
     print(f"Initial Harmony (Override): {config.get('ucf', 'INITIAL_HARMONY')}")
     del os.environ['UCF_INITIAL_HARMONY']
-

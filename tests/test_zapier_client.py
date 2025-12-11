@@ -1,9 +1,10 @@
 """
 Tests for Zapier webhook client integration.
 """
-import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import aiohttp
+import pytest
 
 
 @pytest.mark.unit
@@ -98,8 +99,9 @@ async def test_webhook_retry_logic(mock_env_vars):
 @pytest.mark.webhook
 async def test_rate_limiting(mock_env_vars):
     """Test webhook rate limiting with semaphore."""
-    from backend.services.zapier_client_master import MasterZapierClient
     import asyncio
+
+    from backend.services.zapier_client_master import MasterZapierClient
 
     client = MasterZapierClient()
 
