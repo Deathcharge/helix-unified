@@ -5,13 +5,14 @@ Tests for team CRUD, member management, and invitations
 VILLAIN TESTING: ENSURE THE EMPIRE RUNS SMOOTHLY 😈
 """
 
-import pytest
 from datetime import datetime, timedelta
+
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from backend.database import Base, Team, TeamMember, TeamInvitation, User
+from backend.database import Base, Team, TeamInvitation, TeamMember, User
 from backend.main import app
 
 # Test database
@@ -28,6 +29,7 @@ def override_get_db():
         db.close()
 
 from backend.database import get_db
+
 app.dependency_overrides[get_db] = override_get_db
 
 client = TestClient(app)

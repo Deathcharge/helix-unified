@@ -60,7 +60,7 @@ class VoiceProcessorClient:
 
     def _get_cache_path(self, text: str, voice_name: str, language_code: str) -> Path:
         """Generate cache file path for TTS audio."""
-        # Create hash of text + voice + language (not for security, just cache key)
+        # Create hash of text + voice + language
         cache_key = f"{text}:{voice_name}:{language_code}"
         file_hash = hashlib.md5(cache_key.encode(), usedforsecurity=False).hexdigest()
         return CACHE_DIR / f"{file_hash}.mp3"

@@ -14,24 +14,17 @@ Tests:
 
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
+from urllib.parse import urlparse
 
 import pytest
 from fastapi import HTTPException
-from urllib.parse import urlparse
 
-from backend.saas_stripe import (
-    STRIPE_PRICE_IDS,
-    CheckoutSessionRequest,
-    SubscriptionRequest,
-    SubscriptionResponse,
-    cancel_subscription,
-    create_checkout_session,
-    create_subscription,
-    get_payment_history,
-    get_stripe_price_id,
-    handle_webhook_event,
-    update_subscription,
-)
+from backend.saas_stripe import (STRIPE_PRICE_IDS, CheckoutSessionRequest,
+                                 SubscriptionRequest, SubscriptionResponse,
+                                 cancel_subscription, create_checkout_session,
+                                 create_subscription, get_payment_history,
+                                 get_stripe_price_id, handle_webhook_event,
+                                 update_subscription)
 
 
 class TestSubscriptionCreation:

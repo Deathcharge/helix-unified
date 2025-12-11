@@ -35,60 +35,6 @@ class SafeErrorResponse(JSONResponse):
             content["details"] = details
         super().__init__(status_code=status_code, content=content)
 
-    @staticmethod
-    def sanitize_error(exception: Exception, error_type: str = "api_error") -> tuple[int, str]:
-        """
-        Sanitize error to prevent information leakage.
-
-        Args:
-            exception: The exception to sanitize
-            error_type: Type of error for logging
-
-        Returns:
-            (status_code, safe_error_message) tuple
-        """
-        # Map common API errors to status codes
-        error_str = str(exception).lower()
-
-        # Authentication/authorization errors
-        if "unauthorized" in error_str or "authentication" in error_str:
-            return 401, "Authentication failed. Please check your API key."
-        if "forbidden" in error_str or "permission" in error_str:
-            return 403, "Access forbidden. Insufficient permissions."
-
-        # Rate limiting errors
-        if "rate limit" in error_str or "quota" in error_str or "429" in error_str:
-            return 429, "Rate limit exceeded. Please try again later."
-
-        # API key/token errors
-        if "api key" in error_str or "invalid key" in error_str:
-            return 401, "Invalid API key. Please check your credentials."
-
-        # Model/resource not found
-        if "not found" in error_str or "404" in error_str:
-            return 404, "Resource not found."
-
-        # Bad request errors
-        if "invalid" in error_str or "bad request" in error_str or "400" in error_str:
-            return 400, f"Invalid request: {str(exception)}"
-
-        # Server errors (be vague to avoid leaking internals)
-        if "500" in error_str or "internal" in error_str:
-            logger.error(f"{error_type}: {str(exception)}")
-            return 500, "Internal server error. Please try again later."
-
-        # Service unavailable
-        if "unavailable" in error_str or "503" in error_str:
-            return 503, "Service temporarily unavailable. Please try again later."
-
-        # Gateway timeout
-        if "timeout" in error_str or "504" in error_str:
-            return 504, "Request timeout. Please try again."
-
-        # Default: generic error (don't leak exception details)
-        logger.error(f"{error_type}: {str(exception)}")
-        return 500, "An error occurred. Please contact support if this persists."
-
 
 # ============================================================================
 # SECURITY MIDDLEWARE

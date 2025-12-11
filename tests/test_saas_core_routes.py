@@ -13,11 +13,11 @@ Tests all API endpoints in routes/saas_core.py:
 
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
+from urllib.parse import urlparse
 
 import pytest
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
-from urllib.parse import urlparse
 
 # Note: These tests assume FastAPI app setup
 # They can be integrated into main test suite or run independently
@@ -636,8 +636,9 @@ class TestWebhookEndpoints:
             }
             mock_construct.return_value = mock_event
 
-            from backend.routes.saas_core import stripe_webhook
             from fastapi import Request
+
+            from backend.routes.saas_core import stripe_webhook
 
             # Mock request
             mock_request = MagicMock(spec=Request)

@@ -16,17 +16,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from fastapi import HTTPException
 
-from backend.saas_router import (
-    MODEL_PRICING,
-    MODEL_PROFILES,
-    ChatRequest,
-    ChatResponse,
-    Message,
-    chat_completion,
-    estimate_cost,
-    get_available_models,
-    route_to_best_model,
-)
+from backend.saas_router import (MODEL_PRICING, MODEL_PROFILES, ChatRequest,
+                                 ChatResponse, Message, chat_completion,
+                                 estimate_cost, get_available_models,
+                                 route_to_best_model)
 
 
 class TestModelRouting:

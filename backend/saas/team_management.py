@@ -14,7 +14,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
-from ..database import (Team, TeamInvitation, TeamMember, User, get_db)
+from ..database import Team, TeamInvitation, TeamMember, User, get_db
 
 router = APIRouter()
 
