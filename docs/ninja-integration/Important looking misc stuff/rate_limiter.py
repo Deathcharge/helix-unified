@@ -79,6 +79,7 @@ class RateLimiter:
     def _get_key(self, scope: str, identifier: str, endpoint: str) -> str:
         """Generate rate limit key"""
         key_data = f"{scope}:{identifier}:{endpoint}"
+        # lgtm[py/weak-sensitive-data-hashing] - MD5 used for cache key generation, not cryptography
         return hashlib.md5(key_data.encode()).hexdigest()
     
     def _get_identifier(self, request: Request = None, **kwargs) -> str:

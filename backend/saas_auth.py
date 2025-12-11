@@ -286,6 +286,7 @@ def generate_api_key() -> tuple[str, str, str]:
     # 1. API keys have cryptographic randomness (not user-chosen)
     # 2. 256-bit entropy makes brute force impractical
     # 3. No password-specific attacks apply (no dictionaries/patterns)
+    # lgtm[py/weak-sensitive-data-hashing] - High-entropy API keys (256-bit), not passwords
     key_hash = hashlib.sha256(full_key.encode()).hexdigest()
 
     # Prefix for display (e.g., "hx_user_abc123...")
@@ -307,6 +308,7 @@ async def verify_api_key(api_key: str) -> Optional[Dict[str, Any]]:
     # SECURITY NOTE: SHA-256 for verification (matches generation)
     # See generate_api_key() for security considerations
     # TODO: Match with bcrypt/Argon2 when migration happens
+    # lgtm[py/weak-sensitive-data-hashing] - High-entropy API keys (256-bit), not passwords
     key_hash = hashlib.sha256(api_key.encode()).hexdigest()
 
     # Check cache first (faster)

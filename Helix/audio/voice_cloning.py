@@ -392,7 +392,7 @@ class VoiceCloner:
     def _generate_voice_id(self, user_id: str) -> str:
         """Generate unique voice ID."""
         content = f"{user_id}:{datetime.utcnow().isoformat()}"
-        return hashlib.md5(content.encode()).hexdigest()
+        return hashlib.sha256(content.encode()).hexdigest()
     
     def create_clone_table(self) -> bool:
         """Create user_voice_clones table if it doesn't exist."""

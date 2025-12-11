@@ -400,7 +400,7 @@ class VoiceMessageLogger:
         """Generate unique message ID."""
         import hashlib
         content = f"{user_id}:{timestamp.isoformat()}:{datetime.utcnow().timestamp()}"
-        return hashlib.md5(content.encode()).hexdigest()
+        return hashlib.sha256(content.encode()).hexdigest()
     
     def _dict_to_message(self, data: Dict) -> VoiceMessage:
         """Convert database row to VoiceMessage object."""

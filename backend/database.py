@@ -74,6 +74,9 @@ class User(Base):
     has_agent_rental_access = Column(Boolean, default=False)
     has_dashboard_pro_access = Column(Boolean, default=False)
 
+    # User preferences
+    language = Column(String, default="en")  # Language preference (en, es, fr, de, hi, sa)
+
 class APIKey(Base):
     """API Keys for programmatic access"""
     __tablename__ = "api_keys"

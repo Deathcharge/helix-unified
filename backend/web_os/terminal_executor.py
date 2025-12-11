@@ -244,15 +244,17 @@ class TerminalExecutor:
         """List directory contents"""
         path = args[0] if args else self.current_dir
 
-        valid, error = self.validate_path(path)
-        if not valid:
-            return CommandResult('', error, 1, 'ls', False)
-
         try:
+            # SECURITY: Resolve path first, then validate to prevent TOCTOU
             if not path.startswith('/'):
                 path = os.path.join(self.current_dir, path)
 
             path = os.path.abspath(path)
+
+            # Validate AFTER path resolution
+            valid, error = self.validate_path(path)
+            if not valid:
+                return CommandResult('', error, 1, 'ls', False)
 
             if not os.path.exists(path):
                 return CommandResult('', f"❌ Path not found: {path}", 1, 'ls', False)

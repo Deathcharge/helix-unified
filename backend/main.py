@@ -418,10 +418,18 @@ app.add_middleware(
 # ============================================================================
 # GZIP COMPRESSION MIDDLEWARE (70-90% response size reduction)
 # ============================================================================
-from starlette.middleware.gzip import GZIPMiddleware
+try:
+    from fastapi.middleware.gzip import GZipMiddleware
+except ImportError:
+    # Fallback for older versions
+    try:
+        from starlette.middleware.gzip import GZipMiddleware
+    except ImportError:
+        # Final fallback for very old versions
+        from starlette.middleware.gzip import GZIPMiddleware as GZipMiddleware
 
 app.add_middleware(
-    GZIPMiddleware,
+    GZipMiddleware,
     minimum_size=1000  # Only compress responses > 1KB
 )
 logger.info("✅ Gzip compression enabled (minimum_size=1000)")
@@ -1200,6 +1208,7 @@ async def serve_template(file_path: str) -> FileResponse:
     if any(part == ".." for part in safe_path.parts):
         raise HTTPException(status_code=403, detail="Path traversal forbidden")
     # 5. Combine with template directory and resolve
+    # lgtm[py/path-injection] - Validated above: no '..' components, normalized, sandboxed to TEMPLATES_DIR
     template_path = (TEMPLATES_DIR / safe_path).resolve()
     # Security check - ensure path is within templates directory
     try:
