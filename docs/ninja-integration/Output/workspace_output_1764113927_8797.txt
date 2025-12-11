@@ -1,0 +1,18 @@
+🌀 Helix Collective Dashboard Deployment Script
+=============================================
+Current branch: feature/helix-collective-dashboard-integration
+📊 Git Status:
+On branch feature/helix-collective-dashboard-integration
+nothing to commit, working tree clean
+
+🚀 Ready to push and create PR!
+
+To complete deployment:
+1. Push the branch:
+   git push origin feature/helix-collective-dashboard-integration
+
+2. Create PR on GitHub
+
+3. Dashboard files:
+   - frontend/helix-collective-agents/index.html
+   - frontend/helix-collective-agents/styles.css

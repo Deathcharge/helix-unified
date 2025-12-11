@@ -1,0 +1,40 @@
+On branch feature/helix-os-triple-ai-ecosystem
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+	deleted:    helix-unified-fresh
+
+Changes not staged for commit:
+  (use "git add/rm <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   docs/index.html
+	deleted:    "frontend/community_app/pages/1_\360\237\227\243\357\270\217_Forums.py"
+	deleted:    "frontend/community_app/pages/2_\360\237\222\254_Live_Chat.py"
+	deleted:    "frontend/community_app/pages/3_\360\237\222\225_Agent_Dating.py"
+	modified:   frontend/package.json
+	modified:   todo.md
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	.github/dependabot.yml
+	.github/workflows/ci-cd.yml
+	.github/workflows/security.yml
+	.github/workflows/testing.yml
+	QOL_FEATURE_UPGRADE_COMPLETE.md
+	backend/Dockerfile.dev
+	config/unified-config.json
+	docker-compose.dev.yml
+	frontend/Dockerfile.dev
+	frontend/components/AgentCard.js
+	frontend/components/ServiceCard.js
+	frontend/package-lock.json
+	"frontend/pages/1_\360\237\227\243\357\270\217_Forums.py"
+	"frontend/pages/2_\360\237\222\254_Live_Chat.py"
+	"frontend/pages/3_\360\237\222\225_Agent_Dating.py"
+	frontend/pages/analytics.js
+	frontend/pages/chat.js
+	frontend/pages/codex.js
+	frontend/pages/forum.js
+	frontend/pages/hub.js
+	frontend/pages/portals/
+	frontend/styles/
+

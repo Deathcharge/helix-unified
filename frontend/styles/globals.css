@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global styles for Helix */
+* {
+  @apply box-border;
+}
+
+html,
+body {
+  @apply bg-gradient-to-b from-slate-950 via-purple-950 to-slate-950 text-slate-100;
+  height: 100%;
+}
+
+#__next {
+  height: 100%;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Default button styles */
+button {
+  @apply transition-colors duration-200;
+}
+
+/* Link styles */
+a {
+  @apply text-purple-400 hover:text-purple-300 transition-colors;
+}
+
+/* Form input styles */
+input,
+textarea,
+select {
+  @apply bg-slate-800 border border-slate-700 text-white rounded transition-colors focus:outline-none focus:border-purple-500;
+}
+
+/* Selection color */
+::selection {
+  @apply bg-purple-600 text-white;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  @apply w-2;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-slate-900;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-purple-600 rounded hover:bg-purple-500;
+}

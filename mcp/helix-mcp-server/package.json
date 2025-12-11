@@ -1,0 +1,61 @@
+{
+  "name": "@helix-collective/mcp-server",
+  "version": "1.0.0",
+  "description": "Helix Collective MCP Server - Multi-LLM routing + AI agents for Claude",
+  "main": "dist/index.js",
+  "type": "module",
+  "bin": {
+    "helix-mcp": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "prepublish": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "claude",
+    "ai",
+    "llm",
+    "agents",
+    "helix",
+    "multi-llm"
+  ],
+  "author": "Helix Collective",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Deathcharge/helix-unified.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Deathcharge/helix-unified/issues"
+  },
+  "homepage": "https://helixcollective.io",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.24.0",
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "mcp": {
+    "name": "helix-collective",
+    "displayName": "Helix Collective",
+    "description": "Multi-LLM router with AI agents. Route across Claude, GPT, Grok, Llama. Execute specialized agents.",
+    "icon": "https://helixcollective.io/icon.png",
+    "category": "ai-tools",
+    "tags": ["llm", "routing", "agents", "multi-model", "cost-optimization"],
+    "capabilities": {
+      "tools": true,
+      "resources": true,
+      "prompts": true
+    }
+  }
+}

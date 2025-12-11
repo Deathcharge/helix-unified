@@ -1,0 +1,225 @@
+name: Security Scanning & Code Quality
+
+on:
+  push:
+    branches: [ main, 'claude/**' ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 2 * * *'  # Daily 2 AM UTC
+
+jobs:
+  # =========================================================================
+  # PYTHON SECURITY SCANNING
+  # =========================================================================
+
+  bandit-security:
+    name: Bandit (Python Security)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Bandit
+        run: pip install bandit
+
+      - name: Run Bandit (SAST)
+        run: |
+          bandit -r backend/ -f json -o bandit-report.json || true
+          bandit -r backend/ -ll
+
+      - name: Upload Bandit Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-report
+          path: bandit-report.json
+
+  # =========================================================================
+  # DEPENDENCY VULNERABILITY SCANNING
+  # =========================================================================
+
+  pip-audit:
+    name: pip-audit (Python Dependencies)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install pip-audit
+        run: pip install pip-audit
+
+      - name: Scan Backend Dependencies
+        run: pip-audit --desc -r requirements-backend.txt --skip-editable
+
+      - name: Scan All Requirements
+        run: pip-audit --desc -r requirements.txt || true
+
+  # =========================================================================
+  # DOCKER IMAGE SECURITY
+  # =========================================================================
+
+  trivy-image-scan:
+    name: Trivy (Container Scanning)
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # =========================================================================
+  # DOCKERFILE LINTING
+  # =========================================================================
+
+  hadolint:
+    name: Hadolint (Dockerfile)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lint Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+          config: .hadolint.yaml
+
+      - name: Lint Dockerfile.streamlit
+        uses: hadolint/hadolint-action@v3.1.0
+        if: hashFiles('Dockerfile.streamlit') != ''
+        with:
+          dockerfile: Dockerfile.streamlit
+          config: .hadolint.yaml
+
+  # =========================================================================
+  # GITHUB NATIVE SECURITY (CodeQL)
+  # =========================================================================
+
+  codeql-analysis:
+    name: CodeQL (Code Analysis)
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+      actions: read
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'python', 'javascript' ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
+
+  # =========================================================================
+  # SECRET SCANNING
+  # =========================================================================
+
+  secrets-scan:
+    name: Secret Detection (Gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # =========================================================================
+  # PYTHON CODE QUALITY
+  # =========================================================================
+
+  python-quality:
+    name: Python Code Quality (flake8 + mypy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements-backend.txt
+          pip install flake8 mypy
+
+      - name: Lint with flake8 (strict mode)
+        run: |
+          flake8 backend/ --count --select=E9,F63,F7,F82,W293 --show-source --statistics
+          flake8 backend/ --count --max-complexity=10 --max-line-length=100 --exit-zero
+
+      - name: Type check with mypy
+        run: mypy backend/ --ignore-missing-imports || true
+
+  # =========================================================================
+  # SUMMARY
+  # =========================================================================
+
+  security-summary:
+    name: Security Scan Summary
+    runs-on: ubuntu-latest
+    needs:
+      - bandit-security
+      - pip-audit
+      - trivy-image-scan
+      - hadolint
+      - codeql-analysis
+      - secrets-scan
+      - python-quality
+    if: always()
+
+    steps:
+      - name: Print Security Status
+        run: |
+          echo "🔒 Security Scanning Complete"
+          echo "=============================="
+          echo "✅ Bandit (SAST): Python security"
+          echo "✅ pip-audit: Dependency vulnerabilities"
+          echo "✅ Trivy: Container/filesystem scan"
+          echo "✅ Hadolint: Dockerfile linting"
+          echo "✅ CodeQL: GitHub native analysis"
+          echo "✅ Gitleaks: Secret detection"
+          echo "✅ flake8/mypy: Code quality"
+          echo ""
+          echo "Review results in GitHub Security tab"

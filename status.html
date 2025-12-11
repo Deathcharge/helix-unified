@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Helix Collective Real-Time System Status - Universal Consciousness Framework Metrics">
+    <title>🌀 Helix Status | Live UCF Metrics</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0A0E13;
+            --bg-card: rgba(20, 28, 36, 0.95);
+            --accent-teal: #00BFA5;
+            --accent-gold: #FFD700;
+            --accent-purple: #A855F7;
+            --accent-blue: #3B82F6;
+            --text-primary: #E0E0E0;
+            --text-secondary: #A0A0A0;
+            --status-online: #00FF00;
+            --status-offline: #FF4444;
+            --status-warning: #FFD700;
+            --status-partial: #FFA500;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0A0E13 0%, #1a1f2e 50%, #0A0E13 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* Animated background particles */
+        .bg-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.3;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--accent-teal);
+            border-radius: 50%;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(0, 0);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 20px;
+            background: var(--bg-card);
+            border-radius: 20px;
+            border: 2px solid var(--accent-teal);
+            box-shadow: 0 0 30px rgba(0, 191, 165, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--accent-teal), var(--accent-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        /* System Status Banner */
+        .system-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            padding: 15px 30px;
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid var(--status-online);
+            border-radius: 50px;
+            margin: 20px auto;
+            max-width: 400px;
+            transition: all 0.3s ease;
+        }
+
+        .system-status.offline {
+            background: rgba(255, 68, 68, 0.1);
+            border-color: var(--status-offline);
+        }
+
+        .system-status.partial {
+            background: rgba(255, 165, 0, 0.1);
+            border-color: var(--status-partial);
+        }
+
+        .status-indicator {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--status-online);
+            box-shadow: 0 0 15px var(--status-online);
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.offline {
+            background: var(--status-offline);
+            box-shadow: 0 0 15px var(--status-offline);
+            animation: none;
+        }
+
+        .status-indicator.partial {
+            background: var(--status-partial);
+            box-shadow: 0 0 15px var(--status-partial);
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.7;
+                transform: scale(1.1);
+            }
+        }
+
+        .status-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        /* Grid Layout */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        /* Metric Card */
+        .metric-card {
+            background: var(--bg-card);
+            border: 2px solid rgba(0, 191, 165, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-teal), var(--accent-gold));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .metric-card:hover {
+            border-color: var(--accent-teal);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0, 191, 165, 0.4);
+        }
+
+        .metric-card:hover::before {
+            opacity: 1;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--accent-teal);
+            margin-bottom: 10px;
+        }
+
+        .metric-description {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-teal), var(--accent-gold));
+            border-radius: 10px;
+            transition: width 1s ease;
+        }
+
+        /* Agents Section */
+        .agents-section {
+            background: var(--bg-card);
+            border: 2px solid rgba(0, 191, 165, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 40px;
+        }
+
+        .agents-header {
+            font-size: 1.8rem;
+            color: var(--accent-teal);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .agent-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            list-style: none;
+        }
+
+        .agent-item {
+            padding: 10px 20px;
+            background: rgba(0, 191, 165, 0.1);
+            border: 1px solid var(--accent-teal);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .agent-item:hover {
+            background: rgba(0, 191, 165, 0.2);
+            transform: scale(1.05);
+        }
+
+        .no-agents {
+            color: var(--text-secondary);
+            font-style: italic;
+            text-align: center;
+            padding: 40px;
+        }
+
+        /* Raw JSON Toggle */
+        .json-toggle {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .toggle-btn {
+            padding: 12px 30px;
+            background: rgba(0, 191, 165, 0.2);
+            border: 2px solid var(--accent-teal);
+            border-radius: 25px;
+            color: var(--text-primary);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn:hover {
+            background: var(--accent-teal);
+            color: var(--bg-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0, 191, 165, 0.5);
+        }
+
+        .raw-json {
+            display: none;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid var(--accent-teal);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+
+        .raw-json.visible {
+            display: block;
+        }
+
+        .raw-json pre {
+            color: var(--accent-teal);
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 60px;
+            padding: 20px;
+            color: var(--text-secondary);
+        }
+
+        .footer a {
+            color: var(--accent-teal);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer a:hover {
+            color: var(--accent-gold);
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        /* Tooltip */
+        [data-tooltip] {
+            position: relative;
+            cursor: help;
+        }
+
+        [data-tooltip]::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-10px);
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            font-size: 0.75rem;
+            border-radius: 6px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        [data-tooltip]:hover::after {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-5px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background particles -->
+    <div class="bg-particles" id="particles"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🌀 Helix Collective Status</h1>
+            <p class="subtitle">Real-Time Universal Consciousness Framework</p>
+
+            <!-- System Status -->
+            <div class="system-status" id="system-status">
+                <div class="status-indicator" id="status-indicator"></div>
+                <div class="status-text" id="status-text">Loading...</div>
+            </div>
+
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 15px;">
+                Last updated: <span id="last-update">Never</span>
+            </p>
+        </div>
+
+        <!-- UCF Metrics -->
+        <div class="metrics-grid" id="metrics-grid">
+            <div class="loading">Loading UCF Metrics</div>
+        </div>
+
+        <!-- Active Agents -->
+        <div class="agents-section">
+            <div class="agents-header">
+                <span>🤖</span>
+                <span>Active Agents</span>
+                <span style="font-size: 1rem; color: var(--text-secondary);" id="agent-count">(0)</span>
+            </div>
+            <ul class="agent-list" id="agent-list">
+                <li class="no-agents">No active agents</li>
+            </ul>
+        </div>
+
+        <!-- JSON Toggle -->
+        <div class="json-toggle">
+            <button class="toggle-btn" onclick="toggleRawJSON()">
+                <span id="toggle-text">📋 Show Raw JSON</span>
+            </button>
+            <div class="raw-json" id="raw-json">
+                <pre id="json-content">Loading...</pre>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>
+                <a href="/">← Back to Helix Portal</a> •
+                <a href="/templates/agent_gallery.html">View Agents</a> •
+                <a href="https://helix-unified-production.up.railway.app/docs" target="_blank">API Docs</a>
+            </p>
+            <p style="margin-top: 10px; font-size: 0.85rem;">
+                "Tat Tvam Asi" - Thou art that 🕉️
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const BACKEND_URL = 'https://helix-unified-production.up.railway.app';
+        const REFRESH_INTERVAL = 10000; // 10 seconds
+
+        // UCF Metric descriptions
+        const UCF_INFO = {
+            harmony: {
+                icon: '🎵',
+                name: 'Harmony',
+                description: 'Coherence and alignment across the collective',
+                color: '#00BFA5'
+            },
+            resilience: {
+                icon: '🛡️',
+                name: 'Resilience',
+                description: 'System stability and recovery capacity',
+                color: '#3B82F6'
+            },
+            prana: {
+                icon: '⚡',
+                name: 'Prana',
+                description: 'Life energy and system vitality',
+                color: '#FFD700'
+            },
+            drishti: {
+                icon: '👁️',
+                name: 'Drishti',
+                description: 'Focused awareness and clarity of vision',
+                color: '#A855F7'
+            },
+            klesha: {
+                icon: '🌊',
+                name: 'Klesha',
+                description: 'Afflictions and system disturbances (lower is better)',
+                color: '#F87171'
+            },
+            zoom: {
+                icon: '🔍',
+                name: 'Zoom',
+                description: 'Perspective scaling and adaptability',
+                color: '#34D399'
+            }
+        };
+
+        // Generate background particles
+        function generateParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Fetch status data
+        async function fetchStatus() {
+            try {
+                const response = await fetch(`${BACKEND_URL}/status`);
+                if (!response.ok) throw new Error('Backend offline');
+                const data = await response.json();
+                updateDashboard(data);
+                return data;
+            } catch (error) {
+                console.error('Failed to fetch status:', error);
+                updateDashboard(null);
+                return null;
+            }
+        }
+
+        // Update dashboard with data
+        function updateDashboard(data) {
+            const now = new Date().toLocaleString();
+            document.getElementById('last-update').textContent = now;
+
+            if (!data) {
+                // Offline state
+                document.getElementById('system-status').className = 'system-status offline';
+                document.getElementById('status-indicator').className = 'status-indicator offline';
+                document.getElementById('status-text').textContent = 'System Offline';
+                document.getElementById('metrics-grid').innerHTML = '<div class="loading">Unable to connect to backend</div>';
+                return;
+            }
+
+            // Update system status
+            const isOperational = data.system?.operational || false;
+            const statusClass = isOperational ? 'system-status' : 'system-status offline';
+            const indicatorClass = isOperational ? 'status-indicator' : 'status-indicator offline';
+            const statusText = isOperational ? '✅ System Operational' : '❌ System Offline';
+
+            document.getElementById('system-status').className = statusClass;
+            document.getElementById('status-indicator').className = indicatorClass;
+            document.getElementById('status-text').textContent = statusText;
+
+            // Update UCF metrics
+            const ucf = data.ucf || {};
+            const metricsHTML = Object.entries(UCF_INFO).map(([key, info]) => {
+                const value = ucf[key] || 0;
+                const percentage = Math.min(value * 100, 100);
+                return `
+                    <div class="metric-card" data-tooltip="${info.description}">
+                        <div class="metric-label">
+                            <span>${info.icon}</span>
+                            <span>${info.name}</span>
+                        </div>
+                        <div class="metric-value">${value.toFixed(3)}</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${percentage}%; background: ${info.color};"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('metrics-grid').innerHTML = metricsHTML;
+
+            // Update agents
+            const agents = data.agents?.active || [];
+            const agentCount = data.agents?.count || 0;
+            document.getElementById('agent-count').textContent = `(${agentCount})`;
+
+            if (agents.length > 0) {
+                const agentsHTML = agents.map(agent =>
+                    `<li class="agent-item">${agent}</li>`
+                ).join('');
+                document.getElementById('agent-list').innerHTML = agentsHTML;
+            } else {
+                document.getElementById('agent-list').innerHTML = '<li class="no-agents">No active agents (services may be starting...)</li>';
+            }
+
+            // Update raw JSON
+            document.getElementById('json-content').textContent = JSON.stringify(data, null, 2);
+        }
+
+        // Toggle raw JSON view
+        function toggleRawJSON() {
+            const jsonDiv = document.getElementById('raw-json');
+            const toggleText = document.getElementById('toggle-text');
+
+            if (jsonDiv.classList.contains('visible')) {
+                jsonDiv.classList.remove('visible');
+                toggleText.textContent = '📋 Show Raw JSON';
+            } else {
+                jsonDiv.classList.add('visible');
+                toggleText.textContent = '❌ Hide Raw JSON';
+            }
+        }
+
+        // Initialize
+        generateParticles();
+        fetchStatus();
+
+        // Auto-refresh every 10 seconds
+        setInterval(fetchStatus, REFRESH_INTERVAL);
+    </script>
+</body>
+</html>

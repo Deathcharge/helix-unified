@@ -1,0 +1,1 @@
+fatal: pathspec 'TRIPLE_AI_ECOSYSTEM_COMPLETE.md' did not match any files

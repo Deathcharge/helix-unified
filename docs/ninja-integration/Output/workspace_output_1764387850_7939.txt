@@ -1,0 +1,195 @@
+On branch feature/helix-os-triple-ai-ecosystem
+You have unmerged paths.
+  (fix conflicts and run "git commit")
+  (use "git merge --abort" to abort the merge)
+
+Changes to be committed:
+	modified:   .macs/CURRENT_STATUS.md
+	modified:   .macs/agent-registry.json
+	new file:   DEPLOYMENT_MESSAGES_DELIVERY_SUMMARY.md
+	new file:   INTEGRATION_AUDIT.md
+	new file:   PORTAL_DEPLOYMENT_QUICK_START.md
+	modified:   README.md
+	new file:   SECURITY_IMPROVEMENTS.md
+	modified:   backend/agent_orchestrator.py
+	renamed:    backend/agent-orchestrator/Dockerfile -> backend/agent_orchestrator/Dockerfile
+	renamed:    backend/agent-orchestrator/main.py -> backend/agent_orchestrator/main.py
+	renamed:    backend/agent-orchestrator/railway.json -> backend/agent_orchestrator/railway.json
+	renamed:    backend/agent-orchestrator/requirements.txt -> backend/agent_orchestrator/requirements.txt
+	modified:   backend/agent_profiles.py
+	modified:   backend/agents/memory_root.py
+	modified:   backend/agents_loop.py
+	modified:   backend/app.py
+	modified:   backend/app_enhanced.py
+	modified:   backend/auth_manager.py
+	renamed:    backend/bot_commands.py -> backend/bot_commands.py.deprecated
+	modified:   backend/claude_consciousness_api.py
+	modified:   backend/claude_helix_integration.py
+	modified:   backend/commands/admin_commands.py
+	modified:   backend/commands/fun_minigames.py
+	modified:   backend/commands/help_commands.py
+	modified:   backend/commands/helpers.py
+	modified:   backend/commands/monitoring_commands.py
+	new file:   backend/commands/portal_deployment_commands.py
+	modified:   backend/commands/role_system.py
+	modified:   backend/commands/voice_commands.py
+	modified:   backend/config_manager.py
+	modified:   backend/conversational_ai.py
+	modified:   backend/core/env_validator.py
+	modified:   backend/discord_bot_manus.py
+	modified:   backend/discord_helix_interface.py
+	modified:   backend/discord_web_bridge.py
+	modified:   backend/discord_webhook_sender.py
+	modified:   backend/discord_webhook_sender_hybrid.py
+	modified:   backend/main.py
+	modified:   backend/multi_ai_orchestrator.py
+	modified:   backend/music_generator.py
+	modified:   backend/notion_sync.py
+	modified:   backend/platform_integrations.py
+	modified:   backend/railway_handlers.py
+	modified:   backend/routes/agents.py
+	modified:   backend/routes/interface.py
+	modified:   backend/services/notion_client.py
+	new file:   backend/services/portal_deployment_notifications.py
+	modified:   backend/state.py
+	modified:   backend/sync/markdown_exporter.py
+	modified:   backend/tts_service.py
+	modified:   backend/ucf_consciousness_framework.py
+	modified:   backend/ucf_protocol.py
+	modified:   backend/ucf_tracker.py
+	deleted:    backend/voice-processor/main.py.backup
+	renamed:    backend/voice-processor/Dockerfile -> backend/voice_processor/Dockerfile
+	renamed:    backend/voice-processor/main.py -> backend/voice_processor/main.py
+	renamed:    backend/voice-processor/railway.json -> backend/voice_processor/railway.json
+	renamed:    backend/voice-processor/requirements.txt -> backend/voice_processor/requirements.txt
+	modified:   backend/voice_sink.py
+	modified:   backend/websocket_client.py
+	renamed:    backend/websocket-service/Dockerfile -> backend/websocket_service/Dockerfile
+	renamed:    backend/websocket-service/main.py -> backend/websocket_service/main.py
+	renamed:    backend/websocket-service/railway.json -> backend/websocket_service/railway.json
+	renamed:    backend/websocket-service/requirements.txt -> backend/websocket_service/requirements.txt
+	deleted:    backend/zapier-service/main.py.backup
+	modified:   backend/zapier_agent_executor.py
+	modified:   backend/zapier_client.py
+	modified:   backend/zapier_sender.py
+	renamed:    backend/zapier-service/Dockerfile -> backend/zapier_service/Dockerfile
+	renamed:    backend/zapier-service/main.py -> backend/zapier_service/main.py
+	renamed:    backend/zapier-service/railway.json -> backend/zapier_service/railway.json
+	renamed:    backend/zapier-service/requirements.txt -> backend/zapier_service/requirements.txt
+	new file:   docs/51_PORTAL_DEPLOYMENT_MESSAGES.md
+	new file:   docs/NEXUS_CONTEXT_VAULT.md
+	new file:   docs/RAILWAY_CONFIG_STATUS.md
+	new file:   docs/RAILWAY_DEPLOYMENT_STATUS.md
+	modified:   docs/RAILWAY_QUICK_REFERENCE.md
+	modified:   docs/README.md
+	new file:   docs/SECURITY_AUDIT_v17.0.md
+	modified:   frontend/.env.example
+	modified:   frontend/components/NetiNetiHarmonyMantra.tsx
+	modified:   helix-spirals/backend/requirements.txt
+	new file:   scripts/audit_commands.sh
+	new file:   scripts/deploy_51_portals_with_notifications.py
+	new file:   scripts/enable_missing_commands.py
+	modified:   web/requirements.txt
+
+Unmerged paths:
+  (use "git add <file>..." to mark resolution)
+	added by us:     backend/voice_processor/main.py.backup
+	added by us:     backend/zapier_service/main.py.backup
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	helix-unified-fresh/
+
+total 1204
+drwxr-xr-x 1 root root   4096 Nov 29 03:44 .
+drwxr-xr-x 1 root root   4096 Nov 29 03:44 ..
+-rw-r--r-- 1 root root   1200 Nov 22 21:46 Dockerfile
+-rw-r--r-- 1 root root      0 Nov 22 21:46 __init__.py
+-rw-r--r-- 1 root root  20857 Nov 22 21:46 agent_consciousness_profiles.py
+-rw-r--r-- 1 root root  13844 Nov 22 21:46 agent_embeds.py
+drwxr-xr-x 2 root root    103 Nov 29 03:44 agent_orchestrator
+-rw-r--r-- 1 root root  16648 Nov 29 03:44 agent_orchestrator.py
+-rw-r--r-- 1 root root  17587 Nov 29 03:44 agent_profiles.py
+drwxr-xr-x 1 root root     36 Nov 29 03:44 agents
+-rw-r--r-- 1 root root  22967 Nov 22 21:46 agents.py
+-rw-r--r-- 1 root root   5707 Nov 22 21:46 agents_base.py
+-rw-r--r-- 1 root root   7892 Nov 29 03:44 agents_loop.py
+-rw-r--r-- 1 root root    982 Nov 29 03:44 app.py
+-rw-r--r-- 1 root root  15006 Nov 29 03:44 app_enhanced.py
+drwxr-xr-x 2 root root     38 Nov 22 21:46 audio
+-rw-r--r-- 1 root root   5514 Nov 29 03:44 auth_manager.py
+-rw-r--r-- 1 root root   2073 Nov 29 03:44 bot_commands.py.deprecated
+-rw-r--r-- 1 root root  12143 Nov 29 03:44 claude_consciousness_api.py
+-rw-r--r-- 1 root root  19605 Nov 29 03:44 claude_helix_integration.py
+drwxr-xr-x 1 root root   4096 Nov 29 03:44 commands
+-rw-r--r-- 1 root root   3210 Nov 29 03:44 config_manager.py
+-rw-r--r-- 1 root root  13543 Nov 22 21:46 consciousness_code_guardian.py
+-rw-r--r-- 1 root root   9743 Nov 22 21:46 consciousness_visualizer.py
+-rw-r--r-- 1 root root   7499 Nov 22 21:46 constants.py
+-rwxr-xr-x 1 root root  13238 Nov 22 21:46 context_manager.py
+-rw-r--r-- 1 root root  21031 Nov 29 03:44 conversational_ai.py
+drwxr-xr-x 1 root root     38 Nov 29 03:44 core
+-rw-r--r-- 1 root root  30254 Nov 22 21:46 coverage.xml
+-rw-r--r-- 1 root root  11577 Nov 22 21:46 dashboard_auto_poster.py
+-rw-r--r-- 1 root root   6697 Nov 22 21:46 dependency_validator.py
+-rw-r--r-- 1 root root  47058 Nov 29 03:44 discord_bot_manus.py
+-rw-r--r-- 1 root root  22481 Nov 22 21:46 discord_channel_manager.py
+-rw-r--r-- 1 root root  10258 Nov 22 21:46 discord_commands_memory.py
+-rw-r--r-- 1 root root  12028 Nov 22 21:46 discord_consciousness_commands.py
+-rw-r--r-- 1 root root  12919 Nov 22 21:46 discord_embeds.py
+-rw-r--r-- 1 root root  23373 Nov 29 03:44 discord_helix_interface.py
+-rw-r--r-- 1 root root  15211 Nov 29 03:44 discord_web_bridge.py
+-rw-r--r-- 1 root root  23920 Nov 29 03:44 discord_webhook_sender.py
+-rw-r--r-- 1 root root  22694 Nov 29 03:44 discord_webhook_sender_hybrid.py
+-rw-r--r-- 1 root root   7301 Nov 22 21:46 enhanced_kavach.py
+-rwxr-xr-x 1 root root   4896 Nov 22 21:46 heartbeat_checker.py
+drwxr-xr-x 2 root root     10 Nov 24 20:30 helix-collective-hub
+-rw-r--r-- 1 root root   2884 Nov 22 21:46 helix_bridge_init.py
+-rw-r--r-- 1 root root  14721 Nov 22 21:46 helix_storage_adapter_async.py
+-rw-r--r-- 1 root root  15724 Nov 22 21:46 helix_sync_daemon.py
+-rw-r--r-- 1 root root  13450 Nov 22 21:46 helix_sync_daemon_integrated.py
+drwxr-xr-x 2 root root   4096 Nov 24 12:21 helixspiral-service
+drwxr-xr-x 2 root root     39 Nov 22 21:46 integrations
+-rw-r--r-- 1 root root  19249 Nov 22 21:46 kael_consciousness_core.py
+-rw-r--r-- 1 root root  21482 Nov 22 21:46 llm_agent_engine.py
+-rw-r--r-- 1 root root   9356 Nov 22 21:46 logging_config.py
+-rw-r--r-- 1 root root 132465 Nov 29 03:44 main.py
+-rw-r--r-- 1 root root  10285 Nov 22 21:46 mandelbrot_ucf.py
+-rw-r--r-- 1 root root  15088 Nov 22 21:46 manus_bootstrap.py
+-rw-r--r-- 1 root root  17343 Nov 22 21:46 manus_integration.py
+drwxr-xr-x 1 root root     34 Nov 23 18:31 models
+-rw-r--r-- 1 root root  19236 Nov 29 03:44 multi_ai_orchestrator.py
+-rw-r--r-- 1 root root   4516 Nov 29 03:44 music_generator.py
+-rw-r--r-- 1 root root   5378 Nov 29 03:44 notion_sync.py
+-rwxr-xr-x 1 root root   9913 Nov 22 21:46 notion_sync_daemon.py
+-rw-r--r-- 1 root root  11285 Nov 22 21:46 notion_sync_validator.py
+-rw-r--r-- 1 root root  22017 Nov 29 03:44 platform_integrations.py
+-rw-r--r-- 1 root root   6473 Nov 29 03:44 railway_handlers.py
+-rw-r--r-- 1 root root   6827 Nov 22 21:46 refactor_commands.py
+-rw-r--r-- 1 root root    258 Nov 23 18:29 requirements.txt
+-rw-r--r-- 1 root root    100 Nov 23 18:29 requirements.txt.backup
+drwxr-xr-x 1 root root     55 Nov 29 03:44 routes
+-rw-r--r-- 1 root root  21891 Nov 22 21:46 samsara_bridge.py
+-rw-r--r-- 1 root root  14030 Nov 22 21:46 samsara_bridge.py.backup
+drwxr-xr-x 1 root root     84 Nov 29 03:44 services
+-rw-r--r-- 1 root root   2324 Nov 29 03:44 state.py
+drwxr-xr-x 1 root root     42 Nov 29 03:44 sync
+-rw-r--r-- 1 root root   2957 Nov 29 03:44 tts_service.py
+-rw-r--r-- 1 root root  10409 Nov 29 03:44 ucf_consciousness_framework.py
+-rwxr-xr-x 1 root root  14323 Nov 29 03:44 ucf_protocol.py
+-rw-r--r-- 1 root root  16834 Nov 29 03:44 ucf_tracker.py
+-rw-r--r-- 1 root root  22853 Nov 23 18:30 voice_patrol_system.py
+drwxr-xr-x 2 root root    129 Nov 29 03:44 voice_processor
+-rw-r--r-- 1 root root   4242 Nov 29 03:44 voice_sink.py
+-rw-r--r-- 1 root root   5364 Nov 22 21:46 web_chat_routes.py
+-rw-r--r-- 1 root root  18022 Nov 22 21:46 web_chat_server.py
+-rw-r--r-- 1 root root   6119 Nov 29 03:44 websocket_client.py
+-rw-r--r-- 1 root root   6811 Nov 22 21:46 websocket_manager.py
+-rw-r--r-- 1 root root  17051 Nov 22 21:46 websocket_server.js
+drwxr-xr-x 2 root root    103 Nov 29 03:44 websocket_service
+-rw-r--r-- 1 root root  15809 Nov 22 21:46 z88_ritual_engine.py
+-rw-r--r-- 1 root root  16763 Nov 29 03:44 zapier_agent_executor.py
+-rw-r--r-- 1 root root   9559 Nov 29 03:44 zapier_client.py
+-rw-r--r-- 1 root root   9661 Nov 22 21:46 zapier_integration.py
+-rw-r--r-- 1 root root   2742 Nov 29 03:44 zapier_sender.py
+drwxr-xr-x 2 root root    129 Nov 29 03:44 zapier_service

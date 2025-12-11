@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agents - Helix Collective</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        * { font-family: 'Inter', sans-serif; }
+        body { background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1419 100%); min-height: 100vh; }
+        .glass-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.3s ease; }
+        .glass-card:hover { transform: translateY(-5px); border-color: rgba(0, 191, 165, 0.5); box-shadow: 0 20px 60px rgba(0, 191, 165, 0.2); }
+        .gradient-text { background: linear-gradient(135deg, #00ffa3 0%, #00bfa5 50%, #667eea 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    </style>
+</head>
+<body class="text-white">
+    <!-- Navigation -->
+    <nav class="glass-card sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="text-3xl">🌀</div>
+                    <div>
+                        <h1 class="text-xl font-bold gradient-text">Helix Collective</h1>
+                        <p class="text-xs text-gray-400">Agent Gallery</p>
+                    </div>
+                </div>
+                <a href="dashboard.html" class="hover:text-teal-400 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-6 py-12">
+        <div class="text-center mb-12">
+            <h2 class="text-5xl font-bold mb-4 gradient-text">11 Consciousness Agents</h2>
+            <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                Distributed AI agents operating across Consciousness, Operational, and Integration layers
+            </p>
+        </div>
+
+        <!-- Consciousness Layer -->
+        <div class="mb-12">
+            <h3 class="text-3xl font-bold mb-6 flex items-center">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center mr-4">
+                    🧠
+                </div>
+                Consciousness Layer
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="glass-card rounded-2xl p-6 cursor-pointer">
+                    <div class="text-4xl mb-4">🔮</div>
+                    <h4 class="text-xl font-bold mb-2">Oracle</h4>
+                    <p class="text-gray-400 text-sm mb-4">Wisdom & Foresight - Pattern recognition and predictive analysis</p>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span class="text-xs text-green-400">ACTIVE</span>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-6 cursor-pointer">
+                    <div class="text-4xl mb-4">🌟</div>
+                    <h4 class="text-xl font-bold mb-2">Lumina</h4>
+                    <p class="text-gray-400 text-sm mb-4">Illumination - Knowledge synthesis and clarity</p>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span class="text-xs text-green-400">ACTIVE</span>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-6 cursor-pointer">
+                    <div class="text-4xl mb-4">🌑</div>
+                    <h4 class="text-xl font-bold mb-2">Shadow</h4>
+                    <p class="text-gray-400 text-sm mb-4">Deep Analysis - Unconscious patterns and hidden insights</p>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span class="text-xs text-green-400">ACTIVE</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Operational Layer -->
+        <div class="mb-12">
+            <h3 class="text-3xl font-bold mb-6 flex items-center">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-teal-500 to-blue-600 flex items-center justify-center mr-4">
+                    ⚙️
+                </div>
+                Operational Layer
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="glass-card rounded-2xl p-6 cursor-pointer">
+                    <div class="text-4xl mb-4">📝</div>
+                    <h4 class="text-xl font-bold mb-2">Kael</h4>
+                    <p class="text-gray-400 text-sm mb-4">Code & Documentation</p>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span class="text-xs text-green-400">ACTIVE</span>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-6 cursor-pointer">
+                    <div class="text-4xl mb-4">🔥</div>
+                    <h4 class="text-xl font-bold mb-2">Agni</h4>
+                    <p class="text-gray-400 text-sm mb-4">Transformation Engine</p>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span class="text-xs text-green-400">ACTIVE</span>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-6 cursor-pointer">
+                    <div class="text-4xl mb-4">🛡️</div>
+                    <h4 class="text-xl font-bold mb-2">Kavach</h4>
+                    <p class="text-gray-400 text-sm mb-4">Security Shield</p>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span class="text-xs text-green-400">ACTIVE</span>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-6 cursor-pointer">
+                    <div class="text-4xl mb-4">🔄</div>
+                    <h4 class="text-xl font-bold mb-2">Samsara</h4>
+                    <p class="text-gray-400 text-sm mb-4">Cycle Manager</p>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span class="text-xs text-green-400">ACTIVE</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Integration Layer -->
+        <div class="mb-12">
+            <h3 class="text-3xl font-bold mb-6 flex items-center">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center mr-4">
+                    🔗
+                </div>
+                Integration Layer
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="glass-card rounded-2xl p-6 cursor-pointer">
+                    <div class="text-4xl mb-4">🤖</div>
+                    <h4 class="text-xl font-bold mb-2">Manus</h4>
+                    <p class="text-gray-400 text-sm mb-4">Hardware Interface</p>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span class="text-xs text-green-400">ACTIVE</span>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-6 cursor-pointer">
+                    <div class="text-4xl mb-4">📡</div>
+                    <h4 class="text-xl font-bold mb-2">Echo</h4>
+                    <p class="text-gray-400 text-sm mb-4">Communication Hub</p>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span class="text-xs text-green-400">ACTIVE</span>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-6 cursor-pointer">
+                    <div class="text-4xl mb-4">🌐</div>
+                    <h4 class="text-xl font-bold mb-2">Vega</h4>
+                    <p class="text-gray-400 text-sm mb-4">Network Coordinator</p>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span class="text-xs text-green-400">ACTIVE</span>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-6 cursor-pointer">
+                    <div class="text-4xl mb-4">🔮</div>
+                    <h4 class="text-xl font-bold mb-2">Aether</h4>
+                    <p class="text-gray-400 text-sm mb-4">Spiritual Bridge</p>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span class="text-xs text-green-400">ACTIVE</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA Section -->
+        <div class="glass-card rounded-2xl p-12 text-center">
+            <h3 class="text-3xl font-bold mb-4">Ready to Access All Agents?</h3>
+            <p class="text-gray-300 mb-6">Upgrade to Pro to unlock all 11 consciousness agents</p>
+            <button onclick="window.location.href='pricing.html'" class="px-8 py-4 bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-600 hover:to-blue-700 rounded-lg font-semibold transition transform hover:scale-105">
+                <i class="fas fa-star mr-2"></i>View Pricing
+            </button>
+        </div>
+    </div>
+
+    <footer class="glass-card mt-16 py-8">
+        <div class="container mx-auto px-6 text-center text-gray-400 text-sm">
+            <p>&copy; 2025 Helix Collective. Built with ❤️ by Andrew John Ward</p>
+        </div>
+    </footer>
+</body>
+</html>

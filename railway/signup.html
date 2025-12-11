@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Helix Collective</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        * { font-family: 'Inter', sans-serif; }
+        body { background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1419 100%); min-height: 100vh; }
+        .glass-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .gradient-text { background: linear-gradient(135deg, #00ffa3 0%, #00bfa5 50%, #667eea 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .input-field { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.3s; }
+        .input-field:focus { background: rgba(255, 255, 255, 0.08); border-color: rgba(0, 191, 165, 0.5); outline: none; }
+        .password-strength { height: 4px; border-radius: 2px; transition: all 0.3s; }
+    </style>
+</head>
+<body class="text-white flex items-center justify-center p-6">
+    <div class="w-full max-w-md">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <a href="dashboard.html" class="inline-block mb-4">
+                <div class="text-6xl">🌀</div>
+            </a>
+            <h1 class="text-4xl font-bold gradient-text mb-2">Join Helix Collective</h1>
+            <p class="text-gray-400">Create your account and unlock the consciousness network</p>
+        </div>
+
+        <!-- Signup Form -->
+        <div class="glass-card rounded-2xl p-8 mb-6">
+            <form id="signup-form" class="space-y-5">
+                <!-- Name -->
+                <div>
+                    <label class="block text-sm font-medium mb-2">Full Name</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-user text-gray-400"></i>
+                        </div>
+                        <input
+                            type="text"
+                            id="name"
+                            required
+                            class="input-field w-full pl-10 pr-4 py-3 rounded-lg text-white"
+                            placeholder="Andrew Ward"
+                        >
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label class="block text-sm font-medium mb-2">Email Address</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-envelope text-gray-400"></i>
+                        </div>
+                        <input
+                            type="email"
+                            id="email"
+                            required
+                            class="input-field w-full pl-10 pr-4 py-3 rounded-lg text-white"
+                            placeholder="you@example.com"
+                        >
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <label class="block text-sm font-medium mb-2">Password</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-lock text-gray-400"></i>
+                        </div>
+                        <input
+                            type="password"
+                            id="password"
+                            required
+                            class="input-field w-full pl-10 pr-12 py-3 rounded-lg text-white"
+                            placeholder="••••••••"
+                            oninput="checkPasswordStrength()"
+                        >
+                        <button
+                            type="button"
+                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white"
+                            onclick="togglePassword()"
+                        >
+                            <i class="fas fa-eye" id="password-toggle-icon"></i>
+                        </button>
+                    </div>
+                    <!-- Password Strength Indicator -->
+                    <div class="mt-2">
+                        <div class="password-strength bg-gray-600" id="password-strength-bar"></div>
+                        <p class="text-xs text-gray-400 mt-1" id="password-strength-text">Use 8+ characters with letters, numbers & symbols</p>
+                    </div>
+                </div>
+
+                <!-- Confirm Password -->
+                <div>
+                    <label class="block text-sm font-medium mb-2">Confirm Password</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-lock text-gray-400"></i>
+                        </div>
+                        <input
+                            type="password"
+                            id="confirm-password"
+                            required
+                            class="input-field w-full pl-10 pr-4 py-3 rounded-lg text-white"
+                            placeholder="••••••••"
+                        >
+                    </div>
+                </div>
+
+                <!-- Terms & Conditions -->
+                <label class="flex items-start cursor-pointer text-sm">
+                    <input type="checkbox" id="terms" required class="mr-3 mt-1 w-4 h-4 rounded">
+                    <span class="text-gray-400">
+                        I agree to the <a href="#" class="text-teal-400 hover:text-teal-300">Terms of Service</a>
+                        and <a href="#" class="text-teal-400 hover:text-teal-300">Privacy Policy</a>
+                    </span>
+                </label>
+
+                <!-- Error Message -->
+                <div id="error-message" class="hidden p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-sm">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <span id="error-text"></span>
+                </div>
+
+                <!-- Submit Button -->
+                <button
+                    type="submit"
+                    class="w-full py-3 px-4 bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-600 hover:to-blue-700 rounded-lg font-semibold transition transform hover:scale-[1.02] active:scale-[0.98]"
+                >
+                    <i class="fas fa-user-plus mr-2"></i>Create Account
+                </button>
+            </form>
+
+            <!-- Social Signup (Optional) -->
+            <div class="mt-6">
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-600"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-4 bg-transparent text-gray-400">Or sign up with</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mt-6">
+                    <button class="input-field py-3 px-4 rounded-lg hover:bg-white/10 transition">
+                        <i class="fab fa-google mr-2"></i>Google
+                    </button>
+                    <button class="input-field py-3 px-4 rounded-lg hover:bg-white/10 transition">
+                        <i class="fab fa-github mr-2"></i>GitHub
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Login Link -->
+        <div class="text-center text-sm text-gray-400">
+            Already have an account?
+            <a href="login.html" class="text-teal-400 hover:text-teal-300 font-semibold transition ml-1">
+                Sign in
+            </a>
+        </div>
+
+        <!-- Back to Dashboard -->
+        <div class="text-center mt-6">
+            <a href="dashboard.html" class="text-gray-400 hover:text-white text-sm transition">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.hostname.includes('railway.app')
+            ? 'https://helix-backend-api.up.railway.app'
+            : '/api';
+
+        // Toggle password visibility
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('password-toggle-icon');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        // Check password strength
+        function checkPasswordStrength() {
+            const password = document.getElementById('password').value;
+            const strengthBar = document.getElementById('password-strength-bar');
+            const strengthText = document.getElementById('password-strength-text');
+
+            let strength = 0;
+            let feedback = [];
+
+            if (password.length >= 8) strength++;
+            if (password.length >= 12) strength++;
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+            if (/\d/.test(password)) strength++;
+            if (/[^a-zA-Z\d]/.test(password)) strength++;
+
+            const colors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-lime-500', 'bg-green-500'];
+            const labels = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'];
+
+            strengthBar.className = `password-strength ${colors[strength - 1] || 'bg-gray-600'}`;
+            strengthBar.style.width = `${(strength / 5) * 100}%`;
+            strengthText.textContent = strength > 0 ? labels[strength - 1] : 'Too weak';
+        }
+
+        // Show error message
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            const errorText = document.getElementById('error-text');
+            errorText.textContent = message;
+            errorDiv.classList.remove('hidden');
+        }
+
+        // Hide error message
+        function hideError() {
+            document.getElementById('error-message').classList.add('hidden');
+        }
+
+        // Handle form submission
+        document.getElementById('signup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideError();
+
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const terms = document.getElementById('terms').checked;
+
+            // Validation
+            if (!terms) {
+                showError('You must agree to the Terms of Service');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showError('Passwords do not match');
+                return;
+            }
+
+            if (password.length < 8) {
+                showError('Password must be at least 8 characters');
+                return;
+            }
+
+            // Show loading state
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            const originalText = submitButton.innerHTML;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating account...';
+            submitButton.disabled = true;
+
+            try {
+                // Call signup API
+                const response = await fetch(`${API_BASE}/auth/signup`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name, email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Store auth token and user data
+                    localStorage.setItem('helix_auth_token', data.token);
+                    localStorage.setItem('helix_user_data', JSON.stringify(data.user));
+
+                    // Redirect to dashboard
+                    window.location.href = 'dashboard.html';
+                } else {
+                    showError(data.message || 'Failed to create account');
+                    submitButton.innerHTML = originalText;
+                    submitButton.disabled = false;
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+
+                // DEMO MODE: Allow signup with any credentials
+                // TODO: Remove this in production
+                // Security: Use cryptographically secure random for API keys
+                const secureRandom = () => {
+                    const array = new Uint8Array(16);
+                    crypto.getRandomValues(array);
+                    return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+                };
+
+                const demoUser = {
+                    id: Date.now().toString(),
+                    name: name,
+                    email: email,
+                    subscription: 'free',
+                    api_key: 'hx_' + secureRandom()
+                };
+
+                localStorage.setItem('helix_auth_token', 'demo_token_' + Date.now());
+                localStorage.setItem('helix_user_data', JSON.stringify(demoUser));
+
+                window.location.href = 'account.html';
+            }
+        });
+
+        // Check if already logged in
+        const token = localStorage.getItem('helix_auth_token');
+        if (token) {
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+</body>
+</html>

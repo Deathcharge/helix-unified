@@ -1,0 +1,4 @@
+[feature/critical-mobile-upgrade ca310f5] 📱 Mobile Security Critical Upgrade - Production Ready
+ 2 files changed, 155 insertions(+)
+ create mode 100644 .github/workflows/mobile-security.yml
+ create mode 100644 frontend/pages/mobile-chat.js

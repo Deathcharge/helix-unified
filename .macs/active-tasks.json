@@ -1,0 +1,115 @@
+{
+  "version": "1.0",
+  "checksum": "helix-macs-tasks-v1.0",
+  "last_updated": "2025-11-24T08:57:00Z",
+  "tasks": [
+    {
+      "id": "task-001",
+      "title": "Multi-Agent Coordination System",
+      "assigned_to": "Nexus (Manus 6)",
+      "status": "in_progress",
+      "priority": "high",
+      "started": "2025-11-24T08:30:00Z",
+      "estimated_completion": "2025-11-24T09:30:00Z",
+      "dependencies": [],
+      "deliverables": [
+        "MULTI_AGENT_COORDINATION_SYSTEM.md",
+        "agent-registry.json",
+        "active-tasks.json",
+        "macs-dashboard.html"
+      ]
+    },
+    {
+      "id": "task-002",
+      "title": "Master Portal Hub",
+      "assigned_to": "Architect (Manus 1)",
+      "status": "pending",
+      "priority": "high",
+      "started": null,
+      "estimated_completion": null,
+      "dependencies": [],
+      "deliverables": [
+        "helix-hub.manus.space deployment",
+        "Navigation interface",
+        "Shared authentication"
+      ]
+    },
+    {
+      "id": "task-003",
+      "title": "Ninja Tools Implementation (Phase 1)",
+      "assigned_to": "Ninja (Manus 2)",
+      "status": "pending",
+      "priority": "medium",
+      "started": null,
+      "estimated_completion": null,
+      "dependencies": [],
+      "deliverables": [
+        "8 Stealth Mode Tools",
+        "7 Kunai Precision Tools",
+        "MCP integration"
+      ]
+    },
+    {
+      "id": "task-004",
+      "title": "MCP Server Development (68 tools)",
+      "assigned_to": "Sage (Claude Thread 1)",
+      "status": "in_progress",
+      "priority": "high",
+      "started": null,
+      "estimated_completion": null,
+      "dependencies": [],
+      "deliverables": [
+        "MCP server on Railway",
+        "Claude Desktop integration",
+        "Test report for all 68 tools"
+      ]
+    },
+    {
+      "id": "task-005",
+      "title": "Comprehensive Testing & QA",
+      "assigned_to": "Sentinel (Manus 3)",
+      "status": "pending",
+      "priority": "high",
+      "started": null,
+      "estimated_completion": null,
+      "dependencies": ["task-002", "task-003", "task-004"],
+      "deliverables": [
+        "Test reports",
+        "Bug tracking",
+        "Documentation updates"
+      ]
+    },
+    {
+      "id": "task-006",
+      "title": "Notion Sync Verification",
+      "assigned_to": "Nexus (Manus 6)",
+      "status": "pending",
+      "priority": "high",
+      "started": null,
+      "estimated_completion": "2025-11-24T10:00:00Z",
+      "dependencies": ["task-001"],
+      "deliverables": [
+        "!notion-sync command verification",
+        "All databases accessible",
+        "Deployment logging test"
+      ]
+    }
+  ],
+  "completed_tasks": [
+    {
+      "id": "task-000",
+      "title": "Notion API 2025-09-03 Migration",
+      "assigned_to": "Nexus (Manus 6)",
+      "status": "completed",
+      "priority": "critical",
+      "started": "2025-11-24T06:00:00Z",
+      "completed": "2025-11-24T08:00:00Z",
+      "deliverables": [
+        "Updated notion_client.py",
+        "All 5 databases verified",
+        "Deployment Log integration",
+        "23 security vulnerabilities fixed"
+      ]
+    }
+  ]
+}
