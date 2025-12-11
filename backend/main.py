@@ -418,10 +418,18 @@ app.add_middleware(
 # ============================================================================
 # GZIP COMPRESSION MIDDLEWARE (70-90% response size reduction)
 # ============================================================================
-from starlette.middleware.gzip import GZIPMiddleware
+try:
+    from fastapi.middleware.gzip import GZipMiddleware
+except ImportError:
+    # Fallback for older versions
+    try:
+        from starlette.middleware.gzip import GZipMiddleware
+    except ImportError:
+        # Final fallback for very old versions
+        from starlette.middleware.gzip import GZIPMiddleware as GZipMiddleware
 
 app.add_middleware(
-    GZIPMiddleware,
+    GZipMiddleware,
     minimum_size=1000  # Only compress responses > 1KB
 )
 logger.info("✅ Gzip compression enabled (minimum_size=1000)")
