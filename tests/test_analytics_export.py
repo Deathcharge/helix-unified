@@ -5,16 +5,18 @@ Tests for usage statistics and data export
 VILLAIN ANALYTICS TESTING: MEASURE YOUR EVIL SUCCESS 😈
 """
 
-import pytest
 import csv
-import json
 import io
+import json
 from datetime import datetime, timedelta
+
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from backend.database import Base, User, UsageLog, AgentRental, Team, TeamMember
+from backend.database import (AgentRental, Base, Team, TeamMember, UsageLog,
+                              User)
 from backend.main import app
 
 # Test database
@@ -30,6 +32,7 @@ def override_get_db():
         db.close()
 
 from backend.database import get_db
+
 app.dependency_overrides[get_db] = override_get_db
 
 client = TestClient(app)

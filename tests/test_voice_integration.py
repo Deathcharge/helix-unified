@@ -14,7 +14,8 @@ from pathlib import Path
 # Add backend to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from backend.voice_processor_client import VoiceProcessorClient, get_voice_client
+from backend.voice_processor_client import (VoiceProcessorClient,
+                                            get_voice_client)
 
 
 async def test_health_check():

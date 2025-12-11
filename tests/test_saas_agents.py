@@ -17,14 +17,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from fastapi import HTTPException
 
-from backend.saas_agents import (
-    AGENT_REGISTRY,
-    AgentExecutionRequest,
-    AgentExecutionResponse,
-    execute_agent,
-    get_agent_info,
-    list_agents,
-)
+from backend.saas_agents import (AGENT_REGISTRY, AgentExecutionRequest,
+                                 AgentExecutionResponse, execute_agent,
+                                 get_agent_info, list_agents)
 
 
 class TestAgentRegistry:

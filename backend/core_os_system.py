@@ -34,7 +34,7 @@ class WorkspaceManager:
 
     async def create_workspace(self, name: str, owner_id: str, description: str = "") -> Workspace:
         """Create new workspace"""
-        ws_id = f"ws_{hashlib.md5(f'{name}{owner_id}{datetime.now().isoformat()}'.encode()).hexdigest()[:12]}"
+        ws_id = f"ws_{hashlib.md5(f'{name}{owner_id}{datetime.now().isoformat()}'.encode(), usedforsecurity=False).hexdigest()[:12]}"
         workspace = Workspace(
             id=ws_id,
             name=name,
@@ -146,7 +146,7 @@ class SpiralsEngine:
 
     async def create_spiral(self, name: str, triggers: List[Dict], actions: List[Dict]) -> Spiral:
         """Create automation spiral"""
-        spiral_id = f"spiral_{hashlib.md5(f'{name}{datetime.now().isoformat()}'.encode()).hexdigest()[:12]}"
+        spiral_id = f"spiral_{hashlib.md5(f'{name}{datetime.now().isoformat()}'.encode(), usedforsecurity=False).hexdigest()[:12]}"
         spiral = Spiral(
             id=spiral_id,
             name=name,
@@ -214,7 +214,7 @@ class AdminSystem:
 
     async def create_user(self, email: str, role: str = "user") -> User:
         """Create user"""
-        user_id = f"user_{hashlib.md5(email.encode()).hexdigest()[:12]}"
+        user_id = f"user_{hashlib.md5(email.encode(), usedforsecurity=False).hexdigest()[:12]}"
         user = User(id=user_id, email=email, role=Role(role))
         self.users[user_id] = user
         self._log_audit("user_created", {"user_id": user_id, "email": email})

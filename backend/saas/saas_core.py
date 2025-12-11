@@ -7,18 +7,14 @@ This file integrates all enterprise SaaS features into FastAPI routes.
 
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Request, Query, BackgroundTasks
-from pydantic import BaseModel, Field, EmailStr
+
+from fastapi import (APIRouter, BackgroundTasks, Depends, HTTPException, Query,
+                     Request)
+from pydantic import BaseModel, EmailStr, Field
 
 # Import all SaaS services
-from .audit_logs import (
-    audit_service,
-    AuditAction,
-    AuditLog,
-    AuditLogQuery,
-    AuditSeverity,
-    audit,
-)
+from .audit_logs import (AuditAction, AuditLog, AuditLogQuery, AuditSeverity,
+                         audit, audit_service)
 
 # Create router
 router = APIRouter(prefix="/api/saas", tags=["SaaS Platform"])

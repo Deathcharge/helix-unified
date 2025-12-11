@@ -5,11 +5,12 @@
 import logging
 import sys
 from datetime import datetime
-from typing import Any, Dict, Optional
 from pathlib import Path
+from typing import Any, Dict, Optional
 
 try:
-    from colorama import Fore, Style, init as colorama_init
+    from colorama import Fore, Style
+    from colorama import init as colorama_init
     colorama_init(autoreset=True)
     HAS_COLOR = True
 except ImportError:

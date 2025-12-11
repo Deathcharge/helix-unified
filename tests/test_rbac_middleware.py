@@ -10,15 +10,11 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from backend.database import Base, User, Team, TeamMember
-from backend.middleware.rbac import (
-    has_permission,
-    has_feature,
-    can_use_agent,
-    ROLE_PERMISSIONS,
-    TIER_FEATURES
-)
+from backend.database import Base, Team, TeamMember, User
 from backend.main import app
+from backend.middleware.rbac import (ROLE_PERMISSIONS, TIER_FEATURES,
+                                     can_use_agent, has_feature,
+                                     has_permission)
 
 # Test database
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test_rbac.db"
@@ -33,6 +29,7 @@ def override_get_db():
         db.close()
 
 from backend.database import get_db
+
 app.dependency_overrides[get_db] = override_get_db
 
 client = TestClient(app)

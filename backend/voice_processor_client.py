@@ -2,18 +2,20 @@
 Voice Processor API Client - Connects to voice_processor microservice for TTS/STT.
 """
 import asyncio
-import logging
-import os
 import base64
 import hashlib
-import aiohttp
+import logging
+import os
+import tempfile
 from pathlib import Path
 from typing import Optional
+
+import aiohttp
 
 logger = logging.getLogger(__name__)
 
 # Cache directory for TTS audio
-CACHE_DIR = Path("/tmp/helix_tts_cache")
+CACHE_DIR = Path(tempfile.gettempdir()) / "helix_tts_cache"
 CACHE_DIR.mkdir(exist_ok=True)
 
 
@@ -60,7 +62,7 @@ class VoiceProcessorClient:
         """Generate cache file path for TTS audio."""
         # Create hash of text + voice + language
         cache_key = f"{text}:{voice_name}:{language_code}"
-        file_hash = hashlib.md5(cache_key.encode()).hexdigest()
+        file_hash = hashlib.md5(cache_key.encode(), usedforsecurity=False).hexdigest()
         return CACHE_DIR / f"{file_hash}.mp3"
 
     async def synthesize_speech(

@@ -20,29 +20,14 @@ import jwt
 import pytest
 from fastapi import HTTPException
 
-from backend.saas_auth import (
-    API_KEY_PREFIX,
-    JWT_ALGORITHM,
-    JWT_SECRET,
-    TIER_LIMITS,
-    APIKeyCreate,
-    APIKeyResponse,
-    TokenResponse,
-    UserLogin,
-    UserRegistration,
-    check_rate_limit,
-    create_api_key,
-    generate_api_key,
-    get_current_user_api_key,
-    get_current_user_jwt,
-    list_api_keys,
-    login_user,
-    register_user,
-    revoke_api_key,
-    track_usage,
-    verify_api_key,
-    verify_jwt_token,
-)
+from backend.saas_auth import (API_KEY_PREFIX, JWT_ALGORITHM, JWT_SECRET,
+                               TIER_LIMITS, APIKeyCreate, APIKeyResponse,
+                               TokenResponse, UserLogin, UserRegistration,
+                               check_rate_limit, create_api_key,
+                               generate_api_key, get_current_user_api_key,
+                               get_current_user_jwt, list_api_keys, login_user,
+                               register_user, revoke_api_key, track_usage,
+                               verify_api_key, verify_jwt_token)
 
 
 class TestUserRegistration:
