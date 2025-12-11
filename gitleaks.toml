@@ -1,0 +1,68 @@
+# Gitleaks configuration for Helix Unified
+# This configuration helps avoid false positives from example files
+
+title = "gitleaks config"
+
+# Allow commits older than this date
+# [allowlist]
+# description = "Global allowlist"
+# paths = [
+#   '''\.env\.example$''',
+# ]
+
+[[rules]]
+id = "generic-api-key"
+description = "Generic API Key"
+regex = '''(?i)(?:key|api|token|secret|password)[^\n]*?[=:]\s*['"]([0-9a-zA-Z\-_~]{20,}?)['"]'''
+[rules.allowlist]
+paths = [
+  '''\.env\.example$''',
+  '''\.env\.template$''',
+  '''\.example$''',
+  '''\.template$''',
+]
+
+[[rules]]
+id = "anthropic-api-key"
+description = "Anthropic API Key"
+regex = '''sk-ant-[a-zA-Z0-9\-]{95}'''
+[rules.allowlist]
+paths = [
+  '''\.env\.example$''',
+]
+
+[[rules]]
+id = "openai-api-key"
+description = "OpenAI API Key"
+regex = '''sk-[a-zA-Z0-9]{48}'''
+[rules.allowlist]
+paths = [
+  '''\.env\.example$''',
+]
+
+[[rules]]
+id = "stripe-api-key"
+description = "Stripe API Key"
+regex = '''(?:sk|pk)_(?:test|live)_[0-9a-zA-Z]{24,}'''
+[rules.allowlist]
+paths = [
+  '''\.env\.example$''',
+]
+
+[[rules]]
+id = "discord-token"
+description = "Discord Bot Token"
+regex = '''[MN][a-zA-Z0-9_-]{23,25}\.[a-zA-Z0-9_-]{6}\.[a-zA-Z0-9_-]{27,}'''
+[rules.allowlist]
+paths = [
+  '''\.env\.example$''',
+]
+
+[[rules]]
+id = "stripe-webhook-secret"
+description = "Stripe Webhook Secret"
+regex = '''whsec_[0-9a-zA-Z]{32,}'''
+[rules.allowlist]
+paths = [
+  '''\.env\.example$''',
+]

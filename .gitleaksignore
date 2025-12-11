@@ -1,0 +1,10 @@
+# Ignore example/template files that contain placeholder secrets
+.env.example
+.env.template
+*.example
+*.template
+
+# Ignore test files with fake credentials
+tests/fixtures/**
+tests/test_data/**
+**/test_*.py
