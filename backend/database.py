@@ -127,6 +127,55 @@ class WebOSSession(Base):
     files_accessed = Column(Integer, default=0)
     session_duration_seconds = Column(Integer, default=0)
 
+class Team(Base):
+    """Team/Workspace model - VILLAIN ORGANIZATIONS"""
+    __tablename__ = "teams"
+
+    id = Column(String, primary_key=True)
+    name = Column(String, nullable=False)
+    slug = Column(String, unique=True, nullable=False, index=True)
+    owner_id = Column(String, nullable=False, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Subscription (team-level billing)
+    subscription_tier = Column(String, default="free")  # free, pro, workflow, enterprise
+    stripe_customer_id = Column(String)
+    stripe_subscription_id = Column(String)
+    subscription_status = Column(String, default="inactive")
+    subscription_end_date = Column(DateTime)
+
+    # Team settings
+    settings = Column(JSON, default={})
+
+class TeamMember(Base):
+    """Team membership with RBAC - VILLAIN MINIONS"""
+    __tablename__ = "team_members"
+
+    id = Column(String, primary_key=True)
+    team_id = Column(String, nullable=False, index=True)
+    user_id = Column(String, nullable=False, index=True)
+    role = Column(String, nullable=False)  # owner, admin, member, viewer
+    joined_at = Column(DateTime, default=datetime.utcnow)
+    invited_by = Column(String)  # User ID who invited
+
+    # Permissions
+    permissions = Column(JSON, default={})  # Custom permissions override
+
+class TeamInvitation(Base):
+    """Team invitations - RECRUITING VILLAINS"""
+    __tablename__ = "team_invitations"
+
+    id = Column(String, primary_key=True)
+    team_id = Column(String, nullable=False, index=True)
+    email = Column(String, nullable=False, index=True)
+    role = Column(String, nullable=False)  # admin, member, viewer
+    invited_by = Column(String, nullable=False)  # User ID
+    created_at = Column(DateTime, default=datetime.utcnow)
+    expires_at = Column(DateTime)
+    status = Column(String, default="pending")  # pending, accepted, expired, revoked
+    token = Column(String, unique=True, nullable=False)  # Secure invitation token
+
 # ============================================================================
 # CREATE TABLES
 # ============================================================================

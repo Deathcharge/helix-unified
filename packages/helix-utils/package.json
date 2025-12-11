@@ -1,0 +1,35 @@
+{
+  "name": "@helix/utils",
+  "version": "1.0.0",
+  "description": "Helix utility functions for CSS class management and more",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "helix",
+    "utilities",
+    "css",
+    "tailwind",
+    "classnames"
+  ],
+  "author": "Helix Collective",
+  "license": "MIT",
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {},
+  "dependencies": {}
+}
