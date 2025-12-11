@@ -193,7 +193,7 @@ class FeatureFlagService:
         if flag.percentage > 0:
             # Use consistent hashing for stable rollout
             if user_id:
-                hash_val = int(hashlib.md5(f"{key}:{user_id}".encode()).hexdigest(), 16)
+                hash_val = int(hashlib.sha256(f"{key}:{user_id}".encode()).hexdigest(), 16)
                 bucket = hash_val % 100
                 if bucket < flag.percentage:
                     return True
@@ -300,7 +300,7 @@ class FeatureFlagService:
             return flag.default_variant
 
         # Consistent hashing for stable assignment
-        hash_val = int(hashlib.md5(f"{flag.key}:{user_id}".encode()).hexdigest(), 16)
+        hash_val = int(hashlib.sha256(f"{flag.key}:{user_id}".encode()).hexdigest(), 16)
         total_weight = sum(flag.variant_weights.values())
         bucket = hash_val % total_weight
 
