@@ -260,7 +260,7 @@ uvicorn main:app --port 8001
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+License - see [LICENSE](LICENSE) file for details.
 
 ---
 
