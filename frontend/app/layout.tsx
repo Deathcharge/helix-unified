@@ -2,6 +2,8 @@ import type { Metadata } from "next"
 // import { Inter } from "next/font/google" // Disabled due to network fetch issues
 import "./globals.css"
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary"
+import { LanguageProvider } from "@/lib/language-context"
+import '@/lib/i18n'
 
 // Fallback to system fonts
 // const inter = Inter({ subsets: ["latin"] })
@@ -19,9 +21,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-sans">
-        <ErrorBoundary>
-          {children}
-        </ErrorBoundary>
+        <LanguageProvider>
+          <ErrorBoundary>
+            {children}
+          </ErrorBoundary>
+        </LanguageProvider>
       </body>
     </html>
   )

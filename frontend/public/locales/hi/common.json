@@ -1,0 +1,68 @@
+{
+  "app": {
+    "name": "हेलिक्स यूनिफाइड",
+    "tagline": "एकीकृत एआई प्लेटफॉर्म",
+    "welcome": "हेलिक्स यूनिफाइड में आपका स्वागत है"
+  },
+  "nav": {
+    "home": "होम",
+    "dashboard": "डैशबोर्ड",
+    "settings": "सेटिंग्स",
+    "profile": "प्रोफाइल",
+    "logout": "लॉग आउट",
+    "login": "लॉगिन",
+    "signup": "साइन अप",
+    "learnSanskrit": "संस्कृत सीखें"
+  },
+  "language": {
+    "select": "भाषा चुनें",
+    "current": "वर्तमान भाषा",
+    "autoDetect": "ब्राउज़र से स्वतः पहचानें",
+    "preference": "भाषा प्राथमिकता"
+  },
+  "settings": {
+    "title": "सेटिंग्स",
+    "general": "सामान्य",
+    "account": "खाता",
+    "preferences": "प्राथमिकताएं",
+    "language": "भाषा",
+    "save": "परिवर्तन सहेजें",
+    "saved": "सेटिंग्स सफलतापूर्वक सहेजी गईं"
+  },
+  "auth": {
+    "email": "ईमेल",
+    "password": "पासवर्ड",
+    "confirmPassword": "पासवर्ड की पुष्टि करें",
+    "forgotPassword": "पासवर्ड भूल गए?",
+    "signIn": "साइन इन करें",
+    "signUp": "साइन अप करें",
+    "orContinueWith": "या जारी रखें"
+  },
+  "common": {
+    "loading": "लोड हो रहा है...",
+    "error": "त्रुटि",
+    "success": "सफलता",
+    "cancel": "रद्द करें",
+    "confirm": "पुष्टि करें",
+    "delete": "हटाएं",
+    "edit": "संपादित करें",
+    "save": "सहेजें",
+    "close": "बंद करें",
+    "search": "खोजें",
+    "filter": "फ़िल्टर करें",
+    "sort": "क्रमबद्ध करें",
+    "back": "पीछे",
+    "next": "अगला",
+    "previous": "पिछला"
+  },
+  "sanskrit": {
+    "title": "संस्कृत सीखें",
+    "subtitle": "प्राचीन ज्ञान, आधुनिक शिक्षा",
+    "lessons": "पाठ",
+    "practice": "अभ्यास",
+    "mantras": "मंत्र",
+    "alphabet": "देवनागरी वर्णमाला",
+    "grammar": "व्याकरण",
+    "vocabulary": "शब्दावली"
+  }
+}

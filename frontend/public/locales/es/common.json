@@ -1,0 +1,68 @@
+{
+  "app": {
+    "name": "Helix Unified",
+    "tagline": "Plataforma de IA Unificada",
+    "welcome": "Bienvenido a Helix Unified"
+  },
+  "nav": {
+    "home": "Inicio",
+    "dashboard": "Panel",
+    "settings": "Configuración",
+    "profile": "Perfil",
+    "logout": "Cerrar Sesión",
+    "login": "Iniciar Sesión",
+    "signup": "Registrarse",
+    "learnSanskrit": "Aprender Sánscrito"
+  },
+  "language": {
+    "select": "Seleccionar Idioma",
+    "current": "Idioma Actual",
+    "autoDetect": "Detectar automáticamente del navegador",
+    "preference": "Preferencia de Idioma"
+  },
+  "settings": {
+    "title": "Configuración",
+    "general": "General",
+    "account": "Cuenta",
+    "preferences": "Preferencias",
+    "language": "Idioma",
+    "save": "Guardar Cambios",
+    "saved": "Configuración guardada correctamente"
+  },
+  "auth": {
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar Contraseña",
+    "forgotPassword": "¿Olvidaste tu Contraseña?",
+    "signIn": "Iniciar Sesión",
+    "signUp": "Registrarse",
+    "orContinueWith": "O continuar con"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "save": "Guardar",
+    "close": "Cerrar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "sort": "Ordenar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "previous": "Anterior"
+  },
+  "sanskrit": {
+    "title": "Aprender Sánscrito",
+    "subtitle": "Sabiduría Antigua, Aprendizaje Moderno",
+    "lessons": "Lecciones",
+    "practice": "Práctica",
+    "mantras": "Mantras",
+    "alphabet": "Alfabeto Devanagari",
+    "grammar": "Gramática",
+    "vocabulary": "Vocabulario"
+  }
+}

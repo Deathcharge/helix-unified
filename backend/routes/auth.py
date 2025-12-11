@@ -268,6 +268,38 @@ async def get_current_user_info(user: User = Depends(get_current_user)) -> User:
     """Get current user info - REVEAL YOUR IDENTITY"""
     return user
 
+class UserPreferencesUpdate(BaseModel):
+    language: Optional[str] = None
+
+@router.patch("/me/preferences")
+async def update_user_preferences(
+    preferences: UserPreferencesUpdate,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+) -> User:
+    """Update user preferences - CUSTOMIZE YOUR VILLAIN PROFILE"""
+    db_user = db.query(DBUser).filter(DBUser.id == user.id).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if preferences.language:
+        allowed_languages = ["en", "es", "fr", "de", "hi", "sa"]
+        if preferences.language not in allowed_languages:
+            raise HTTPException(status_code=400, detail=f"Invalid language. Allowed: {allowed_languages}")
+        db_user.language = preferences.language
+
+    db.commit()
+    db.refresh(db_user)
+
+    return User(
+        id=db_user.id,
+        email=db_user.email,
+        name=db_user.name,
+        picture=db_user.picture,
+        subscription_tier=db_user.subscription_tier,
+        created_at=db_user.created_at.isoformat() if db_user.created_at else None
+    )
+
 @router.post("/logout")
 async def logout():
     """Logout (client should delete token) - ESCAPE THE LAIR"""
