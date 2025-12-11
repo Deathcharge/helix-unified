@@ -74,3 +74,4 @@ sqlalchemy==2.0.25  # Database ORM for user management
 
 # Optional: Commented out dependencies
 # opencv-python==4.9.0.80
+slowapi==0.1.9  # For rate-limiting (FastAPI limiter)
