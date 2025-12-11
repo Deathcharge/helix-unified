@@ -1208,6 +1208,7 @@ async def serve_template(file_path: str) -> FileResponse:
     if any(part == ".." for part in safe_path.parts):
         raise HTTPException(status_code=403, detail="Path traversal forbidden")
     # 5. Combine with template directory and resolve
+    # lgtm[py/path-injection] - Validated above: no '..' components, normalized, sandboxed to TEMPLATES_DIR
     template_path = (TEMPLATES_DIR / safe_path).resolve()
     # Security check - ensure path is within templates directory
     try:
