@@ -1,0 +1,68 @@
+{
+  "app": {
+    "name": "Helix Unified",
+    "tagline": "통합 AI 플랫폼",
+    "welcome": "Helix Unified에 오신 것을 환영합니다"
+  },
+  "nav": {
+    "home": "홈",
+    "dashboard": "대시보드",
+    "settings": "설정",
+    "profile": "프로필",
+    "logout": "로그아웃",
+    "login": "로그인",
+    "signup": "회원가입",
+    "learnSanskrit": "산스크리트어 배우기"
+  },
+  "language": {
+    "select": "언어 선택",
+    "current": "현재 언어",
+    "autoDetect": "브라우저에서 자동 감지",
+    "preference": "언어 설정"
+  },
+  "settings": {
+    "title": "설정",
+    "general": "일반",
+    "account": "계정",
+    "preferences": "환경설정",
+    "language": "언어",
+    "save": "변경사항 저장",
+    "saved": "설정이 성공적으로 저장되었습니다"
+  },
+  "auth": {
+    "email": "이메일",
+    "password": "비밀번호",
+    "confirmPassword": "비밀번호 확인",
+    "forgotPassword": "비밀번호를 잊으셨나요?",
+    "signIn": "로그인",
+    "signUp": "회원가입",
+    "orContinueWith": "또는 다음으로 계속"
+  },
+  "common": {
+    "loading": "로딩 중...",
+    "error": "오류",
+    "success": "성공",
+    "cancel": "취소",
+    "confirm": "확인",
+    "delete": "삭제",
+    "edit": "편집",
+    "save": "저장",
+    "close": "닫기",
+    "search": "검색",
+    "filter": "필터",
+    "sort": "정렬",
+    "back": "뒤로",
+    "next": "다음",
+    "previous": "이전"
+  },
+  "sanskrit": {
+    "title": "산스크리트어 배우기",
+    "subtitle": "고대의 지혜, 현대적 학습",
+    "lessons": "레슨",
+    "practice": "연습",
+    "mantras": "만트라",
+    "alphabet": "데바나가리 문자",
+    "grammar": "문법",
+    "vocabulary": "어휘"
+  }
+}

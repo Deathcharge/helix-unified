@@ -2,7 +2,7 @@
 module.exports = {
   i18n: {
     defaultLocale: 'en',
-    locales: ['en', 'es', 'fr', 'de', 'hi', 'sa'], // Including Sanskrit (sa)
+    locales: ['en', 'es', 'fr', 'de', 'hi', 'sa', 'zh-CN', 'ar', 'pt', 'bn', 'ru', 'ja', 'ko', 'it', 'tr', 'vi'], // Top 15 languages by speakers
     localeDetection: true,
   },
   fallbackLng: {

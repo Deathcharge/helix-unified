@@ -9,6 +9,16 @@ import frCommon from '@/public/locales/fr/common.json';
 import deCommon from '@/public/locales/de/common.json';
 import hiCommon from '@/public/locales/hi/common.json';
 import saCommon from '@/public/locales/sa/common.json';
+import zhCNCommon from '@/public/locales/zh-CN/common.json';
+import arCommon from '@/public/locales/ar/common.json';
+import ptCommon from '@/public/locales/pt/common.json';
+import bnCommon from '@/public/locales/bn/common.json';
+import ruCommon from '@/public/locales/ru/common.json';
+import jaCommon from '@/public/locales/ja/common.json';
+import koCommon from '@/public/locales/ko/common.json';
+import itCommon from '@/public/locales/it/common.json';
+import trCommon from '@/public/locales/tr/common.json';
+import viCommon from '@/public/locales/vi/common.json';
 
 const resources = {
   en: { common: enCommon },
@@ -17,6 +27,16 @@ const resources = {
   de: { common: deCommon },
   hi: { common: hiCommon },
   sa: { common: saCommon },
+  'zh-CN': { common: zhCNCommon },
+  ar: { common: arCommon },
+  pt: { common: ptCommon },
+  bn: { common: bnCommon },
+  ru: { common: ruCommon },
+  ja: { common: jaCommon },
+  ko: { common: koCommon },
+  it: { common: itCommon },
+  tr: { common: trCommon },
+  vi: { common: viCommon },
 };
 
 i18n
