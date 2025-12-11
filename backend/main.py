@@ -668,6 +668,31 @@ except Exception as e:
     logger.error(f"❌ Failed to load SaaS Core routes: {e}")
     logger.error("   ⚠️  This is CRITICAL - SaaS platform will not be accessible!")
 
+# Include Team Management routes (v17.3 - Beta Features)
+try:
+    from backend.saas.team_management import router as team_router
+
+    app.include_router(team_router, prefix="/api/teams", tags=["Team Management"])
+    logger.info("✅ Team Management API loaded (v17.3)")
+    logger.info("   → /api/teams (CRUD operations)")
+    logger.info("   → /api/teams/{id}/members (Member management)")
+    logger.info("   → /api/teams/{id}/invitations (Invite system)")
+    logger.info("   → RBAC: owner > admin > member > viewer")
+except Exception as e:
+    logger.error(f"❌ Failed to load Team Management routes: {e}")
+
+# Include Analytics Export routes (v17.3 - Beta Features)
+try:
+    from backend.saas.analytics_export import router as analytics_router
+
+    app.include_router(analytics_router, prefix="/api", tags=["Analytics & Export"])
+    logger.info("✅ Analytics Export API loaded (v17.3)")
+    logger.info("   → /api/analytics/usage (Usage statistics)")
+    logger.info("   → /api/analytics/export/* (CSV/JSON export)")
+    logger.info("   → /api/analytics/billing-summary (Cost breakdown)")
+except Exception as e:
+    logger.error(f"❌ Failed to load Analytics Export routes: {e}")
+
 # Enable Admin Bypass Middleware
 try:
     from backend.admin_bypass import admin_bypass_middleware
