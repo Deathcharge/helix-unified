@@ -729,6 +729,20 @@ try:
 except Exception as e:
     logger.error(f"❌ Failed to load Metrics Middleware: {e}")
 
+# Include GitHub App Integration (v17.5)
+try:
+    from backend.integrations.github_app import router as github_router
+
+    app.include_router(github_router, prefix="/api", tags=["GitHub Integration"])
+    logger.info("✅ GitHub App Integration loaded (v17.5)")
+    logger.info("   → /api/github/webhook (Receive GitHub events)")
+    logger.info("   → /api/github/installations (List installations)")
+    logger.info("   → /api/github/repos/{owner}/{repo}/issues (Create issues)")
+    logger.info("   → /api/github/health (Configuration check)")
+    logger.info("   🔄 Replaces Zapier-based GitHub integration with native app")
+except Exception as e:
+    logger.error(f"❌ Failed to load GitHub App routes: {e}")
+
 # Enable Admin Bypass Middleware
 try:
     from backend.admin_bypass import admin_bypass_middleware
