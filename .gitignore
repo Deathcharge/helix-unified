@@ -77,3 +77,8 @@ docs/archive/
 *.jpg
 *.png
 *.screenshot
+
+# Build artifacts (should not be committed)
+tsconfig.tsbuildinfo
+coverage.xml
+*.tsbuildinfo
