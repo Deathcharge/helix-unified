@@ -743,6 +743,22 @@ try:
 except Exception as e:
     logger.error(f"❌ Failed to load GitHub App routes: {e}")
 
+# Include Email Automation API (v17.5)
+try:
+    from backend.routes.email import router as email_router
+
+    app.include_router(email_router, prefix="/api/email", tags=["Email Automation"])
+    logger.info("✅ Email Automation API loaded (v17.5)")
+    logger.info("   → POST /api/email/send-welcome (Welcome emails)")
+    logger.info("   → POST /api/email/send-password-reset (Password resets)")
+    logger.info("   → POST /api/email/send-team-invite (Team invitations)")
+    logger.info("   → POST /api/email/send-bulk (Bulk emails)")
+    logger.info("   → POST /api/email/test (Test email configuration)")
+    logger.info("   → GET /api/email/health (Configuration check)")
+    logger.info("   📧 Multi-provider support: SendGrid, Mailgun, Resend, SMTP")
+except Exception as e:
+    logger.error(f"❌ Failed to load Email Automation routes: {e}")
+
 # Enable Admin Bypass Middleware
 try:
     from backend.admin_bypass import admin_bypass_middleware
