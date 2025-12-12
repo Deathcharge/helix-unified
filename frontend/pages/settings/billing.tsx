@@ -8,6 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { CreditCard, Download, AlertCircle, CheckCircle, Calendar, DollarSign } from 'lucide-react';
 import { useRouter } from 'next/router';
+import { useFormatters } from '@/lib/use-formatters';
 
 interface BillingInfo {
   tier: 'free' | 'pro' | 'enterprise';
@@ -37,6 +38,7 @@ interface Invoice {
 
 export default function BillingSettings() {
   const router = useRouter();
+  const formatters = useFormatters('USD'); // Default to USD, can be made dynamic
   const [billingInfo, setBillingInfo] = useState<BillingInfo | null>(null);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
@@ -198,16 +200,16 @@ export default function BillingSettings() {
               <div className="p-4 rounded bg-slate-900/50 border border-slate-700/50">
                 <p className="text-sm text-slate-400 mb-2">Period</p>
                 <p className="font-semibold">
-                  {new Date(billingInfo.current_period.period_start).toLocaleDateString()} -{' '}
-                  {new Date(billingInfo.current_period.period_end).toLocaleDateString()}
+                  {formatters.formatDate(billingInfo.current_period.period_start)} -{' '}
+                  {formatters.formatDate(billingInfo.current_period.period_end)}
                 </p>
               </div>
 
               <div className="p-4 rounded bg-slate-900/50 border border-slate-700/50">
                 <p className="text-sm text-slate-400 mb-2">API Calls Used</p>
                 <p className="font-semibold">
-                  {billingInfo.current_period.api_calls_used.toLocaleString()} /{' '}
-                  {billingInfo.current_period.api_calls_included.toLocaleString()}
+                  {formatters.formatNumber(billingInfo.current_period.api_calls_used)} /{' '}
+                  {formatters.formatNumber(billingInfo.current_period.api_calls_included)}
                 </p>
                 <div className="h-2 rounded-full bg-slate-700/50 mt-2 overflow-hidden">
                   <div
@@ -221,12 +223,12 @@ export default function BillingSettings() {
 
               <div className="p-4 rounded bg-slate-900/50 border border-slate-700/50">
                 <p className="text-sm text-slate-400 mb-2">Additional Charges</p>
-                <p className="font-semibold text-blue-400">${billingInfo.current_period.additional_charges.toFixed(2)}</p>
+                <p className="font-semibold text-blue-400">{formatters.formatCurrency(billingInfo.current_period.additional_charges)}</p>
               </div>
 
               <div className="p-4 rounded bg-slate-900/50 border border-slate-700/50">
                 <p className="text-sm text-slate-400 mb-2">Estimated Total</p>
-                <p className="text-2xl font-bold text-green-400">${billingInfo.current_period.estimated_total.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-green-400">{formatters.formatCurrency(billingInfo.current_period.estimated_total)}</p>
               </div>
             </div>
           </div>
@@ -250,7 +252,7 @@ export default function BillingSettings() {
                   <div>
                     <h3 className="text-xl font-semibold capitalize">{tier}</h3>
                     <div className="flex items-baseline gap-1 mt-2">
-                      <span className="text-3xl font-bold">${tierPricing[tier]}</span>
+                      <span className="text-3xl font-bold">{formatters.formatCurrency(tierPricing[tier])}</span>
                       {tier !== 'free' && <span className="text-sm text-slate-400">/month</span>}
                     </div>
                   </div>
@@ -319,8 +321,8 @@ export default function BillingSettings() {
                 <tbody>
                   {invoices.map((invoice) => (
                     <tr key={invoice.id} className="border-b border-slate-700/30 hover:bg-slate-900/30 transition">
-                      <td className="px-4 py-3 text-sm">{new Date(invoice.date).toLocaleDateString()}</td>
-                      <td className="px-4 py-3 text-sm font-semibold">${invoice.amount.toFixed(2)}</td>
+                      <td className="px-4 py-3 text-sm">{formatters.formatDate(invoice.date)}</td>
+                      <td className="px-4 py-3 text-sm font-semibold">{formatters.formatCurrency(invoice.amount)}</td>
                       <td className="px-4 py-3 text-sm">{invoice.status === 'paid' ? '✓' : '–'}</td>
                       <td className="px-4 py-3 text-sm">
                         <span
