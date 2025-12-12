@@ -1,115 +1,125 @@
 {
-  "version": "1.0",
-  "checksum": "helix-macs-tasks-v1.0",
-  "last_updated": "2025-11-24T08:57:00Z",
+  "version": "2.0",
+  "checksum": "helix-macs-tasks-v2.0",
+  "last_updated": "2025-12-12T17:30:00Z",
+  "beta_target": "2025-12-15",
   "tasks": [
     {
-      "id": "task-001",
-      "title": "Multi-Agent Coordination System",
-      "assigned_to": "Nexus (Manus 6)",
+      "id": "task-010",
+      "title": "Railway Deployment Fix (slowapi crash)",
+      "assigned_to": "Claude Opus",
+      "status": "completed",
+      "priority": "critical",
+      "started": "2025-12-12T17:00:00Z",
+      "completed": "2025-12-12T17:30:00Z",
+      "deliverables": [
+        "Dockerfile updated with slowapi==0.1.9",
+        "Dockerfile updated with openai client",
+        "PR ready for merge"
+      ],
+      "notes": "Root cause: Dockerfile manually installs deps but missed slowapi"
+    },
+    {
+      "id": "task-011",
+      "title": "Repository Audit & Verification",
+      "assigned_to": "Claude Opus",
+      "status": "completed",
+      "priority": "high",
+      "started": "2025-12-12T17:00:00Z",
+      "completed": "2025-12-12T17:30:00Z",
+      "deliverables": [
+        ".macs/SESSION_2025-12-12_AUDIT.md",
+        "Corrected misinformation from other AI chats",
+        "Verified actual file count: 5,828 (not 547)",
+        "Verified CI/CD: 18 workflows (not empty)"
+      ]
+    },
+    {
+      "id": "task-012",
+      "title": "Quick Wins Batch",
+      "assigned_to": "Claude Opus",
       "status": "in_progress",
-      "priority": "high",
-      "started": "2025-11-24T08:30:00Z",
-      "estimated_completion": "2025-11-24T09:30:00Z",
-      "dependencies": [],
-      "deliverables": [
-        "MULTI_AGENT_COORDINATION_SYSTEM.md",
-        "agent-registry.json",
-        "active-tasks.json",
-        "macs-dashboard.html"
-      ]
-    },
-    {
-      "id": "task-002",
-      "title": "Master Portal Hub",
-      "assigned_to": "Architect (Manus 1)",
-      "status": "pending",
-      "priority": "high",
-      "started": null,
-      "estimated_completion": null,
-      "dependencies": [],
-      "deliverables": [
-        "helix-hub.manus.space deployment",
-        "Navigation interface",
-        "Shared authentication"
-      ]
-    },
-    {
-      "id": "task-003",
-      "title": "Ninja Tools Implementation (Phase 1)",
-      "assigned_to": "Ninja (Manus 2)",
-      "status": "pending",
       "priority": "medium",
-      "started": null,
-      "estimated_completion": null,
-      "dependencies": [],
+      "started": "2025-12-12T17:30:00Z",
       "deliverables": [
-        "8 Stealth Mode Tools",
-        "7 Kunai Precision Tools",
-        "MCP integration"
-      ]
-    },
-    {
-      "id": "task-004",
-      "title": "MCP Server Development (68 tools)",
-      "assigned_to": "Sage (Claude Thread 1)",
-      "status": "in_progress",
-      "priority": "high",
-      "started": null,
-      "estimated_completion": null,
-      "dependencies": [],
-      "deliverables": [
-        "MCP server on Railway",
-        "Claude Desktop integration",
-        "Test report for all 68 tools"
-      ]
-    },
-    {
-      "id": "task-005",
-      "title": "Comprehensive Testing & QA",
-      "assigned_to": "Sentinel (Manus 3)",
-      "status": "pending",
-      "priority": "high",
-      "started": null,
-      "estimated_completion": null,
-      "dependencies": ["task-002", "task-003", "task-004"],
-      "deliverables": [
-        "Test reports",
-        "Bug tracking",
-        "Documentation updates"
-      ]
-    },
-    {
-      "id": "task-006",
-      "title": "Notion Sync Verification",
-      "assigned_to": "Nexus (Manus 6)",
-      "status": "pending",
-      "priority": "high",
-      "started": null,
-      "estimated_completion": "2025-11-24T10:00:00Z",
-      "dependencies": ["task-001"],
-      "deliverables": [
-        "!notion-sync command verification",
-        "All databases accessible",
-        "Deployment logging test"
+        "Critical alerts now call send_discord_alert",
+        ".env.example updated with new features",
+        ".gitignore updated for build artifacts"
       ]
     }
   ],
   "completed_tasks": [
     {
-      "id": "task-000",
-      "title": "Notion API 2025-09-03 Migration",
-      "assigned_to": "Nexus (Manus 6)",
+      "id": "task-007",
+      "title": "Metrics Dashboard (v17.4)",
+      "assigned_to": "Claude Sonnet",
       "status": "completed",
-      "priority": "critical",
-      "started": "2025-11-24T06:00:00Z",
-      "completed": "2025-11-24T08:00:00Z",
+      "completed": "2025-12-12T12:00:00Z",
       "deliverables": [
-        "Updated notion_client.py",
-        "All 5 databases verified",
-        "Deployment Log integration",
-        "23 security vulnerabilities fixed"
+        "8 database models for metrics",
+        "7 API endpoints",
+        "React dashboard with Recharts",
+        "Auto-tracking middleware"
+      ]
+    },
+    {
+      "id": "task-008",
+      "title": "Batch Features (v17.5)",
+      "assigned_to": "Claude Sonnet",
+      "status": "completed",
+      "completed": "2025-12-12T14:00:00Z",
+      "deliverables": [
+        "PWA with service worker",
+        "GitHub App integration (700 lines)",
+        "Email automation multi-provider",
+        "Google Analytics GA4"
+      ]
+    },
+    {
+      "id": "task-009",
+      "title": "Google OAuth & Email API (v17.6)",
+      "assigned_to": "Claude Sonnet",
+      "status": "completed",
+      "completed": "2025-12-12T16:00:00Z",
+      "deliverables": [
+        "Complete OAuth callback flow",
+        "ID token verification",
+        "10 email API endpoints",
+        "Rate limiting on all endpoints"
       ]
     }
+  ],
+  "pending_setup": [
+    {
+      "item": "GitHub App",
+      "requires": "Create GitHub App, generate private key, set env vars",
+      "doc": "docs/BATCH_FEATURES_SETUP_GUIDE.md"
+    },
+    {
+      "item": "Email Provider",
+      "requires": "Choose SendGrid/Mailgun/Resend, get API key",
+      "doc": "docs/BATCH_FEATURES_SETUP_GUIDE.md"
+    },
+    {
+      "item": "Google Analytics",
+      "requires": "Create GA4 property, set NEXT_PUBLIC_GA_TRACKING_ID",
+      "doc": "docs/BATCH_FEATURES_SETUP_GUIDE.md"
+    },
+    {
+      "item": "Discord Alert Webhook",
+      "requires": "Create webhook in Discord server, set DISCORD_ALERT_WEBHOOK",
+      "doc": ".env.example"
+    }
+  ],
+  "beta_blockers": [],
+  "beta_ready_features": [
+    "Core backend (FastAPI)",
+    "Rate limiting (slowapi)",
+    "Metrics Dashboard",
+    "PWA",
+    "Google OAuth",
+    "Email API (10 endpoints)",
+    "26 test files",
+    "18 CI/CD workflows"
   ]
 }

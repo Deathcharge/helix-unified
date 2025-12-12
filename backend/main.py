@@ -3397,8 +3397,12 @@ async def infrastructure_events(payload: InfrastructureEventRequest):
         # Handle critical infrastructure events
         if priority == "critical":
             logger.warning(f"🚨 CRITICAL: {event_type}")
-            # TODO: Trigger emergency scaling
-            # TODO: Send alerts to Discord/Slack
+            # Send alerts to Discord
+            await send_discord_alert(
+                title=f"🚨 CRITICAL: {event_type}",
+                message=f"Priority: {priority}\nService: {service_name}\nDetails: {event_data}",
+                color=0xFF0000  # Red
+            )
 
         return {
             "status": "success",
