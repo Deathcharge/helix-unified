@@ -3413,9 +3413,10 @@ async def infrastructure_events(payload: InfrastructureEventRequest):
         if priority == "critical":
             logger.warning(f"🚨 CRITICAL: {event_type}")
             # Send alerts to Discord
+            svc = payload.service or "unknown"
             await send_discord_alert(
                 title=f"🚨 CRITICAL: {event_type}",
-                message=f"Priority: {priority}\nService: {service_name}\nDetails: {event_data}",
+                message=f"Priority: {priority}\nService: {svc}",
                 color=0xFF0000  # Red
             )
 
