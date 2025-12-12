@@ -87,6 +87,7 @@ logger.info("🌀 Helix Collective v16.9 - Backend Initialization (Quantum Hands
 # Track app start time for uptime calculations
 APP_START_TIME = datetime.utcnow()
 
+
 def calculate_uptime() -> str:
     """Calculate uptime since app started"""
     uptime_delta = datetime.utcnow() - APP_START_TIME
@@ -94,6 +95,7 @@ def calculate_uptime() -> str:
     hours, remainder = divmod(uptime_delta.seconds, 3600)
     minutes, _ = divmod(remainder, 60)
     return f"{days}d {hours}h {minutes}m"
+
 
 async def send_discord_alert(title: str, message: str, color: int = 0xFF0000):
     """Send alert to Discord webhook for emergencies"""
@@ -437,9 +439,9 @@ logger.info("✅ Gzip compression enabled (minimum_size=1000)")
 # ============================================================================
 # RATE LIMITING (prevent API abuse)
 # ============================================================================
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.errors import RateLimitExceeded
-from slowapi.util import get_remote_address
+from slowapi import Limiter, _rate_limit_exceeded_handler  # noqa: E402
+from slowapi.errors import RateLimitExceeded  # noqa: E402
+from slowapi.util import get_remote_address  # noqa: E402
 
 limiter = Limiter(key_func=get_remote_address, default_limits=["1000/hour"])
 app.state.limiter = limiter
@@ -450,7 +452,7 @@ logger.info("✅ Rate limiting enabled (1000 requests/hour default)")
 # ============================================================================
 # REQUEST CORRELATION IDs (for distributed tracing)
 # ============================================================================
-import uuid
+import uuid  # noqa: E402
 
 
 @app.middleware("http")
@@ -703,7 +705,8 @@ except Exception as e:
 
 # Include Metrics Dashboard routes (v17.4 - Metrics Dashboard)
 try:
-    from backend.saas.metrics_dashboard_api import router as metrics_dashboard_router
+    from backend.saas.metrics_dashboard_api import \
+        router as metrics_dashboard_router
 
     app.include_router(metrics_dashboard_router, prefix="/api", tags=["Metrics Dashboard"])
     logger.info("✅ Metrics Dashboard API loaded (v17.4)")
@@ -1057,7 +1060,11 @@ def helix_manifest() -> Dict[str, Any]:
         return manifest_data
     except FileNotFoundError:
         logger.error(f"❌ Manifest not found: {manifest_path.resolve()}")
-        return {"version": "16.8", "error": "manifest_missing", "note": "helix-manifest.json not found in repository root"}
+        return {
+            "version": "16.8",
+            "error": "manifest_missing",
+            "note": "helix-manifest.json not found in repository root"
+        }
     except Exception as e:
         logger.error(f"❌ Error loading manifest: {e}")
         return {"version": "16.7", "error": "manifest_load_failed", "detail": str(e)}
@@ -1477,7 +1484,11 @@ async def consciousness_websocket_endpoint(websocket: WebSocket, token: Optional
 
             else:
                 # Echo back for unknown messages
-                await websocket.send_json({"type": "echo", "message": data, "timestamp": datetime.utcnow().isoformat() + "Z"})
+                await websocket.send_json({
+                    "type": "echo",
+                    "message": data,
+                    "timestamp": datetime.utcnow().isoformat() + "Z"
+                })
 
     except WebSocketDisconnect:
         ws_manager.disconnect(websocket)
@@ -1724,7 +1735,11 @@ async def trigger_zapier_webhook(payload: Dict[str, Any]) -> Dict[str, Any]:
             return {
                 "status": response.status,
                 "success": response.status == 200,
-                "message": ("Webhook triggered successfully" if response.status == 200 else "Webhook returned non-200 status"),
+                "message": (
+                    "Webhook triggered successfully"
+                    if response.status == 200
+                    else "Webhook returned non-200 status"
+                ),
             }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Webhook trigger failed: {str(e)}")
@@ -1754,7 +1769,10 @@ async def send_zapier_telemetry() -> Dict[str, Any]:
 
         # Get agent status
         agents_status = await get_collective_status()
-        agent_list = [{"name": name, "symbol": info["symbol"], "status": "active"} for name, info in agents_status.items()]
+        agent_list = [
+            {"name": name, "symbol": info["symbol"], "status": "active"}
+            for name, info in agents_status.items()
+        ]
 
         # Send to Zapier
         success = await zapier.send_telemetry(
@@ -2130,7 +2148,10 @@ async def manus_get_ucf() -> Dict[str, Any]:
                 ucf_state = json.load(f)
         except FileNotFoundError:
             # Return defaults if state not found
-            ucf_state = {"harmony": 0.62, "resilience": 1.85, "prana": 0.55, "drishti": 0.48, "klesha": 0.08, "zoom": 1.02}
+            ucf_state = {
+                "harmony": 0.62, "resilience": 1.85, "prana": 0.55,
+                "drishti": 0.48, "klesha": 0.08, "zoom": 1.02
+            }
 
         # Calculate consciousness level
         consciousness_level = round(
@@ -2408,8 +2429,14 @@ async def manus_analytics_summary() -> Dict[str, Any]:
                     "average_harmony_gain": avg_harmony_gain,
                     "completion_rate": 0.95,  # Placeholder
                 },
-                "emergency_events": {"total_events": 0, "critical_events": 0},  # Placeholder  # Placeholder
-                "system_health": {"status": "OPERATIONAL", "uptime_percent": 99.8, "last_incident": None},  # Placeholder
+                "emergency_events": {
+                    "total_events": 0, "critical_events": 0
+                },
+                "system_health": {
+                    "status": "OPERATIONAL",
+                    "uptime_percent": 99.8,
+                    "last_incident": None
+                },
             },
         }
 
@@ -2436,7 +2463,10 @@ async def manus_test_webhook(event_type: str = "telemetry") -> Dict[str, Any]:
                 with open("Helix/state/ucf_state.json", "r") as f:
                     ucf_state = json.load(f)
             except Exception:
-                ucf_state = {"harmony": 0.62, "resilience": 1.85, "prana": 0.55, "drishti": 0.48, "klesha": 0.08, "zoom": 1.02}
+                ucf_state = {
+                    "harmony": 0.62, "resilience": 1.85, "prana": 0.55,
+                    "drishti": 0.48, "klesha": 0.08, "zoom": 1.02
+                }
 
             # Get agents
             try:
@@ -2514,7 +2544,10 @@ async def get_ucf_for_zapier_tables() -> Dict[str, Any]:
                 ucf_state = json.load(f)
         except FileNotFoundError:
             # Return default state if file not found
-            ucf_state = {"harmony": 0.62, "resilience": 1.85, "prana": 0.55, "drishti": 0.48, "klesha": 0.08, "zoom": 1.02}
+            ucf_state = {
+                "harmony": 0.62, "resilience": 1.85, "prana": 0.55,
+                "drishti": 0.48, "klesha": 0.08, "zoom": 1.02
+            }
 
         # Calculate consciousness level (0-10 scale)
         consciousness_level = round(
@@ -2612,7 +2645,9 @@ async def get_agents_for_zapier_tables() -> Dict[str, Any]:
                     round(sum(a["ucf_resonance"] for a in agents_list) / len(agents_list), 3) if agents_list else 0
                 ),
                 "average_entanglement": (
-                    round(sum(a["entanglement_factor"] for a in agents_list) / len(agents_list), 3) if agents_list else 0
+                    round(
+                        sum(a["entanglement_factor"] for a in agents_list) / len(agents_list), 3
+                    ) if agents_list else 0
                 ),
             },
         }
@@ -2793,7 +2828,9 @@ async def test_zapier_webhook(webhook_url: str) -> Dict[str, Any]:
                 "status_code": response.status_code,
                 "webhook_url": webhook_url[:60] + "...",  # Truncate for security
                 "message": (
-                    "Webhook test successful" if response.status_code == 200 else f"Webhook returned {response.status_code}"
+                    "Webhook test successful"
+                    if response.status_code == 200
+                    else f"Webhook returned {response.status_code}"
                 ),
                 "timestamp": datetime.utcnow().isoformat(),
             }
@@ -2854,7 +2891,10 @@ async def zapier_health_check() -> Dict[str, Any]:
             "configured": bool(operations_webhook),
             "url": operations_webhook[:60] + "..." if operations_webhook else None,
         },
-        "advanced": {"configured": bool(advanced_webhook), "url": advanced_webhook[:60] + "..." if advanced_webhook else None},
+        "advanced": {
+            "configured": bool(advanced_webhook),
+            "url": advanced_webhook[:60] + "..." if advanced_webhook else None
+        },
         "communications": {
             "configured": bool(communications_webhook),
             "url": communications_webhook[:60] + "..." if communications_webhook else None,
@@ -3212,7 +3252,10 @@ async def consciousness_webhook(payload: ConsciousnessWebhookRequest):
             # Trigger emergency protocols
             await send_discord_alert(
                 title="🚨 CRISIS DETECTED",
-                message=f"Consciousness level critically low: {consciousness_level:.2f}\nEvent: {event_type}\nTimestamp: {datetime.now().isoformat()}",
+                message=(
+                    f"Consciousness level critically low: {consciousness_level:.2f}\n"
+                    f"Event: {event_type}\nTimestamp: {datetime.now().isoformat()}"
+                ),
                 color=0xFF0000  # Red
             )
             # Note: Railway auto-scaling would require Railway API integration (beyond scope)
@@ -3222,7 +3265,10 @@ async def consciousness_webhook(payload: ConsciousnessWebhookRequest):
             logger.info(f"✨ TRANSCENDENT STATE: Consciousness at {consciousness_level:.2f}")
             await send_discord_alert(
                 title="✨ TRANSCENDENT STATE",
-                message=f"Consciousness level peak performance: {consciousness_level:.2f}\nEvent: {event_type}\nTimestamp: {datetime.now().isoformat()}",
+                message=(
+                    f"Consciousness level peak performance: {consciousness_level:.2f}\n"
+                    f"Event: {event_type}\nTimestamp: {datetime.now().isoformat()}"
+                ),
                 color=0x00FF00  # Green
             )
             # Advanced features could be enabled here (e.g., meta-LLM triggers)
@@ -3367,14 +3413,20 @@ async def ucf_events(payload: UCFUpdateRequest):
             logger.warning(f"🔴 Meta-LLM Trigger: Critical low consciousness ({consciousness_level:.2f}%)")
             await send_discord_alert(
                 title="🔴 Meta-LLM Alert: Critical Low",
-                message=f"Consciousness dropped to {consciousness_level:.2f}%\nTriggering meta-analysis and corrective measures.",
+                message=(
+                    f"Consciousness dropped to {consciousness_level:.2f}%\n"
+                    "Triggering meta-analysis and corrective measures."
+                ),
                 color=0xFF0000
             )
         elif consciousness_level >= 90.0:
             logger.info(f"🟢 Meta-LLM Trigger: Peak consciousness ({consciousness_level:.2f}%)")
             await send_discord_alert(
                 title="🟢 Meta-LLM Alert: Peak Performance",
-                message=f"Consciousness reached {consciousness_level:.2f}%\nTriggering advanced optimization protocols.",
+                message=(
+                    f"Consciousness reached {consciousness_level:.2f}%\n"
+                    "Triggering advanced optimization protocols."
+                ),
                 color=0x00FF00
             )
 
@@ -3412,8 +3464,13 @@ async def infrastructure_events(payload: InfrastructureEventRequest):
         # Handle critical infrastructure events
         if priority == "critical":
             logger.warning(f"🚨 CRITICAL: {event_type}")
-            # TODO: Trigger emergency scaling
-            # TODO: Send alerts to Discord/Slack
+            # Send alerts to Discord
+            svc = payload.service or "unknown"
+            await send_discord_alert(
+                title=f"🚨 CRITICAL: {event_type}",
+                message=f"Priority: {priority}\nService: {svc}",
+                color=0xFF0000  # Red
+            )
 
         return {
             "status": "success",
