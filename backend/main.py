@@ -729,6 +729,21 @@ try:
 except Exception as e:
     logger.error(f"❌ Failed to load Metrics Middleware: {e}")
 
+# Include SaaS Dashboard API (v17.5 - Subscription Management)
+try:
+    from backend.saas.dashboard_api import router as dashboard_api_router
+
+    app.include_router(dashboard_api_router, tags=["SaaS Dashboard"])
+    logger.info("✅ SaaS Dashboard API loaded (v17.5)")
+    logger.info("   → /api/saas/dashboard/billing (Billing information)")
+    logger.info("   → /api/saas/dashboard/invoices (Invoice history)")
+    logger.info("   → /api/saas/dashboard/upgrade (Upgrade subscription)")
+    logger.info("   → /api/saas/dashboard/cancel-subscription (Cancel subscription)")
+    logger.info("   → /api/saas/dashboard/metrics (System metrics)")
+    logger.info("   → /api/saas/dashboard/usage (Usage summary)")
+except Exception as e:
+    logger.error(f"❌ Failed to load SaaS Dashboard API routes: {e}")
+
 # Include GitHub App Integration (v17.5)
 try:
     from backend.integrations.github_app import router as github_router
