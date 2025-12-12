@@ -47,13 +47,15 @@ RUN pip install --no-cache-dir \
     python-multipart==0.0.18 \
     pydantic==2.10.3 \
     python-dateutil==2.8.2 \
-    pytz==2024.1
+    pytz==2024.1 \
+    slowapi==0.1.9
 
 # Install Discord and integrations
 RUN pip install --no-cache-dir \
     discord.py==2.4.0 \
     anthropic==0.39.0 \
-    notion-client==2.5.0
+    notion-client==2.5.0 \
+    openai
 
 # Install monitoring and media
 RUN pip install --no-cache-dir \
