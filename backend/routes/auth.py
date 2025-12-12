@@ -10,8 +10,11 @@ import secrets
 from datetime import datetime, timedelta
 from typing import Optional
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
+from google.auth.transport import requests as google_requests
+from google.oauth2 import id_token
 from pydantic import BaseModel, EmailStr, validator
 from sqlalchemy.orm import Session
 
@@ -141,47 +144,204 @@ async def google_login():
     return RedirectResponse(google_auth_url)
 
 @router.get("/google/callback")
-async def google_callback(code: str):
+async def google_callback(code: str, db: Session = Depends(get_db)):
     """Handle Google OAuth callback"""
-    # TODO: Exchange code for tokens with Google
-    # TODO: Verify ID token
-    # TODO: Create/update user in database
-    # TODO: Generate JWT
+    if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
+        raise HTTPException(
+            status_code=500,
+            detail="Google OAuth not configured"
+        )
 
-    # For now, create a demo user
-    user = User(
-        id=f"google_{secrets.token_hex(8)}",
-        email="demo@helixspiral.work",
-        name="Demo User",
-        picture="https://api.dicebear.com/7.x/avataaars/svg?seed=demo",
-        subscription_tier="free",
-        created_at=datetime.utcnow().isoformat()
-    )
+    try:
+        # Step 1: Exchange code for tokens with Google
+        token_url = "https://oauth2.googleapis.com/token"
+        redirect_uri = "http://localhost:8000/auth/google/callback"
 
-    token = create_user_token(user)
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                token_url,
+                data={
+                    "code": code,
+                    "client_id": GOOGLE_CLIENT_ID,
+                    "client_secret": GOOGLE_CLIENT_SECRET,
+                    "redirect_uri": redirect_uri,
+                    "grant_type": "authorization_code"
+                }
+            )
 
-    # Redirect to frontend with token
-    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
-    return RedirectResponse(f"{frontend_url}/dashboard?token={token}")
+            if response.status_code != 200:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Failed to exchange code for token: {response.text}"
+                )
+
+            token_data = response.json()
+            google_id_token = token_data.get("id_token")
+
+            if not google_id_token:
+                raise HTTPException(status_code=400, detail="No ID token received")
+
+        # Step 2: Verify ID token
+        try:
+            idinfo = id_token.verify_oauth2_token(
+                google_id_token,
+                google_requests.Request(),
+                GOOGLE_CLIENT_ID
+            )
+
+            # Extract user info from verified token
+            google_user_id = idinfo["sub"]
+            email = idinfo.get("email")
+            name = idinfo.get("name", email.split("@")[0])
+            picture = idinfo.get("picture")
+
+            if not email:
+                raise HTTPException(status_code=400, detail="Email not provided by Google")
+
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=f"Invalid ID token: {str(e)}")
+
+        # Step 3: Create/update user in database
+        db_user = db.query(DBUser).filter(DBUser.email == email).first()
+
+        if db_user:
+            # Update existing user
+            db_user.name = name
+            db_user.picture = picture
+            db_user.last_login = datetime.utcnow()
+            db.commit()
+            db.refresh(db_user)
+        else:
+            # Create new user
+            user_id = f"google_{generate_secure_token(8)}"
+            db_user = DBUser(
+                id=user_id,
+                email=email,
+                name=name,
+                picture=picture,
+                auth_provider="google",
+                subscription_tier="free",
+                created_at=datetime.utcnow(),
+                last_login=datetime.utcnow()
+            )
+            db.add(db_user)
+            db.commit()
+            db.refresh(db_user)
+
+            # Send welcome email
+            try:
+                from backend.services.email_automation import send_welcome_email
+                await send_welcome_email(
+                    user_email=email,
+                    user_name=name
+                )
+            except Exception as e:
+                # Don't fail auth if email fails
+                print(f"Failed to send welcome email: {e}")
+
+        # Step 4: Generate JWT
+        user = User(
+            id=db_user.id,
+            email=db_user.email,
+            name=db_user.name,
+            picture=db_user.picture,
+            subscription_tier=db_user.subscription_tier,
+            created_at=db_user.created_at.isoformat() if db_user.created_at else None
+        )
+
+        token = create_user_token(user)
+
+        # Redirect to frontend with token
+        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+        return RedirectResponse(f"{frontend_url}/dashboard?token={token}")
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"OAuth error: {str(e)}")
 
 @router.post("/verify-google-token")
-async def verify_google_token(req: GoogleTokenRequest) -> Token:
-    """Verify Google ID token and create session"""
-    # TODO: Implement actual Google token verification
-    # For now, create demo user
+async def verify_google_token(req: GoogleTokenRequest, db: Session = Depends(get_db)) -> Token:
+    """Verify Google ID token and create session (for client-side OAuth)"""
+    if not GOOGLE_CLIENT_ID:
+        raise HTTPException(
+            status_code=500,
+            detail="Google OAuth not configured"
+        )
 
-    user = User(
-        id=f"google_{secrets.token_hex(8)}",
-        email="demo@helixspiral.work",
-        name="Demo User",
-        picture="https://api.dicebear.com/7.x/avataaars/svg?seed=demo",
-        subscription_tier="free",
-        created_at=datetime.utcnow().isoformat()
-    )
+    try:
+        # Verify the ID token
+        idinfo = id_token.verify_oauth2_token(
+            req.id_token,
+            google_requests.Request(),
+            GOOGLE_CLIENT_ID
+        )
 
-    access_token = create_user_token(user)
+        # Extract user info
+        google_user_id = idinfo["sub"]
+        email = idinfo.get("email")
+        name = idinfo.get("name", email.split("@")[0] if email else "User")
+        picture = idinfo.get("picture")
 
-    return Token(access_token=access_token, user=user)
+        if not email:
+            raise HTTPException(status_code=400, detail="Email not provided by Google")
+
+        # Create/update user in database
+        db_user = db.query(DBUser).filter(DBUser.email == email).first()
+
+        if db_user:
+            # Update existing user
+            db_user.name = name
+            db_user.picture = picture
+            db_user.last_login = datetime.utcnow()
+            db.commit()
+            db.refresh(db_user)
+        else:
+            # Create new user
+            user_id = f"google_{generate_secure_token(8)}"
+            db_user = DBUser(
+                id=user_id,
+                email=email,
+                name=name,
+                picture=picture,
+                auth_provider="google",
+                subscription_tier="free",
+                created_at=datetime.utcnow(),
+                last_login=datetime.utcnow()
+            )
+            db.add(db_user)
+            db.commit()
+            db.refresh(db_user)
+
+            # Send welcome email
+            try:
+                from backend.services.email_automation import send_welcome_email
+                await send_welcome_email(
+                    user_email=email,
+                    user_name=name
+                )
+            except Exception as e:
+                # Don't fail auth if email fails
+                print(f"Failed to send welcome email: {e}")
+
+        # Create response user
+        user = User(
+            id=db_user.id,
+            email=db_user.email,
+            name=db_user.name,
+            picture=db_user.picture,
+            subscription_tier=db_user.subscription_tier,
+            created_at=db_user.created_at.isoformat() if db_user.created_at else None
+        )
+
+        access_token = create_user_token(user)
+
+        return Token(access_token=access_token, user=user)
+
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid ID token: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Verification error: {str(e)}")
 
 # ============================================================================
 # EMAIL/PASSWORD ROUTES
