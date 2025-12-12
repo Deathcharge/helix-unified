@@ -701,6 +701,34 @@ try:
 except Exception as e:
     logger.error(f"❌ Failed to load Analytics Export routes: {e}")
 
+# Include Metrics Dashboard routes (v17.4 - Metrics Dashboard)
+try:
+    from backend.saas.metrics_dashboard_api import router as metrics_dashboard_router
+
+    app.include_router(metrics_dashboard_router, prefix="/api", tags=["Metrics Dashboard"])
+    logger.info("✅ Metrics Dashboard API loaded (v17.4)")
+    logger.info("   → /api/metrics/summary (Comprehensive metrics overview)")
+    logger.info("   → /api/metrics/daily (Daily time series data)")
+    logger.info("   → /api/metrics/activation-funnel (User activation tracking)")
+    logger.info("   → /api/metrics/revenue-breakdown (Revenue by tier)")
+    logger.info("   → /api/metrics/support-overview (Support tickets)")
+    logger.info("   → /api/metrics/error-overview (Error tracking)")
+    logger.info("   📊 Tracks: Signups, DAU/MAU, MRR/ARR, Churn, NPS, Errors, Uptime")
+except Exception as e:
+    logger.error(f"❌ Failed to load Metrics Dashboard routes: {e}")
+
+# Enable Metrics Collection Middleware (v17.4)
+try:
+    from backend.saas.metrics_middleware import MetricsMiddleware
+
+    app.add_middleware(MetricsMiddleware)
+    logger.info("✅ Metrics Collection Middleware enabled (v17.4)")
+    logger.info("   → Auto-tracking all API requests for DAU/MAU")
+    logger.info("   → Logging errors for error rate calculation")
+    logger.info("   → Recording response times for performance monitoring")
+except Exception as e:
+    logger.error(f"❌ Failed to load Metrics Middleware: {e}")
+
 # Enable Admin Bypass Middleware
 try:
     from backend.admin_bypass import admin_bypass_middleware

@@ -179,6 +179,121 @@ class TeamInvitation(Base):
     status = Column(String, default="pending")  # pending, accepted, expired, revoked
     token = Column(String, unique=True, nullable=False)  # Secure invitation token
 
+class UserActivation(Base):
+    """Track user activation events - KEY METRICS"""
+    __tablename__ = "user_activations"
+
+    id = Column(String, primary_key=True)
+    user_id = Column(String, nullable=False, index=True)
+    activation_type = Column(String, nullable=False)  # first_api_call, first_agent_session, profile_completed, etc.
+    completed_at = Column(DateTime, default=datetime.utcnow, index=True)
+    metadata = Column(JSON)  # Additional context
+
+class RevenueEvent(Base):
+    """Track revenue events for MRR/ARR calculation"""
+    __tablename__ = "revenue_events"
+
+    id = Column(String, primary_key=True)
+    user_id = Column(String, index=True)
+    team_id = Column(String, index=True)
+    event_type = Column(String, nullable=False)  # subscription_started, subscription_renewed, subscription_upgraded, subscription_canceled
+    amount = Column(Float, nullable=False)  # Amount in USD
+    currency = Column(String, default="USD")
+    billing_period = Column(String)  # monthly, yearly
+    occurred_at = Column(DateTime, default=datetime.utcnow, index=True)
+    stripe_event_id = Column(String)  # Reference to Stripe event
+    metadata = Column(JSON)
+
+class NPSSurvey(Base):
+    """Net Promoter Score surveys"""
+    __tablename__ = "nps_surveys"
+
+    id = Column(String, primary_key=True)
+    user_id = Column(String, nullable=False, index=True)
+    score = Column(Integer, nullable=False)  # 0-10
+    feedback = Column(String)  # Optional text feedback
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    survey_trigger = Column(String)  # dashboard, email, in_app, etc.
+
+class SupportTicket(Base):
+    """Support ticket tracking"""
+    __tablename__ = "support_tickets"
+
+    id = Column(String, primary_key=True)
+    user_id = Column(String, nullable=False, index=True)
+    subject = Column(String, nullable=False)
+    description = Column(String)
+    status = Column(String, default="open")  # open, in_progress, resolved, closed
+    priority = Column(String, default="medium")  # low, medium, high, urgent
+    category = Column(String)  # bug, feature_request, billing, general
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    resolved_at = Column(DateTime)
+    assigned_to = Column(String)  # Support agent ID
+
+class ErrorLog(Base):
+    """Application error tracking"""
+    __tablename__ = "error_logs"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(String, index=True)  # Optional - may be unauthenticated error
+    error_type = Column(String, nullable=False)  # ValueError, HTTPException, etc.
+    error_message = Column(String, nullable=False)
+    stack_trace = Column(String)
+    endpoint = Column(String, index=True)
+    method = Column(String)
+    request_data = Column(JSON)
+    occurred_at = Column(DateTime, default=datetime.utcnow, index=True)
+    severity = Column(String, default="error")  # warning, error, critical
+    resolved = Column(Boolean, default=False)
+
+class HealthCheck(Base):
+    """API uptime and health monitoring"""
+    __tablename__ = "health_checks"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    service_name = Column(String, nullable=False, index=True)  # api, database, redis, etc.
+    status = Column(String, nullable=False)  # healthy, degraded, down
+    response_time_ms = Column(Float)
+    checked_at = Column(DateTime, default=datetime.utcnow, index=True)
+    metadata = Column(JSON)  # Additional health metrics
+
+class DailyMetrics(Base):
+    """Pre-calculated daily metrics for dashboard performance"""
+    __tablename__ = "daily_metrics"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    date = Column(DateTime, nullable=False, index=True, unique=True)
+
+    # User metrics
+    new_signups = Column(Integer, default=0)
+    daily_active_users = Column(Integer, default=0)
+    monthly_active_users = Column(Integer, default=0)
+    activations_count = Column(Integer, default=0)
+
+    # Revenue metrics
+    mrr = Column(Float, default=0)  # Monthly Recurring Revenue
+    arr = Column(Float, default=0)  # Annual Recurring Revenue
+    new_revenue = Column(Float, default=0)
+    churned_revenue = Column(Float, default=0)
+
+    # Usage metrics
+    api_calls_total = Column(Integer, default=0)
+    agent_sessions_total = Column(Integer, default=0)
+    error_count = Column(Integer, default=0)
+    error_rate = Column(Float, default=0)  # Percentage
+
+    # Support metrics
+    new_tickets = Column(Integer, default=0)
+    resolved_tickets = Column(Integer, default=0)
+    avg_resolution_time_hours = Column(Float, default=0)
+
+    # NPS
+    nps_score = Column(Float)  # -100 to 100
+    nps_responses = Column(Integer, default=0)
+
+    calculated_at = Column(DateTime, default=datetime.utcnow)
+
 # ============================================================================
 # CREATE TABLES
 # ============================================================================
