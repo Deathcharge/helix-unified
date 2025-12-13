@@ -18,7 +18,6 @@ export {
 export {
   ErrorBoundary,
   InlineErrorBoundary,
-  APIErrorBoundary,
 } from './ErrorBoundary';
 
 // Toast Notifications

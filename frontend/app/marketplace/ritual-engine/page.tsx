@@ -1,5 +1,9 @@
 "use client"
 
+export const dynamic = "force-dynamic";
+
+"use client"
+
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { Card } from '@/components/ui/card'
@@ -90,7 +94,7 @@ const ritualTemplates: RitualTemplate[] = [
   {
     id: 'evening-integration',
     name: 'Evening Integration',
-    description: 'Process the day's experiences and prepare consciousness for rest',
+    description: 'Process the day\'s experiences and prepare consciousness for rest',
     duration: '20 minutes',
     ucfImpact: '+0.12 Harmony, -0.10 Klesha',
     difficulty: 'beginner',

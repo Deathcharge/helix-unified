@@ -10,6 +10,7 @@ import React, { Component, ErrorInfo, ReactNode } from 'react';
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
+  errorMessage?: string;
 }
 
 interface State {
@@ -73,10 +74,10 @@ export class ErrorBoundary extends Component<Props, State> {
             <div className="text-center mb-6">
               <div className="text-6xl mb-4">⚠️</div>
               <h1 className="text-3xl font-bold text-white mb-2">
-                Oops! Something went wrong
+                {this.props.errorMessage || 'Oops! Something went wrong'}
               </h1>
               <p className="text-gray-300">
-                We encountered an unexpected error. Don't worry, our team has been notified.
+                {this.props.errorMessage ? 'Please try again later.' : 'We encountered an unexpected error. Don\'t worry, our team has been notified.'}
               </p>
             </div>
 
@@ -114,5 +115,8 @@ export class ErrorBoundary extends Component<Props, State> {
     return this.props.children;
   }
 }
+
+// Alias for inline error handling
+export const InlineErrorBoundary = ErrorBoundary;
 
 export default ErrorBoundary;
