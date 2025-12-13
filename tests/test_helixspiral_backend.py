@@ -10,20 +10,11 @@ Critical tests for Dec 15 launch:
 - Database models
 """
 
+"""Test suite for HelixSpiral backend - uses mocks for external dependencies"""
 import pytest
 import json
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch, MagicMock
-import sys
-import os
-
-# Add backend to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../docs/ninja-integration/HelixSpiralSaaS/backend'))
-
-# Mock dependencies before importing
-sys.modules['stripe'] = MagicMock()
-sys.modules['sendgrid'] = MagicMock()
-sys.modules['anthropic'] = MagicMock()
+from unittest.mock import Mock, patch, MagicMock, AsyncMock
 
 # ============================================================================
 # FIXTURES
