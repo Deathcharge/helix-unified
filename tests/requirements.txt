@@ -15,7 +15,7 @@ faker==20.1.0
 
 # API Testing
 httpx==0.25.2
-aiohttp==3.9.1
+aiohttp==3.12.14
 
 # Database Testing
 sqlalchemy==2.0.23
@@ -27,12 +27,12 @@ asyncio-contextmanager==1.0.0
 pytest-timeout==2.2.0
 
 # Security Testing
-cryptography==41.0.7
+cryptography==42.0.4
 pyjwt==2.8.1
 
 # FastAPI Testing
 fastapi==0.109.0
-starlette==0.35.0
+starlette==0.47.2
 pydantic==2.5.3
 
 # Stripe Testing
@@ -41,8 +41,8 @@ stripe==7.8.0
 # Code Quality
 coverage==7.3.2
 pylint==3.0.3
-black==23.12.1
+black==24.3.0
 
 # Utilities
 python-dotenv==1.0.0
-requests==2.31.0
+requests==2.32.4
