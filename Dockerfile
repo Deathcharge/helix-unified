@@ -62,7 +62,8 @@ RUN pip install --no-cache-dir \
     sentry-sdk[fastapi]==2.19.0 \
     pydub==0.25.1 \
     Pillow==10.4.0 \
-    loguru==0.7.2
+    loguru==0.7.2 \
+    psutil==5.9.6
 
 # Install heavy ML dependencies LAST (one at a time to reduce memory spikes)
 RUN pip install --no-cache-dir numpy==1.26.4

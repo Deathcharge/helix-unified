@@ -949,6 +949,56 @@ def health_check() -> Dict[str, Any]:
     return health_data
 
 
+@app.get("/api/health/deep")
+async def deep_health_check() -> Dict[str, Any]:
+    """
+    Deep health check with circuit breaker status and dependency health.
+
+    Returns detailed status of:
+    - All circuit breakers (Discord, Notion, Zapier, OpenAI, Anthropic)
+    - Memory usage
+    - Active connections
+    - System readiness for production
+
+    Use /health for basic Railway health checks.
+    Use /api/health/deep for detailed monitoring dashboards.
+    """
+    try:
+        from backend.core.resilience import CircuitBreaker
+        circuit_states = CircuitBreaker.get_all_states()
+    except ImportError:
+        circuit_states = {"error": "Resilience module not loaded"}
+
+    import psutil
+    try:
+        process = psutil.Process()
+        memory_info = {
+            "rss_mb": round(process.memory_info().rss / 1024 / 1024, 2),
+            "vms_mb": round(process.memory_info().vms / 1024 / 1024, 2),
+            "percent": round(process.memory_percent(), 2),
+        }
+    except Exception:
+        memory_info = {"error": "Could not get memory info"}
+
+    # Count open circuits
+    open_circuits = [
+        name for name, state in circuit_states.items()
+        if isinstance(state, dict) and state.get("state") == "open"
+    ]
+
+    return {
+        "status": "healthy" if not open_circuits else "degraded",
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "uptime": calculate_uptime(),
+        "version": "16.9",
+        "circuit_breakers": circuit_states,
+        "open_circuits": open_circuits,
+        "memory": memory_info,
+        "production_ready": len(open_circuits) == 0,
+        "degraded_services": open_circuits,
+    }
+
+
 @app.get("/api/claude/status")
 async def claude_api_status() -> Dict[str, Any]:
     """
