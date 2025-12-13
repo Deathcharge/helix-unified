@@ -4,8 +4,8 @@ Railway Variable Validation Script
 Validates environment variable distribution across 4 Helix services
 """
 
-import os
 import json
+import os
 from typing import Dict, List, Set
 
 # Define variable distribution per service

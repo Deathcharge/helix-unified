@@ -9,14 +9,19 @@ Features:
 - Voice announcements for system events
 - Multi-channel voice presence
 """
+
 import asyncio
 import logging
-from datetime import datetime
-from typing import Dict, Optional, Set
+import tempfile
 from collections import defaultdict
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, Optional, Set
 
 import discord
 from discord.ext import commands, tasks
+
+from backend.voice_processor_client import get_voice_client
 
 logger = logging.getLogger(__name__)
 
@@ -67,6 +72,7 @@ AGENT_VOICE_PROFILES = {
 # ============================================================================
 # VOICE PATROL SYSTEM
 # ============================================================================
+
 
 class VoicePatrolSystem:
     """Manages voice channel patrol and agent presence."""
@@ -162,8 +168,8 @@ class VoicePatrolSystem:
                     f"{agent['emoji']} **{agent['name']}** has joined voice channel **{channel.name}** for patrol duty!"
                 )
 
-            # TODO: Play greeting TTS
-            # await self.speak_in_channel(channel.id, agent['greeting'], agent['tts_voice'])
+            # Play greeting TTS
+            await self.speak_in_channel(channel.id, agent['greeting'], agent['tts_voice'])
 
         except discord.ClientException as e:
             logger.error(f"Already connected to a voice channel: {e}")
@@ -215,10 +221,12 @@ class VoicePatrolSystem:
         logger.info(f"🎙️ {member.display_name} joined voice: {channel.name}")
 
         # Track join event
-        self.user_join_events[channel.id].append({
-            "member": member,
-            "timestamp": datetime.utcnow(),
-        })
+        self.user_join_events[channel.id].append(
+            {
+                "member": member,
+                "timestamp": datetime.utcnow(),
+            }
+        )
 
         # Auto-join if configured
         if channel.name.lower() in self.auto_join_channels:
@@ -236,6 +244,10 @@ class VoicePatrolSystem:
                 await text_channel.send(
                     f"{agent['emoji']} **{agent['name']}**: Welcome, {member.mention}, to **{channel.name}**!"
                 )
+
+            # Speak voice greeting
+            greeting_text = f"Welcome, {member.display_name}."
+            await self.speak_in_channel(channel.id, greeting_text, agent['tts_voice'])
 
     async def on_user_leave_voice(self, member: discord.Member, channel: discord.VoiceChannel):
         """Handle user leaving voice channel."""
@@ -267,12 +279,10 @@ class VoicePatrolSystem:
                 # Send to text channel
                 text_channel = channel.guild.system_channel or discord.utils.get(channel.guild.text_channels, name="general")
                 if text_channel:
-                    await text_channel.send(
-                        f"📢 **{agent['name']}** voice announcement in **{channel.name}**:\n> {message}"
-                    )
+                    await text_channel.send(f"📢 **{agent['name']}** voice announcement in **{channel.name}**:\n> {message}")
 
-                # TODO: Play TTS
-                # await self.speak_in_channel(channel_id, message, agent['tts_voice'])
+                # Play TTS announcement
+                await self.speak_in_channel(channel_id, message, agent['tts_voice'])
 
             except Exception as e:
                 logger.error(f"Error announcing to channel {channel_id}: {e}")
@@ -296,6 +306,68 @@ class VoicePatrolSystem:
             text: Text to speak
             voice: Google Cloud TTS voice name
         """
+        if channel_id not in self.voice_clients:
+            logger.warning(f"Cannot speak in channel {channel_id}: Not connected")
+            return
+
+        voice_client = self.voice_clients[channel_id]
+
+        # Check if already playing audio
+        if voice_client.is_playing():
+            logger.info(f"⏳ Voice channel {channel_id} is busy, queuing message")
+            # Wait for current audio to finish
+            while voice_client.is_playing():
+                await asyncio.sleep(0.5)
+
+        try:
+            # Get TTS audio from voice_processor
+            logger.info(f"🎙️ Synthesizing speech for channel {channel_id}: {text[:50]}...")
+            voice_client_api = get_voice_client()
+
+            audio_data = await voice_client_api.synthesize_speech(
+                text=text,
+                voice_name=voice,
+                language_code="en-US"
+            )
+
+            if not audio_data:
+                logger.error(f"Failed to synthesize speech for: {text[:50]}...")
+                return
+
+            # Save audio to temporary file for FFmpeg
+            with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as temp_file:
+                temp_file.write(audio_data)
+                temp_path = temp_file.name
+
+            # Play audio in Discord voice channel
+            logger.info(f"🔊 Playing TTS audio in channel {channel_id}")
+
+            audio_source = discord.FFmpegPCMAudio(
+                temp_path,
+                options="-loglevel panic"  # Suppress FFmpeg logs
+            )
+
+            # Callback to delete temp file after playback
+            def after_playback(error):
+                if error:
+                    logger.error(f"Audio playback error: {error}")
+                else:
+                    logger.info(f"✅ TTS playback complete in channel {channel_id}")
+
+                # Clean up temp file
+                try:
+                    Path(temp_path).unlink()
+                except Exception as e:
+                    logger.warning(f"Failed to delete temp file {temp_path}: {e}")
+
+            voice_client.play(audio_source, after=after_playback)
+
+        except FileNotFoundError:
+            logger.error("FFmpeg not found! Install FFmpeg for voice playback.")
+            logger.error("Ubuntu/Debian: sudo apt-get install ffmpeg")
+            logger.error("macOS: brew install ffmpeg")
+        except Exception as e:
+            logger.error(f"Error speaking in channel: {e}", exc_info=True)
         # TODO: Implement TTS with Google Cloud Text-to-Speech
         # This requires:
         # 1. Google Cloud TTS API setup
@@ -304,7 +376,6 @@ class VoicePatrolSystem:
         #
         # For now, we'll log the intent
         logger.info(f"🎙️ [TTS] Would speak in channel {channel_id}: {text[:50]}...")
-        pass
 
 
 # Global voice patrol instance
@@ -326,6 +397,7 @@ def set_voice_patrol(patrol: VoicePatrolSystem):
 # ============================================================================
 # DISCORD BOT COMMANDS
 # ============================================================================
+
 
 @commands.command(name="voice-join", aliases=["vjoin", "voice-patrol"])
 @commands.has_permissions(move_members=True)
@@ -351,10 +423,7 @@ async def voice_join_cmd(ctx: commands.Context, agent: str = "sentinel"):
 
     # Validate agent
     if agent.lower() not in AGENT_VOICE_PROFILES:
-        await ctx.send(
-            f"❌ Unknown agent: `{agent}`\n"
-            f"Available: {', '.join(AGENT_VOICE_PROFILES.keys())}"
-        )
+        await ctx.send(f"❌ Unknown agent: `{agent}`\n" f"Available: {', '.join(AGENT_VOICE_PROFILES.keys())}")
         return
 
     # Join the channel
@@ -454,7 +523,7 @@ async def voice_status_cmd(ctx: commands.Context):
         title="🎙️ Voice Patrol Status",
         description=f"System: {'🟢 Active' if patrol.patrol_enabled else '🔴 Inactive'}",
         color=0x00FF00 if patrol.patrol_enabled else 0xFF0000,
-        timestamp=datetime.utcnow()
+        timestamp=datetime.utcnow(),
     )
 
     # Active patrols
@@ -471,7 +540,7 @@ async def voice_status_cmd(ctx: commands.Context):
         embed.add_field(
             name=f"Active Patrols ({len(patrol.active_patrols)})",
             value="\n".join(patrols_text) if patrols_text else "None",
-            inline=False
+            inline=False,
         )
 
     # Auto-join channels
@@ -479,14 +548,14 @@ async def voice_status_cmd(ctx: commands.Context):
         embed.add_field(
             name=f"Auto-Join Channels ({len(patrol.auto_join_channels)})",
             value=", ".join([f"`{ch}`" for ch in patrol.auto_join_channels]),
-            inline=False
+            inline=False,
         )
 
     # Available agents
     embed.add_field(
         name="Available Agents",
         value=", ".join([f"{a['emoji']} {a['name']}" for a in AGENT_VOICE_PROFILES.values()]),
-        inline=False
+        inline=False,
     )
 
     await ctx.send(embed=embed)

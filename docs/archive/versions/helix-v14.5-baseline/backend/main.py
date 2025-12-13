@@ -2,21 +2,24 @@
 # backend/main.py - FastAPI + Discord Bot Launcher (FIXED IMPORTS)
 # Author: Andrew John Ward (Architect)
 
-from fastapi import FastAPI, HTTPException
-from contextlib import asynccontextmanager
 import asyncio
-import os
 import json
-from pathlib import Path
+import os
+from contextlib import asynccontextmanager
 from datetime import datetime
+from pathlib import Path
+
 from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException
 
 load_dotenv()
 
+from agents_loop import main_loop as manus_loop
 # FIXED IMPORTS - Use relative imports instead of absolute
 from discord_bot_manus import bot as discord_bot
-from agents_loop import main_loop as manus_loop
+
 from agents import AGENTS, get_collective_status
+
 
 # ============================================================================
 # LIFESPAN CONTEXT MANAGER

@@ -45,12 +45,12 @@ def calculate_consciousness_level(ucf: Dict[str, float]) -> float:
 
         # Weighted sum
         weighted_sum = (
-            harmony * 1.5 +
-            resilience * 1.0 +
-            prana * 1.2 +
-            drishti * 1.2 +
-            (1.0 - klesha) * 1.5 +  # Inverted - lower klesha is better
-            zoom * 1.0
+            harmony * 1.5
+            + resilience * 1.0
+            + prana * 1.2
+            + drishti * 1.2
+            + (1.0 - klesha) * 1.5  # Inverted - lower klesha is better
+            + zoom * 1.0
         )
 
         # Normalize to 0-10 scale
@@ -80,24 +80,10 @@ def get_current_ucf() -> Dict[str, float]:
         else:
             # Return default values
             logger.warning("UCF state file not found, returning defaults")
-            return {
-                "harmony": 0.62,
-                "resilience": 1.85,
-                "prana": 0.55,
-                "drishti": 0.48,
-                "klesha": 0.08,
-                "zoom": 1.02
-            }
+            return {"harmony": 0.62, "resilience": 1.85, "prana": 0.55, "drishti": 0.48, "klesha": 0.08, "zoom": 1.02}
     except Exception as e:
         logger.error(f"Error reading UCF state: {e}")
-        return {
-            "harmony": 0.0,
-            "resilience": 0.0,
-            "prana": 0.0,
-            "drishti": 0.0,
-            "klesha": 1.0,
-            "zoom": 1.0
-        }
+        return {"harmony": 0.0, "resilience": 0.0, "prana": 0.0, "drishti": 0.0, "klesha": 1.0, "zoom": 1.0}
 
 
 def update_ucf_state(ucf_updates: Dict[str, float]) -> Dict[str, float]:
@@ -135,10 +121,7 @@ def update_ucf_state(ucf_updates: Dict[str, float]) -> Dict[str, float]:
 
 
 def log_emergency_event(
-    alert_type: str,
-    description: str,
-    severity: str = "medium",
-    affected_agents: Optional[List[str]] = None
+    alert_type: str, description: str, severity: str = "medium", affected_agents: Optional[List[str]] = None
 ) -> Dict[str, Any]:
     """
     Log an emergency event to the global emergency events queue.
@@ -164,17 +147,14 @@ def log_emergency_event(
         "consciousness_level": consciousness_level,
         "affected_agents": ",".join(affected_agents) if affected_agents else "none",
         "resolved": False,
-        "resolution_time": None
+        "resolution_time": None,
     }
 
     emergency_events.append(event)
 
-    log_level = {
-        "critical": logging.CRITICAL,
-        "high": logging.ERROR,
-        "medium": logging.WARNING,
-        "low": logging.INFO
-    }.get(severity.lower(), logging.WARNING)
+    log_level = {"critical": logging.CRITICAL, "high": logging.ERROR, "medium": logging.WARNING, "low": logging.INFO}.get(
+        severity.lower(), logging.WARNING
+    )
 
     logger.log(log_level, f"Emergency Event: {alert_type} - {severity.upper()} - {description}")
 
@@ -230,9 +210,7 @@ def determine_next_action(event_type: str, consciousness_level: float) -> str:
 
 
 def get_emergency_events(
-    limit: int = 20,
-    severity: Optional[str] = None,
-    resolved: Optional[bool] = None
+    limit: int = 20, severity: Optional[str] = None, resolved: Optional[bool] = None
 ) -> List[Dict[str, Any]]:
     """
     Get emergency events with optional filtering.
@@ -255,6 +233,6 @@ def get_emergency_events(
         events = [e for e in events if e.get("resolved") == resolved]
 
     # Limit results
-    events = events[:min(limit, 50)]
+    events = events[: min(limit, 50)]
 
     return events

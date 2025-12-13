@@ -104,11 +104,10 @@ router = APIRouter(prefix="/api/saas/dashboard", tags=["SaaS Dashboard"])
 
 
 @router.get("/metrics")
-async def get_metrics(
-    user: Dict[str, Any] = Depends(get_current_user), system_id: Optional[str] = None
-) -> DashboardResponse:
+async def get_metrics(user: Dict[str, Any] = Depends(get_current_user), system_id: Optional[str] = None) -> DashboardResponse:
     """Get consciousness metrics for user's systems."""
-    from backend.core.ucf_helpers import calculate_consciousness_level, get_current_ucf
+    from backend.core.ucf_helpers import (calculate_consciousness_level,
+                                          get_current_ucf)
     from backend.saas.usage_metering import UsageMeter
 
     user_id = user.get("user_id")
@@ -211,9 +210,7 @@ async def get_billing(user: Dict[str, Any] = Depends(get_current_user)) -> Dict[
 
 
 @router.post("/upgrade")
-async def upgrade_plan(
-    tier: str, user: Dict[str, Any] = Depends(get_current_user)
-) -> Dict[str, Any]:
+async def upgrade_plan(tier: str, user: Dict[str, Any] = Depends(get_current_user)) -> Dict[str, Any]:
     """Upgrade to paid plan."""
     from backend.saas.stripe_service import get_stripe_service
 
@@ -235,7 +232,7 @@ async def upgrade_plan(
     checkout = await stripe_service.create_checkout_session(
         customer_id,
         tier,
-        success_url=f"https://helixspiral.work/dashboard?session_id={{CHECKOUT_SESSION_ID}}",
+        success_url=f"https://helixspiral.work/dashboard?session_id={{CHECKOUT_SESSION_ID}}",  # noqa
         cancel_url="https://helixspiral.work/pricing",
     )
 

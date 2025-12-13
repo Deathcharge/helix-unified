@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * 📁 File Explorer Component
  * Browser-based file explorer with real backend

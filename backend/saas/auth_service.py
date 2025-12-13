@@ -20,7 +20,7 @@ import os
 import secrets
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 import jwt
 
@@ -216,9 +216,7 @@ class TokenManager:
             return None
 
         # Create new token
-        return TokenManager.create_token(
-            payload["user_id"], payload["email"], payload["tier"]
-        )
+        return TokenManager.create_token(payload["user_id"], payload["email"], payload["tier"])
 
 
 # ============================================================================
@@ -330,4 +328,4 @@ class SessionManager:
 
 __all__ = ["UserManager", "TokenManager", "OAuthHandler", "SessionManager"]
 
-import asyncio
+import asyncio  # noqa

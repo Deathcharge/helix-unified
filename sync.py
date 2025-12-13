@@ -17,9 +17,9 @@ Design Philosophy:
 Author: Claude Code (implementing Grok's strategy)
 """
 
-import subprocess
-import os
 import logging
+import os
+import subprocess
 from enum import Enum
 from pathlib import Path
 from typing import Optional

@@ -1,25 +1,25 @@
 """
 Enhanced Discord Bot with Anthropic Claude integration and modern features
 """
-import os
 import asyncio
-import logging
 import json
+import logging
+import os
+import traceback
 from datetime import datetime
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
+
 import discord
 from discord.ext import commands
-import traceback
-
+from discord_commands import EnhancedDiscordCommands
+from monitoring.performance_dashboard import performance_monitor
+from utils.channel_manager import initialize_channel_manager
+from utils.claude_integration import claude_integration
+from utils.error_handlers import DiscordError, error_boundary, error_tracker
 # Import enhanced utilities
 from utils.logging_config import get_logger
-from utils.error_handlers import error_boundary, error_tracker, DiscordError
-from utils.claude_integration import claude_integration
-from utils.tts_system import tts_system
 from utils.rate_limiter import discord_rate_limit
-from monitoring.performance_dashboard import performance_monitor
-from discord_commands import EnhancedDiscordCommands
-from utils.channel_manager import initialize_channel_manager
+from utils.tts_system import tts_system
 
 logger = get_logger('enhanced_agent_bot')
 

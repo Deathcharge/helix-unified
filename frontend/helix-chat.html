@@ -443,20 +443,42 @@
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${type}`;
 
+            // XSS Protection: Use textContent for user-controlled data
             if (type === 'system') {
-                messageDiv.innerHTML = `
-                    <div class="message-text">${text}</div>
-                `;
+                const textDiv = document.createElement('div');
+                textDiv.className = 'message-text';
+                textDiv.textContent = text; // Safe from XSS
+                messageDiv.appendChild(textDiv);
             } else {
                 const time = new Date(timestamp).toLocaleTimeString();
-                messageDiv.innerHTML = `
-                    <div class="message-header">
-                        <span class="message-emoji">${emoji}</span>
-                        <span class="message-sender" style="color: ${color || '#00d9ff'}">${sender}</span>
-                        <span class="message-time">${time}</span>
-                    </div>
-                    <div class="message-text">${text}</div>
-                `;
+
+                // Create header with safe text insertion
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'message-header';
+
+                const emojiSpan = document.createElement('span');
+                emojiSpan.className = 'message-emoji';
+                emojiSpan.textContent = emoji; // Safe from XSS
+
+                const senderSpan = document.createElement('span');
+                senderSpan.className = 'message-sender';
+                senderSpan.style.color = color || '#00d9ff';
+                senderSpan.textContent = sender; // Safe from XSS
+
+                const timeSpan = document.createElement('span');
+                timeSpan.className = 'message-time';
+                timeSpan.textContent = time; // Safe from XSS
+
+                headerDiv.appendChild(emojiSpan);
+                headerDiv.appendChild(senderSpan);
+                headerDiv.appendChild(timeSpan);
+
+                const textDiv = document.createElement('div');
+                textDiv.className = 'message-text';
+                textDiv.textContent = text; // Safe from XSS
+
+                messageDiv.appendChild(headerDiv);
+                messageDiv.appendChild(textDiv);
             }
 
             messagesDiv.appendChild(messageDiv);

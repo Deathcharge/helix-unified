@@ -18,7 +18,7 @@ import logging
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -335,7 +335,7 @@ class PlatformDiscoveryManager:
 
             # Skip if already configured
             if platform_id in self._configs:
-                logger.info(f"  ℹ️ Already configured, skipping")
+                logger.info(f"  ℹ️ Already configured, skipping")  # noqa
                 continue
 
             # Generate config

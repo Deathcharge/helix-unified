@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
-import requests
 import json
-import time
 import os
-import jwt
+import time
 from datetime import datetime, timedelta
+
+import jwt
+import requests
 
 # Configuration
 RAILWAY_SELF_MANAGEMENT_URL = os.getenv("RAILWAY_SELF_MANAGEMENT_URL", "http://localhost:3000")

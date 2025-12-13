@@ -13,18 +13,19 @@ Author: Claude (Manus Validator)
 Date: 2025-11-30
 """
 
+import hashlib
+import os
 import secrets
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
+
+import asyncpg
 import bcrypt
 import jwt
-import asyncpg
-from datetime import datetime, timedelta
-from typing import Optional, Dict, Any, List
-from fastapi import HTTPException, Header, Depends, Request
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from pydantic import BaseModel, EmailStr, validator
 import redis.asyncio as redis
-import os
-import hashlib
+from fastapi import Depends, Header, HTTPException
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from pydantic import BaseModel, EmailStr, validator
 
 # ============================================================================
 # CONFIGURATION
@@ -41,16 +42,12 @@ REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 # Rate limits by tier (requests per day)
-TIER_LIMITS = {
-    "free": 100,
-    "pro": 10000,
-    "workflow": 20000,
-    "enterprise": -1  # Unlimited
-}
+TIER_LIMITS = {"free": 100, "pro": 10000, "workflow": 20000, "enterprise": -1}  # Unlimited
 
 # ============================================================================
 # PYDANTIC MODELS
 # ============================================================================
+
 
 class UserRegistration(BaseModel):
     email: EmailStr
@@ -70,20 +67,24 @@ class UserRegistration(BaseModel):
             raise ValueError('Password must contain at least one digit')
         return v
 
+
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
 
 class APIKeyCreate(BaseModel):
     name: str = "Default API Key"
     scopes: List[str] = ["chat", "agents", "prompts", "workflows"]
     expires_in_days: Optional[int] = None
 
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     expires_in: int
     user: Dict[str, Any]
+
 
 class APIKeyResponse(BaseModel):
     api_key: str  # Full key (shown only once!)
@@ -92,6 +93,7 @@ class APIKeyResponse(BaseModel):
     scopes: List[str]
     created_at: datetime
     expires_at: Optional[datetime]
+
 
 class User(BaseModel):
     id: str
@@ -108,9 +110,11 @@ class User(BaseModel):
     created_at: datetime
     last_login_at: Optional[datetime]
 
+
 # ============================================================================
 # DATABASE CONNECTION
 # ============================================================================
+
 
 class Database:
     """Async PostgreSQL database connection pool"""
@@ -121,12 +125,7 @@ class Database:
     async def connect(cls):
         """Initialize connection pool"""
         if not cls.pool:
-            cls.pool = await asyncpg.create_pool(
-                DATABASE_URL,
-                min_size=5,
-                max_size=20,
-                command_timeout=60
-            )
+            cls.pool = await asyncpg.create_pool(DATABASE_URL, min_size=5, max_size=20, command_timeout=60)
         return cls.pool
 
     @classmethod
@@ -164,9 +163,11 @@ class Database:
         async with pool.acquire() as conn:
             return await conn.fetchval(query, *args)
 
+
 # ============================================================================
 # REDIS CONNECTION
 # ============================================================================
+
 
 class Cache:
     """Redis cache for rate limiting and session management"""
@@ -177,11 +178,7 @@ class Cache:
     async def connect(cls):
         """Initialize Redis connection"""
         if not cls.client:
-            cls.client = await redis.from_url(
-                REDIS_URL,
-                encoding="utf-8",
-                decode_responses=True
-            )
+            cls.client = await redis.from_url(REDIS_URL, encoding="utf-8", decode_responses=True)
         return cls.client
 
     @classmethod
@@ -221,9 +218,11 @@ class Cache:
         client = await cls.connect()
         return await client.delete(key)
 
+
 # ============================================================================
 # PASSWORD HASHING
 # ============================================================================
+
 
 def hash_password(password: str) -> str:
     """Hash password using bcrypt"""
@@ -231,16 +230,16 @@ def hash_password(password: str) -> str:
     hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
     return hashed.decode('utf-8')
 
+
 def verify_password(password: str, password_hash: str) -> bool:
     """Verify password against hash"""
-    return bcrypt.checkpw(
-        password.encode('utf-8'),
-        password_hash.encode('utf-8')
-    )
+    return bcrypt.checkpw(password.encode('utf-8'), password_hash.encode('utf-8'))
+
 
 # ============================================================================
 # JWT TOKEN MANAGEMENT
 # ============================================================================
+
 
 def create_jwt_token(user_id: str, tier: str, expiry_hours: int = JWT_EXPIRY_HOURS) -> str:
     """Create JWT access token"""
@@ -248,9 +247,10 @@ def create_jwt_token(user_id: str, tier: str, expiry_hours: int = JWT_EXPIRY_HOU
         "user_id": user_id,
         "tier": tier,
         "exp": datetime.utcnow() + timedelta(hours=expiry_hours),
-        "iat": datetime.utcnow()
+        "iat": datetime.utcnow(),
     }
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
 
 def decode_jwt_token(token: str) -> Dict[str, Any]:
     """Decode and validate JWT token"""
@@ -262,9 +262,11 @@ def decode_jwt_token(token: str) -> Dict[str, Any]:
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
+
 # ============================================================================
 # API KEY MANAGEMENT
 # ============================================================================
+
 
 def generate_api_key() -> tuple[str, str, str]:
     """
@@ -274,16 +276,24 @@ def generate_api_key() -> tuple[str, str, str]:
         (full_key, key_hash, key_prefix) tuple
     """
     # Generate random bytes
-    random_part = secrets.token_hex(32)  # 64 chars
+    random_part = secrets.token_hex(32)  # 64 chars (256 bits entropy)
     full_key = f"{API_KEY_PREFIX}{random_part}"
 
-    # Hash the key for storage (never store plaintext!)
+    # SECURITY NOTE: Using SHA-256 for API key hashing
+    # Acceptable for high-entropy tokens (256 bits) but not ideal
+    # TODO: Migrate to bcrypt/Argon2 for production (requires db schema change)
+    # Current approach: SHA-256 is fast but acceptable given:
+    # 1. API keys have cryptographic randomness (not user-chosen)
+    # 2. 256-bit entropy makes brute force impractical
+    # 3. No password-specific attacks apply (no dictionaries/patterns)
+    # lgtm[py/weak-sensitive-data-hashing] - High-entropy API keys (256-bit), not passwords
     key_hash = hashlib.sha256(full_key.encode()).hexdigest()
 
     # Prefix for display (e.g., "hx_user_abc123...")
     key_prefix = f"{API_KEY_PREFIX}{random_part[:8]}..."
 
     return full_key, key_hash, key_prefix
+
 
 async def verify_api_key(api_key: str) -> Optional[Dict[str, Any]]:
     """
@@ -295,13 +305,17 @@ async def verify_api_key(api_key: str) -> Optional[Dict[str, Any]]:
     Returns:
         User data dict or None if invalid
     """
-    # Hash the provided key
+    # SECURITY NOTE: SHA-256 for verification (matches generation)
+    # See generate_api_key() for security considerations
+    # TODO: Match with bcrypt/Argon2 when migration happens
+    # lgtm[py/weak-sensitive-data-hashing] - High-entropy API keys (256-bit), not passwords
     key_hash = hashlib.sha256(api_key.encode()).hexdigest()
 
     # Check cache first (faster)
     cached_user = await Cache.get(f"api_key:{key_hash}")
     if cached_user:
         import json
+
         return json.loads(cached_user)
 
     # Query database
@@ -328,23 +342,21 @@ async def verify_api_key(api_key: str) -> Optional[Dict[str, Any]]:
 
     # Cache for 5 minutes
     import json
-    await Cache.set(
-        f"api_key:{key_hash}",
-        json.dumps(user_data, default=str),
-        expiry=300
-    )
+
+    await Cache.set(f"api_key:{key_hash}", json.dumps(user_data, default=str), expiry=300)
 
     # Update last_used_at (fire and forget)
     await Database.execute(
-        "UPDATE api_keys SET last_used_at = NOW(), requests_count = requests_count + 1 WHERE id = $1",
-        user_data["key_id"]
+        "UPDATE api_keys SET last_used_at = NOW(), requests_count = requests_count + 1 WHERE id = $1", user_data["key_id"]
     )
 
     return user_data
 
+
 # ============================================================================
 # AUTHENTICATION ENDPOINTS
 # ============================================================================
+
 
 async def register_user(registration: UserRegistration) -> TokenResponse:
     """
@@ -357,10 +369,7 @@ async def register_user(registration: UserRegistration) -> TokenResponse:
         JWT token and user data
     """
     # Check if email exists
-    existing = await Database.fetchval(
-        "SELECT id FROM users WHERE email = $1",
-        registration.email
-    )
+    existing = await Database.fetchval("SELECT id FROM users WHERE email = $1", registration.email)
 
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -384,13 +393,7 @@ async def register_user(registration: UserRegistration) -> TokenResponse:
                   created_at
     """
 
-    user = await Database.fetchrow(
-        user_query,
-        registration.email,
-        password_hash,
-        registration.full_name,
-        registration.company
-    )
+    user = await Database.fetchrow(user_query, registration.email, password_hash, registration.full_name, registration.company)
 
     # Create default API key
     await Database.execute(
@@ -400,7 +403,7 @@ async def register_user(registration: UserRegistration) -> TokenResponse:
         """,
         str(user["id"]),
         key_hash,
-        key_prefix
+        key_prefix,
     )
 
     # Generate JWT token
@@ -414,9 +417,10 @@ async def register_user(registration: UserRegistration) -> TokenResponse:
             "email": user["email"],
             "full_name": user["full_name"],
             "tier": user["tier"],
-            "api_key": api_key  # Show ONLY on registration!
-        }
+            "api_key": api_key,  # Show ONLY on registration!
+        },
     )
+
 
 async def login_user(login: UserLogin) -> TokenResponse:
     """
@@ -436,7 +440,7 @@ async def login_user(login: UserLogin) -> TokenResponse:
         FROM users
         WHERE email = $1
         """,
-        login.email
+        login.email,
     )
 
     if not user:
@@ -450,10 +454,7 @@ async def login_user(login: UserLogin) -> TokenResponse:
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
     # Update last login
-    await Database.execute(
-        "UPDATE users SET last_login_at = NOW() WHERE id = $1",
-        user["id"]
-    )
+    await Database.execute("UPDATE users SET last_login_at = NOW() WHERE id = $1", user["id"])
 
     # Generate JWT token
     token = create_jwt_token(str(user["id"]), user["tier"])
@@ -466,9 +467,10 @@ async def login_user(login: UserLogin) -> TokenResponse:
             "email": user["email"],
             "full_name": user["full_name"],
             "tier": user["tier"],
-            "subscription_status": user["subscription_status"]
-        }
+            "subscription_status": user["subscription_status"],
+        },
     )
+
 
 async def create_api_key(user_id: str, key_data: APIKeyCreate) -> APIKeyResponse:
     """
@@ -496,15 +498,7 @@ async def create_api_key(user_id: str, key_data: APIKeyCreate) -> APIKeyResponse
         RETURNING id, name, scopes, created_at, expires_at
     """
 
-    key = await Database.fetchrow(
-        query,
-        user_id,
-        key_hash,
-        key_prefix,
-        key_data.name,
-        key_data.scopes,
-        expires_at
-    )
+    key = await Database.fetchrow(query, user_id, key_hash, key_prefix, key_data.name, key_data.scopes, expires_at)
 
     return APIKeyResponse(
         api_key=api_key,  # Full key (show only once!)
@@ -512,12 +506,14 @@ async def create_api_key(user_id: str, key_data: APIKeyCreate) -> APIKeyResponse
         name=key["name"],
         scopes=key["scopes"],
         created_at=key["created_at"],
-        expires_at=key["expires_at"]
+        expires_at=key["expires_at"],
     )
+
 
 # ============================================================================
 # RATE LIMITING
 # ============================================================================
+
 
 async def check_rate_limit(user_id: str, tier: str) -> bool:
     """
@@ -552,8 +548,8 @@ async def check_rate_limit(user_id: str, tier: str) -> bool:
     if count >= limit:
         raise HTTPException(
             status_code=429,
-            detail=f"Rate limit exceeded. Tier '{tier}' allows {limit} requests per day. Upgrade to Pro for 10,000 requests/day.",
-            headers={"X-RateLimit-Limit": str(limit), "X-RateLimit-Remaining": "0"}
+            detail=f"Rate limit exceeded. Tier '{tier}' allows {limit} requests per day. Upgrade to Pro for 10,000 requests/day.",  # noqa
+            headers={"X-RateLimit-Limit": str(limit), "X-RateLimit-Remaining": "0"},
         )
 
     # Increment counter
@@ -561,15 +557,16 @@ async def check_rate_limit(user_id: str, tier: str) -> bool:
 
     return True
 
+
 # ============================================================================
 # FASTAPI DEPENDENCIES
 # ============================================================================
 
 security = HTTPBearer()
+  # noqa
 
-async def get_current_user_jwt(
-    credentials: HTTPAuthorizationCredentials = Depends(security)
-) -> Dict[str, Any]:
+
+async def get_current_user_jwt(credentials: HTTPAuthorizationCredentials = Depends(security)) -> Dict[str, Any]:
     """
     Dependency: Get current user from JWT token
 
@@ -590,7 +587,7 @@ async def get_current_user_jwt(
         FROM users
         WHERE id = $1 AND is_active = TRUE
         """,
-        payload["user_id"]
+        payload["user_id"],
     )
 
     if not user:
@@ -598,9 +595,8 @@ async def get_current_user_jwt(
 
     return dict(user)
 
-async def get_current_user_api_key(
-    authorization: str = Header(None)
-) -> Dict[str, Any]:
+
+async def get_current_user_api_key(authorization: str = Header(None)) -> Dict[str, Any]:
     """
     Dependency: Get current user from API key
 
@@ -627,9 +623,11 @@ async def get_current_user_api_key(
 
     return user
 
+
 # ============================================================================
 # TIER ENFORCEMENT
 # ============================================================================
+
 
 def require_tier(minimum_tier: str):
     """
@@ -652,19 +650,21 @@ def require_tier(minimum_tier: str):
         if user_tier_level < required_tier_level:
             raise HTTPException(
                 status_code=403,
-                detail=f"This feature requires '{minimum_tier}' tier or higher. Current tier: '{user['tier']}'. Upgrade at https://helixcollective.io/pricing"
+                detail=f"This feature requires '{minimum_tier}' tier or higher. Current tier: '{user['tier']}'. Upgrade at https://helixcollective.io/pricing",  # noqa
             )
 
         return user
 
     return check_tier
 
+
 # ============================================================================
 # USAGE TRACKING
 # ============================================================================
 
+
 async def track_usage(
-    user_id: str,
+    user_id: str,  # noqa
     endpoint: str,
     method: str,
     provider: Optional[str] = None,
@@ -675,7 +675,7 @@ async def track_usage(
     response_time_ms: int = 0,
     status_code: int = 200,
     ip_address: Optional[str] = None,
-    user_agent: Optional[str] = None
+    user_agent: Optional[str] = None,
 ):
     """
     Track API usage for analytics and billing
@@ -706,10 +706,19 @@ async def track_usage(
             $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
         )
         """,
-        user_id, endpoint, method, provider, model,
-        tokens_input, tokens_output, tokens_input + tokens_output,
-        cost_usd, response_time_ms, status_code,
-        ip_address, user_agent
+        user_id,
+        endpoint,
+        method,
+        provider,
+        model,
+        tokens_input,
+        tokens_output,
+        tokens_input + tokens_output,
+        cost_usd,
+        response_time_ms,
+        status_code,
+        ip_address,
+        user_agent,
     )
 
     # Update user totals
@@ -720,7 +729,8 @@ async def track_usage(
             total_spent_usd = total_spent_usd + $2
         WHERE id = $1
         """,
-        user_id, cost_usd
+        user_id,
+        cost_usd,
     )
 
     # Update daily summary (upsert)
@@ -736,12 +746,17 @@ async def track_usage(
             total_tokens = daily_usage_summary.total_tokens + $3,
             total_cost_usd = daily_usage_summary.total_cost_usd + $4
         """,
-        user_id, today, tokens_input + tokens_output, cost_usd
+        user_id,
+        today,
+        tokens_input + tokens_output,
+        cost_usd,
     )
+
 
 # ============================================================================
 # UTILITY FUNCTIONS
 # ============================================================================
+
 
 async def get_user_stats(user_id: str) -> Dict[str, Any]:
     """Get user usage statistics"""
@@ -755,7 +770,7 @@ async def get_user_stats(user_id: str) -> Dict[str, Any]:
         FROM api_usage
         WHERE user_id = $1
         """,
-        user_id
+        user_id,
     )
 
     # Today's usage
@@ -766,13 +781,15 @@ async def get_user_stats(user_id: str) -> Dict[str, Any]:
         FROM daily_usage_summary
         WHERE user_id = $1 AND date = $2
         """,
-        user_id, today
+        user_id,
+        today,
     )
 
     return {
         "lifetime": dict(stats) if stats else {},
-        "today": dict(today_stats) if today_stats else {"total_requests": 0, "total_tokens": 0, "total_cost_usd": 0}
+        "today": dict(today_stats) if today_stats else {"total_requests": 0, "total_tokens": 0, "total_cost_usd": 0},
     }
+
 
 async def list_api_keys(user_id: str) -> List[Dict[str, Any]]:
     """List all API keys for user (without full keys)"""
@@ -784,10 +801,11 @@ async def list_api_keys(user_id: str) -> List[Dict[str, Any]]:
         WHERE user_id = $1
         ORDER BY created_at DESC
         """,
-        user_id
+        user_id,
     )
 
     return [dict(key) for key in keys]
+
 
 async def revoke_api_key(user_id: str, key_id: str):
     """Revoke (deactivate) an API key"""
@@ -797,21 +815,25 @@ async def revoke_api_key(user_id: str, key_id: str):
         SET is_active = FALSE
         WHERE id = $1 AND user_id = $2
         """,
-        key_id, user_id
+        key_id,
+        user_id,
     )
 
     # Invalidate cache
     # (Note: key_hash is needed but we don't have it here, so cache will expire naturally)
 
+
 # ============================================================================
 # INITIALIZATION
 # ============================================================================
+
 
 async def init_auth_system():
     """Initialize database and Redis connections"""
     await Database.connect()
     await Cache.connect()
     print("✅ Auth system initialized")
+
 
 async def cleanup_auth_system():
     """Cleanup connections"""

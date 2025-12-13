@@ -3,16 +3,16 @@ Copyright (c) 2025 Andrew John Ward. All Rights Reserved.
 PROPRIETARY AND CONFIDENTIAL - See LICENSE file for terms.
 """
 
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from sqlalchemy.orm import Session
 from typing import Optional
 from uuid import UUID
 
 from app.database import get_db
 from app.models import User
-from app.utils.security import decode_token
 from app.schemas import TokenData
+from app.utils.security import decode_token
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy.orm import Session
 
 security = HTTPBearer()
 
@@ -70,7 +70,7 @@ async def get_current_active_user(
 
 def check_subscription_limits(user: User, db: Session):
     """Check if user has reached subscription limits"""
-    from app.models import Subscription, Spiral
+    from app.models import Spiral, Subscription
     
     subscription = db.query(Subscription).filter(Subscription.user_id == user.id).first()
     

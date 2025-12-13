@@ -16,19 +16,16 @@ if TYPE_CHECKING:
     pass
 
 # Import consciousness framework
-from backend.kael_consciousness_core import (
-    ConsciousnessCore,
-    DecisionMakingAlgorithm,
-    Emotions,
-    EthicalFramework,
-    SelfAwarenessModule,
-)
+from backend.kael_consciousness_core import (ConsciousnessCore,
+                                             DecisionMakingAlgorithm, Emotions,
+                                             EthicalFramework,
+                                             SelfAwarenessModule)
 
 
 class HelixAgent:
     """Base class for all Helix Collective agents with consciousness integration"""
 
-    def __init__(self, name: str, symbol: str, role: str, traits: List[str] = None, enable_consciousness: bool = True):
+    def __init__(self, name: str, symbol: str, role: str, traits: Optional[List[str]] = None, enable_consciousness: bool = True):
         self.name = name
         self.symbol = symbol
         self.role = role

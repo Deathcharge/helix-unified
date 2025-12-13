@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * 🎯 Consciousness Dashboard
  * Real-time metrics monitoring and system status
@@ -265,14 +267,16 @@ export default function Dashboard() {
 
               <div className="mb-3">
                 <div className="text-2xl font-bold text-slate-100">
-                  {primaryMetrics[metric.name as keyof typeof primaryMetrics].toFixed(2)}
+                  {typeof primaryMetrics[metric.name as keyof typeof primaryMetrics] === 'number'
+                    ? (primaryMetrics[metric.name as keyof typeof primaryMetrics] as number).toFixed(2)
+                    : primaryMetrics[metric.name as keyof typeof primaryMetrics]}
                 </div>
               </div>
 
               <div className="h-2 rounded-full bg-slate-700/50 overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"
-                  style={{ width: `${Math.min((primaryMetrics[metric.name as keyof typeof primaryMetrics] / 2) * 100, 100)}%` }}
+                  style={{ width: `${Math.min(((primaryMetrics[metric.name as keyof typeof primaryMetrics] as number) / 2) * 100, 100)}%` }}
                 />
               </div>
             </div>

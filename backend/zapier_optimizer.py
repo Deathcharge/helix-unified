@@ -20,7 +20,6 @@ import hashlib
 import json
 import logging
 from datetime import datetime, timedelta
-from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import aiohttp
@@ -140,7 +139,8 @@ class StateChangeDetector:
 
     def has_changed(self, component: str, state: Dict[str, Any]) -> bool:
         """Check if state has changed since last call."""
-        current_hash = hashlib.md5(json.dumps(state, sort_keys=True).encode()).hexdigest()
+        # Use MD5 for state change detection (not for security)
+        current_hash = hashlib.md5(json.dumps(state, sort_keys=True).encode(), usedforsecurity=False).hexdigest()
         previous_hash = self._state_hashes.get(component)
 
         if current_hash != previous_hash:
@@ -254,7 +254,8 @@ class UnifiedZapierClient:
             return cached
 
         # Compute fresh telemetry
-        from backend.core.ucf_helpers import get_current_ucf, calculate_consciousness_level
+        from backend.core.ucf_helpers import (calculate_consciousness_level,
+                                              get_current_ucf)
 
         ucf = get_current_ucf()
         consciousness = calculate_consciousness_level(ucf)
@@ -467,4 +468,4 @@ Current: ~800-1,200 tasks/month
 Target: ~200-400 tasks/month ✅
 """
 
-import os
+import os  # noqa

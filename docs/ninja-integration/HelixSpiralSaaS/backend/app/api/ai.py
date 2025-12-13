@@ -3,15 +3,15 @@ Copyright (c) 2025 Andrew John Ward. All Rights Reserved.
 PROPRIETARY AND CONFIDENTIAL - See LICENSE file for terms.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from pydantic import BaseModel
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
+from app.config import settings
 from app.database import get_db
 from app.models import User
 from app.utils.dependencies import get_current_user
-from app.config import settings
+from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
@@ -108,7 +108,7 @@ Also provide a brief explanation of how the spiral works."""
         # Extract JSON from response
         import json
         import re
-        
+
         # Try to find JSON in the response
         json_match = re.search(r'\{[\s\S]*\}', response_text)
         if json_match:
@@ -192,9 +192,10 @@ async def debug_spiral(
     db: Session = Depends(get_db)
 ):
     """Get AI-powered debugging help for a failed spiral"""
-    from anthropic import Anthropic
-    from app.models import Spiral, ExecutionLog
     from uuid import UUID
+
+    from anthropic import Anthropic
+    from app.models import ExecutionLog, Spiral
     
     client = Anthropic(api_key=settings.ANTHROPIC_API_KEY)
     

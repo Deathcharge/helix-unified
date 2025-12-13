@@ -1,0 +1,68 @@
+{
+  "app": {
+    "name": "Helix Unified",
+    "tagline": "Vereinheitlichte KI-Plattform",
+    "welcome": "Willkommen bei Helix Unified"
+  },
+  "nav": {
+    "home": "Startseite",
+    "dashboard": "Dashboard",
+    "settings": "Einstellungen",
+    "profile": "Profil",
+    "logout": "Abmelden",
+    "login": "Anmelden",
+    "signup": "Registrieren",
+    "learnSanskrit": "Sanskrit Lernen"
+  },
+  "language": {
+    "select": "Sprache Auswählen",
+    "current": "Aktuelle Sprache",
+    "autoDetect": "Automatisch vom Browser erkennen",
+    "preference": "Sprachpräferenz"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "general": "Allgemein",
+    "account": "Konto",
+    "preferences": "Präferenzen",
+    "language": "Sprache",
+    "save": "Änderungen Speichern",
+    "saved": "Einstellungen erfolgreich gespeichert"
+  },
+  "auth": {
+    "email": "E-Mail",
+    "password": "Passwort",
+    "confirmPassword": "Passwort Bestätigen",
+    "forgotPassword": "Passwort Vergessen?",
+    "signIn": "Anmelden",
+    "signUp": "Registrieren",
+    "orContinueWith": "Oder fortfahren mit"
+  },
+  "common": {
+    "loading": "Lädt...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "cancel": "Abbrechen",
+    "confirm": "Bestätigen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "save": "Speichern",
+    "close": "Schließen",
+    "search": "Suchen",
+    "filter": "Filtern",
+    "sort": "Sortieren",
+    "back": "Zurück",
+    "next": "Weiter",
+    "previous": "Zurück"
+  },
+  "sanskrit": {
+    "title": "Sanskrit Lernen",
+    "subtitle": "Alte Weisheit, Modernes Lernen",
+    "lessons": "Lektionen",
+    "practice": "Übung",
+    "mantras": "Mantras",
+    "alphabet": "Devanagari-Alphabet",
+    "grammar": "Grammatik",
+    "vocabulary": "Vokabular"
+  }
+}

@@ -1,11 +1,12 @@
-import streamlit as st
-import numpy as np
-import matplotlib.pyplot as plt
-from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageEnhance
 import io
-from scipy.io.wavfile import write
-import time
 import json
+import time
+
+import matplotlib.pyplot as plt
+import numpy as np
+import streamlit as st
+from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont
+from scipy.io.wavfile import write
 
 # Configure Streamlit page
 st.set_page_config(

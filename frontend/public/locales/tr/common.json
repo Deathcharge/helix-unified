@@ -1,0 +1,68 @@
+{
+  "app": {
+    "name": "Helix Unified",
+    "tagline": "Birleşik Yapay Zeka Platformu",
+    "welcome": "Helix Unified'a Hoş Geldiniz"
+  },
+  "nav": {
+    "home": "Ana Sayfa",
+    "dashboard": "Gösterge Paneli",
+    "settings": "Ayarlar",
+    "profile": "Profil",
+    "logout": "Çıkış Yap",
+    "login": "Giriş Yap",
+    "signup": "Kayıt Ol",
+    "learnSanskrit": "Sanskritçe Öğren"
+  },
+  "language": {
+    "select": "Dil Seçin",
+    "current": "Mevcut Dil",
+    "autoDetect": "Tarayıcıdan otomatik algıla",
+    "preference": "Dil Tercihi"
+  },
+  "settings": {
+    "title": "Ayarlar",
+    "general": "Genel",
+    "account": "Hesap",
+    "preferences": "Tercihler",
+    "language": "Dil",
+    "save": "Değişiklikleri Kaydet",
+    "saved": "Ayarlar başarıyla kaydedildi"
+  },
+  "auth": {
+    "email": "E-posta",
+    "password": "Şifre",
+    "confirmPassword": "Şifreyi Onayla",
+    "forgotPassword": "Şifrenizi mi unuttunuz?",
+    "signIn": "Giriş Yap",
+    "signUp": "Kayıt Ol",
+    "orContinueWith": "Veya şununla devam et"
+  },
+  "common": {
+    "loading": "Yükleniyor...",
+    "error": "Hata",
+    "success": "Başarılı",
+    "cancel": "İptal",
+    "confirm": "Onayla",
+    "delete": "Sil",
+    "edit": "Düzenle",
+    "save": "Kaydet",
+    "close": "Kapat",
+    "search": "Ara",
+    "filter": "Filtrele",
+    "sort": "Sırala",
+    "back": "Geri",
+    "next": "İleri",
+    "previous": "Önceki"
+  },
+  "sanskrit": {
+    "title": "Sanskritçe Öğren",
+    "subtitle": "Eski Bilgelik, Modern Öğrenme",
+    "lessons": "Dersler",
+    "practice": "Pratik",
+    "mantras": "Mantralar",
+    "alphabet": "Devanagari Alfabesi",
+    "grammar": "Dilbilgisi",
+    "vocabulary": "Kelime Hazinesi"
+  }
+}

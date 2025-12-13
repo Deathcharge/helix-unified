@@ -13,6 +13,9 @@ eggs/
 lib/
 lib64/
 parts/
+
+# Exception: Allow frontend/lib (Next.js library code)
+!frontend/lib/
 sdist/
 var/
 wheels/
@@ -67,3 +70,15 @@ htmlcov/
 config.local.json
 secrets.json
 backups/
+
+# Documentation scratch work & large generated files
+docs/ninja-integration/
+docs/archive/
+*.jpg
+*.png
+*.screenshot
+
+# Build artifacts (should not be committed)
+tsconfig.tsbuildinfo
+coverage.xml
+*.tsbuildinfo

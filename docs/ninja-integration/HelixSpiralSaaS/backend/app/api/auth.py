@@ -3,13 +3,12 @@ Copyright (c) 2025 Andrew John Ward. All Rights Reserved.
 PROPRIETARY AND CONFIDENTIAL - See LICENSE file for terms.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-
 from app.database import get_db
-from app.schemas import UserCreate, UserLogin, UserResponse, TokenResponse
+from app.schemas import TokenResponse, UserCreate, UserLogin, UserResponse
 from app.services.auth_service import AuthService
 from app.services.email_service import email_service
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 

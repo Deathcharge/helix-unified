@@ -2,9 +2,11 @@
 # 🌀 Helix v15.2 Release Banner Generator
 # Creates visual banner for README and GitHub repo
 
-from PIL import Image, ImageDraw, ImageFont
-import numpy as np
 from pathlib import Path
+
+import numpy as np
+from PIL import Image, ImageDraw, ImageFont
+
 
 def create_release_banner(style="dark"):
     """

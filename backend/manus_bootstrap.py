@@ -10,6 +10,7 @@ from typing import Optional
 
 import aiohttp
 from fastapi import Depends, FastAPI, HTTPException
+
 from services.zapier_client import ZapierClient, validate_zapier_config
 
 # ============================================================================
@@ -280,9 +281,7 @@ async def test_zapier(zap: ZapierClient = Depends(get_zapier)) -> dict:
 
     # Test Agent Registry webhook
     try:
-        await zap.update_agent(
-            agent_name="Manus", status="Active", last_action="Testing Zapier integration", health_score=100
-        )
+        await zap.update_agent(agent_name="Manus", status="Active", last_action="Testing Zapier integration", health_score=100)
         results["agent_registry"] = True
     except Exception as e:
         print(f"❌ Agent Registry test failed: {e}")
@@ -462,4 +461,4 @@ if __name__ == "__main__":
     import uvicorn
 
     # Run with: uvicorn backend.manus_bootstrap:app --reload
-    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", "8000")), log_level="info")
+    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", "8000")), log_level="info")  # nosec B104

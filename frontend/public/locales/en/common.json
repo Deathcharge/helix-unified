@@ -1,0 +1,68 @@
+{
+  "app": {
+    "name": "Helix Unified",
+    "tagline": "Unified AI Platform",
+    "welcome": "Welcome to Helix Unified"
+  },
+  "nav": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "profile": "Profile",
+    "logout": "Logout",
+    "login": "Login",
+    "signup": "Sign Up",
+    "learnSanskrit": "Learn Sanskrit"
+  },
+  "language": {
+    "select": "Select Language",
+    "current": "Current Language",
+    "autoDetect": "Auto-detect from browser",
+    "preference": "Language Preference"
+  },
+  "settings": {
+    "title": "Settings",
+    "general": "General",
+    "account": "Account",
+    "preferences": "Preferences",
+    "language": "Language",
+    "save": "Save Changes",
+    "saved": "Settings saved successfully"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "forgotPassword": "Forgot Password?",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "orContinueWith": "Or continue with"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "save": "Save",
+    "close": "Close",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous"
+  },
+  "sanskrit": {
+    "title": "Learn Sanskrit",
+    "subtitle": "Ancient Wisdom, Modern Learning",
+    "lessons": "Lessons",
+    "practice": "Practice",
+    "mantras": "Mantras",
+    "alphabet": "Devanagari Alphabet",
+    "grammar": "Grammar",
+    "vocabulary": "Vocabulary"
+  }
+}

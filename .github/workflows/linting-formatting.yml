@@ -60,7 +60,7 @@ jobs:
       - name: Lint with flake8 (warnings)
         run: |
           # Report warnings but don't fail
-          flake8 backend/ --count --max-complexity=10 --max-line-length=100 --exit-code=0
+          flake8 backend/ --count --max-complexity=10 --max-line-length=100 --exit-zero
 
   # =========================================================================
   # PYTHON TYPE CHECKING (mypy strict)

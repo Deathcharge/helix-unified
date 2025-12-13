@@ -1,9 +1,10 @@
 """
 Tests for UCF (Universal Consciousness Framework) calculator.
 """
-import pytest
-from pathlib import Path
 import json
+from pathlib import Path
+
+import pytest
 
 
 @pytest.mark.unit

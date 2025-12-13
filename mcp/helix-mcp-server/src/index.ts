@@ -468,7 +468,11 @@ async function main() {
   await server.connect(transport);
 
   console.error('✅ Helix Collective MCP Server running');
-  console.error(`   API Key: ${HELIX_API_KEY.substring(0, 15)}...`);
+  // SECURITY: Removed API key logging to prevent credential exposure
+  // Use DEBUG environment variable to enable verbose logging if needed
+  if (process.env.DEBUG === 'true') {
+    console.error(`   API Key: ${HELIX_API_KEY ? '[SET]' : '[NOT SET]'}`);
+  }
   console.error(`   Base URL: ${HELIX_API_BASE}`);
 }
 

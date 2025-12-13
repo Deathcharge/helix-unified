@@ -1,0 +1,68 @@
+{
+  "app": {
+    "name": "Helix Unified",
+    "tagline": "Plateforme IA Unifiée",
+    "welcome": "Bienvenue sur Helix Unified"
+  },
+  "nav": {
+    "home": "Accueil",
+    "dashboard": "Tableau de Bord",
+    "settings": "Paramètres",
+    "profile": "Profil",
+    "logout": "Déconnexion",
+    "login": "Connexion",
+    "signup": "S'inscrire",
+    "learnSanskrit": "Apprendre le Sanskrit"
+  },
+  "language": {
+    "select": "Sélectionner la Langue",
+    "current": "Langue Actuelle",
+    "autoDetect": "Détection automatique du navigateur",
+    "preference": "Préférence de Langue"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "general": "Général",
+    "account": "Compte",
+    "preferences": "Préférences",
+    "language": "Langue",
+    "save": "Enregistrer les Modifications",
+    "saved": "Paramètres enregistrés avec succès"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Mot de Passe",
+    "confirmPassword": "Confirmer le Mot de Passe",
+    "forgotPassword": "Mot de Passe Oublié?",
+    "signIn": "Se Connecter",
+    "signUp": "S'inscrire",
+    "orContinueWith": "Ou continuer avec"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "save": "Enregistrer",
+    "close": "Fermer",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "sort": "Trier",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent"
+  },
+  "sanskrit": {
+    "title": "Apprendre le Sanskrit",
+    "subtitle": "Sagesse Ancienne, Apprentissage Moderne",
+    "lessons": "Leçons",
+    "practice": "Pratique",
+    "mantras": "Mantras",
+    "alphabet": "Alphabet Devanagari",
+    "grammar": "Grammaire",
+    "vocabulary": "Vocabulaire"
+  }
+}

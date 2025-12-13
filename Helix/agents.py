@@ -10,11 +10,11 @@ The 21 Agents across four layers:
 - Special Operations: Hydra, Widow, KairoByte
 """
 
-from typing import Dict, Any, List
 import asyncio
 import json
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Dict, List
 
 # Global agent registry
 AGENTS: Dict[str, Any] = {}

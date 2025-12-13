@@ -11,8 +11,8 @@ Author: Andrew John Ward (Architect)
 Date: 2025-11-06
 """
 
-import sys
 import os
+import sys
 from pathlib import Path
 
 # Add backend to path
@@ -85,7 +85,7 @@ print("\n🔮 TEST 3: z88_ritual_engine Wrapper Functions")
 print("-" * 60)
 
 try:
-    from backend.z88_ritual_engine import load_ucf_state, execute_ritual
+    from backend.z88_ritual_engine import execute_ritual, load_ucf_state
 
     print("✅ load_ucf_state imported successfully")
     print("✅ execute_ritual imported successfully")

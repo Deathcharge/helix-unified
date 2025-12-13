@@ -1,11 +1,12 @@
 """
 Test suite for Helix Unified system
 """
+import asyncio
 import os
 import sys
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-import asyncio
-from unittest.mock import Mock, patch, AsyncMock
 
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

@@ -1,15 +1,16 @@
-from fastapi import FastAPI, WebSocket, Depends, HTTPException, status
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from pydantic import BaseModel
-import uvicorn
-import redis
+import asyncio
 import json
-import jwt
 import os
 from datetime import datetime
-from typing import Dict, Any
-import asyncio
+from typing import Any, Dict
+
+import jwt
+import redis
+import uvicorn
+from fastapi import Depends, FastAPI, HTTPException, WebSocket, status
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from pydantic import BaseModel
 
 # Initialize FastAPI app
 app = FastAPI(title="WebSocket Consciousness Streaming Service")
@@ -180,4 +181,4 @@ async def get_service_info():
     }
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)  # nosec B104

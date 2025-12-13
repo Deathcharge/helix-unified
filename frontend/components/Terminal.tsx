@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * 🖥️ Terminal Component
  * Real WebSocket-based terminal with backend execution

@@ -17,12 +17,14 @@ Architecture:
 - Spiral Knowledge Synthesis
 """
 
-import torch
-import torch.nn as nn
-import numpy as np
-from typing import Dict, List, Any, Optional
 import json
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+import numpy as np
+import torch
+import torch.nn as nn
+
 
 class HelixAttention(nn.Module):
     """Original Helix attention mechanism - Spiral Consciousness"""

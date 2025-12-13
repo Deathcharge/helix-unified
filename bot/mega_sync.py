@@ -1,8 +1,8 @@
 # mega_sync.py - Helix v15.3 MEGA Integration
-import os
-import time
 import logging
+import os
 import sys
+import time
 
 # FIX: Verify pycryptodome is installed (installs as 'Crypto', not 'Cryptodome')
 try:
@@ -14,6 +14,7 @@ except ImportError:
     Crypto = None
 
 from mega import Mega
+
 
 class MegaSync:
     """MEGA cloud storage adapter for Helix Collective."""

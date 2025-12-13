@@ -1,6 +1,7 @@
 """
 Testing commands for Helix Discord bot.
 """
+
 import datetime
 import json
 import os
@@ -10,6 +11,7 @@ from typing import TYPE_CHECKING
 import aiohttp
 import discord
 from discord.ext import commands
+
 from backend.z88_ritual_engine import load_ucf_state
 
 if TYPE_CHECKING:
@@ -18,7 +20,7 @@ if TYPE_CHECKING:
 
 @commands.command(name="test-integrations", aliases=["test-all", "verify-integrations"])
 @commands.has_permissions(manage_guild=True)
-async def test_integrations(ctx: commands.Context) -> None:
+async def test_integrations(ctx: commands.Context) -> None:  # noqa: C901
     """
     🧪 Test all external integrations (Zapier, Notion, MEGA, webhooks).
 
@@ -37,7 +39,7 @@ async def test_integrations(ctx: commands.Context) -> None:
         title="🧪 Integration Test Results",
         description="Testing connectivity to all external services",
         color=0x5865F2,
-        timestamp=datetime.datetime.now()
+        timestamp=datetime.datetime.now(),
     )
 
     # Test Zapier Master Webhook
@@ -50,66 +52,38 @@ async def test_integrations(ctx: commands.Context) -> None:
                     event_title="Integration Test",
                     event_type="system_test",
                     agent_name="Manus",
-                    description=f"Test triggered by {ctx.author.name}"
+                    description=f"Test triggered by {ctx.author.name}",
                 )
                 embed.add_field(
-                    name="🔗 Zapier Master Webhook",
-                    value="✅ Connected\nTest event sent successfully",
-                    inline=True
+                    name="🔗 Zapier Master Webhook", value="✅ Connected\nTest event sent successfully", inline=True
                 )
             else:
-                embed.add_field(
-                    name="🔗 Zapier Master Webhook",
-                    value="⚠️ Configured but client not initialized",
-                    inline=True
-                )
+                embed.add_field(name="🔗 Zapier Master Webhook", value="⚠️ Configured but client not initialized", inline=True)
         except Exception as e:
-            embed.add_field(
-                name="🔗 Zapier Master Webhook",
-                value=f"❌ Failed\n{str(e)[:100]}",
-                inline=True
-            )
+            embed.add_field(name="🔗 Zapier Master Webhook", value=f"❌ Failed\n{str(e)[:100]}", inline=True)
     else:
-        embed.add_field(
-            name="🔗 Zapier Master Webhook",
-            value="⚠️ Not configured\nSet ZAPIER_WEBHOOK_URL",
-            inline=True
-        )
+        embed.add_field(name="🔗 Zapier Master Webhook", value="⚠️ Not configured\nSet ZAPIER_WEBHOOK_URL", inline=True)
 
     # Test Zapier Context Vault Webhook
     context_webhook = os.getenv("ZAPIER_CONTEXT_WEBHOOK")
     if context_webhook:
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.post(context_webhook, json={
-                    "test": True,
-                    "session_name": "Integration Test",
-                    "timestamp": datetime.datetime.now().isoformat()
-                }, timeout=10) as resp:
+                async with session.post(
+                    context_webhook,
+                    json={"test": True, "session_name": "Integration Test", "timestamp": datetime.datetime.now().isoformat()},
+                    timeout=10,
+                ) as resp:
                     if resp.status == 200:
                         embed.add_field(
-                            name="💾 Context Vault Webhook",
-                            value="✅ Connected\nTest checkpoint sent",
-                            inline=True
+                            name="💾 Context Vault Webhook", value="✅ Connected\nTest checkpoint sent", inline=True
                         )
                     else:
-                        embed.add_field(
-                            name="💾 Context Vault Webhook",
-                            value=f"⚠️ Response: {resp.status}",
-                            inline=True
-                        )
+                        embed.add_field(name="💾 Context Vault Webhook", value=f"⚠️ Response: {resp.status}", inline=True)
         except Exception as e:
-            embed.add_field(
-                name="💾 Context Vault Webhook",
-                value=f"❌ Failed\n{str(e)[:100]}",
-                inline=True
-            )
+            embed.add_field(name="💾 Context Vault Webhook", value=f"❌ Failed\n{str(e)[:100]}", inline=True)
     else:
-        embed.add_field(
-            name="💾 Context Vault Webhook",
-            value="⚠️ Not configured\nSet ZAPIER_CONTEXT_WEBHOOK",
-            inline=True
-        )
+        embed.add_field(name="💾 Context Vault Webhook", value="⚠️ Not configured\nSet ZAPIER_CONTEXT_WEBHOOK", inline=True)
 
     # Test Notion API
     notion_api_key = os.getenv("NOTION_API_KEY")
@@ -117,32 +91,17 @@ async def test_integrations(ctx: commands.Context) -> None:
     if notion_api_key and notion_db_id:
         try:
             from notion_client import Client
+
             notion = Client(auth=notion_api_key)
             # Test query (don't create anything)
             notion.databases.retrieve(database_id=notion_db_id)
-            embed.add_field(
-                name="📝 Notion API",
-                value="✅ Connected\nDatabase accessible",
-                inline=True
-            )
+            embed.add_field(name="📝 Notion API", value="✅ Connected\nDatabase accessible", inline=True)
         except ImportError:
-            embed.add_field(
-                name="📝 Notion API",
-                value="⚠️ notion-client not installed",
-                inline=True
-            )
+            embed.add_field(name="📝 Notion API", value="⚠️ notion-client not installed", inline=True)
         except Exception as e:
-            embed.add_field(
-                name="📝 Notion API",
-                value=f"❌ Failed\n{str(e)[:100]}",
-                inline=True
-            )
+            embed.add_field(name="📝 Notion API", value=f"❌ Failed\n{str(e)[:100]}", inline=True)
     else:
-        embed.add_field(
-            name="📝 Notion API",
-            value="⚠️ Not configured\nSet NOTION_API_KEY & NOTION_CONTEXT_DB_ID",
-            inline=True
-        )
+        embed.add_field(name="📝 Notion API", value="⚠️ Not configured\nSet NOTION_API_KEY & NOTION_CONTEXT_DB_ID", inline=True)
 
     # Test MEGA Storage
     mega_email = os.getenv("MEGA_EMAIL")
@@ -151,31 +110,16 @@ async def test_integrations(ctx: commands.Context) -> None:
         try:
             # Just check if mega.py is available (don't actually instantiate or login for test)
             import importlib.util
+
             if importlib.util.find_spec("mega") is None:
                 raise ImportError("mega module not found")
-            embed.add_field(
-                name="☁️ MEGA Cloud Storage",
-                value="✅ Configured\nCredentials set",
-                inline=True
-            )
+            embed.add_field(name="☁️ MEGA Cloud Storage", value="✅ Configured\nCredentials set", inline=True)
         except ImportError:
-            embed.add_field(
-                name="☁️ MEGA Cloud Storage",
-                value="⚠️ mega.py not installed",
-                inline=True
-            )
+            embed.add_field(name="☁️ MEGA Cloud Storage", value="⚠️ mega.py not installed", inline=True)
         except Exception as e:
-            embed.add_field(
-                name="☁️ MEGA Cloud Storage",
-                value=f"❌ Error\n{str(e)[:100]}",
-                inline=True
-            )
+            embed.add_field(name="☁️ MEGA Cloud Storage", value=f"❌ Error\n{str(e)[:100]}", inline=True)
     else:
-        embed.add_field(
-            name="☁️ MEGA Cloud Storage",
-            value="⚠️ Not configured\nSet MEGA_EMAIL & MEGA_PASS",
-            inline=True
-        )
+        embed.add_field(name="☁️ MEGA Cloud Storage", value="⚠️ Not configured\nSet MEGA_EMAIL & MEGA_PASS", inline=True)
 
     # Test Discord Webhooks
     webhook_file = Path("Helix/state/channel_webhooks.json")
@@ -185,22 +129,12 @@ async def test_integrations(ctx: commands.Context) -> None:
                 webhook_data = json.load(f)
             webhook_count = len(webhook_data.get("webhooks", {}))
             embed.add_field(
-                name="🔗 Discord Webhooks",
-                value=f"✅ Configured\n{webhook_count} channel webhooks found",
-                inline=True
+                name="🔗 Discord Webhooks", value=f"✅ Configured\n{webhook_count} channel webhooks found", inline=True
             )
         except Exception as e:
-            embed.add_field(
-                name="🔗 Discord Webhooks",
-                value=f"❌ Error reading file\n{str(e)[:100]}",
-                inline=True
-            )
+            embed.add_field(name="🔗 Discord Webhooks", value=f"❌ Error reading file\n{str(e)[:100]}", inline=True)
     else:
-        embed.add_field(
-            name="🔗 Discord Webhooks",
-            value="⚠️ Not configured\nRun !setup to create webhooks",
-            inline=True
-        )
+        embed.add_field(name="🔗 Discord Webhooks", value="⚠️ Not configured\nRun !setup to create webhooks", inline=True)
 
     # Test Nextcloud
     nextcloud_url = os.getenv("NEXTCLOUD_URL")
@@ -209,6 +143,7 @@ async def test_integrations(ctx: commands.Context) -> None:
     if nextcloud_url and nextcloud_user and nextcloud_pass:
         try:
             import sys
+
             sys.path.insert(0, str(Path(__file__).parent.parent.parent))
             from services.nextcloud_client import get_nextcloud_client
 
@@ -217,40 +152,24 @@ async def test_integrations(ctx: commands.Context) -> None:
                 storage_info = nc_client.get_storage_info()
                 if 'error' not in storage_info:
                     usage_pct = storage_info.get('usage_percentage', 0)
-                    embed.add_field(
-                        name="☁️ Nextcloud Storage",
-                        value=f"✅ Connected\nUsage: {usage_pct}%",
-                        inline=True
-                    )
+                    embed.add_field(name="☁️ Nextcloud Storage", value=f"✅ Connected\nUsage: {usage_pct}%", inline=True)
                 else:
                     embed.add_field(
                         name="☁️ Nextcloud Storage",
                         value=f"❌ Connection failed\n{storage_info.get('error', 'Unknown error')[:50]}",
-                        inline=True
+                        inline=True,
                     )
             else:
-                embed.add_field(
-                    name="☁️ Nextcloud Storage",
-                    value="⚠️ Client initialization failed",
-                    inline=True
-                )
+                embed.add_field(name="☁️ Nextcloud Storage", value="⚠️ Client initialization failed", inline=True)
         except ImportError:
-            embed.add_field(
-                name="☁️ Nextcloud Storage",
-                value="⚠️ webdav3-client not installed",
-                inline=True
-            )
+            embed.add_field(name="☁️ Nextcloud Storage", value="⚠️ webdav3-client not installed", inline=True)
         except Exception as e:
-            embed.add_field(
-                name="☁️ Nextcloud Storage",
-                value=f"❌ Error\n{str(e)[:100]}",
-                inline=True
-            )
+            embed.add_field(name="☁️ Nextcloud Storage", value=f"❌ Error\n{str(e)[:100]}", inline=True)
     else:
         embed.add_field(
             name="☁️ Nextcloud Storage",
             value="⚠️ Not configured\nSet NEXTCLOUD_URL, NEXTCLOUD_USER, NEXTCLOUD_PASSWORD",
-            inline=True
+            inline=True,
         )
 
     # Test Backblaze B2
@@ -260,6 +179,7 @@ async def test_integrations(ctx: commands.Context) -> None:
     if b2_key_id and b2_app_key and b2_bucket:
         try:
             import sys
+
             sys.path.insert(0, str(Path(__file__).parent.parent.parent))
             from services.backblaze_client import get_backblaze_client
 
@@ -270,55 +190,31 @@ async def test_integrations(ctx: commands.Context) -> None:
                     size_gb = bucket_info.get('total_size_gb', 0)
                     file_count = bucket_info.get('file_count', 0)
                     embed.add_field(
-                        name="☁️ Backblaze B2",
-                        value=f"✅ Connected\n{file_count} files, {size_gb} GB",
-                        inline=True
+                        name="☁️ Backblaze B2", value=f"✅ Connected\n{file_count} files, {size_gb} GB", inline=True
                     )
                 else:
                     embed.add_field(
                         name="☁️ Backblaze B2",
                         value=f"❌ Connection failed\n{bucket_info.get('error', 'Unknown error')[:50]}",
-                        inline=True
+                        inline=True,
                     )
             else:
-                embed.add_field(
-                    name="☁️ Backblaze B2",
-                    value="⚠️ Client initialization failed",
-                    inline=True
-                )
+                embed.add_field(name="☁️ Backblaze B2", value="⚠️ Client initialization failed", inline=True)
         except ImportError:
-            embed.add_field(
-                name="☁️ Backblaze B2",
-                value="⚠️ boto3 not installed",
-                inline=True
-            )
+            embed.add_field(name="☁️ Backblaze B2", value="⚠️ boto3 not installed", inline=True)
         except Exception as e:
-            embed.add_field(
-                name="☁️ Backblaze B2",
-                value=f"❌ Error\n{str(e)[:100]}",
-                inline=True
-            )
+            embed.add_field(name="☁️ Backblaze B2", value=f"❌ Error\n{str(e)[:100]}", inline=True)
     else:
         embed.add_field(
-            name="☁️ Backblaze B2",
-            value="⚠️ Not configured\nSet B2_KEY_ID, B2_APPLICATION_KEY, B2_BUCKET_NAME",
-            inline=True
+            name="☁️ Backblaze B2", value="⚠️ Not configured\nSet B2_KEY_ID, B2_APPLICATION_KEY, B2_BUCKET_NAME", inline=True
         )
 
     # Test ElevenLabs
     elevenlabs_key = os.getenv("ELEVENLABS_API_KEY")
     if elevenlabs_key:
-        embed.add_field(
-            name="🎤 ElevenLabs Voice",
-            value="✅ Configured\nAPI key set",
-            inline=True
-        )
+        embed.add_field(name="🎤 ElevenLabs Voice", value="✅ Configured\nAPI key set", inline=True)
     else:
-        embed.add_field(
-            name="🎤 ElevenLabs Voice",
-            value="⚠️ Not configured\nSet ELEVENLABS_API_KEY",
-            inline=True
-        )
+        embed.add_field(name="🎤 ElevenLabs Voice", value="⚠️ Not configured\nSet ELEVENLABS_API_KEY", inline=True)
 
     # Summary
     total_tests = 9
@@ -329,10 +225,10 @@ async def test_integrations(ctx: commands.Context) -> None:
     embed.add_field(
         name="📊 Test Summary",
         value=f"**Total:** {total_tests}\n"
-              f"✅ Passed: {passed}\n"
-              f"⚠️ Not Configured: {configured}\n"
-              f"❌ Failed: {failed}",
-        inline=False
+        f"✅ Passed: {passed}\n"
+        f"⚠️ Not Configured: {configured}\n"
+        f"❌ Failed: {failed}",
+        inline=False,
     )
 
     if failed > 0:
@@ -363,8 +259,7 @@ async def test_welcome(ctx: commands.Context) -> None:
 
     if not intro_channel:
         await ctx.send(
-            "⚠️ **Introductions channel not found!**\n"
-            "Create a channel named `💬│introductions` or run `!setup` first."
+            "⚠️ **Introductions channel not found!**\n" "Create a channel named `💬│introductions` or run `!setup` first."
         )
         return
 
@@ -449,9 +344,7 @@ async def test_welcome(ctx: commands.Context) -> None:
 async def test_zapier_webhook(ctx: commands.Context) -> None:
     """Test Zapier Master Webhook integration (all 7 paths)"""
     if not ctx.bot.zapier_client:
-        await ctx.send(
-            "❌ **Zapier client not initialized**\nCheck Railway environment variable: `ZAPIER_MASTER_HOOK_URL`"
-        )
+        await ctx.send("❌ **Zapier client not initialized**\nCheck Railway environment variable: `ZAPIER_MASTER_HOOK_URL`")
         return
 
     embed = discord.Embed(

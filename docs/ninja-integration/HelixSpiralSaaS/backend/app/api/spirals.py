@@ -3,26 +3,19 @@ Copyright (c) 2025 Andrew John Ward. All Rights Reserved.
 PROPRIETARY AND CONFIDENTIAL - See LICENSE file for terms.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
 from typing import List
 from uuid import UUID
 
 from app.database import get_db
 from app.models import User
-from app.schemas import (
-    SpiralCreate,
-    SpiralUpdate,
-    SpiralResponse,
-    SpiralExecuteRequest,
-    ActionCreate,
-    ActionUpdate,
-    ActionResponse,
-    ExecutionLogResponse
-)
-from app.utils.dependencies import get_current_user
-from app.services.spiral_service import SpiralService
+from app.schemas import (ActionCreate, ActionResponse, ActionUpdate,
+                         ExecutionLogResponse, SpiralCreate,
+                         SpiralExecuteRequest, SpiralResponse, SpiralUpdate)
 from app.services.execution_service import ExecutionService
+from app.services.spiral_service import SpiralService
+from app.utils.dependencies import get_current_user
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 

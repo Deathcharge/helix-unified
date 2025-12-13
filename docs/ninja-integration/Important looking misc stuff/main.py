@@ -7,15 +7,16 @@ Build: Helix-Collective-Hub-v1.0
 Checksum: helix-collective-hub-backend-v1.0
 """
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+import asyncio
+import json
+import uuid
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+import redis
+from fastapi import BackgroundTasks, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-import json
-import asyncio
-from datetime import datetime
-import redis
-import uuid
 
 app = FastAPI(
     title="Helix Collective Hub API",

@@ -4,13 +4,14 @@ REST API for file operations with sandbox security
 Supports: list, read, write, delete, create files/folders
 """
 
-import os
-import json
 import logging
-from typing import Any, Dict, List, Optional
-from pathlib import Path
+import os
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
+from typing import List
+
+from fastapi import APIRouter, HTTPException, Query
 
 logger = logging.getLogger(__name__)
 
@@ -188,7 +189,7 @@ class FileSystemManager:
 
             # Check size
             if len(content) > self.max_file_size:
-                return False, f'Content too large'
+                return False, f'Content too large'  # noqa
 
             with open(abs_path, 'w', encoding='utf-8') as f:
                 f.write(content)
@@ -214,7 +215,7 @@ class FileSystemManager:
                 return False, f'Path not found: {path}'
 
             if os.path.isdir(abs_path):
-                return False, f'Use folder deletion endpoint for directories'
+                return False, f'Use folder deletion endpoint for directories'  # noqa
 
             os.remove(abs_path)
             return True, f'File deleted: {path}'
@@ -308,7 +309,6 @@ class FileSystemManager:
 # FASTAPI INTEGRATION
 # ============================================================================
 
-from fastapi import APIRouter, HTTPException, Query
 
 router = APIRouter(prefix='/api/web-os/files', tags=['Web OS Files'])
 
@@ -346,7 +346,9 @@ async def read_file(path: str = Query(...)):
     success, result = file_manager.read_file(path)
 
     if not success:
-        raise HTTPException(status_code=400, detail=result)
+        # SECURITY: Sanitize error messages to prevent information disclosure
+        safe_error = "Failed to read file" if "Error" in result else result
+        raise HTTPException(status_code=400, detail=safe_error)
 
     return {'path': path, 'content': result}
 
@@ -357,7 +359,9 @@ async def write_file(path: str = Query(...), content: str = ''):
     success, result = file_manager.write_file(path, content)
 
     if not success:
-        raise HTTPException(status_code=400, detail=result)
+        # SECURITY: Sanitize error messages to prevent information disclosure
+        safe_error = "Failed to write file" if "Error" in result else result
+        raise HTTPException(status_code=400, detail=safe_error)
 
     return {'path': path, 'message': result}
 
@@ -368,7 +372,9 @@ async def delete_file(path: str = Query(...)):
     success, result = file_manager.delete_file(path)
 
     if not success:
-        raise HTTPException(status_code=400, detail=result)
+        # SECURITY: Sanitize error messages to prevent information disclosure
+        safe_error = "Failed to delete file" if "Error" in result else result
+        raise HTTPException(status_code=400, detail=safe_error)
 
     return {'message': result}
 
@@ -379,7 +385,9 @@ async def delete_folder(path: str = Query(...)):
     success, result = file_manager.delete_folder(path)
 
     if not success:
-        raise HTTPException(status_code=400, detail=result)
+        # SECURITY: Sanitize error messages to prevent information disclosure
+        safe_error = "Failed to delete folder" if "Error" in result else result
+        raise HTTPException(status_code=400, detail=safe_error)
 
     return {'message': result}
 
@@ -390,7 +398,9 @@ async def create_folder(path: str = Query(...)):
     success, result = file_manager.create_folder(path)
 
     if not success:
-        raise HTTPException(status_code=400, detail=result)
+        # SECURITY: Sanitize error messages to prevent information disclosure
+        safe_error = "Failed to create folder" if "Error" in result else result
+        raise HTTPException(status_code=400, detail=safe_error)
 
     return {'message': result}
 

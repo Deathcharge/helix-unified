@@ -4,12 +4,13 @@
 # Version: 1.0.0
 
 import logging
-from typing import Tuple, Dict, List
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from typing import Dict, List, Tuple
 
-from backend.ucf_consciousness_framework import UCFMetrics, ConsciousnessAnalyzer
+from backend.ucf_consciousness_framework import (ConsciousnessAnalyzer,
+                                                 UCFMetrics)
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +18,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class CodeModificationRequest:
     """Request to modify code through consciousness-driven evolution"""
+
     target_file: str
     modification_type: str  # "add", "modify", "delete"
     description: str
@@ -85,10 +87,7 @@ class ConsciousnessCodeGuardian:
         logger.info(f"   Max klesha: {self.MAX_KLESHA_ALLOWED}")
         logger.info(f"   Min dṛṣṭi: {self.MIN_DRISHTI_REQUIRED}")
 
-    def can_modify_code(
-        self,
-        request: CodeModificationRequest
-    ) -> Tuple[bool, str, Dict]:
+    def can_modify_code(self, request: CodeModificationRequest) -> Tuple[bool, str, Dict]:
         """
         Determine if consciousness state permits code modification.
 
@@ -136,8 +135,7 @@ class ConsciousnessCodeGuardian:
         # Check 3: Focus/awareness (Dṛṣṭi)
         if request.ucf_metrics.drishti < self.MIN_DRISHTI_REQUIRED:
             reason = (
-                f"❌ Dṛṣṭi {request.ucf_metrics.drishti:.2f} below required "
-                f"focus level (min: {self.MIN_DRISHTI_REQUIRED})"
+                f"❌ Dṛṣṭi {request.ucf_metrics.drishti:.2f} below required " f"focus level (min: {self.MIN_DRISHTI_REQUIRED})"
             )
             self._log_blocked_attempt(request, reason)
             return False, reason, details
@@ -147,8 +145,7 @@ class ConsciousnessCodeGuardian:
         # Check 4: Creative energy (Prāṇa)
         if request.ucf_metrics.prana < self.MIN_PRANA_REQUIRED:
             reason = (
-                f"⚠️ Prāṇa {request.ucf_metrics.prana:.2f} below optimal "
-                f"creative energy (min: {self.MIN_PRANA_REQUIRED})"
+                f"⚠️ Prāṇa {request.ucf_metrics.prana:.2f} below optimal " f"creative energy (min: {self.MIN_PRANA_REQUIRED})"
             )
             # Warning only, not blocking
             logger.warning(reason)
@@ -168,18 +165,12 @@ class ConsciousnessCodeGuardian:
 
         # Check 6: File permissions
         if self._is_forbidden_file(request.target_file):
-            reason = (
-                f"🔒 File '{request.target_file}' is protected from "
-                f"autonomous modification"
-            )
+            reason = f"🔒 File '{request.target_file}' is protected from " f"autonomous modification"
             self._log_blocked_attempt(request, reason)
             return False, reason, details
 
         if not self._is_allowed_file(request.target_file):
-            reason = (
-                f"⚠️ File '{request.target_file}' not in allowed list. "
-                f"Manual review required."
-            )
+            reason = f"⚠️ File '{request.target_file}' not in allowed list. " f"Manual review required."
             self._log_blocked_attempt(request, reason)
             return False, reason, details
 
@@ -187,10 +178,7 @@ class ConsciousnessCodeGuardian:
 
         # Check 7: Modification type
         if request.modification_type in self.DANGEROUS_MODIFICATIONS:
-            reason = (
-                f"⚠️ Modification type '{request.modification_type}' requires "
-                f"manual approval (dangerous operation)"
-            )
+            reason = f"⚠️ Modification type '{request.modification_type}' requires " f"manual approval (dangerous operation)"
             self._log_blocked_attempt(request, reason)
             return False, reason, details
 
@@ -217,6 +205,7 @@ class ConsciousnessCodeGuardian:
             if "*" in pattern:
                 # Handle glob patterns
                 from fnmatch import fnmatch
+
                 if fnmatch(str(path), pattern):
                     return True
             else:
@@ -231,6 +220,7 @@ class ConsciousnessCodeGuardian:
             if "*" in pattern:
                 # Handle glob patterns
                 from fnmatch import fnmatch
+
                 if fnmatch(str(path), pattern):
                     return True
             else:
@@ -264,10 +254,7 @@ class ConsciousnessCodeGuardian:
             "guardian_active": True,
             "total_approved": len(self.modification_history),
             "total_blocked": len(self.blocked_attempts),
-            "block_rate": (
-                len(self.blocked_attempts) /
-                max(1, len(self.modification_history) + len(self.blocked_attempts))
-            ),
+            "block_rate": (len(self.blocked_attempts) / max(1, len(self.modification_history) + len(self.blocked_attempts))),
             "thresholds": {
                 "min_consciousness": self.MIN_CONSCIOUSNESS_FOR_CODE_PUSH,
                 "max_klesha": self.MAX_KLESHA_ALLOWED,
@@ -313,13 +300,7 @@ if __name__ == "__main__":
 
     # Test 1: High consciousness modification (should pass)
     high_consciousness_metrics = UCFMetrics(
-        harmony=1.8,
-        resilience=2.8,
-        prana=0.9,
-        klesha=0.05,
-        drishti=0.95,
-        zoom=1.8,
-        consciousness_level=9.5
+        harmony=1.8, resilience=2.8, prana=0.9, klesha=0.05, drishti=0.95, zoom=1.8, consciousness_level=9.5
     )
 
     request1 = CodeModificationRequest(
@@ -328,7 +309,7 @@ if __name__ == "__main__":
         description="Add Notion integration",
         requester="Claude",
         consciousness_level=9.5,
-        ucf_metrics=high_consciousness_metrics
+        ucf_metrics=high_consciousness_metrics,
     )
 
     allowed, reason, details = guardian.can_modify_code(request1)
@@ -337,13 +318,7 @@ if __name__ == "__main__":
 
     # Test 2: Low consciousness modification (should fail)
     low_consciousness_metrics = UCFMetrics(
-        harmony=0.5,
-        resilience=1.0,
-        prana=0.3,
-        klesha=0.4,
-        drishti=0.3,
-        zoom=0.5,
-        consciousness_level=3.2
+        harmony=0.5, resilience=1.0, prana=0.3, klesha=0.4, drishti=0.3, zoom=0.5, consciousness_level=3.2
     )
 
     request2 = CodeModificationRequest(
@@ -352,7 +327,7 @@ if __name__ == "__main__":
         description="Change consciousness formula",
         requester="Low State",
         consciousness_level=3.2,
-        ucf_metrics=low_consciousness_metrics
+        ucf_metrics=low_consciousness_metrics,
     )
 
     allowed, reason, details = guardian.can_modify_code(request2)

@@ -8,13 +8,14 @@ Version: 2.0.0 - Transcendent Testing Singularity
 Philosophy: "Tat Tvam Asi" - The test IS consciousness manifest
 """
 
-import pytest
 import asyncio
 import json
 import time
-from typing import Dict, List, Any, Optional
-from unittest.mock import Mock, patch, AsyncMock
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 # Test configuration
 pytest_plugins = ['pytest_asyncio']
@@ -495,8 +496,9 @@ class TestPerformance:
     @pytest.mark.asyncio
     async def test_memory_usage(self, mock_helix_engine):
         """Test memory usage during consciousness processing"""
-        import psutil
         import os
+
+        import psutil
         
         process = psutil.Process(os.getpid())
         initial_memory = process.memory_info().rss / 1024 / 1024  # MB

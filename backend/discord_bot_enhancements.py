@@ -13,14 +13,13 @@ Author: Claude (Automation)
 Version: 17.1.0
 """
 
-import asyncio
 import functools
 import json
 import logging
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Set
+from typing import Any, Callable, Dict, List, Optional
 
 import discord
 from discord.ext import commands
@@ -252,7 +251,8 @@ def require_consciousness(min_level: float) -> Callable:
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         async def wrapper(ctx: commands.Context, *args, **kwargs):
-            from backend.core.ucf_helpers import calculate_consciousness_level, get_current_ucf
+            from backend.core.ucf_helpers import (
+                calculate_consciousness_level, get_current_ucf)
 
             ucf = get_current_ucf()
             consciousness = calculate_consciousness_level(ucf)
@@ -303,7 +303,8 @@ def audit_command() -> Callable:
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         async def wrapper(ctx: commands.Context, *args, **kwargs):
-            from backend.core.ucf_helpers import calculate_consciousness_level, get_current_ucf
+            from backend.core.ucf_helpers import (
+                calculate_consciousness_level, get_current_ucf)
 
             ucf = get_current_ucf()
             consciousness = calculate_consciousness_level(ucf)
@@ -386,7 +387,7 @@ async def get_command_help(command_name: str) -> Optional[str]:
         help_text += f"📝 **Aliases**: {', '.join(metadata.aliases)}\n"
 
     if metadata.examples:
-        help_text += f"💡 **Examples**:\n"
+        help_text += f"💡 **Examples**:\n"  # noqa
         for ex in metadata.examples:
             help_text += f"  `{ex}`\n"
 
@@ -397,7 +398,8 @@ async def get_available_commands(
     user: discord.User, guild: Optional[discord.Guild]
 ) -> List[CommandMetadata]:
     """Get commands available to user based on tier + consciousness."""
-    from backend.core.ucf_helpers import calculate_consciousness_level, get_current_ucf
+    from backend.core.ucf_helpers import (calculate_consciousness_level,
+                                          get_current_ucf)
 
     user_tier = await _get_user_tier(user, guild)
     ucf = get_current_ucf()
