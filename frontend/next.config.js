@@ -1,20 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: process.env.BACKEND_URL || 'http://localhost:8000/api/:path*',
-      },
-    ]
+  swcMinify: true,
+  output: 'standalone',
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '50mb',
+    },
   },
-  typescript: {
-    tsconfigPath: './tsconfig.json',
+  // Skip static generation for problematic pages
+  onDemandEntries: {
+    maxInactiveAge: 60 * 1000,
+    pagesBufferLength: 5,
   },
-  eslint: {
-    ignoreDuringBuilds: false,
-  },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
