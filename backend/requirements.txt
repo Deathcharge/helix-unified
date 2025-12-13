@@ -10,3 +10,14 @@ loguru==0.7.2
 anthropic==0.39.0
 openai==1.54.0
 requests==2.32.4
+mega.py==1.0.8  # MEGA cloud storage integration
+python-dotenv==1.0.0  # Environment variable loading
+slowapi==0.1.9  # Rate limiting
+sse-starlette==2.1.0  # Server-Sent Events for streaming
+httpx==0.27.0  # Async HTTP client
+aiohttp==3.9.5  # Async HTTP client/server
+discord.py==2.3.2  # Discord bot integration
+cohere==5.11.0  # Cohere AI API
+stripe==11.1.0  # Stripe payment processing
+pycryptodome==3.20.0  # Cryptography library (required by mega.py)
+Pillow==10.4.0  # Image processing
