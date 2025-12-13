@@ -4,30 +4,28 @@ REST endpoints for email automation system
 """
 
 import os
-from typing import List, Optional
 from datetime import datetime, timedelta
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, EmailStr, validator
 from sqlalchemy.orm import Session
 
 from backend.core.rate_limit import get_rate_limit, limiter
-from backend.database import get_db, User as DBUser
-from backend.routes.auth import get_current_user, User
-from backend.services.email_automation import (
-    send_welcome_email,
-    send_password_reset_email,
-    send_usage_alert_email,
-    send_team_invitation_email,
-    send_billing_notification_email,
-    send_weekly_summary_email,
-    send_feature_announcement_email,
-    send_bulk_email,
-    check_email_health,
-    EmailRecipient,
-    EMAIL_PROVIDER,
-    EMAIL_FROM,
-)
+from backend.database import User as DBUser
+from backend.database import get_db
+from backend.routes.auth import User, get_current_user
+from backend.services.email_automation import (EMAIL_FROM, EMAIL_PROVIDER,
+                                               EmailRecipient,
+                                               check_email_health,
+                                               send_billing_notification_email,
+                                               send_bulk_email,
+                                               send_feature_announcement_email,
+                                               send_password_reset_email,
+                                               send_team_invitation_email,
+                                               send_usage_alert_email,
+                                               send_weekly_summary_email,
+                                               send_welcome_email)
 
 router = APIRouter()
 

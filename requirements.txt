@@ -74,4 +74,47 @@ sqlalchemy==2.0.25  # Database ORM for user management
 
 # Optional: Commented out dependencies
 # opencv-python==4.9.0.80
-slowapi==0.1.9  # For rate-limiting (FastAPI limiter)
+# sqlalchemy==2.0.25
+
+# ============================================================================
+# TESTING & QUALITY ASSURANCE (Dec 15 Launch)
+# ============================================================================
+
+# Testing Framework
+pytest>=7.4.3
+pytest-asyncio>=0.21.1
+pytest-cov>=4.1.0
+pytest-mock>=3.12.0
+pytest-json-report>=1.5.0
+pytest-timeout>=2.2.0
+
+# Mocking & Fixtures
+responses>=0.24.1
+faker>=20.1.0
+
+# Security Testing
+cryptography>=41.0.7
+pyjwt>=2.8.1
+bcrypt>=4.1.1
+
+# Authentication
+python-jose>=3.3.0
+passlib>=1.7.4
+
+# API Integrations for Testing
+stripe>=7.8.0
+sendgrid>=6.10.0
+
+# Database Testing
+sqlalchemy>=2.0.23
+alembic>=1.13.1
+psycopg2-binary>=2.9.9
+
+# Code Quality
+coverage>=7.3.2
+pylint>=3.0.3
+black>=23.12.1
+isort>=5.13.2
+
+# Production Server
+gunicorn>=21.2.0

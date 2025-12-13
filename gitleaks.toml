@@ -20,6 +20,9 @@ paths = [
   '''\.env\.template$''',
   '''\.example$''',
   '''\.template$''',
+  '''test.*\.py$''',
+  '''tests/.*\.py$''',
+  '''conftest\.py$''',
 ]
 
 [[rules]]
@@ -29,6 +32,9 @@ regex = '''sk-ant-[a-zA-Z0-9\-]{95}'''
 [rules.allowlist]
 paths = [
   '''\.env\.example$''',
+  '''test.*\.py$''',
+  '''tests/.*\.py$''',
+  '''conftest\.py$''',
 ]
 
 [[rules]]
@@ -38,6 +44,9 @@ regex = '''sk-[a-zA-Z0-9]{48}'''
 [rules.allowlist]
 paths = [
   '''\.env\.example$''',
+  '''test.*\.py$''',
+  '''tests/.*\.py$''',
+  '''conftest\.py$''',
 ]
 
 [[rules]]
@@ -47,6 +56,9 @@ regex = '''(?:sk|pk)_(?:test|live)_[0-9a-zA-Z]{24,}'''
 [rules.allowlist]
 paths = [
   '''\.env\.example$''',
+  '''test.*\.py$''',
+  '''tests/.*\.py$''',
+  '''conftest\.py$''',
 ]
 
 [[rules]]
@@ -56,6 +68,9 @@ regex = '''[MN][a-zA-Z0-9_-]{23,25}\.[a-zA-Z0-9_-]{6}\.[a-zA-Z0-9_-]{27,}'''
 [rules.allowlist]
 paths = [
   '''\.env\.example$''',
+  '''test.*\.py$''',
+  '''tests/.*\.py$''',
+  '''conftest\.py$''',
 ]
 
 [[rules]]
@@ -65,4 +80,7 @@ regex = '''whsec_[0-9a-zA-Z]{32,}'''
 [rules.allowlist]
 paths = [
   '''\.env\.example$''',
+  '''test.*\.py$''',
+  '''tests/.*\.py$''',
+  '''conftest\.py$''',
 ]

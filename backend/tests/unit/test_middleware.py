@@ -158,8 +158,9 @@ def test_gzip_import_source():
     If this test fails, check backend/main.py:421 - the import MUST be:
     from starlette.middleware.gzip import GZIPMiddleware
     """
-    import backend.main as main_module
     import inspect
+
+    import backend.main as main_module
 
     # Get the source code of main.py
     source = inspect.getsource(main_module)

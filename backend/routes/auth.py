@@ -230,7 +230,8 @@ async def google_callback(code: str, db: Session = Depends(get_db)):
 
             # Send welcome email
             try:
-                from backend.services.email_automation import send_welcome_email
+                from backend.services.email_automation import \
+                    send_welcome_email
                 await send_welcome_email(
                     user_email=email,
                     user_name=name
@@ -315,7 +316,8 @@ async def verify_google_token(req: GoogleTokenRequest, db: Session = Depends(get
 
             # Send welcome email
             try:
-                from backend.services.email_automation import send_welcome_email
+                from backend.services.email_automation import \
+                    send_welcome_email
                 await send_welcome_email(
                     user_email=email,
                     user_name=name
