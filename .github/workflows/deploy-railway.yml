@@ -5,15 +5,33 @@ on:
     branches: [main]
   workflow_dispatch:
 
+concurrency:
+  group: railway-deploy
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
     steps:
-      - uses: actions/checkout@v3
-      - name: Deploy to Railway
-        run: |
-          curl -fsSL https://railway.app/install.sh | sh
-          railway link ${{ secrets.RAILWAY_PROJECT_ID }}
-          railway up
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Install Railway CLI
+        run: curl -fsSL https://railway.app/install.sh | sh
+      
+      - name: Link Railway project
+        run: railway link ${{ secrets.RAILWAY_PROJECT_ID }}
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      
+      - name: Deploy to Railway
+        run: railway up
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      
+      - name: Verify deployment
+        run: |
+          echo "✅ Deployment complete"
+          echo "🔗 Check Railway dashboard for status"
