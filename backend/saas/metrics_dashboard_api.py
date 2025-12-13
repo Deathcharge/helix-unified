@@ -12,9 +12,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from ..database import (
-    DailyMetrics, ErrorLog, HealthCheck, SupportTicket, User, get_db
-)
+from ..database import (DailyMetrics, ErrorLog, HealthCheck, SupportTicket,
+                        User, get_db)
 from .metrics_calculator import MetricsCalculator
 
 router = APIRouter()

@@ -11,10 +11,9 @@ from typing import Dict, List, Optional, Tuple
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Session
 
-from ..database import (
-    DailyMetrics, ErrorLog, HealthCheck, NPSSurvey, RevenueEvent,
-    SupportTicket, User, UserActivation, UsageLog
-)
+from ..database import (DailyMetrics, ErrorLog, HealthCheck, NPSSurvey,
+                        RevenueEvent, SupportTicket, UsageLog, User,
+                        UserActivation)
 
 
 class MetricsCalculator:

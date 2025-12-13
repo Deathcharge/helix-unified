@@ -12,12 +12,11 @@ from datetime import datetime
 from typing import Callable
 
 from fastapi import Request, Response
-from starlette.middleware.base import BaseHTTPMiddleware
 from sqlalchemy.orm import Session
+from starlette.middleware.base import BaseHTTPMiddleware
 
-from ..database import (
-    ErrorLog, HealthCheck, SessionLocal, UsageLog, UserActivation
-)
+from ..database import (ErrorLog, HealthCheck, SessionLocal, UsageLog,
+                        UserActivation)
 
 
 class MetricsMiddleware(BaseHTTPMiddleware):
